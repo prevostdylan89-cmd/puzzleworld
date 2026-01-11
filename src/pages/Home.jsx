@@ -59,37 +59,37 @@ export default function Home() {
     }
   };
 
-const monthlyEvents = [
-  {
-    title: 'Speed Puzzle Challenge',
-    description: 'Race against time to complete puzzles faster than anyone else',
-    image: 'https://images.unsplash.com/photo-1553481187-be93c21490a9?w=400&h=200&fit=crop',
-    date: 'Jan 15-31',
-    participants: 2847,
-    timeLeft: '5 days left',
-    type: 'challenge'
-  },
-  {
-    title: 'Winter Tournament',
-    description: 'Compete in the seasonal championship for exclusive rewards',
-    image: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400&h=200&fit=crop',
-    date: 'Jan 20 - Feb 10',
-    participants: 1523,
-    timeLeft: '12 days left',
-    type: 'tournament'
-  },
-  {
-    title: 'Community Build',
-    description: 'Collaborate with others to complete a massive 10,000 piece puzzle',
-    image: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=200&fit=crop',
-    date: 'Ongoing',
-    participants: 892,
-    timeLeft: 'Join anytime',
-    type: 'community'
-  }
-];
+  const monthlyEvents = [
+    {
+      title: 'Speed Puzzle Challenge',
+      description: 'Race against time to complete puzzles faster than anyone else',
+      image: 'https://images.unsplash.com/photo-1553481187-be93c21490a9?w=400&h=200&fit=crop',
+      date: 'Jan 15-31',
+      participants: 2847,
+      timeLeft: '5 days left',
+      type: 'challenge'
+    },
+    {
+      title: 'Winter Tournament',
+      description: 'Compete in the seasonal championship for exclusive rewards',
+      image: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400&h=200&fit=crop',
+      date: 'Jan 20 - Feb 10',
+      participants: 1523,
+      timeLeft: '12 days left',
+      type: 'tournament'
+    },
+    {
+      title: 'Community Build',
+      description: 'Collaborate with others to complete a massive 10,000 piece puzzle',
+      image: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=200&fit=crop',
+      date: 'Ongoing',
+      participants: 892,
+      timeLeft: 'Join anytime',
+      type: 'community'
+    }
+  ];
 
-const container = {
+  const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
