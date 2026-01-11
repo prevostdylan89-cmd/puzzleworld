@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -9,8 +9,12 @@ import {
   LayoutGrid,
   ChevronDown,
   X,
-  Puzzle
+  Puzzle,
+  Loader2,
+  Users
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +35,45 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import PuzzleCard from '@/components/shared/PuzzleCard';
+import EditPuzzleModal from '@/components/admin/EditPuzzleModal';
 
-const allPuzzles = [
+const [allPuzzles, setAllPuzzles] = useState([]);
+const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  loadGlobalPuzzles();
+}, [sortBy]);
+
+const loadGlobalPuzzles = async () => {
+  try {
+    setIsLoading(true);
+    const sortOrder = sortBy === 'popular' ? '-completion_count' : 
+                      sortBy === 'newest' ? '-created_date' :
+                      sortBy === 'pieces-asc' ? 'puzzle_pieces' :
+                      sortBy === 'pieces-desc' ? '-puzzle_pieces' : '-completion_count';
+    
+    const data = await base44.entities.GlobalPuzzle.list(sortOrder, 100);
+    setAllPuzzles(data.map(p => ({
+      id: p.id,
+      title: p.puzzle_name,
+      image: p.image_url || 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400&h=400&fit=crop',
+      pieces: p.puzzle_pieces,
+      plays: p.completion_count,
+      brand: p.puzzle_brand,
+      category: p.category || 'General',
+      difficulty: p.difficulty || 'Medium',
+      reference: p.puzzle_reference,
+      affiliate_link: p.affiliate_link
+    })));
+  } catch (error) {
+    console.error('Error loading puzzles:', error);
+    toast.error('Failed to load puzzles');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const oldPuzzles = [
   {
     title: 'Starry Night Dreams',
     image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
@@ -166,6 +207,22 @@ export default function Collection() {
   const [activeFilters, setActiveFilters] = useState([]);
   const [pieceRange, setPieceRange] = useState([0, 5000]);
   const [selectedDifficulties, setSelectedDifficulties] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [editingPuzzle, setEditingPuzzle] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error loading user:', error);
+    }
+  };
 
   const clearFilters = () => {
     setSelectedCategory('All');
@@ -353,24 +410,89 @@ export default function Collection() {
 
       {/* Puzzle Grid */}
       <div className="px-4 lg:px-8 py-6">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className={`grid gap-4 ${
-            viewMode === 'large' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-              : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-          }`}
-        >
-          {allPuzzles.map((puzzle, index) => (
-            <motion.div key={index} variants={item}>
-              <Link to={createPageUrl('PuzzleDetail')}>
-                <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          </div>
+        ) : allPuzzles.length === 0 ? (
+          <div className="text-center py-12">
+            <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+            <p className="text-white/50">No puzzles in the collection yet</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className={`grid gap-4 ${
+              viewMode === 'large' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            }`}
+          >
+            {allPuzzles.filter(puzzle => {
+              const matchesSearch = !searchQuery || 
+                puzzle.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                puzzle.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+              const matchesCategory = selectedCategory === 'All' || puzzle.category === selectedCategory;
+              const matchesPieces = puzzle.pieces >= pieceRange[0] && puzzle.pieces <= pieceRange[1];
+              const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(puzzle.difficulty);
+              
+              return matchesSearch && matchesCategory && matchesPieces && matchesDifficulty;
+            }).map((puzzle, index) => (
+              <motion.div key={puzzle.id || index} variants={item}>
+                <div className="group relative overflow-hidden rounded-2xl cursor-pointer aspect-square">
+                  <Link to={createPageUrl('PuzzleDetail')} state={{ puzzle }}>
+                    <div className="absolute inset-0">
+                      <img
+                        src={puzzle.image}
+                        alt={puzzle.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#000019] via-[#000019]/60 to-transparent" />
+                    </div>
+                    
+                    <div className="absolute inset-0 p-3 flex flex-col justify-end">
+                      <h3 className="font-semibold text-white leading-tight text-sm">
+                        {puzzle.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-white/70 text-xs mt-2">
+                        <span className="flex items-center gap-1">
+                          <Puzzle className="w-3 h-3 text-orange-400" />
+                          {puzzle.pieces} pcs
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3 text-orange-400" />
+                          {puzzle.plays}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute inset-0 bg-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </Link>
+                  
+                  {/* Admin Edit Button */}
+                  {currentUser?.role === 'admin' && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setEditingPuzzle(puzzle);
+                        setShowEditModal(true);
+                      }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {/* Load More */}
         <div className="flex justify-center mt-12">
@@ -383,6 +505,20 @@ export default function Collection() {
           </Button>
         </div>
       </div>
+
+      {/* Admin Edit Modal */}
+      <EditPuzzleModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingPuzzle(null);
+        }}
+        puzzle={editingPuzzle}
+        onPuzzleUpdated={() => {
+          loadGlobalPuzzles();
+          toast.success('Puzzle updated!');
+        }}
+      />
     </div>
   );
 }
