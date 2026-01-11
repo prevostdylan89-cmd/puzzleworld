@@ -59,75 +59,6 @@ export default function Home() {
     }
   };
 
-const oldFeaturedPuzzles = [
-  {
-    title: 'Starry Night Dreams',
-    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 1523,
-    rating: 4.9,
-    creator: 'ArtMaster'
-  },
-  {
-    title: 'Ocean Sunset',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 892,
-    rating: 4.7,
-    creator: 'NatureVibes'
-  },
-  {
-    title: 'Mountain Peak',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop',
-    pieces: 500,
-    difficulty: 'Easy',
-    plays: 2341,
-    rating: 4.8,
-    creator: 'Explorer'
-  }
-];
-
-const mostPlayedPuzzles = [
-  {
-    title: 'Cosmic Galaxy',
-    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=400&fit=crop',
-    pieces: 1500,
-    difficulty: 'Hard',
-    plays: 5672,
-    rating: 4.9,
-    creator: 'SpaceExplorer'
-  },
-  {
-    title: 'Cherry Blossoms',
-    image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=400&fit=crop',
-    pieces: 750,
-    difficulty: 'Medium',
-    plays: 4231,
-    rating: 4.6,
-    creator: 'JapanLover'
-  },
-  {
-    title: 'City Lights',
-    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 3892,
-    rating: 4.7,
-    creator: 'UrbanArt'
-  },
-  {
-    title: 'Aurora Borealis',
-    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 3456,
-    rating: 4.8,
-    creator: 'NorthernLights'
-  }
-];
-
 const monthlyEvents = [
   {
     title: 'Speed Puzzle Challenge',
@@ -158,26 +89,7 @@ const monthlyEvents = [
   }
 ];
 
-const oldLatestPosts = [
-  {
-    author: { name: 'PuzzlePro', initials: 'PP' },
-    content: 'Just finished this beautiful 2000 piece puzzle in record time! The colors are absolutely stunning 🎨',
-    image: 'https://images.unsplash.com/photo-1494059980473-813e73ee784b?w=600&h=400&fit=crop',
-    likes: 234,
-    comments: 45,
-    timeAgo: '2h ago',
-    tags: ['completion', 'record']
-  },
-  {
-    author: { name: 'JigsawJane', initials: 'JJ' },
-    content: 'Any tips for sorting edge pieces faster? Looking for strategies from the community!',
-    likes: 89,
-    comments: 67,
-    timeAgo: '4h ago',
-    tags: ['tips', 'strategy']
-  }
-];
-  const container = {
+const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
