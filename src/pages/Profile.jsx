@@ -47,7 +47,7 @@ export default function Profile() {
       // Load completed puzzles
       const completed = await base44.entities.CompletedPuzzle.filter(
         { user_email: user.email },
-        '-created_date'
+        '-completion_date'
       );
       setCompletedPuzzles(completed);
 
@@ -327,8 +327,11 @@ export default function Profile() {
                         {puzzle.puzzle_brand && puzzle.puzzle_pieces && <span>•</span>}
                         {puzzle.puzzle_pieces && <span>{puzzle.puzzle_pieces} pieces</span>}
                       </div>
+                      {puzzle.puzzle_reference && (
+                        <p className="text-xs text-white/30 mt-1">Ref: {puzzle.puzzle_reference}</p>
+                      )}
                       <p className="text-xs text-white/40 mt-2">
-                        {format(new Date(puzzle.created_date), 'MMM d, yyyy')}
+                        Completed: {format(new Date(puzzle.completion_date || puzzle.created_date), 'MMM d, yyyy')}
                       </p>
                     </div>
                   </motion.div>
