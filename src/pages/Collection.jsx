@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -9,7 +7,10 @@ import {
   LayoutGrid,
   ChevronDown,
   X,
-  Puzzle
+  Puzzle,
+  Users,
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,152 +29,58 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import PuzzleCard from '@/components/shared/PuzzleCard';
-
-const allPuzzles = [
-  {
-    title: 'Starry Night Dreams',
-    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 1523,
-    rating: 4.9,
-    creator: 'ArtMaster',
-    category: 'Abstract'
-  },
-  {
-    title: 'Ocean Sunset',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 892,
-    rating: 4.7,
-    creator: 'NatureVibes',
-    category: 'Nature'
-  },
-  {
-    title: 'Mountain Peak',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=400&fit=crop',
-    pieces: 500,
-    difficulty: 'Easy',
-    plays: 2341,
-    rating: 4.8,
-    creator: 'Explorer',
-    category: 'Nature'
-  },
-  {
-    title: 'Cosmic Galaxy',
-    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=400&fit=crop',
-    pieces: 1500,
-    difficulty: 'Hard',
-    plays: 5672,
-    rating: 4.9,
-    creator: 'SpaceExplorer',
-    category: 'Space'
-  },
-  {
-    title: 'Cherry Blossoms',
-    image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=400&fit=crop',
-    pieces: 750,
-    difficulty: 'Medium',
-    plays: 4231,
-    rating: 4.6,
-    creator: 'JapanLover',
-    category: 'Nature'
-  },
-  {
-    title: 'City Lights',
-    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 3892,
-    rating: 4.7,
-    creator: 'UrbanArt',
-    category: 'Urban'
-  },
-  {
-    title: 'Aurora Borealis',
-    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 3456,
-    rating: 4.8,
-    creator: 'NorthernLights',
-    category: 'Nature'
-  },
-  {
-    title: 'Ancient Temple',
-    image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&h=400&fit=crop',
-    pieces: 1200,
-    difficulty: 'Medium',
-    plays: 2134,
-    rating: 4.7,
-    creator: 'HistoryBuff',
-    category: 'Architecture'
-  },
-  {
-    title: 'Tropical Paradise',
-    image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=400&h=400&fit=crop',
-    pieces: 800,
-    difficulty: 'Easy',
-    plays: 1876,
-    rating: 4.5,
-    creator: 'BeachLover',
-    category: 'Nature'
-  },
-  {
-    title: 'Abstract Colors',
-    image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&h=400&fit=crop',
-    pieces: 1500,
-    difficulty: 'Hard',
-    plays: 2987,
-    rating: 4.8,
-    creator: 'ModernArt',
-    category: 'Abstract'
-  },
-  {
-    title: 'Forest Trail',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=400&fit=crop',
-    pieces: 600,
-    difficulty: 'Easy',
-    plays: 3421,
-    rating: 4.6,
-    creator: 'NatureWalk',
-    category: 'Nature'
-  },
-  {
-    title: 'Vintage Map',
-    image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&h=400&fit=crop',
-    pieces: 2500,
-    difficulty: 'Hard',
-    plays: 1543,
-    rating: 4.9,
-    creator: 'Cartographer',
-    category: 'Vintage'
-  }
-];
+import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 
 const categories = ['All', 'Nature', 'Abstract', 'Urban', 'Space', 'Architecture', 'Vintage', 'Animals', 'Art'];
-const difficulties = ['Easy', 'Medium', 'Hard'];
 
 export default function Collection() {
+  const [globalPuzzles, setGlobalPuzzles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedBrand, setSelectedBrand] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState('grid');
-  const [activeFilters, setActiveFilters] = useState([]);
-  const [pieceRange, setPieceRange] = useState([0, 5000]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState([]);
+  const [pieceFilter, setPieceFilter] = useState('');
+  const [brands, setBrands] = useState([]);
 
-  const clearFilters = () => {
-    setSelectedCategory('All');
-    setActiveFilters([]);
-    setPieceRange([0, 5000]);
-    setSelectedDifficulties([]);
-    setSearchQuery('');
+  useEffect(() => {
+    loadGlobalPuzzles();
+  }, [sortBy]);
+
+  const loadGlobalPuzzles = async () => {
+    try {
+      setIsLoading(true);
+      const sortOrder = sortBy === 'popular' ? '-completion_count' : 
+                       sortBy === 'newest' ? '-created_date' :
+                       sortBy === 'pieces-asc' ? 'puzzle_pieces' : '-puzzle_pieces';
+      
+      const data = await base44.entities.GlobalPuzzle.list(sortOrder);
+      setGlobalPuzzles(data);
+
+      // Extract unique brands
+      const uniqueBrands = [...new Set(data.map(p => p.puzzle_brand).filter(Boolean))];
+      setBrands(uniqueBrands);
+    } catch (error) {
+      console.error('Error loading puzzles:', error);
+      toast.error('Failed to load puzzles');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const filteredPuzzles = globalPuzzles.filter(puzzle => {
+    const matchesSearch = !searchQuery || 
+      puzzle.puzzle_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      puzzle.puzzle_brand?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesBrand = selectedBrand === 'all' || puzzle.puzzle_brand === selectedBrand;
+    
+    const matchesPieces = !pieceFilter || puzzle.puzzle_pieces?.toString() === pieceFilter;
+
+    return matchesSearch && matchesBrand && matchesPieces;
+  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -191,12 +98,12 @@ export default function Collection() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className="sticky top-16 lg:top-16 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="px-4 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Puzzle Collection</h1>
-              <p className="text-white/50 text-sm mt-1">Explore {allPuzzles.length} puzzles</p>
+              <h1 className="text-2xl font-bold text-white">Global Puzzle Collection</h1>
+              <p className="text-white/50 text-sm mt-1">Explore {globalPuzzles.length} puzzles from the community</p>
             </div>
 
             {/* Search & Actions */}
@@ -210,69 +117,6 @@ export default function Collection() {
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
                 />
               </div>
-
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="border-white/10 text-white hover:bg-white/5">
-                    <SlidersHorizontal className="w-4 h-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="bg-[#000019] border-white/[0.06]">
-                  <SheetHeader>
-                    <SheetTitle className="text-white">Filters</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 space-y-6">
-                    {/* Piece Count */}
-                    <div>
-                      <label className="text-sm text-white/70 mb-3 block">Piece Count</label>
-                      <Slider
-                        value={pieceRange}
-                        onValueChange={setPieceRange}
-                        min={0}
-                        max={5000}
-                        step={100}
-                        className="my-6"
-                      />
-                      <div className="flex justify-between text-sm text-white/50">
-                        <span>{pieceRange[0]} pcs</span>
-                        <span>{pieceRange[1]} pcs</span>
-                      </div>
-                    </div>
-
-                    {/* Difficulty */}
-                    <div>
-                      <label className="text-sm text-white/70 mb-3 block">Difficulty</label>
-                      <div className="space-y-2">
-                        {difficulties.map((diff) => (
-                          <div key={diff} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={diff}
-                              checked={selectedDifficulties.includes(diff)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedDifficulties([...selectedDifficulties, diff]);
-                                } else {
-                                  setSelectedDifficulties(selectedDifficulties.filter(d => d !== diff));
-                                }
-                              }}
-                              className="border-white/20 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                            />
-                            <label htmlFor={diff} className="text-sm text-white/70">{diff}</label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Button 
-                      onClick={clearFilters}
-                      variant="outline" 
-                      className="w-full border-white/20 text-white hover:bg-white/5"
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
 
               {/* View Mode Toggle */}
               <div className="hidden lg:flex bg-white/5 border border-white/10 rounded-lg p-1">
@@ -296,53 +140,35 @@ export default function Collection() {
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? 'default' : 'outline'}
-                size="sm"
-                className={`rounded-full whitespace-nowrap ${
-                  selectedCategory === category
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500'
-                    : 'border-white/20 text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4">
+            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/10 text-white">
+                <SelectValue placeholder="All Brands" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0a0a2e] border-white/10">
+                <SelectItem value="all">All Brands</SelectItem>
+                {brands.map(brand => (
+                  <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Sort & Active Filters */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              {activeFilters.map((filter, index) => (
-                <Badge 
-                  key={index}
-                  variant="secondary"
-                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 pl-2 pr-1"
-                >
-                  {filter}
-                  <button 
-                    className="ml-1 hover:bg-orange-500/30 rounded p-0.5"
-                    onClick={() => setActiveFilters(activeFilters.filter((_, i) => i !== index))}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
+            <Input
+              type="number"
+              value={pieceFilter}
+              onChange={(e) => setPieceFilter(e.target.value)}
+              placeholder="Filter by pieces..."
+              className="w-full sm:w-48 bg-white/5 border-white/10 text-white"
+            />
 
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
+              <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/10 text-white">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent className="bg-[#0a0a2e] border-white/10">
                 <SelectItem value="popular">Most Popular</SelectItem>
                 <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
                 <SelectItem value="pieces-asc">Pieces: Low to High</SelectItem>
                 <SelectItem value="pieces-desc">Pieces: High to Low</SelectItem>
               </SelectContent>
@@ -353,35 +179,78 @@ export default function Collection() {
 
       {/* Puzzle Grid */}
       <div className="px-4 lg:px-8 py-6">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className={`grid gap-4 ${
-            viewMode === 'large' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-              : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-          }`}
-        >
-          {allPuzzles.map((puzzle, index) => (
-            <motion.div key={index} variants={item}>
-              <Link to={createPageUrl('PuzzleDetail')}>
-                <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Load More */}
-        <div className="flex justify-center mt-12">
-          <Button 
-            variant="outline" 
-            className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          </div>
+        ) : filteredPuzzles.length === 0 ? (
+          <div className="text-center py-12">
+            <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+            <p className="text-white/50">No puzzles found</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className={`grid gap-4 ${
+              viewMode === 'large' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            }`}
           >
-            Load More Puzzles
-            <ChevronDown className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
+            {filteredPuzzles.map((puzzle) => (
+              <motion.div 
+                key={puzzle.id} 
+                variants={item}
+                className="group relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-orange-500/30 transition-all duration-300"
+              >
+                {/* Image */}
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={puzzle.image_url || 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400&h=400&fit=crop'}
+                    alt={puzzle.puzzle_name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="text-white font-semibold mb-2 line-clamp-1">{puzzle.puzzle_name}</h3>
+                  
+                  <div className="space-y-2 text-sm">
+                    {puzzle.puzzle_brand && (
+                      <p className="text-white/60">{puzzle.puzzle_brand}</p>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1 text-white/50">
+                        <Puzzle className="w-3.5 h-3.5 text-orange-400" />
+                        {puzzle.puzzle_pieces} pcs
+                      </span>
+                      <span className="flex items-center gap-1 text-white/50">
+                        <Users className="w-3.5 h-3.5 text-orange-400" />
+                        {puzzle.completion_count || 0}
+                      </span>
+                    </div>
+
+                    {puzzle.affiliate_link && (
+                      <a
+                        href={puzzle.affiliate_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-center py-1.5 px-3 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-lg text-xs font-medium transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Buy Now
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </div>
   );
