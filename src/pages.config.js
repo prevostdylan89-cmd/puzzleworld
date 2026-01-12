@@ -1,23 +1,21 @@
-import Home from './pages/Home';
-import Social from './pages/Social';
-import Profile from './pages/Profile';
 import Collection from './pages/Collection';
-import PuzzleDetail from './pages/PuzzleDetail';
 import OnlinePuzzles from './pages/OnlinePuzzles';
-import __Layout from './Layout.jsx';
+import Profile from './pages/Profile';
+import PuzzleDetail from './pages/PuzzleDetail';
+import Social from './pages/Social';
+import Home from './pages/Home';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Social": Social,
-    "Profile": Profile,
     "Collection": Collection,
-    "PuzzleDetail": PuzzleDetail,
     "OnlinePuzzles": OnlinePuzzles,
+    "Profile": Profile,
+    "PuzzleDetail": PuzzleDetail,
+    "Social": Social,
+    "Home": Home,
 }
 
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
-    Layout: __Layout,
 };
