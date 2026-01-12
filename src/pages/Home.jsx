@@ -1,63 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Sparkles, TrendingUp, Calendar, MessageSquare, ChevronRight, Play, Loader2 } from 'lucide-react';
+import { Sparkles, TrendingUp, Calendar, MessageSquare, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
 import PostCard from '@/components/shared/PostCard';
 import SectionHeader from '@/components/shared/SectionHeader';
-import { base44 } from '@/api/base44Client';
 
-export default function Home() {
-  const [featuredPuzzles, setFeaturedPuzzles] = useState([]);
-  const [mostPlayedPuzzles, setMostPlayedPuzzles] = useState([]);
-  const [latestPosts, setLatestPosts] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+const featuredPuzzles = [
+  {
+    title: 'Starry Night Dreams',
+    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&h=400&fit=crop',
+    pieces: 2000,
+    difficulty: 'Hard',
+    plays: 1523,
+    rating: 4.9,
+    creator: 'ArtMaster'
+  },
+  {
+    title: 'Ocean Sunset',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+    pieces: 1000,
+    difficulty: 'Medium',
+    plays: 892,
+    rating: 4.7,
+    creator: 'NatureVibes'
+  },
+  {
+    title: 'Mountain Peak',
+    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop',
+    pieces: 500,
+    difficulty: 'Easy',
+    plays: 2341,
+    rating: 4.8,
+    creator: 'Explorer'
+  }
+];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      const user = await base44.auth.me().catch(() => null);
-      setCurrentUser(user);
-
-      // Load top puzzles
-      const topPuzzles = await base44.entities.GlobalPuzzle.list('-completion_count', 10);
-      
-      setFeaturedPuzzles(topPuzzles.slice(0, 3).map(p => ({
-        title: p.puzzle_name,
-        image: p.image_url || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&h=400&fit=crop',
-        pieces: p.puzzle_pieces,
-        difficulty: p.difficulty || 'Medium',
-        plays: p.completion_count,
-        rating: 4.7,
-        creator: p.puzzle_brand || 'Community'
-      })));
-
-      setMostPlayedPuzzles(topPuzzles.slice(0, 4).map(p => ({
-        title: p.puzzle_name,
-        image: p.image_url || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
-        pieces: p.puzzle_pieces,
-        difficulty: p.difficulty || 'Medium',
-        plays: p.completion_count,
-        rating: 4.7,
-        creator: p.puzzle_brand || 'Community'
-      })));
-
-      // Load latest posts
-      const posts = await base44.entities.Post.list('-created_date', 2);
-      setLatestPosts(posts);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const mostPlayedPuzzles = [
+  {
+    title: 'Cosmic Galaxy',
+    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=400&fit=crop',
+    pieces: 1500,
+    difficulty: 'Hard',
+    plays: 5672,
+    rating: 4.9,
+    creator: 'SpaceExplorer'
+  },
+  {
+    title: 'Cherry Blossoms',
+    image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=400&fit=crop',
+    pieces: 750,
+    difficulty: 'Medium',
+    plays: 4231,
+    rating: 4.6,
+    creator: 'JapanLover'
+  },
+  {
+    title: 'City Lights',
+    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',
+    pieces: 1000,
+    difficulty: 'Medium',
+    plays: 3892,
+    rating: 4.7,
+    creator: 'UrbanArt'
+  },
+  {
+    title: 'Aurora Borealis',
+    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop',
+    pieces: 2000,
+    difficulty: 'Hard',
+    plays: 3456,
+    rating: 4.8,
+    creator: 'NorthernLights'
+  }
+];
 
 const monthlyEvents = [
   {
@@ -89,7 +108,28 @@ const monthlyEvents = [
   }
 ];
 
-const container = {
+const latestPosts = [
+  {
+    author: { name: 'PuzzlePro', initials: 'PP' },
+    content: 'Just finished this beautiful 2000 piece puzzle in record time! The colors are absolutely stunning 🎨',
+    image: 'https://images.unsplash.com/photo-1494059980473-813e73ee784b?w=600&h=400&fit=crop',
+    likes: 234,
+    comments: 45,
+    timeAgo: '2h ago',
+    tags: ['completion', 'record']
+  },
+  {
+    author: { name: 'JigsawJane', initials: 'JJ' },
+    content: 'Any tips for sorting edge pieces faster? Looking for strategies from the community!',
+    likes: 89,
+    comments: 67,
+    timeAgo: '4h ago',
+    tags: ['tips', 'strategy']
+  }
+];
+
+export default function Home() {
+  const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -101,14 +141,6 @@ const container = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
@@ -164,25 +196,15 @@ const container = {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-          {featuredPuzzles.length === 0 ? (
-            <p className="text-white/50 col-span-3 text-center py-8">No puzzles yet</p>
-          ) : (
-            <>
-              <motion.div variants={item} className="md:col-span-2 md:row-span-2">
-                <PuzzleCard puzzle={featuredPuzzles[0]} variant="featured" />
-              </motion.div>
-              {featuredPuzzles[1] && (
-                <motion.div variants={item}>
-                  <PuzzleCard puzzle={featuredPuzzles[1]} variant="default" />
-                </motion.div>
-              )}
-              {featuredPuzzles[2] && (
-                <motion.div variants={item}>
-                  <PuzzleCard puzzle={featuredPuzzles[2]} variant="default" />
-                </motion.div>
-              )}
-            </>
-          )}
+          <motion.div variants={item} className="md:col-span-2 md:row-span-2">
+            <PuzzleCard puzzle={featuredPuzzles[0]} variant="featured" />
+          </motion.div>
+          <motion.div variants={item}>
+            <PuzzleCard puzzle={featuredPuzzles[1]} variant="default" />
+          </motion.div>
+          <motion.div variants={item}>
+            <PuzzleCard puzzle={featuredPuzzles[2]} variant="default" />
+          </motion.div>
         </div>
       </motion.section>
 
@@ -202,17 +224,13 @@ const container = {
         />
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {mostPlayedPuzzles.length === 0 ? (
-            <p className="text-white/50 col-span-4 text-center py-8">No puzzles yet</p>
-          ) : (
-            mostPlayedPuzzles.map((puzzle, index) => (
-              <motion.div key={index} variants={item}>
-                <Link to={createPageUrl('PuzzleDetail')}>
-                  <PuzzleCard puzzle={puzzle} />
-                </Link>
-              </motion.div>
-            ))
-          )}
+          {mostPlayedPuzzles.map((puzzle, index) => (
+            <motion.div key={index} variants={item}>
+              <Link to={createPageUrl('PuzzleDetail')}>
+                <PuzzleCard puzzle={puzzle} />
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </motion.section>
 
@@ -255,15 +273,11 @@ const container = {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          {latestPosts.length === 0 ? (
-            <p className="text-white/50 col-span-2 text-center py-8">No posts yet</p>
-          ) : (
-            latestPosts.map((post, index) => (
-              <motion.div key={index} variants={item}>
-                <PostCard post={post} currentUser={currentUser} />
-              </motion.div>
-            ))
-          )}
+          {latestPosts.map((post, index) => (
+            <motion.div key={index} variants={item}>
+              <PostCard post={post} />
+            </motion.div>
+          ))}
         </div>
       </motion.section>
     </div>

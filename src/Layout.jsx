@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,12 +10,12 @@ import {
   Gamepad2,
   Menu,
   X,
-  Puzzle,
-  Plus
+  Search,
+  Bell,
+  Puzzle
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { base44 } from '@/api/base44Client';
-import AddPuzzleModal from '@/components/puzzle/AddPuzzleModal';
 
 const navItems = [
   { name: 'Home', icon: Home, page: 'Home' },
@@ -27,26 +27,7 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showAddPuzzle, setShowAddPuzzle] = useState(false);
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const user = await base44.auth.me();
-      setCurrentUser(user);
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  };
-
-  const handlePuzzleAdded = () => {
-    // Reload page or trigger refresh
-    window.location.reload();
-  };
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-[#000019] text-white">
@@ -89,63 +70,89 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Top Header Navigation */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50">
-        <div className="max-w-7xl mx-auto h-full px-4 flex items-center justify-between">
-          {/* Logo */}
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-white/[0.06] bg-[#000019]/80 backdrop-blur-xl z-50">
+        {/* Logo */}
+        <div className="p-6 border-b border-white/[0.06]">
+          <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <Puzzle className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent hidden sm:inline">
+            <span className="text-xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               PuzzleHub
             </span>
           </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = currentPageName === item.page;
-              return (
-                <Link
-                  key={item.name}
-                  to={createPageUrl(item.page)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 relative ${
-                    isActive 
-                      ? 'text-orange-400' 
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium text-sm">{item.name}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2">
-            {currentUser && (
-              <Button
-                onClick={() => setShowAddPuzzle(true)}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg hidden sm:flex"
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1">
+          {navItems.map((item) => {
+            const isActive = currentPageName === item.page;
+            return (
+              <Link
+                key={item.name}
+                to={createPageUrl(item.page)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  isActive 
+                    ? 'bg-orange-500/10 text-orange-400' 
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Puzzle
-              </Button>
-            )}
-            
-            {/* Mobile Menu Button */}
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-orange-400' : 'group-hover:text-orange-400'}`} />
+                <span className="font-medium">{item.name}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-400"
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Section */}
+        <div className="p-4 border-t border-white/[0.06]">
+          <Link 
+            to={createPageUrl('Profile')}
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors"
+          >
+            <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
+              <AvatarImage src="" />
+              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+                JD
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">John Doe</p>
+              <p className="text-xs text-white/40 truncate">@puzzlemaster</p>
+            </div>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50">
+        <div className="flex items-center justify-between h-full px-4">
+          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+              <Puzzle className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-lg">PuzzleHub</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+              <Search className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5 relative">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500" />
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-white/60 hover:text-white hover:bg-white/5"
+              className="text-white/60 hover:text-white hover:bg-white/5"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -157,19 +164,20 @@ export default function Layout({ children, currentPageName }) {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 top-16"
-              onClick={() => setMobileMenuOpen(false)}
-            />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             <motion.nav
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="md:hidden fixed top-16 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-40 p-4"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute right-0 top-16 bottom-0 w-64 bg-[#000019] border-l border-white/[0.06] p-4"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-1">
                 {navItems.map((item) => {
@@ -190,37 +198,37 @@ export default function Layout({ children, currentPageName }) {
                     </Link>
                   );
                 })}
-                
-                {currentUser && (
-                  <Button
-                    onClick={() => {
-                      setShowAddPuzzle(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl mt-4"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Puzzle
-                  </Button>
-                )}
               </div>
             </motion.nav>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Mobile Bottom Nav */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40">
+        <div className="flex items-center justify-around h-full">
+          {navItems.slice(0, 5).map((item) => {
+            const isActive = currentPageName === item.page;
+            return (
+              <Link
+                key={item.name}
+                to={createPageUrl(item.page)}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+                  isActive ? 'text-orange-400' : 'text-white/40'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* Main Content */}
-      <main className="pt-16">
+      <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0 pb-20 lg:pb-0">
         {children}
       </main>
-
-      {/* Add Puzzle Modal */}
-      <AddPuzzleModal
-        isOpen={showAddPuzzle}
-        onClose={() => setShowAddPuzzle(false)}
-        onPuzzleAdded={handlePuzzleAdded}
-        user={currentUser}
-      />
     </div>
   );
 }
