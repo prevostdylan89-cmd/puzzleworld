@@ -32,7 +32,10 @@ export default function PostCard({ post }) {
           <h4 className="text-white font-medium text-sm">{author.name}</h4>
           <p className="text-white/40 text-xs">{timeAgo}</p>
         </div>
-        <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
+        <button 
+          onClick={handleAddToWishlist}
+          className="p-2 hover:bg-white/5 rounded-full transition-colors"
+        >
           <Bookmark className="w-4 h-4 text-white/40 hover:text-orange-400" />
         </button>
       </div>

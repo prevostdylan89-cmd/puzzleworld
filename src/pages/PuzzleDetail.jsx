@@ -122,6 +122,7 @@ export default function PuzzleDetail() {
           </Link>
           <div className="flex items-center gap-2">
             <Button 
+              onClick={handleShare}
               variant="ghost" 
               size="icon" 
               className="text-white/60 hover:text-white hover:bg-white/5"
@@ -137,6 +138,7 @@ export default function PuzzleDetail() {
               <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500' : ''}`} />
             </Button>
             <Button 
+              onClick={handleBookmark}
               variant="ghost" 
               size="icon" 
               className="text-white/60 hover:text-white hover:bg-white/5"
