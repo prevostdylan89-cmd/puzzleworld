@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Puzzle, Users, Star, Clock, Bookmark } from 'lucide-react';
+import { Puzzle, Users, Star, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
-import { toast } from 'sonner';
 
 export default function PuzzleCard({ puzzle, variant = 'default' }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const {
     title = 'Mystery Puzzle',
     image = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=400&h=300&fit=crop',
@@ -20,43 +17,6 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
 
   const isLarge = variant === 'large';
   const isFeatured = variant === 'featured';
-
-  const handleAddToWishlist = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    try {
-      const user = await base44.auth.me();
-      
-      const existing = await base44.entities.Wishlist.filter({
-        puzzle_name: title,
-        created_by: user.email
-      });
-
-      if (existing.length > 0) {
-        toast.info('Already in your wishlist');
-        return;
-      }
-
-      await base44.entities.Wishlist.create({
-        puzzle_name: title,
-        puzzle_brand: creator || '',
-        puzzle_pieces: pieces || 0,
-        image_url: image || '',
-        priority: 'medium'
-      });
-
-      setIsWishlisted(true);
-      toast.success('Added to wishlist!');
-    } catch (error) {
-      if (error.message?.includes('not authenticated')) {
-        toast.error('Please log in to add to wishlist');
-        base44.auth.redirectToLogin();
-      } else {
-        toast.error('Failed to add to wishlist');
-      }
-    }
-  };
 
   return (
     <Link to={createPageUrl('PuzzleDetail')}>
@@ -79,18 +39,8 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
 
       {/* Content */}
       <div className="absolute inset-0 p-4 flex flex-col justify-end">
-        {/* Difficulty Badge & Wishlist */}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <button
-            onClick={handleAddToWishlist}
-            className={`p-2 rounded-full backdrop-blur-md transition-colors ${
-              isWishlisted 
-                ? 'bg-orange-500 text-white' 
-                : 'bg-black/30 text-white hover:bg-orange-500/50'
-            }`}
-          >
-            <Bookmark className={`w-4 h-4 ${isWishlisted ? 'fill-white' : ''}`} />
-          </button>
+        {/* Difficulty Badge */}
+        <div className="absolute top-3 right-3">
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md ${
             difficulty === 'Easy' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
             difficulty === 'Medium' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :

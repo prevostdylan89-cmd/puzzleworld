@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
 import { 
   ArrowLeft,
   Heart,
@@ -109,62 +108,6 @@ export default function PuzzleDetail() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: puzzleData.title,
-          text: `Check out this amazing ${puzzleData.pieces} piece puzzle!`,
-          url: window.location.href
-        });
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          fallbackShare();
-        }
-      }
-    } else {
-      fallbackShare();
-    }
-  };
-
-  const fallbackShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success('Link copied to clipboard!');
-  };
-
-  const handleBookmark = async () => {
-    try {
-      const user = await base44.auth.me();
-      
-      const existing = await base44.entities.Wishlist.filter({
-        puzzle_name: puzzleData.title,
-        created_by: user.email
-      });
-
-      if (existing.length > 0) {
-        toast.info('Already in your wishlist');
-        return;
-      }
-
-      await base44.entities.Wishlist.create({
-        puzzle_name: puzzleData.title,
-        puzzle_brand: puzzleData.creator.name || '',
-        puzzle_pieces: puzzleData.pieces || 0,
-        image_url: puzzleData.image || '',
-        priority: 'medium'
-      });
-
-      toast.success('Added to wishlist!');
-    } catch (error) {
-      if (error.message?.includes('not authenticated')) {
-        toast.error('Please log in to add to wishlist');
-        base44.auth.redirectToLogin();
-      } else {
-        toast.error('Failed to add to wishlist');
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen pb-8">
       {/* Back Button */}
@@ -179,7 +122,6 @@ export default function PuzzleDetail() {
           </Link>
           <div className="flex items-center gap-2">
             <Button 
-              onClick={handleShare}
               variant="ghost" 
               size="icon" 
               className="text-white/60 hover:text-white hover:bg-white/5"
@@ -195,7 +137,6 @@ export default function PuzzleDetail() {
               <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500' : ''}`} />
             </Button>
             <Button 
-              onClick={handleBookmark}
               variant="ghost" 
               size="icon" 
               className="text-white/60 hover:text-white hover:bg-white/5"

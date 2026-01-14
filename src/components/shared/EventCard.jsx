@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Users, Clock, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import EventRegistrationDialog from './EventRegistrationDialog';
+import { toast } from 'sonner';
 
 export default function EventCard({ event }) {
-  const [showDialog, setShowDialog] = useState(false);
   const {
     title = 'Monthly Challenge',
     description = 'Complete the puzzle in record time',
@@ -66,7 +65,7 @@ export default function EventCard({ event }) {
             {timeLeft}
           </span>
           <Button 
-            onClick={() => setShowDialog(true)}
+            onClick={() => toast.success('Event registration coming soon! Stay tuned.')}
             size="sm" 
             className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4"
           >
@@ -75,12 +74,6 @@ export default function EventCard({ event }) {
           </Button>
         </div>
       </div>
-
-      <EventRegistrationDialog 
-        event={event}
-        open={showDialog}
-        onOpenChange={setShowDialog}
-      />
     </motion.div>
   );
 }
