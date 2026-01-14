@@ -1,21 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Home, 
   Users, 
   Grid3X3, 
   User, 
   Gamepad2,
-  Menu,
-  X,
-  Search,
   Bell,
-  Puzzle
+  Puzzle,
+  LogOut
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { base44 } from '@/api/base44Client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { name: 'Home', icon: Home, page: 'Home' },
@@ -26,8 +32,29 @@ const navItems = [
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+    } catch (error) {
+      console.log('User not logged in');
+    }
+  };
+
+  const handleLogout = () => {
+    base44.auth.logout();
+  };
+
+  const userInitials = user?.full_name 
+    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() || 'U';
 
   return (
     <div className="min-h-screen bg-[#000019] text-white">
@@ -193,7 +220,7 @@ export default function Layout({ children, currentPageName }) {
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400">
                     <LogOut className="w-4 h-4 mr-2" />
                     Log Out
-                    </DropdownMenuItem>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -208,8 +235,6 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </header>
-
-
 
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40">
