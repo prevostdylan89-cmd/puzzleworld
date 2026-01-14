@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { toast } from 'sonner';
 import { 
   ArrowLeft,
   Heart,
@@ -159,13 +160,15 @@ export default function PuzzleDetail() {
 
         {/* Floating Play Button */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-20 h-20 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-orange-500/30"
-          >
-            <Play className="w-8 h-8 text-white ml-1" />
-          </motion.button>
+          <Link to={createPageUrl('OnlinePuzzles')}>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-20 h-20 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-orange-500/30"
+            >
+              <Play className="w-8 h-8 text-white ml-1" />
+            </motion.button>
+          </Link>
         </div>
 
         {/* Difficulty Badge */}
@@ -218,11 +221,16 @@ export default function PuzzleDetail() {
                 transition={{ delay: 0.1 }}
                 className="flex flex-wrap gap-3"
               >
-                <Button className="flex-1 sm:flex-none bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8 h-12">
-                  <Play className="w-5 h-5 mr-2" />
-                  Start Puzzle
-                </Button>
+                <Link to={createPageUrl('OnlinePuzzles')}>
+                  <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8 h-12">
+                    <Play className="w-5 h-5 mr-2" />
+                    Play Online
+                  </Button>
+                </Link>
                 <Button 
+                  onClick={() => {
+                    toast.success('Download feature coming soon!');
+                  }}
                   variant="outline" 
                   className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6 h-12"
                 >
@@ -383,24 +391,30 @@ export default function PuzzleDetail() {
                 </div>
                 <div className="flex gap-2">
                   <Button 
+                    onClick={() => toast.success('Follow feature coming soon!')}
                     variant="outline" 
                     size="sm"
                     className="flex-1 border-orange-500/30 text-orange-400 hover:bg-orange-500/10 rounded-full"
                   >
                     Follow
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1 border-white/20 text-white hover:bg-white/5 rounded-full"
-                  >
-                    View Profile
-                  </Button>
+                  <Link to={createPageUrl('Profile')} className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full border-white/20 text-white hover:bg-white/5 rounded-full"
+                    >
+                      View Profile
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
 
               {/* Report */}
-              <button className="flex items-center gap-2 text-white/40 hover:text-white/60 text-sm transition-colors">
+              <button 
+                onClick={() => toast.info('Report feature coming soon. Thank you for keeping our community safe!')}
+                className="flex items-center gap-2 text-white/40 hover:text-white/60 text-sm transition-colors"
+              >
                 <Flag className="w-4 h-4" />
                 Report this puzzle
               </button>

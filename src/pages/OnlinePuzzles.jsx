@@ -10,6 +10,7 @@ import {
   Star,
   TrendingUp
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -232,7 +233,10 @@ export default function OnlinePuzzles() {
                 </span>
               </div>
 
-              <Button className="w-fit bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8">
+              <Button 
+                onClick={() => window.open(featuredGame.url || '#', '_blank')}
+                className="w-fit bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8"
+              >
                 Play Now
               </Button>
             </div>
@@ -297,6 +301,7 @@ export default function OnlinePuzzles() {
               </p>
             </div>
             <Button 
+              onClick={() => toast.success('Thank you! Game suggestion feature coming soon.')}
               variant="outline"
               className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10 rounded-xl w-fit"
             >

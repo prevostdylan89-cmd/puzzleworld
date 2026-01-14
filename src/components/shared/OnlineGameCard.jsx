@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Star, Users, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function OnlineGameCard({ game }) {
   const {
@@ -69,6 +70,13 @@ export default function OnlineGameCard({ game }) {
 
         {/* CTA */}
         <Button 
+          onClick={() => {
+            if (url && url !== '#') {
+              window.open(url, '_blank');
+            } else {
+              toast.info('This game will be available soon!');
+            }
+          }}
           className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
         >
           Play Now

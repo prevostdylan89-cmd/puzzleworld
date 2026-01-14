@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Users, Clock, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function EventCard({ event }) {
   const {
@@ -64,6 +65,7 @@ export default function EventCard({ event }) {
             {timeLeft}
           </span>
           <Button 
+            onClick={() => toast.success('Event registration coming soon! Stay tuned.')}
             size="sm" 
             className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4"
           >

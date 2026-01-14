@@ -365,9 +365,7 @@ export default function Collection() {
         >
           {allPuzzles.map((puzzle, index) => (
             <motion.div key={index} variants={item}>
-              <Link to={createPageUrl('PuzzleDetail')}>
-                <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
-              </Link>
+              <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
             </motion.div>
           ))}
         </motion.div>
@@ -375,11 +373,15 @@ export default function Collection() {
         {/* Load More */}
         <div className="flex justify-center mt-12">
           <Button 
+            onClick={() => {
+              // Scroll to top to see more puzzles
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             variant="outline" 
             className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
           >
-            Load More Puzzles
-            <ChevronDown className="w-4 h-4 ml-2" />
+            Back to Top
+            <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
           </Button>
         </div>
       </div>

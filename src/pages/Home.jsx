@@ -170,13 +170,17 @@ export default function Home() {
               Discover, share, and complete puzzles with enthusiasts from around the world.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6">
-                <Play className="w-4 h-4 mr-2" />
-                Start Puzzling
-              </Button>
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6">
-                Explore Collection
-              </Button>
+              <Link to={createPageUrl('OnlinePuzzles')}>
+                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6">
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Puzzling
+                </Button>
+              </Link>
+              <Link to={createPageUrl('Collection')}>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6">
+                  Explore Collection
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -226,9 +230,7 @@ export default function Home() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {mostPlayedPuzzles.map((puzzle, index) => (
             <motion.div key={index} variants={item}>
-              <Link to={createPageUrl('PuzzleDetail')}>
-                <PuzzleCard puzzle={puzzle} />
-              </Link>
+              <PuzzleCard puzzle={puzzle} />
             </motion.div>
           ))}
         </div>

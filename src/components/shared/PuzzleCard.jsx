@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Puzzle, Users, Star, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function PuzzleCard({ puzzle, variant = 'default' }) {
   const {
@@ -17,13 +19,14 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
   const isFeatured = variant === 'featured';
 
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.02 }}
-      transition={{ duration: 0.2 }}
-      className={`group relative overflow-hidden rounded-2xl cursor-pointer ${
-        isFeatured ? 'aspect-[16/10]' : isLarge ? 'aspect-[4/3]' : 'aspect-square'
-      }`}
-    >
+    <Link to={createPageUrl('PuzzleDetail')}>
+      <motion.div
+        whileHover={{ y: -4, scale: 1.02 }}
+        transition={{ duration: 0.2 }}
+        className={`group relative overflow-hidden rounded-2xl cursor-pointer ${
+          isFeatured ? 'aspect-[16/10]' : isLarge ? 'aspect-[4/3]' : 'aspect-square'
+        }`}
+      >
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -76,6 +79,7 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
 
       {/* Hover Overlay */}
       <div className="absolute inset-0 bg-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }

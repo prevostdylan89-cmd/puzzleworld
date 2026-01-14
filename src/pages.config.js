@@ -1,18 +1,18 @@
-import OnlinePuzzles from './pages/OnlinePuzzles';
-import PuzzleDetail from './pages/PuzzleDetail';
-import Home from './pages/Home';
 import Collection from './pages/Collection';
+import Home from './pages/Home';
+import OnlinePuzzles from './pages/OnlinePuzzles';
 import Profile from './pages/Profile';
+import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "OnlinePuzzles": OnlinePuzzles,
-    "PuzzleDetail": PuzzleDetail,
-    "Home": Home,
     "Collection": Collection,
+    "Home": Home,
+    "OnlinePuzzles": OnlinePuzzles,
     "Profile": Profile,
+    "PuzzleDetail": PuzzleDetail,
     "Social": Social,
 }
 
