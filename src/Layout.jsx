@@ -169,13 +169,13 @@ export default function Layout({ children, currentPageName }) {
               <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
                 <DropdownMenuItem 
                   onClick={() => setLanguage('fr')}
-                  className={language === 'fr' ? 'bg-orange-500/20 text-orange-400' : ''}
+                  className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                 >
                   🇫🇷 Français
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setLanguage('en')}
-                  className={language === 'en' ? 'bg-orange-500/20 text-orange-400' : ''}
+                  className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                 >
                   🇬🇧 English
                 </DropdownMenuItem>
