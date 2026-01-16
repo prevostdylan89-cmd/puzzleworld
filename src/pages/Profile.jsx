@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   MapPin, 
   Calendar, 
@@ -27,6 +28,7 @@ import WishlistSection from '@/components/profile/WishlistSection';
 
 
 export default function Profile() {
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('completed');
@@ -85,14 +87,14 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
         >
-          <h2 className="text-2xl font-bold text-white mb-4">Welcome to PuzzleHub</h2>
-          <p className="text-white/60 mb-6">Log in to view your profile, track completed puzzles, and manage your wishlist</p>
+          <h2 className="text-2xl font-bold text-white mb-4">{t('welcomeProfile')}</h2>
+          <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}
             className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
           >
             <LogIn className="w-4 h-4 mr-2" />
-            Log In
+            {t('logIn')}
           </Button>
         </motion.div>
       </div>
@@ -111,14 +113,14 @@ export default function Profile() {
     current: Math.floor(stats.completed / 5) + 1,
     xp: stats.completed * 100,
     nextLevelXp: (Math.floor(stats.completed / 5) + 1) * 500,
-    title: stats.completed > 50 ? 'Puzzle Master' : stats.completed > 20 ? 'Puzzle Expert' : 'Puzzle Enthusiast'
+    title: stats.completed > 50 ? t('puzzleMaster') : stats.completed > 20 ? t('puzzleExpert') : t('puzzleEnthusiast')
   };
 
   const statItems = [
-    { label: 'Completed', value: stats.completed, icon: Puzzle },
-    { label: 'Hours', value: stats.hours, icon: Clock },
-    { label: 'Achievements', value: stats.achievements, icon: Trophy },
-    { label: 'Wishlist', value: stats.wishlist, icon: Heart }
+    { label: t('completed'), value: stats.completed, icon: Puzzle },
+    { label: t('hours'), value: stats.hours, icon: Clock },
+    { label: t('achievements'), value: stats.achievements, icon: Trophy },
+    { label: t('wishlist'), value: stats.wishlist, icon: Heart }
   ];
 
   return (
@@ -162,18 +164,18 @@ export default function Profile() {
                   variant="outline" 
                   className="border-white/20 text-white hover:bg-white/5 w-fit"
                 >
-                  Log Out
+                  {t('logOut')}
                 </Button>
               </div>
               
               <p className="text-white/70 mt-3 max-w-xl">
-                Welcome to your puzzle journey dashboard! Track your completed puzzles and build your wishlist.
+                {t('welcomeToDashboard')}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-white/50">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-orange-400" />
-                  Joined {joinedDate}
+                  {t('joined')} {joinedDate}
                 </span>
               </div>
             </div>
@@ -205,7 +207,7 @@ export default function Profile() {
           >
             <div className="flex items-center justify-between mb-3">
               <div>
-                <span className="text-orange-400 font-bold text-lg">Level {levelProgress.current}</span>
+                <span className="text-orange-400 font-bold text-lg">{t('level')} {levelProgress.current}</span>
                 <span className="text-white/50 ml-2">{levelProgress.title}</span>
               </div>
               <span className="text-white/50 text-sm">
@@ -229,21 +231,21 @@ export default function Profile() {
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
               <Grid3X3 className="w-4 h-4 mr-2" />
-              Completed
+              {t('completed')}
             </TabsTrigger>
             <TabsTrigger 
               value="achievements"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
               <Trophy className="w-4 h-4 mr-2" />
-              Achievements
+              {t('achievements')}
             </TabsTrigger>
             <TabsTrigger 
               value="wishlist"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
               <Heart className="w-4 h-4 mr-2" />
-              Wishlist
+              {t('wishlist')}
             </TabsTrigger>
           </TabsList>
 
@@ -255,8 +257,8 @@ export default function Profile() {
             {achievements.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                <p className="text-white/50">No achievements yet</p>
-                <p className="text-white/30 text-sm mt-2">Complete puzzles to unlock badges!</p>
+                <p className="text-white/50">{t('noAchievements')}</p>
+                <p className="text-white/30 text-sm mt-2">{t('completeToUnlock')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">

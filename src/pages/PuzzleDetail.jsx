@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   ArrowLeft,
   Heart,
@@ -105,6 +106,7 @@ const similarPuzzles = [
 ];
 
 export default function PuzzleDetail() {
+  const { t } = useLanguage();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -118,7 +120,7 @@ export default function PuzzleDetail() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">Back to Collection</span>
+            <span className="hidden sm:inline">{t('backToCollection')}</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button 
@@ -224,7 +226,7 @@ export default function PuzzleDetail() {
                 <Link to={createPageUrl('OnlinePuzzles')}>
                   <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8 h-12">
                     <Play className="w-5 h-5 mr-2" />
-                    Play Online
+                    {t('playOnline')}
                   </Button>
                 </Link>
                 <Button 
@@ -235,7 +237,7 @@ export default function PuzzleDetail() {
                   className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6 h-12"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  Download
+                  {t('download')}
                 </Button>
               </motion.div>
 
@@ -246,28 +248,28 @@ export default function PuzzleDetail() {
                     value="overview" 
                     className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
                   >
-                    Overview
+                    {t('overview')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="leaderboard"
                     className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
                   >
                     <Trophy className="w-4 h-4 mr-2" />
-                    Leaderboard
+                    {t('leaderboard')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="reviews"
                     className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Reviews
+                    {t('reviews')}
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6 space-y-6">
                   {/* Description */}
                   <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5">
-                    <h3 className="text-white font-semibold mb-3">About this Puzzle</h3>
+                    <h3 className="text-white font-semibold mb-3">{t('aboutPuzzle')}</h3>
                     <p className="text-white/70 leading-relaxed">{puzzleData.description}</p>
                     
                     <div className="flex flex-wrap gap-2 mt-4">
@@ -288,12 +290,12 @@ export default function PuzzleDetail() {
                     <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center">
                       <Clock className="w-6 h-6 text-orange-400 mx-auto mb-2" />
                       <div className="text-lg font-bold text-white">{puzzleData.avgTime}</div>
-                      <div className="text-sm text-white/50">Average Time</div>
+                      <div className="text-sm text-white/50">{t('avgTime')}</div>
                     </div>
                     <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center">
                       <Trophy className="w-6 h-6 text-orange-400 mx-auto mb-2" />
                       <div className="text-lg font-bold text-white">{puzzleData.bestTime}</div>
-                      <div className="text-sm text-white/50">Best Time</div>
+                      <div className="text-sm text-white/50">{t('bestTime')}</div>
                     </div>
                   </div>
                 </TabsContent>
@@ -377,7 +379,7 @@ export default function PuzzleDetail() {
                 transition={{ delay: 0.2 }}
                 className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5"
               >
-                <h3 className="text-white/50 text-sm mb-4">Created by</h3>
+                <h3 className="text-white/50 text-sm mb-4">{t('createdBy')}</h3>
                 <div className="flex items-center gap-3 mb-4">
                   <Avatar className="h-12 w-12 ring-2 ring-orange-500/20">
                     <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
@@ -386,7 +388,7 @@ export default function PuzzleDetail() {
                   </Avatar>
                   <div>
                     <p className="text-white font-medium">{puzzleData.creator.name}</p>
-                    <p className="text-white/50 text-sm">{puzzleData.creator.followers} followers</p>
+                    <p className="text-white/50 text-sm">{puzzleData.creator.followers} {t('followers')}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -396,7 +398,7 @@ export default function PuzzleDetail() {
                     size="sm"
                     className="flex-1 border-orange-500/30 text-orange-400 hover:bg-orange-500/10 rounded-full"
                   >
-                    Follow
+                    {t('follow')}
                   </Button>
                   <Link to={createPageUrl('Profile')} className="flex-1">
                     <Button 
@@ -404,7 +406,7 @@ export default function PuzzleDetail() {
                       size="sm"
                       className="w-full border-white/20 text-white hover:bg-white/5 rounded-full"
                     >
-                      View Profile
+                      {t('viewProfile')}
                     </Button>
                   </Link>
                 </div>
@@ -416,7 +418,7 @@ export default function PuzzleDetail() {
                 className="flex items-center gap-2 text-white/40 hover:text-white/60 text-sm transition-colors"
               >
                 <Flag className="w-4 h-4" />
-                Report this puzzle
+                {t('reportPuzzle')}
               </button>
             </div>
           </div>
@@ -429,12 +431,12 @@ export default function PuzzleDetail() {
             className="mt-12"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">You Might Also Like</h2>
+              <h2 className="text-xl font-bold text-white">{t('youMightLike')}</h2>
               <Link 
                 to={createPageUrl('Collection')}
                 className="text-orange-400 hover:text-orange-300 text-sm flex items-center gap-1"
               >
-                View More
+                {t('viewMore')}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>

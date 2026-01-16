@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   TrendingUp,
   Flame,
@@ -16,6 +17,7 @@ import PostCard from '@/components/social/PostCard';
 
 
 export default function Social() {
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState('trending');
@@ -118,7 +120,7 @@ export default function Social() {
       {/* Header */}
       <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="px-4 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-white mb-4">Community</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">{t('community')}</h1>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-white/5 border border-white/10">
               <TabsTrigger 
@@ -126,20 +128,20 @@ export default function Social() {
                 className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
               >
                 <Flame className="w-4 h-4 mr-2" />
-                Trending
+                {t('trending')}
               </TabsTrigger>
               <TabsTrigger 
                 value="latest"
                 className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
               >
                 <Clock className="w-4 h-4 mr-2" />
-                Latest
+                {t('latest')}
               </TabsTrigger>
               <TabsTrigger 
                 value="following"
                 className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
               >
-                Following
+                {t('following')}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -161,12 +163,12 @@ export default function Social() {
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
               >
-                <p className="text-white/80 mb-3">Please log in to create posts and interact with the community</p>
+                <p className="text-white/80 mb-3">{t('logInToPost')}</p>
                 <Button 
                   onClick={() => base44.auth.redirectToLogin()}
                   className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
                 >
-                  Log In
+                  {t('logIn')}
                 </Button>
               </motion.div>
             )}
@@ -178,7 +180,7 @@ export default function Social() {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/50">No posts yet. Be the first to share!</p>
+                <p className="text-white/50">{t('noPosts')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -198,7 +200,7 @@ export default function Social() {
                     </div>
                   )}
                   {!hasMore && posts.length > 0 && (
-                    <p className="text-white/40 text-sm text-center">You've reached the end!</p>
+                    <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
                   )}
                 </div>
               </div>
@@ -209,23 +211,23 @@ export default function Social() {
           <div className="hidden lg:block w-80 space-y-6">
             {/* Community Guidelines */}
             <div className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5">
-              <h3 className="font-semibold text-white mb-2">Community Guidelines</h3>
+              <h3 className="font-semibold text-white mb-2">{t('communityGuidelines')}</h3>
               <p className="text-white/50 text-sm leading-relaxed">
-                Be respectful, share your passion, and help fellow puzzlers. Let's keep this community awesome! 🧩
+                {t('guidelinesText')}
               </p>
             </div>
 
             {/* Stats */}
             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5">
-              <h3 className="font-semibold text-white mb-4">Community Stats</h3>
+              <h3 className="font-semibold text-white mb-4">{t('communityStats')}</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-white/60 text-sm">Total Posts</span>
+                  <span className="text-white/60 text-sm">{t('totalPosts')}</span>
                   <span className="text-white font-medium">{posts.length}+</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60 text-sm">Active Today</span>
-                  <span className="text-orange-400 font-medium">Live</span>
+                  <span className="text-white/60 text-sm">{t('activeToday')}</span>
+                  <span className="text-orange-400 font-medium">{t('live')}</span>
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   Search, 
   Filter,
@@ -118,6 +119,7 @@ const platforms = [
 ];
 
 export default function OnlinePuzzles() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
 
@@ -141,8 +143,8 @@ export default function OnlinePuzzles() {
         <div className="px-4 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Online Puzzles</h1>
-              <p className="text-white/50 text-sm mt-1">Play puzzles directly in your browser</p>
+              <h1 className="text-2xl font-bold text-white">{t('onlinePuzzles')}</h1>
+              <p className="text-white/50 text-sm mt-1">{t('playInBrowser')}</p>
             </div>
 
             {/* Search */}
@@ -151,7 +153,7 @@ export default function OnlinePuzzles() {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search games..."
+                placeholder={t('searchGames')}
                 className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
               />
             </div>
@@ -188,7 +190,7 @@ export default function OnlinePuzzles() {
         >
           <div className="flex items-center gap-2 mb-4">
             <Star className="w-5 h-5 text-orange-400 fill-orange-400" />
-            <span className="text-orange-400 font-medium">Featured</span>
+            <span className="text-orange-400 font-medium">{t('featured')}</span>
           </div>
           
           <div className="relative overflow-hidden rounded-3xl">
@@ -225,7 +227,7 @@ export default function OnlinePuzzles() {
                 </span>
                 <span className="flex items-center gap-1.5 text-white/60 text-sm">
                   <TrendingUp className="w-4 h-4 text-orange-400" />
-                  {featuredGame.players} players
+                  {featuredGame.players} {t('players')}
                 </span>
                 <span className="flex items-center gap-1.5 text-white/60 text-sm">
                   <Globe className="w-4 h-4 text-orange-400" />
@@ -237,7 +239,7 @@ export default function OnlinePuzzles() {
                 onClick={() => window.open(featuredGame.url || '#', '_blank')}
                 className="w-fit bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-8"
               >
-                Play Now
+                {t('playNow')}
               </Button>
             </div>
           </div>
@@ -246,8 +248,8 @@ export default function OnlinePuzzles() {
         {/* Trending Section */}
         <section className="mb-12">
           <SectionHeader 
-            title="Trending Now"
-            subtitle="Most popular puzzle games this week"
+            title={t('trendingNow')}
+            subtitle={t('popularThisWeek')}
           />
           
           <motion.div
@@ -267,8 +269,8 @@ export default function OnlinePuzzles() {
         {/* All Games Section */}
         <section>
           <SectionHeader 
-            title="All Online Games"
-            subtitle="Browse our complete collection"
+            title={t('allOnlineGames')}
+            subtitle={t('browseCollection')}
           />
           
           <motion.div
@@ -295,9 +297,9 @@ export default function OnlinePuzzles() {
         >
           <div className="flex flex-col lg:flex-row lg:items-center gap-6">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-white mb-2">Want to add a game?</h3>
+              <h3 className="text-xl font-bold text-white mb-2">{t('wantToAddGame')}</h3>
               <p className="text-white/60">
-                Know of an amazing online puzzle game that should be featured here? Let us know and we'll review it for inclusion!
+                {t('addGameText')}
               </p>
             </div>
             <Button 
@@ -305,7 +307,7 @@ export default function OnlinePuzzles() {
               variant="outline"
               className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10 rounded-xl w-fit"
             >
-              Suggest a Game
+              {t('suggestGame')}
             </Button>
           </div>
         </motion.div>
