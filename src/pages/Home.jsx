@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/components/LanguageContext';
 import { Sparkles, TrendingUp, Calendar, MessageSquare, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PuzzleCard from '@/components/shared/PuzzleCard';
@@ -129,34 +130,7 @@ const latestPosts = [
 ];
 
 export default function Home() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('language') || 'fr';
-  });
-
-  const translations = {
-    fr: {
-      heroTitle: 'Votre Communauté Puzzle Ultime',
-      heroSubtitle: 'Connectez-vous avec des milliers de passionnés de puzzles, partagez vos créations et découvrez de nouveaux défis passionnants',
-      startCollection: 'Commence Ta Collection',
-      exploreCollection: 'Explorer la Collection',
-      featuredPuzzles: 'Puzzles en Vedette',
-      mostPlayed: 'Les Plus Joués',
-      monthlyEvents: 'Événements Mensuels',
-      communityFeed: 'Fil de la Communauté',
-    },
-    en: {
-      heroTitle: 'Your Ultimate Puzzle Community',
-      heroSubtitle: 'Connect with thousands of puzzle enthusiasts, share your creations, and discover exciting new challenges',
-      startCollection: 'Start Your Collection',
-      exploreCollection: 'Explore Collection',
-      featuredPuzzles: 'Featured Puzzles',
-      mostPlayed: 'Most Played',
-      monthlyEvents: 'Monthly Events',
-      communityFeed: 'Community Feed',
-    }
-  };
-
-  const t = (key) => translations[language][key] || key;
+  const { t } = useLanguage();
   
   const container = {
     hidden: { opacity: 0 },

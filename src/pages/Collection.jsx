@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/components/LanguageContext';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -159,6 +160,7 @@ const categories = ['All', 'Nature', 'Abstract', 'Urban', 'Space', 'Architecture
 const difficulties = ['Easy', 'Medium', 'Hard'];
 
 export default function Collection() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
@@ -195,8 +197,8 @@ export default function Collection() {
         <div className="px-4 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Puzzle Collection</h1>
-              <p className="text-white/50 text-sm mt-1">Explore {allPuzzles.length} puzzles</p>
+              <h1 className="text-2xl font-bold text-white">{t('puzzleCollection')}</h1>
+              <p className="text-white/50 text-sm mt-1">{t('explorePuzzles', { count: allPuzzles.length })}</p>
             </div>
 
             {/* Search & Actions */}
@@ -206,7 +208,7 @@ export default function Collection() {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search puzzles..."
+                  placeholder={t('searchPuzzles')}
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
                 />
               </div>
@@ -219,12 +221,12 @@ export default function Collection() {
                 </SheetTrigger>
                 <SheetContent className="bg-[#000019] border-white/[0.06]">
                   <SheetHeader>
-                    <SheetTitle className="text-white">Filters</SheetTitle>
+                    <SheetTitle className="text-white">{t('filters')}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     {/* Piece Count */}
                     <div>
-                      <label className="text-sm text-white/70 mb-3 block">Piece Count</label>
+                      <label className="text-sm text-white/70 mb-3 block">{t('pieceCount')}</label>
                       <Slider
                         value={pieceRange}
                         onValueChange={setPieceRange}
@@ -241,7 +243,7 @@ export default function Collection() {
 
                     {/* Difficulty */}
                     <div>
-                      <label className="text-sm text-white/70 mb-3 block">Difficulty</label>
+                      <label className="text-sm text-white/70 mb-3 block">{t('difficulty')}</label>
                       <div className="space-y-2">
                         {difficulties.map((diff) => (
                           <div key={diff} className="flex items-center space-x-2">
@@ -268,7 +270,7 @@ export default function Collection() {
                       variant="outline" 
                       className="w-full border-white/20 text-white hover:bg-white/5"
                     >
-                      Clear All Filters
+                      {t('clearAllFilters')}
                     </Button>
                   </div>
                 </SheetContent>
@@ -337,14 +339,14 @@ export default function Collection() {
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
               <SelectContent className="bg-[#0a0a2e] border-white/10">
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="pieces-asc">Pieces: Low to High</SelectItem>
-                <SelectItem value="pieces-desc">Pieces: High to Low</SelectItem>
+                <SelectItem value="popular" className="text-white">{t('mostPopular')}</SelectItem>
+                <SelectItem value="newest" className="text-white">{t('newest')}</SelectItem>
+                <SelectItem value="rating" className="text-white">{t('highestRated')}</SelectItem>
+                <SelectItem value="pieces-asc" className="text-white">{t('piecesLowToHigh')}</SelectItem>
+                <SelectItem value="pieces-desc" className="text-white">{t('piecesHighToLow')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -380,7 +382,7 @@ export default function Collection() {
             variant="outline" 
             className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
           >
-            Back to Top
+            {t('backToTop')}
             <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
           </Button>
         </div>

@@ -1,10 +1,17 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
+const LanguageContext = createContext();
+
 const translations = {
   fr: {
-    // Layout & Navigation
-    home: 'Accueil', social: 'Social', collection: 'Collection', online: 'En Ligne', profile: 'Profil',
-    logOut: 'Déconnexion', logIn: 'Connexion',
+    // Navigation
+    home: 'Accueil',
+    social: 'Social',
+    collection: 'Collection',
+    online: 'En Ligne',
+    profile: 'Profil',
+    logOut: 'Déconnexion',
+    logIn: 'Connexion',
     
     // Home Page
     heroTitle: 'Votre Communauté Puzzle Ultime',
@@ -19,63 +26,134 @@ const translations = {
     
     // Collection Page
     puzzleCollection: 'Collection de Puzzles',
-    collectionSubtitle: 'Découvrez notre vaste collection de puzzles soigneusement sélectionnés',
-    searchPlaceholder: 'Rechercher des puzzles...',
-    filters: 'Filtres', categories: 'Catégories', allCategories: 'Toutes',
-    landscapes: 'Paysages', abstract: 'Abstrait', animals: 'Animaux', architecture: 'Architecture', art: 'Art', nature: 'Nature',
-    difficulty: 'Difficulté', allDifficulties: 'Toutes', easy: 'Facile', medium: 'Moyen', hard: 'Difficile',
-    pieces: 'Pièces', sortBy: 'Trier par', popular: 'Populaire', newest: 'Nouveau', rating: 'Note',
-    viewMode: 'Affichage', grid: 'Grille', large: 'Grand', backToTop: 'Retour en Haut',
-    puzzlesFound: 'puzzles trouvés',
+    explorePuzzles: 'Explorer {count} puzzles',
+    searchPuzzles: 'Rechercher des puzzles...',
+    filters: 'Filtres',
+    all: 'Tout',
+    nature: 'Nature',
+    abstract: 'Abstrait',
+    urban: 'Urbain',
+    space: 'Espace',
+    architecture: 'Architecture',
+    vintage: 'Vintage',
+    animals: 'Animaux',
+    art: 'Art',
+    pieceCount: 'Nombre de Pièces',
+    difficulty: 'Difficulté',
+    easy: 'Facile',
+    medium: 'Moyen',
+    hard: 'Difficile',
+    clearAllFilters: 'Effacer Tous les Filtres',
+    mostPopular: 'Plus Populaire',
+    newest: 'Plus Récent',
+    highestRated: 'Mieux Noté',
+    piecesLowToHigh: 'Pièces: Bas à Haut',
+    piecesHighToLow: 'Pièces: Haut à Bas',
+    backToTop: 'Retour en Haut',
+    sortBy: 'Trier par',
     
-    // Puzzle Detail
-    playOnline: 'Jouer en Ligne', download: 'Télécharger', overview: 'Aperçu', leaderboard: 'Classement', reviews: 'Avis',
-    downloadSoon: 'Téléchargement bientôt disponible!',
-    followSoon: 'Fonction de suivi bientôt disponible!', follow: 'Suivre', viewProfile: 'Voir le Profil',
-    report: 'Signaler ce puzzle', reportSoon: 'Fonction de signalement bientôt disponible.',
+    // Social Page
+    community: 'Communauté',
+    trending: 'Tendances',
+    latest: 'Récent',
+    following: 'Abonnements',
+    createPost: 'Créer une Publication',
+    whatsOnYourMind: 'Quoi de neuf?',
+    shareYourThoughts: 'Partagez vos pensées...',
+    uploadImage: 'Télécharger une Image',
+    completedPuzzle: 'Puzzle Complété?',
+    puzzleName: 'Nom du Puzzle',
+    brand: 'Marque',
+    pieces: 'Pièces',
+    post: 'Publier',
+    posting: 'Publication...',
+    logInToPost: 'Veuillez vous connecter pour créer des publications et interagir avec la communauté',
+    noPosts: 'Aucune publication pour le moment. Soyez le premier à partager!',
+    youveReachedEnd: 'Vous avez atteint la fin!',
+    communityGuidelines: 'Règles de la Communauté',
+    guidelinesText: 'Soyez respectueux, partagez votre passion et aidez les autres puzzleurs. Gardons cette communauté géniale! 🧩',
+    communityStats: 'Statistiques de la Communauté',
+    totalPosts: 'Total Publications',
+    activeToday: 'Actif Aujourd\'hui',
+    live: 'En Direct',
     
-    // Online Puzzles
-    onlinePuzzles: 'Puzzles en Ligne', searchGames: 'Rechercher des jeux...',
-    platform: 'Plateforme', all: 'Tout', web: 'Web', mobile: 'Mobile', crossPlatform: 'Multi-plateforme',
-    playNow: 'Jouer Maintenant', gameSoon: 'Ce jeu sera bientôt disponible!',
-    trending: 'Tendances', allGames: 'Tous les Jeux', suggestGame: 'Suggérer un Jeu',
-    suggestSoon: 'Merci! Fonction de suggestion bientôt disponible.',
+    // Profile Page
+    welcomeProfile: 'Bienvenue sur PuzzleHub',
+    logInToViewProfile: 'Connectez-vous pour voir votre profil, suivre les puzzles complétés et gérer votre liste de souhaits',
+    joined: 'Inscrit',
+    completed: 'Complétés',
+    hours: 'Heures',
+    achievements: 'Succès',
+    wishlist: 'Liste de Souhaits',
+    level: 'Niveau',
+    puzzleEnthusiast: 'Passionné de Puzzles',
+    puzzleExpert: 'Expert en Puzzles',
+    puzzleMaster: 'Maître des Puzzles',
+    noAchievements: 'Aucun succès pour le moment',
+    completeToUnlock: 'Complétez des puzzles pour débloquer des badges!',
+    welcomeToDashboard: 'Bienvenue sur votre tableau de bord de puzzle! Suivez vos puzzles complétés et construisez votre liste de souhaits.',
     
-    // Social
-    shareJourney: 'Partagez votre parcours puzzle...', post: 'Publier', posting: 'Publication...',
-    completionPost: 'Ceci est une publication de complétion de puzzle',
-    puzzleName: 'Nom du Puzzle', brand: 'Marque',
-    loginToCreate: 'Veuillez vous connecter pour créer des publications',
-    loginToLike: 'Veuillez vous connecter pour aimer', addedToWishlist: 'Ajouté à la liste!',
-    alreadyInWishlist: 'Déjà dans la liste', postCreated: 'Publication créée!',
-    addContent: 'Ajoutez du contenu', completed: 'Complété',
-    writeComment: 'Écrire un commentaire...', noComments: 'Pas de commentaires',
-    noPosts: 'Pas de publications', reachedEnd: 'Fin atteinte!',
-    communityGuidelines: 'Règles Communauté',
-    guidelinesText: 'Soyez respectueux et aidez les autres! 🧩',
-    communityStats: 'Statistiques', totalPosts: 'Publications', activeToday: 'Actifs', live: 'Direct',
+    // Online Puzzles Page
+    onlinePuzzles: 'Puzzles En Ligne',
+    playInBrowser: 'Jouez aux puzzles directement dans votre navigateur',
+    searchGames: 'Rechercher des jeux...',
+    web: 'Web',
+    mobile: 'Mobile',
+    crossPlatform: 'Multi-Plateforme',
+    featured: 'En Vedette',
+    playNow: 'Jouer Maintenant',
+    players: 'joueurs',
+    trendingNow: 'Tendances Actuelles',
+    popularThisWeek: 'Jeux de puzzle les plus populaires cette semaine',
+    allOnlineGames: 'Tous les Jeux En Ligne',
+    browseCollection: 'Parcourir notre collection complète',
+    wantToAddGame: 'Vous voulez ajouter un jeu?',
+    addGameText: 'Connaissez-vous un jeu de puzzle en ligne incroyable qui devrait être présenté ici? Faites-le nous savoir et nous l\'examinerons!',
+    suggestGame: 'Suggérer un Jeu',
     
-    // Profile
-    welcomeTo: 'Bienvenue sur PuzzleHub',
-    loginToView: 'Connectez-vous pour voir votre profil',
-    welcomeDashboard: 'Bienvenue sur votre tableau de bord!',
-    completedPuzzles: 'Puzzles Complétés', achievements: 'Succès', wishlist: 'Liste Souhaits',
-    searchPuzzles: 'Rechercher...', noAchievements: 'Pas de succès',
-    unlockBadges: 'Débloquez des badges!', noPuzzlesYet: 'Pas de puzzles',
-    wishlistEmpty: 'Liste vide', remove: 'Retirer',
-    removedFromWishlist: 'Retiré', low: 'Basse', high: 'Haute',
-    
-    // Events
-    joinEvent: 'Rejoindre', eventSoon: 'Bientôt disponible!',
+    // Puzzle Detail Page
+    backToCollection: 'Retour à la Collection',
+    playOnline: 'Jouer En Ligne',
+    download: 'Télécharger',
+    overview: 'Aperçu',
+    leaderboard: 'Classement',
+    reviews: 'Avis',
+    aboutPuzzle: 'À Propos de ce Puzzle',
+    avgTime: 'Temps Moyen',
+    bestTime: 'Meilleur Temps',
+    createdBy: 'Créé par',
+    followers: 'abonnés',
+    follow: 'Suivre',
+    viewProfile: 'Voir le Profil',
+    reportPuzzle: 'Signaler ce puzzle',
+    youMightLike: 'Vous Pourriez Aussi Aimer',
+    viewMore: 'Voir Plus',
+    foundHelpful: 'trouvé utile',
     
     // Common
-    loading: 'Chargement...', hours: 'Heures', completed: 'Complétés',
+    loading: 'Chargement...',
+    cancel: 'Annuler',
+    save: 'Enregistrer',
+    delete: 'Supprimer',
+    edit: 'Modifier',
+    share: 'Partager',
+    like: 'J\'aime',
+    comment: 'Commenter',
+    comments: 'Commentaires',
+    addComment: 'Ajouter un commentaire...',
+    noComments: 'Aucun commentaire pour le moment',
+    search: 'Rechercher',
+    close: 'Fermer',
   },
-  
   en: {
-    // Layout & Navigation
-    home: 'Home', social: 'Social', collection: 'Collection', online: 'Online', profile: 'Profile',
-    logOut: 'Log Out', logIn: 'Log In',
+    // Navigation
+    home: 'Home',
+    social: 'Social',
+    collection: 'Collection',
+    online: 'Online',
+    profile: 'Profile',
+    logOut: 'Log Out',
+    logIn: 'Log In',
     
     // Home Page
     heroTitle: 'Your Ultimate Puzzle Community',
@@ -90,61 +168,126 @@ const translations = {
     
     // Collection Page
     puzzleCollection: 'Puzzle Collection',
-    collectionSubtitle: 'Discover our vast collection of carefully curated puzzles',
-    searchPlaceholder: 'Search puzzles...',
-    filters: 'Filters', categories: 'Categories', allCategories: 'All',
-    landscapes: 'Landscapes', abstract: 'Abstract', animals: 'Animals', architecture: 'Architecture', art: 'Art', nature: 'Nature',
-    difficulty: 'Difficulty', allDifficulties: 'All', easy: 'Easy', medium: 'Medium', hard: 'Hard',
-    pieces: 'Pieces', sortBy: 'Sort by', popular: 'Popular', newest: 'Newest', rating: 'Rating',
-    viewMode: 'View Mode', grid: 'Grid', large: 'Large', backToTop: 'Back to Top',
-    puzzlesFound: 'puzzles found',
+    explorePuzzles: 'Explore {count} puzzles',
+    searchPuzzles: 'Search puzzles...',
+    filters: 'Filters',
+    all: 'All',
+    nature: 'Nature',
+    abstract: 'Abstract',
+    urban: 'Urban',
+    space: 'Space',
+    architecture: 'Architecture',
+    vintage: 'Vintage',
+    animals: 'Animals',
+    art: 'Art',
+    pieceCount: 'Piece Count',
+    difficulty: 'Difficulty',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+    clearAllFilters: 'Clear All Filters',
+    mostPopular: 'Most Popular',
+    newest: 'Newest',
+    highestRated: 'Highest Rated',
+    piecesLowToHigh: 'Pieces: Low to High',
+    piecesHighToLow: 'Pieces: High to Low',
+    backToTop: 'Back to Top',
+    sortBy: 'Sort by',
     
-    // Puzzle Detail
-    playOnline: 'Play Online', download: 'Download', overview: 'Overview', leaderboard: 'Leaderboard', reviews: 'Reviews',
-    downloadSoon: 'Download feature coming soon!',
-    followSoon: 'Follow feature coming soon!', follow: 'Follow', viewProfile: 'View Profile',
-    report: 'Report this puzzle', reportSoon: 'Report feature coming soon.',
-    
-    // Online Puzzles
-    onlinePuzzles: 'Online Puzzles', searchGames: 'Search games...',
-    platform: 'Platform', all: 'All', web: 'Web', mobile: 'Mobile', crossPlatform: 'Cross-Platform',
-    playNow: 'Play Now', gameSoon: 'This game will be available soon!',
-    trending: 'Trending', allGames: 'All Games', suggestGame: 'Suggest a Game',
-    suggestSoon: 'Thank you! Game suggestion feature coming soon.',
-    
-    // Social
-    shareJourney: 'Share your puzzle journey...', post: 'Post', posting: 'Posting...',
-    completionPost: 'This is a puzzle completion post',
-    puzzleName: 'Puzzle Name', brand: 'Brand',
-    loginToCreate: 'Please log in to create posts',
-    loginToLike: 'Please log in to like', addedToWishlist: 'Added to wishlist!',
-    alreadyInWishlist: 'Already in wishlist', postCreated: 'Post created!',
-    addContent: 'Add content', completed: 'Completed',
-    writeComment: 'Write a comment...', noComments: 'No comments',
-    noPosts: 'No posts yet', reachedEnd: 'You reached the end!',
+    // Social Page
+    community: 'Community',
+    trending: 'Trending',
+    latest: 'Latest',
+    following: 'Following',
+    createPost: 'Create Post',
+    whatsOnYourMind: 'What\'s on your mind?',
+    shareYourThoughts: 'Share your thoughts...',
+    uploadImage: 'Upload Image',
+    completedPuzzle: 'Completed Puzzle?',
+    puzzleName: 'Puzzle Name',
+    brand: 'Brand',
+    pieces: 'Pieces',
+    post: 'Post',
+    posting: 'Posting...',
+    logInToPost: 'Please log in to create posts and interact with the community',
+    noPosts: 'No posts yet. Be the first to share!',
+    youveReachedEnd: 'You\'ve reached the end!',
     communityGuidelines: 'Community Guidelines',
-    guidelinesText: 'Be respectful and help fellow puzzlers! 🧩',
-    communityStats: 'Community Stats', totalPosts: 'Total Posts', activeToday: 'Active Today', live: 'Live',
+    guidelinesText: 'Be respectful, share your passion, and help fellow puzzlers. Let\'s keep this community awesome! 🧩',
+    communityStats: 'Community Stats',
+    totalPosts: 'Total Posts',
+    activeToday: 'Active Today',
+    live: 'Live',
     
-    // Profile
-    welcomeTo: 'Welcome to PuzzleHub',
-    loginToView: 'Log in to view your profile',
-    welcomeDashboard: 'Welcome to your puzzle dashboard!',
-    completedPuzzles: 'Completed Puzzles', achievements: 'Achievements', wishlist: 'Wishlist',
-    searchPuzzles: 'Search...', noAchievements: 'No achievements',
-    unlockBadges: 'Unlock badges!', noPuzzlesYet: 'No puzzles yet',
-    wishlistEmpty: 'Wishlist empty', remove: 'Remove',
-    removedFromWishlist: 'Removed', low: 'Low', high: 'High',
+    // Profile Page
+    welcomeProfile: 'Welcome to PuzzleHub',
+    logInToViewProfile: 'Log in to view your profile, track completed puzzles, and manage your wishlist',
+    joined: 'Joined',
+    completed: 'Completed',
+    hours: 'Hours',
+    achievements: 'Achievements',
+    wishlist: 'Wishlist',
+    level: 'Level',
+    puzzleEnthusiast: 'Puzzle Enthusiast',
+    puzzleExpert: 'Puzzle Expert',
+    puzzleMaster: 'Puzzle Master',
+    noAchievements: 'No achievements yet',
+    completeToUnlock: 'Complete puzzles to unlock badges!',
+    welcomeToDashboard: 'Welcome to your puzzle journey dashboard! Track your completed puzzles and build your wishlist.',
     
-    // Events
-    joinEvent: 'Join', eventSoon: 'Coming soon!',
+    // Online Puzzles Page
+    onlinePuzzles: 'Online Puzzles',
+    playInBrowser: 'Play puzzles directly in your browser',
+    searchGames: 'Search games...',
+    web: 'Web',
+    mobile: 'Mobile',
+    crossPlatform: 'Cross-Platform',
+    featured: 'Featured',
+    playNow: 'Play Now',
+    players: 'players',
+    trendingNow: 'Trending Now',
+    popularThisWeek: 'Most popular puzzle games this week',
+    allOnlineGames: 'All Online Games',
+    browseCollection: 'Browse our complete collection',
+    wantToAddGame: 'Want to add a game?',
+    addGameText: 'Know of an amazing online puzzle game that should be featured here? Let us know and we\'ll review it for inclusion!',
+    suggestGame: 'Suggest a Game',
+    
+    // Puzzle Detail Page
+    backToCollection: 'Back to Collection',
+    playOnline: 'Play Online',
+    download: 'Download',
+    overview: 'Overview',
+    leaderboard: 'Leaderboard',
+    reviews: 'Reviews',
+    aboutPuzzle: 'About this Puzzle',
+    avgTime: 'Average Time',
+    bestTime: 'Best Time',
+    createdBy: 'Created by',
+    followers: 'followers',
+    follow: 'Follow',
+    viewProfile: 'View Profile',
+    reportPuzzle: 'Report this puzzle',
+    youMightLike: 'You Might Also Like',
+    viewMore: 'View More',
+    foundHelpful: 'found helpful',
     
     // Common
-    loading: 'Loading...', hours: 'Hours', completed: 'Completed',
+    loading: 'Loading...',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    share: 'Share',
+    like: 'Like',
+    comment: 'Comment',
+    comments: 'Comments',
+    addComment: 'Add a comment...',
+    noComments: 'No comments yet',
+    search: 'Search',
+    close: 'Close',
   }
 };
-
-const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
@@ -153,10 +296,17 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('language', language);
+    // Trigger a custom event when language changes
+    window.dispatchEvent(new CustomEvent('languageChange', { detail: language }));
   }, [language]);
 
-  const t = (key) => {
-    return translations[language][key] || key;
+  const t = (key, params = {}) => {
+    let text = translations[language][key] || key;
+    // Replace {param} placeholders
+    Object.keys(params).forEach(param => {
+      text = text.replace(`{${param}}`, params[param]);
+    });
+    return text;
   };
 
   return (

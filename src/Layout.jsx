@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
 import { motion } from 'framer-motion';
 import { 
   Home, 
@@ -23,29 +24,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function Layout({ children, currentPageName }) {
+function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('language') || 'fr';
-  });
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
-
-  useEffect(() => {
-    localStorage.setItem('language', language);
-  }, [language]);
-
-  const translations = {
-    fr: {
-      home: 'Accueil', social: 'Social', collection: 'Collection', online: 'En Ligne', profile: 'Profil',
-      logOut: 'Déconnexion', logIn: 'Connexion',
-    },
-    en: {
-      home: 'Home', social: 'Social', collection: 'Collection', online: 'Online', profile: 'Profile',
-      logOut: 'Log Out', logIn: 'Log In',
-    }
-  };
-
-  const t = (key) => translations[language][key] || key;
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home' },
@@ -295,5 +277,13 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
     </div>
+  );
+}
+
+export default function Layout({ children, currentPageName }) {
+  return (
+    <LanguageProvider>
+      <LayoutContent children={children} currentPageName={currentPageName} />
+    </LanguageProvider>
   );
 }
