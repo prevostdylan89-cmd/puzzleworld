@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/utils/LanguageContext';
 import { motion } from 'framer-motion';
 import { 
   Home, 
@@ -8,9 +9,9 @@ import {
   Grid3X3, 
   User, 
   Gamepad2,
-  Bell,
   Puzzle,
-  LogOut
+  LogOut,
+  Languages
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -23,17 +24,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const navItems = [
-  { name: 'Home', icon: Home, page: 'Home' },
-  { name: 'Social', icon: Users, page: 'Social' },
-  { name: 'Collection', icon: Grid3X3, page: 'Collection' },
-  { name: 'Online', icon: Gamepad2, page: 'OnlinePuzzles' },
-  { name: 'Profile', icon: User, page: 'Profile' },
-];
-
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
+
+  const navItems = [
+    { name: t('home'), icon: Home, page: 'Home' },
+    { name: t('social'), icon: Users, page: 'Social' },
+    { name: t('collection'), icon: Grid3X3, page: 'Collection' },
+    { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
+    { name: t('profile'), icon: User, page: 'Profile' },
+  ];
 
   useEffect(() => {
     loadUser();
@@ -139,10 +141,28 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5 relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500" />
-            </Button>
+            {/* Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+                  <Languages className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('fr')}
+                  className={language === 'fr' ? 'bg-orange-500/20 text-orange-400' : ''}
+                >
+                  🇫🇷 Français
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setLanguage('en')}
+                  className={language === 'en' ? 'bg-orange-500/20 text-orange-400' : ''}
+                >
+                  🇬🇧 English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {user ? (
               <DropdownMenu>
@@ -175,7 +195,7 @@ export default function Layout({ children, currentPageName }) {
                 onClick={() => base44.auth.redirectToLogin()}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
               >
-                Log In
+                {t('logIn')}
               </Button>
             )}
           </div>
@@ -193,11 +213,6 @@ export default function Layout({ children, currentPageName }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5 relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500" />
-            </Button>
-            
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -213,13 +228,13 @@ export default function Layout({ children, currentPageName }) {
                   <DropdownMenuItem asChild>
                     <Link to={createPageUrl('Profile')} className="cursor-pointer">
                       <User className="w-4 h-4 mr-2" />
-                      Profile
+                      {t('profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400">
                     <LogOut className="w-4 h-4 mr-2" />
-                    Log Out
+                    {t('logOut')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -229,7 +244,7 @@ export default function Layout({ children, currentPageName }) {
                 size="sm"
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg"
               >
-                Log In
+                {t('logIn')}
               </Button>
             )}
           </div>
