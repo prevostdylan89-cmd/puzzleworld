@@ -4,6 +4,7 @@ import OnlinePuzzles from './pages/OnlinePuzzles';
 import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
+import App from './pages/App';
 import __Layout from './Layout.jsx';
 
 
@@ -14,6 +15,7 @@ export const PAGES = {
     "Profile": Profile,
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
+    "App": App,
 }
 
 export const pagesConfig = {
