@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { useLanguage } from '@/components/LanguageContext';
 import { motion } from 'framer-motion';
 import { 
   Home, 
@@ -26,8 +25,27 @@ import {
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
-  const { language, setLanguage, t } = useLanguage();
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'fr';
+  });
   const location = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
+
+  const translations = {
+    fr: {
+      home: 'Accueil', social: 'Social', collection: 'Collection', online: 'En Ligne', profile: 'Profil',
+      logOut: 'Déconnexion', logIn: 'Connexion',
+    },
+    en: {
+      home: 'Home', social: 'Social', collection: 'Collection', online: 'Online', profile: 'Profile',
+      logOut: 'Log Out', logIn: 'Log In',
+    }
+  };
+
+  const t = (key) => translations[language][key] || key;
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home' },
@@ -180,13 +198,13 @@ export default function Layout({ children, currentPageName }) {
                   <DropdownMenuItem asChild>
                     <Link to={createPageUrl('Profile')} className="cursor-pointer">
                       <User className="w-4 h-4 mr-2" />
-                      Profile
+                      {t('profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400">
                     <LogOut className="w-4 h-4 mr-2" />
-                    Log Out
+                    {t('logOut')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
