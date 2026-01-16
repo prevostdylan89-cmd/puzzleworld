@@ -196,13 +196,13 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Profile')} className="cursor-pointer">
+                    <Link to={createPageUrl('Profile')} className="cursor-pointer text-white hover:bg-white/10">
                       <User className="w-4 h-4 mr-2" />
                       {t('profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:bg-white/10 hover:text-red-300">
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('logOut')}
                   </DropdownMenuItem>
@@ -244,13 +244,13 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Profile')} className="cursor-pointer">
+                    <Link to={createPageUrl('Profile')} className="cursor-pointer text-white hover:bg-white/10">
                       <User className="w-4 h-4 mr-2" />
                       {t('profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:bg-white/10 hover:text-red-300">
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('logOut')}
                   </DropdownMenuItem>
