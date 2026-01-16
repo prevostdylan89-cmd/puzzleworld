@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { useLanguage } from '@/components/LanguageContext';
 import { Sparkles, TrendingUp, Calendar, MessageSquare, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PuzzleCard from '@/components/shared/PuzzleCard';
@@ -129,6 +130,8 @@ const latestPosts = [
 ];
 
 export default function Home() {
+  const { t } = useLanguage();
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -161,24 +164,23 @@ export default function Home() {
               <span>New puzzles added daily</span>
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
-              Welcome to the <br />
               <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                Puzzle Community
+                {t('heroTitle')}
               </span>
             </h1>
             <p className="text-white/60 text-lg mb-8 max-w-lg">
-              Discover, share, and complete puzzles with enthusiasts from around the world.
+              {t('heroSubtitle')}
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link to={createPageUrl('OnlinePuzzles')}>
+              <Link to={createPageUrl('Collection')}>
                 <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6">
                   <Play className="w-4 h-4 mr-2" />
-                  Start Puzzling
+                  {t('startCollection')}
                 </Button>
               </Link>
               <Link to={createPageUrl('Collection')}>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6">
-                  Explore Collection
+                  {t('exploreCollection')}
                 </Button>
               </Link>
             </div>
@@ -194,8 +196,8 @@ export default function Home() {
         className="px-4 lg:px-8 py-8"
       >
         <SectionHeader 
-          title="Featured This Month"
-          subtitle="Hand-picked puzzles by our curators"
+          title={t('featuredPuzzles')}
+          subtitle=""
           link="Collection"
         />
         
@@ -221,8 +223,8 @@ export default function Home() {
         className="px-4 lg:px-8 py-8"
       >
         <SectionHeader 
-          title="Most Played"
-          subtitle="Trending puzzles this week"
+          title={t('mostPlayed')}
+          subtitle=""
           link="Collection"
           icon={TrendingUp}
         />
@@ -245,8 +247,8 @@ export default function Home() {
         className="px-4 lg:px-8 py-8"
       >
         <SectionHeader 
-          title="Monthly Events"
-          subtitle="Join challenges and tournaments"
+          title={t('monthlyEvents')}
+          subtitle=""
           icon={Calendar}
         />
         
@@ -268,8 +270,8 @@ export default function Home() {
         className="px-4 lg:px-8 py-8 pb-12"
       >
         <SectionHeader 
-          title="Community Feed"
-          subtitle="See what others are sharing"
+          title={t('communityFeed')}
+          subtitle=""
           link="Social"
           icon={MessageSquare}
         />
