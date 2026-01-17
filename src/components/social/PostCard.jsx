@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Bookmark, Puzzle } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import CommentSection from './CommentSection';
+import UserProfileDialog from './UserProfileDialog';
 
-export default function PostCard({ post, user, onAddToWishlist }) {
+export default function PostCard({ post, user }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const [showComments, setShowComments] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     checkIfLiked();
@@ -39,7 +42,6 @@ export default function PostCard({ post, user, onAddToWishlist }) {
     setIsProcessing(true);
     try {
       if (isLiked) {
-        // Unlike
         const likes = await base44.entities.Like.filter({
           post_id: post.id,
           user_id: user.email
@@ -52,7 +54,6 @@ export default function PostCard({ post, user, onAddToWishlist }) {
           await base44.entities.Post.update(post.id, { likes_count: newCount });
         }
       } else {
-        // Like
         await base44.entities.Like.create({
           post_id: post.id,
           user_id: user.email
@@ -82,7 +83,6 @@ export default function PostCard({ post, user, onAddToWishlist }) {
     }
 
     try {
-      // Check if already in wishlist
       const existing = await base44.entities.Wishlist.filter({
         puzzle_name: post.puzzle_name,
         created_by: user.email
@@ -102,11 +102,19 @@ export default function PostCard({ post, user, onAddToWishlist }) {
       });
 
       toast.success('Added to wishlist!');
-      if (onAddToWishlist) onAddToWishlist();
     } catch (error) {
       console.error('Error adding to wishlist:', error);
       toast.error('Failed to add to wishlist');
     }
+  };
+
+  const handleFollow = () => {
+    if (!user) {
+      toast.error('Please log in to follow users');
+      return;
+    }
+    setIsFollowing(!isFollowing);
+    toast.success(isFollowing ? 'Unfollowed' : 'Following!');
   };
 
   const handleCommentAdded = () => {
@@ -128,52 +136,91 @@ export default function PostCard({ post, user, onAddToWishlist }) {
       className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden"
     >
       {/* Header */}
-      <div className="p-4 flex items-center gap-3">
-        <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
-          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
-            {authorInitials}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h4 className="text-white font-medium text-sm">{post.author_name}</h4>
+      <div className="p-4 flex items-start gap-3">
+        <button onClick={() => setShowUserProfile(true)}>
+          <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 cursor-pointer hover:ring-orange-500/40 transition-all">
+            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+              {authorInitials}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button 
+              onClick={() => setShowUserProfile(true)}
+              className="font-medium text-white hover:text-orange-400 transition-colors text-sm"
+            >
+              {post.author_name}
+            </button>
+            {post.is_completion_post && (
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                <Puzzle className="w-3 h-3 mr-1" />
+                Completed
+              </Badge>
+            )}
+          </div>
           <p className="text-white/40 text-xs">{timeAgo}</p>
         </div>
-        {post.is_completion_post && post.puzzle_name && (
+        {user && post.created_by !== user.email && (
           <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleAddToWishlist}
-            className="text-white/40 hover:text-orange-400 hover:bg-orange-500/10"
+            onClick={handleFollow}
+            size="sm"
+            variant={isFollowing ? "outline" : "default"}
+            className={`rounded-full text-xs h-7 px-3 ${
+              isFollowing 
+                ? 'border-orange-500/30 text-orange-400 hover:bg-orange-500/10' 
+                : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
+            }`}
           >
-            <Bookmark className="w-4 h-4" />
+            {isFollowing ? (
+              <>
+                <UserCheck className="w-3 h-3 mr-1" />
+                Following
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-3 h-3 mr-1" />
+                Follow
+              </>
+            )}
           </Button>
         )}
       </div>
-
-      {/* Puzzle Details */}
-      {post.is_completion_post && post.puzzle_name && (
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2 p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-            <Puzzle className="w-4 h-4 text-orange-400" />
-            <div className="flex-1">
-              <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
-              <div className="flex items-center gap-2 text-xs text-white/60 mt-0.5">
-                {post.puzzle_brand && <span>{post.puzzle_brand}</span>}
-                {post.puzzle_brand && post.puzzle_pieces && <span>•</span>}
-                {post.puzzle_pieces && <span>{post.puzzle_pieces} pieces</span>}
-              </div>
-            </div>
-            <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-              Completed
-            </Badge>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       <div className="px-4 pb-3">
         <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
       </div>
+
+      {/* Puzzle Details */}
+      {post.is_completion_post && post.puzzle_name && (
+        <div className="px-4 pb-3">
+          <div className="flex items-start justify-between p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Puzzle className="w-4 h-4 text-orange-400" />
+                <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-white/60 mt-1">
+                {post.puzzle_brand && <span>{post.puzzle_brand}</span>}
+                {post.puzzle_brand && post.puzzle_pieces && <span>•</span>}
+                {post.puzzle_pieces && <span>{post.puzzle_pieces} pieces</span>}
+              </div>
+            </div>
+            {user && (
+              <Button
+                onClick={handleAddToWishlist}
+                size="sm"
+                variant="ghost"
+                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 rounded-lg h-7 px-2 ml-2"
+              >
+                <Heart className="w-4 h-4 mr-1" />
+                Wishlist
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Image */}
       {post.image_url && (
@@ -211,6 +258,14 @@ export default function PostCard({ post, user, onAddToWishlist }) {
           post={post} 
           user={user} 
           onCommentAdded={handleCommentAdded}
+        />
+      )}
+
+      {/* User Profile Dialog */}
+      {showUserProfile && (
+        <UserProfileDialog 
+          userEmail={post.created_by} 
+          onClose={() => setShowUserProfile(false)} 
         />
       )}
     </motion.div>
