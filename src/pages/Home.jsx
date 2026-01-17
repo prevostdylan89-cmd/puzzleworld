@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
-import { Sparkles, TrendingUp, Calendar, MessageSquare, ChevronRight, Play } from 'lucide-react';
+import { Sparkles, TrendingUp, Calendar, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
-import PostCard from '@/components/shared/PostCard';
 import SectionHeader from '@/components/shared/SectionHeader';
 
 const featuredPuzzles = [
@@ -109,25 +108,7 @@ const monthlyEvents = [
   }
 ];
 
-const latestPosts = [
-  {
-    author: { name: 'PuzzlePro', initials: 'PP' },
-    content: 'Just finished this beautiful 2000 piece puzzle in record time! The colors are absolutely stunning 🎨',
-    image: 'https://images.unsplash.com/photo-1494059980473-813e73ee784b?w=600&h=400&fit=crop',
-    likes: 234,
-    comments: 45,
-    timeAgo: '2h ago',
-    tags: ['completion', 'record']
-  },
-  {
-    author: { name: 'JigsawJane', initials: 'JJ' },
-    content: 'Any tips for sorting edge pieces faster? Looking for strategies from the community!',
-    likes: 89,
-    comments: 67,
-    timeAgo: '4h ago',
-    tags: ['tips', 'strategy']
-  }
-];
+
 
 export default function Home() {
   const { t } = useLanguage();
@@ -202,15 +183,11 @@ export default function Home() {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-          <motion.div variants={item} className="md:col-span-2 md:row-span-2">
-            <PuzzleCard puzzle={featuredPuzzles[0]} variant="featured" />
-          </motion.div>
-          <motion.div variants={item}>
-            <PuzzleCard puzzle={featuredPuzzles[1]} variant="default" />
-          </motion.div>
-          <motion.div variants={item}>
-            <PuzzleCard puzzle={featuredPuzzles[2]} variant="default" />
-          </motion.div>
+          {featuredPuzzles.map((puzzle, index) => (
+            <motion.div key={index} variants={item}>
+              <PuzzleCard puzzle={puzzle} variant="default" />
+            </motion.div>
+          ))}
         </div>
       </motion.section>
 
@@ -261,29 +238,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Latest Community Posts */}
-      <motion.section 
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="px-4 lg:px-8 py-8 pb-12"
-      >
-        <SectionHeader 
-          title={t('communityFeed')}
-          subtitle=""
-          link="Social"
-          icon={MessageSquare}
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          {latestPosts.map((post, index) => (
-            <motion.div key={index} variants={item}>
-              <PostCard post={post} />
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
+
     </div>
   );
 }
