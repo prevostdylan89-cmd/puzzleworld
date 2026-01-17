@@ -9,36 +9,6 @@ import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
 import SectionHeader from '@/components/shared/SectionHeader';
 
-const featuredPuzzles = [
-  {
-    title: 'Starry Night Dreams',
-    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 1523,
-    rating: 4.9,
-    creator: 'ArtMaster'
-  },
-  {
-    title: 'Ocean Sunset',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 892,
-    rating: 4.7,
-    creator: 'NatureVibes'
-  },
-  {
-    title: 'Mountain Peak',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop',
-    pieces: 500,
-    difficulty: 'Easy',
-    plays: 2341,
-    rating: 4.8,
-    creator: 'Explorer'
-  }
-];
-
 const mostPlayedPuzzles = [
   {
     title: 'Cosmic Galaxy',
@@ -168,28 +138,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
-      {/* Featured Puzzles */}
-      <motion.section 
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="px-4 lg:px-8 py-8"
-      >
-        <SectionHeader 
-          title={t('featuredPuzzles')}
-          subtitle=""
-          link="Collection"
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-          {featuredPuzzles.map((puzzle, index) => (
-            <motion.div key={index} variants={item}>
-              <PuzzleCard puzzle={puzzle} variant="default" />
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
 
       {/* Most Played */}
       <motion.section 
