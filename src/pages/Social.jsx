@@ -149,31 +149,30 @@ export default function Social() {
       </div>
 
       <div className="px-4 lg:px-8 py-6">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Feed */}
-          <div className="flex-1 max-w-2xl">
-            {/* Create Post */}
-            {user && (
-              <CreatePostForm user={user} onPostCreated={handlePostCreated} />
-            )}
+        <div className="max-w-4xl mx-auto">
+          {/* Create Post */}
+          {user && (
+            <CreatePostForm user={user} onPostCreated={handlePostCreated} />
+          )}
 
-            {!user && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
+          {!user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
+            >
+              <p className="text-white/80 mb-3">{t('logInToPost')}</p>
+              <Button 
+                onClick={() => base44.auth.redirectToLogin()}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
               >
-                <p className="text-white/80 mb-3">{t('logInToPost')}</p>
-                <Button 
-                  onClick={() => base44.auth.redirectToLogin()}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
-                >
-                  {t('logIn')}
-                </Button>
-              </motion.div>
-            )}
+                {t('logIn')}
+              </Button>
+            </motion.div>
+          )}
 
-            {/* Posts Feed */}
+          {/* Posts Feed */}
+          <div className="space-y-4">
             {isLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
@@ -183,7 +182,7 @@ export default function Social() {
                 <p className="text-white/50">{t('noPosts')}</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <>
                 {posts.map((post) => (
                   <PostCard 
                     key={post.id} 
@@ -203,37 +202,13 @@ export default function Social() {
                     <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
                   )}
                 </div>
-              </div>
+              </>
             )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="hidden lg:block w-80 space-y-6">
-            {/* Community Guidelines */}
-            <div className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5">
-              <h3 className="font-semibold text-white mb-2">{t('communityGuidelines')}</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                {t('guidelinesText')}
-              </p>
-            </div>
-
-            {/* Stats */}
-            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5">
-              <h3 className="font-semibold text-white mb-4">{t('communityStats')}</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-white/60 text-sm">{t('totalPosts')}</span>
-                  <span className="text-white font-medium">{posts.length}+</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60 text-sm">{t('activeToday')}</span>
-                  <span className="text-orange-400 font-medium">{t('live')}</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }
