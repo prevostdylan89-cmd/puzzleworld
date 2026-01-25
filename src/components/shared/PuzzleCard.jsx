@@ -9,7 +9,6 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
     title = 'Mystery Puzzle',
     image = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=400&h=300&fit=crop',
     pieces = 1000,
-    difficulty = 'Medium',
     plays = 234,
     rating = 4.5,
     creator = 'Anonymous'
@@ -39,17 +38,6 @@ export default function PuzzleCard({ puzzle, variant = 'default' }) {
 
       {/* Content */}
       <div className="absolute inset-0 p-4 flex flex-col justify-end">
-        {/* Difficulty Badge */}
-        <div className="absolute top-3 right-3">
-          <span className={`px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md ${
-            difficulty === 'Easy' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-            difficulty === 'Medium' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-            'bg-red-500/20 text-red-400 border border-red-500/30'
-          }`}>
-            {difficulty}
-          </span>
-        </div>
-
         {/* Title & Info */}
         <div className="space-y-2">
           <h3 className={`font-semibold text-white leading-tight ${
