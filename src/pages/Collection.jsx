@@ -29,8 +29,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import PuzzleCard from '@/components/shared/PuzzleCard';
 
 const allPuzzles = [
@@ -38,7 +36,6 @@ const allPuzzles = [
     title: 'Starry Night Dreams',
     image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
     pieces: 2000,
-    difficulty: 'Hard',
     plays: 1523,
     rating: 4.9,
     creator: 'ArtMaster',
@@ -48,7 +45,6 @@ const allPuzzles = [
     title: 'Ocean Sunset',
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop',
     pieces: 1000,
-    difficulty: 'Medium',
     plays: 892,
     rating: 4.7,
     creator: 'NatureVibes',
@@ -58,7 +54,6 @@ const allPuzzles = [
     title: 'Mountain Peak',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=400&fit=crop',
     pieces: 500,
-    difficulty: 'Easy',
     plays: 2341,
     rating: 4.8,
     creator: 'Explorer',
@@ -68,7 +63,6 @@ const allPuzzles = [
     title: 'Cosmic Galaxy',
     image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=400&fit=crop',
     pieces: 1500,
-    difficulty: 'Hard',
     plays: 5672,
     rating: 4.9,
     creator: 'SpaceExplorer',
@@ -78,7 +72,6 @@ const allPuzzles = [
     title: 'Cherry Blossoms',
     image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=400&fit=crop',
     pieces: 750,
-    difficulty: 'Medium',
     plays: 4231,
     rating: 4.6,
     creator: 'JapanLover',
@@ -88,7 +81,6 @@ const allPuzzles = [
     title: 'City Lights',
     image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',
     pieces: 1000,
-    difficulty: 'Medium',
     plays: 3892,
     rating: 4.7,
     creator: 'UrbanArt',
@@ -98,7 +90,6 @@ const allPuzzles = [
     title: 'Aurora Borealis',
     image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop',
     pieces: 2000,
-    difficulty: 'Hard',
     plays: 3456,
     rating: 4.8,
     creator: 'NorthernLights',
@@ -108,7 +99,6 @@ const allPuzzles = [
     title: 'Ancient Temple',
     image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&h=400&fit=crop',
     pieces: 1200,
-    difficulty: 'Medium',
     plays: 2134,
     rating: 4.7,
     creator: 'HistoryBuff',
@@ -118,7 +108,6 @@ const allPuzzles = [
     title: 'Tropical Paradise',
     image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=400&h=400&fit=crop',
     pieces: 800,
-    difficulty: 'Easy',
     plays: 1876,
     rating: 4.5,
     creator: 'BeachLover',
@@ -128,7 +117,6 @@ const allPuzzles = [
     title: 'Abstract Colors',
     image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&h=400&fit=crop',
     pieces: 1500,
-    difficulty: 'Hard',
     plays: 2987,
     rating: 4.8,
     creator: 'ModernArt',
@@ -138,7 +126,6 @@ const allPuzzles = [
     title: 'Forest Trail',
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=400&fit=crop',
     pieces: 600,
-    difficulty: 'Easy',
     plays: 3421,
     rating: 4.6,
     creator: 'NatureWalk',
@@ -148,7 +135,6 @@ const allPuzzles = [
     title: 'Vintage Map',
     image: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&h=400&fit=crop',
     pieces: 2500,
-    difficulty: 'Hard',
     plays: 1543,
     rating: 4.9,
     creator: 'Cartographer',
@@ -156,26 +142,47 @@ const allPuzzles = [
   }
 ];
 
-const categories = ['All', 'Nature', 'Abstract', 'Urban', 'Space', 'Architecture', 'Vintage', 'Animals', 'Art'];
-const difficulties = ['Easy', 'Medium', 'Hard'];
-
 export default function Collection() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState('grid');
-  const [activeFilters, setActiveFilters] = useState([]);
-  const [pieceRange, setPieceRange] = useState([0, 5000]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState([]);
+  const [minPieces, setMinPieces] = useState('');
+  const [maxPieces, setMaxPieces] = useState('');
 
   const clearFilters = () => {
-    setSelectedCategory('All');
-    setActiveFilters([]);
-    setPieceRange([0, 5000]);
-    setSelectedDifficulties([]);
+    setMinPieces('');
+    setMaxPieces('');
     setSearchQuery('');
   };
+
+  // Filter puzzles
+  const filteredPuzzles = allPuzzles.filter(puzzle => {
+    const matchesSearch = puzzle.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          puzzle.creator.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMinPieces = !minPieces || puzzle.pieces >= parseInt(minPieces);
+    const matchesMaxPieces = !maxPieces || puzzle.pieces <= parseInt(maxPieces);
+    
+    return matchesSearch && matchesMinPieces && matchesMaxPieces;
+  });
+
+  // Sort puzzles
+  const sortedPuzzles = [...filteredPuzzles].sort((a, b) => {
+    switch(sortBy) {
+      case 'popular':
+        return b.plays - a.plays;
+      case 'newest':
+        return 0; // Keep original order for "newest"
+      case 'rating':
+        return b.rating - a.rating;
+      case 'pieces-asc':
+        return a.pieces - b.pieces;
+      case 'pieces-desc':
+        return b.pieces - a.pieces;
+      default:
+        return 0;
+    }
+  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -198,7 +205,7 @@ export default function Collection() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-white">{t('puzzleCollection')}</h1>
-              <p className="text-white/50 text-sm mt-1">{t('explorePuzzles', { count: allPuzzles.length })}</p>
+              <p className="text-white/50 text-sm mt-1">{sortedPuzzles.length} puzzles disponibles</p>
             </div>
 
             {/* Search & Actions */}
@@ -224,44 +231,32 @@ export default function Collection() {
                     <SheetTitle className="text-white">{t('filters')}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
-                    {/* Piece Count */}
+                    {/* Piece Count Min/Max */}
                     <div>
                       <label className="text-sm text-white/70 mb-3 block">{t('pieceCount')}</label>
-                      <Slider
-                        value={pieceRange}
-                        onValueChange={setPieceRange}
-                        min={0}
-                        max={5000}
-                        step={100}
-                        className="my-6"
-                      />
-                      <div className="flex justify-between text-sm text-white/50">
-                        <span>{pieceRange[0]} pcs</span>
-                        <span>{pieceRange[1]} pcs</span>
-                      </div>
-                    </div>
-
-                    {/* Difficulty */}
-                    <div>
-                      <label className="text-sm text-white/70 mb-3 block">{t('difficulty')}</label>
-                      <div className="space-y-2">
-                        {difficulties.map((diff) => (
-                          <div key={diff} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={diff}
-                              checked={selectedDifficulties.includes(diff)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedDifficulties([...selectedDifficulties, diff]);
-                                } else {
-                                  setSelectedDifficulties(selectedDifficulties.filter(d => d !== diff));
-                                }
-                              }}
-                              className="border-white/20 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                            />
-                            <label htmlFor={diff} className="text-sm text-white/70">{diff}</label>
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-white/50 mb-1.5 block">Minimum</label>
+                          <Input
+                            type="number"
+                            value={minPieces}
+                            onChange={(e) => setMinPieces(e.target.value)}
+                            placeholder="Ex: 500"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-white/50 mb-1.5 block">Maximum</label>
+                          <Input
+                            type="number"
+                            value={maxPieces}
+                            onChange={(e) => setMaxPieces(e.target.value)}
+                            placeholder="Ex: 2000"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            min="0"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -298,57 +293,49 @@ export default function Collection() {
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? 'default' : 'outline'}
-                size="sm"
-                className={`rounded-full whitespace-nowrap ${
-                  selectedCategory === category
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500'
-                    : 'border-white/20 text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-
-          {/* Sort & Active Filters */}
+          {/* Sort Options */}
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              {activeFilters.map((filter, index) => (
-                <Badge 
-                  key={index}
-                  variant="secondary"
-                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 pl-2 pr-1"
-                >
-                  {filter}
-                  <button 
-                    className="ml-1 hover:bg-orange-500/30 rounded p-0.5"
-                    onClick={() => setActiveFilters(activeFilters.filter((_, i) => i !== index))}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
+            <div className="flex items-center gap-2 text-sm text-white/50">
+              <Puzzle className="w-4 h-4" />
+              <span>Trier par:</span>
             </div>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
-                <SelectValue placeholder={t('sortBy')} />
-              </SelectTrigger>
-              <SelectContent className="bg-[#0a0a2e] border-white/10">
-                <SelectItem value="popular" className="text-white">{t('mostPopular')}</SelectItem>
-                <SelectItem value="newest" className="text-white">{t('newest')}</SelectItem>
-                <SelectItem value="rating" className="text-white">{t('highestRated')}</SelectItem>
-                <SelectItem value="pieces-asc" className="text-white">{t('piecesLowToHigh')}</SelectItem>
-                <SelectItem value="pieces-desc" className="text-white">{t('piecesHighToLow')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={sortBy === 'popular' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setSortBy('popular')}
+                className={`rounded-full ${
+                  sortBy === 'popular'
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Popular
+              </Button>
+              <Button
+                variant={sortBy === 'newest' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setSortBy('newest')}
+                className={`rounded-full ${
+                  sortBy === 'newest'
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                New
+              </Button>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
+                  <SelectValue placeholder="Plus..." />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  <SelectItem value="rating" className="text-white text-sm">{t('highestRated')}</SelectItem>
+                  <SelectItem value="pieces-asc" className="text-white text-sm">{t('piecesLowToHigh')}</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">{t('piecesHighToLow')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
@@ -365,11 +352,18 @@ export default function Collection() {
               : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
           }`}
         >
-          {allPuzzles.map((puzzle, index) => (
-            <motion.div key={index} variants={item}>
-              <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
-            </motion.div>
-          ))}
+          {sortedPuzzles.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+              <p className="text-white/50">Aucun puzzle trouvé avec ces critères</p>
+            </div>
+          ) : (
+            sortedPuzzles.map((puzzle, index) => (
+              <motion.div key={index} variants={item}>
+                <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
+              </motion.div>
+            ))
+          )}
         </motion.div>
 
         {/* Load More */}
