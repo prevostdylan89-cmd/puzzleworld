@@ -66,14 +66,28 @@ export default function Social() {
     setHasMore(true);
     
     try {
-      let sortBy = '-created_date';
-      if (activeTab === 'trending') {
-        sortBy = '-likes_count';
+      let postsList = [];
+      
+      if (activeTab === 'following' && user) {
+        // Get list of followed users
+        const follows = await base44.entities.Follow.filter({ follower_email: user.email });
+        const followingEmails = follows.map(f => f.following_email);
+        
+        if (followingEmails.length > 0) {
+          // Get all posts and filter by following
+          const allPosts = await base44.entities.Post.list('-created_date', 100);
+          postsList = allPosts.filter(post => followingEmails.includes(post.created_by));
+        }
+      } else {
+        let sortBy = '-created_date';
+        if (activeTab === 'trending') {
+          sortBy = '-likes_count';
+        }
+        postsList = await base44.entities.Post.list(sortBy, POSTS_PER_PAGE);
       }
       
-      const postsList = await base44.entities.Post.list(sortBy, POSTS_PER_PAGE);
       setPosts(postsList);
-      setHasMore(postsList.length === POSTS_PER_PAGE);
+      setHasMore(activeTab !== 'following' && postsList.length === POSTS_PER_PAGE);
     } catch (error) {
       console.error('Error loading posts:', error);
     } finally {
@@ -82,7 +96,7 @@ export default function Social() {
   };
 
   const loadMorePosts = async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore || activeTab === 'following') return;
 
     setIsLoading(true);
     const nextPage = page + 1;
