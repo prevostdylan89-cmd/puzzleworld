@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+
+const PUZZLE_CATEGORIES = ['Nature', 'Art & Culture', 'Architecture', 'Abstract'];
 
 export default function CreatePostForm({ user, onPostCreated }) {
   const [content, setContent] = useState('');
@@ -16,6 +18,8 @@ export default function CreatePostForm({ user, onPostCreated }) {
   const [puzzleName, setPuzzleName] = useState('');
   const [puzzleBrand, setPuzzleBrand] = useState('');
   const [puzzlePieces, setPuzzlePieces] = useState('');
+  const [puzzleCategory, setPuzzleCategory] = useState('');
+  const [puzzleReference, setPuzzleReference] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,9 +41,30 @@ export default function CreatePostForm({ user, onPostCreated }) {
     setImagePreview('');
   };
 
+  const validatePuzzlePost = () => {
+    if (!isCompletionPost) return true;
+
+    const errors = [];
+    if (!puzzleCategory) errors.push('Catégorie');
+    if (!puzzlePieces || puzzlePieces <= 0) errors.push('Nombre de pièces');
+    if (!puzzleBrand) errors.push('Marque');
+    if (!imageFile && !imagePreview) errors.push('Photo');
+    if (!puzzleReference) errors.push('Référence');
+
+    if (errors.length > 0) {
+      toast.error(`Champs requis manquants: ${errors.join(', ')}`);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (!content.trim() && !imageFile) {
-      toast.error('Please add some content or an image');
+      toast.error('Veuillez ajouter du contenu ou une image');
+      return;
+    }
+
+    if (!validatePuzzlePost()) {
       return;
     }
 
@@ -48,13 +73,11 @@ export default function CreatePostForm({ user, onPostCreated }) {
     try {
       let imageUrl = '';
       
-      // Upload image if present
       if (imageFile) {
         const uploadResult = await base44.integrations.Core.UploadFile({ file: imageFile });
         imageUrl = uploadResult.file_url;
       }
 
-      // Create post
       const postData = {
         content: content.trim(),
         is_completion_post: isCompletionPost,
@@ -65,23 +88,23 @@ export default function CreatePostForm({ user, onPostCreated }) {
 
       if (imageUrl) postData.image_url = imageUrl;
       if (isCompletionPost) {
-        if (puzzleName) postData.puzzle_name = puzzleName;
-        if (puzzleBrand) postData.puzzle_brand = puzzleBrand;
-        if (puzzlePieces) postData.puzzle_pieces = parseInt(puzzlePieces);
+        postData.puzzle_name = puzzleName || 'Puzzle';
+        postData.puzzle_brand = puzzleBrand;
+        postData.puzzle_pieces = parseInt(puzzlePieces);
+        postData.puzzle_category = puzzleCategory;
+        postData.puzzle_reference = puzzleReference;
       }
 
       await base44.entities.Post.create(postData);
 
-      // If completion post, also add to completed puzzles
-      if (isCompletionPost && puzzleName) {
+      if (isCompletionPost) {
         await base44.entities.CompletedPuzzle.create({
-          puzzle_name: puzzleName,
-          puzzle_brand: puzzleBrand || '',
-          puzzle_pieces: parseInt(puzzlePieces) || 0,
+          puzzle_name: puzzleName || 'Puzzle',
+          puzzle_brand: puzzleBrand,
+          puzzle_pieces: parseInt(puzzlePieces),
           image_url: imageUrl
         });
 
-        // Check for achievements
         const completedCount = (await base44.entities.CompletedPuzzle.filter({ created_by: user.email })).length;
         
         if (completedCount === 1) {
@@ -105,19 +128,20 @@ export default function CreatePostForm({ user, onPostCreated }) {
         }
       }
 
-      // Reset form
       setContent('');
       setIsCompletionPost(false);
       setPuzzleName('');
       setPuzzleBrand('');
       setPuzzlePieces('');
+      setPuzzleCategory('');
+      setPuzzleReference('');
       removeImage();
       
-      toast.success('Post created successfully!');
+      toast.success('Post créé avec succès!');
       if (onPostCreated) onPostCreated();
     } catch (error) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post. Please try again.');
+      toast.error('Échec de la création du post. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -143,11 +167,10 @@ export default function CreatePostForm({ user, onPostCreated }) {
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Share your puzzle journey..."
+            placeholder="Partagez votre passion pour les puzzles..."
             className="bg-transparent border-none text-white placeholder:text-white/40 resize-none min-h-[80px] p-0 focus-visible:ring-0"
           />
 
-          {/* Image Preview */}
           <AnimatePresence>
             {imagePreview && (
               <motion.div
@@ -167,90 +190,109 @@ export default function CreatePostForm({ user, onPostCreated }) {
             )}
           </AnimatePresence>
 
-          {/* Puzzle Details Checkbox */}
-          <div className="flex items-center space-x-2 mt-3">
-            <Checkbox
-              id="completion"
-              checked={isCompletionPost}
-              onCheckedChange={setIsCompletionPost}
-              className="border-white/20 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-            />
-            <label htmlFor="completion" className="text-sm text-white/70 cursor-pointer flex items-center gap-1">
-              <Puzzle className="w-4 h-4 text-orange-400" />
-              This is a puzzle completion post
-            </label>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
+            <Button 
+              onClick={() => setIsCompletionPost(!isCompletionPost)}
+              variant={isCompletionPost ? "default" : "ghost"}
+              size="sm"
+              className={`rounded-full ${isCompletionPost ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : 'text-white/60 hover:text-orange-400'}`}
+            >
+              <Puzzle className="w-4 h-4 mr-1" />
+              {isCompletionPost ? 'Poste Puzzle Actif' : 'Créer un Poste Puzzle'}
+            </Button>
           </div>
 
-          {/* Puzzle Details Form */}
           <AnimatePresence>
             {isCompletionPost && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 space-y-3 p-3 bg-white/[0.02] rounded-xl border border-white/[0.06]"
+                className="mt-3 space-y-3 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20"
               >
-                <div>
-                  <Label htmlFor="puzzleName" className="text-white/70 text-xs">Puzzle Name *</Label>
-                  <Input
-                    id="puzzleName"
-                    value={puzzleName}
-                    onChange={(e) => setPuzzleName(e.target.value)}
-                    placeholder="e.g., Starry Night"
-                    className="bg-white/5 border-white/10 text-white mt-1"
-                  />
-                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="puzzleBrand" className="text-white/70 text-xs">Brand</Label>
-                    <Input
-                      id="puzzleBrand"
-                      value={puzzleBrand}
-                      onChange={(e) => setPuzzleBrand(e.target.value)}
-                      placeholder="e.g., Ravensburger"
-                      className="bg-white/5 border-white/10 text-white mt-1"
-                    />
+                    <Label className="text-white/70 text-xs">Catégorie *</Label>
+                    <Select value={puzzleCategory} onValueChange={setPuzzleCategory}>
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0a0a2e] border-white/10">
+                        {PUZZLE_CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat} className="text-white hover:bg-white/10">
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
-                    <Label htmlFor="puzzlePieces" className="text-white/70 text-xs">Pieces</Label>
+                    <Label className="text-white/70 text-xs">Nombre de pièces *</Label>
                     <Input
-                      id="puzzlePieces"
                       type="number"
                       value={puzzlePieces}
                       onChange={(e) => setPuzzlePieces(e.target.value)}
-                      placeholder="e.g., 1000"
+                      placeholder="ex: 1000"
                       className="bg-white/5 border-white/10 text-white mt-1"
                     />
                   </div>
+                </div>
+                <div>
+                  <Label className="text-white/70 text-xs">Marque *</Label>
+                  <Input
+                    value={puzzleBrand}
+                    onChange={(e) => setPuzzleBrand(e.target.value)}
+                    placeholder="ex: Ravensburger"
+                    className="bg-white/5 border-white/10 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70 text-xs">Référence du puzzle *</Label>
+                  <Input
+                    value={puzzleReference}
+                    onChange={(e) => setPuzzleReference(e.target.value)}
+                    placeholder="ex: RAV-12345"
+                    className="bg-white/5 border-white/10 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70 text-xs">Nom du puzzle (optionnel)</Label>
+                  <Input
+                    value={puzzleName}
+                    onChange={(e) => setPuzzleName(e.target.value)}
+                    placeholder="ex: Starry Night"
+                    className="bg-white/5 border-white/10 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70 text-xs mb-1 block">Photo du puzzle *</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="puzzleImageUpload"
+                  />
+                  <label htmlFor="puzzleImageUpload">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-white/20 text-white hover:bg-white/10"
+                      asChild
+                    >
+                      <span>
+                        <ImagePlus className="w-4 h-4 mr-2" />
+                        {imageFile ? 'Changer la photo' : 'Ajouter une photo'}
+                      </span>
+                    </Button>
+                  </label>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Actions */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-                id="imageUpload"
-              />
-              <label htmlFor="imageUpload">
-                <Button 
-                  type="button"
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white/40 hover:text-orange-400 hover:bg-orange-500/10"
-                  asChild
-                >
-                  <span>
-                    <ImagePlus className="w-5 h-5" />
-                  </span>
-                </Button>
-              </label>
-            </div>
+          <div className="flex items-center justify-end mt-3 pt-3 border-t border-white/[0.06]">
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting || (!content.trim() && !imageFile)}
@@ -259,11 +301,11 @@ export default function CreatePostForm({ user, onPostCreated }) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Posting...
+                  Publication...
                 </>
               ) : (
                 <>
-                  Post
+                  Publier
                   <Send className="w-4 h-4 ml-2" />
                 </>
               )}

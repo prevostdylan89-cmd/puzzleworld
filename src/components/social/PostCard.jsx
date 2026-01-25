@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,14 +18,23 @@ export default function PostCard({ post, user }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  const isOwnPost = user && post.created_by === user.email;
+  const showWishlistButton = !isOwnPost && post.is_completion_post && post.puzzle_name && user;
 
   useEffect(() => {
-    checkIfLiked();
+    if (user) {
+      checkIfLiked();
+      checkIfFollowing();
+      if (showWishlistButton) {
+        checkIfInWishlist();
+      }
+    }
   }, [post.id, user?.email]);
 
   const checkIfLiked = async () => {
     if (!user) return;
-    
     const likes = await base44.entities.Like.filter({
       post_id: post.id,
       user_id: user.email
@@ -33,9 +42,27 @@ export default function PostCard({ post, user }) {
     setIsLiked(likes.length > 0);
   };
 
+  const checkIfFollowing = async () => {
+    if (!user || isOwnPost) return;
+    const follows = await base44.entities.Follow.filter({
+      follower_email: user.email,
+      following_email: post.created_by
+    });
+    setIsFollowing(follows.length > 0);
+  };
+
+  const checkIfInWishlist = async () => {
+    if (!user) return;
+    const existing = await base44.entities.Wishlist.filter({
+      puzzle_name: post.puzzle_name,
+      created_by: user.email
+    });
+    setIsInWishlist(existing.length > 0);
+  };
+
   const handleLike = async () => {
     if (!user) {
-      toast.error('Please log in to like posts');
+      toast.error('Connectez-vous pour aimer les posts');
       return;
     }
 
@@ -65,7 +92,7 @@ export default function PostCard({ post, user }) {
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      toast.error('Failed to update like');
+      toast.error('Échec de la mise à jour du like');
     } finally {
       setIsProcessing(false);
     }
@@ -73,48 +100,67 @@ export default function PostCard({ post, user }) {
 
   const handleAddToWishlist = async () => {
     if (!user) {
-      toast.error('Please log in to add to wishlist');
-      return;
-    }
-
-    if (!post.is_completion_post || !post.puzzle_name) {
-      toast.error('This post does not contain puzzle details');
+      toast.error('Connectez-vous pour ajouter à la wishlist');
       return;
     }
 
     try {
-      const existing = await base44.entities.Wishlist.filter({
-        puzzle_name: post.puzzle_name,
-        created_by: user.email
-      });
-
-      if (existing.length > 0) {
-        toast.info('This puzzle is already in your wishlist');
-        return;
+      if (isInWishlist) {
+        const existing = await base44.entities.Wishlist.filter({
+          puzzle_name: post.puzzle_name,
+          created_by: user.email
+        });
+        if (existing.length > 0) {
+          await base44.entities.Wishlist.delete(existing[0].id);
+          setIsInWishlist(false);
+          toast.success('Retiré de votre wishlist');
+        }
+      } else {
+        await base44.entities.Wishlist.create({
+          puzzle_name: post.puzzle_name,
+          puzzle_brand: post.puzzle_brand || '',
+          puzzle_pieces: post.puzzle_pieces || 0,
+          image_url: post.image_url || '',
+          priority: 'medium'
+        });
+        setIsInWishlist(true);
+        toast.success('Ajouté à votre wishlist!');
       }
-
-      await base44.entities.Wishlist.create({
-        puzzle_name: post.puzzle_name,
-        puzzle_brand: post.puzzle_brand || '',
-        puzzle_pieces: post.puzzle_pieces || 0,
-        image_url: post.image_url || '',
-        priority: 'medium'
-      });
-
-      toast.success('Added to wishlist!');
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist');
+      console.error('Error managing wishlist:', error);
+      toast.error('Échec de la mise à jour de la wishlist');
     }
   };
 
-  const handleFollow = () => {
+  const handleFollow = async () => {
     if (!user) {
-      toast.error('Please log in to follow users');
+      toast.error('Connectez-vous pour suivre des utilisateurs');
       return;
     }
-    setIsFollowing(!isFollowing);
-    toast.success(isFollowing ? 'Unfollowed' : 'Following!');
+
+    try {
+      if (isFollowing) {
+        const follows = await base44.entities.Follow.filter({
+          follower_email: user.email,
+          following_email: post.created_by
+        });
+        if (follows.length > 0) {
+          await base44.entities.Follow.delete(follows[0].id);
+          setIsFollowing(false);
+          toast.success('Vous ne suivez plus cet utilisateur');
+        }
+      } else {
+        await base44.entities.Follow.create({
+          follower_email: user.email,
+          following_email: post.created_by
+        });
+        setIsFollowing(true);
+        toast.success('Vous suivez maintenant cet utilisateur!');
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast.error('Échec de la mise à jour du suivi');
+    }
   };
 
   const handleCommentAdded = () => {
@@ -155,13 +201,13 @@ export default function PostCard({ post, user }) {
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Puzzle className="w-3 h-3 mr-1" />
-                Completed
+                Puzzle complété
               </Badge>
             )}
           </div>
           <p className="text-white/40 text-xs">{timeAgo}</p>
         </div>
-        {user && post.created_by !== user.email && (
+        {user && !isOwnPost && (
           <Button 
             onClick={handleFollow}
             size="sm"
@@ -175,12 +221,12 @@ export default function PostCard({ post, user }) {
             {isFollowing ? (
               <>
                 <UserCheck className="w-3 h-3 mr-1" />
-                Following
+                Suivi
               </>
             ) : (
               <>
                 <UserPlus className="w-3 h-3 mr-1" />
-                Follow
+                Suivre
               </>
             )}
           </Button>
@@ -195,29 +241,45 @@ export default function PostCard({ post, user }) {
       {/* Puzzle Details */}
       {post.is_completion_post && post.puzzle_name && (
         <div className="px-4 pb-3">
-          <div className="flex items-start justify-between p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Puzzle className="w-4 h-4 text-orange-400" />
-                <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
+          <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Puzzle className="w-4 h-4 text-orange-400" />
+                  <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
+                </div>
+                <div className="space-y-0.5 text-xs text-white/60">
+                  {post.puzzle_brand && <p>Marque: {post.puzzle_brand}</p>}
+                  {post.puzzle_pieces && <p>Pièces: {post.puzzle_pieces}</p>}
+                  {post.puzzle_category && <p>Catégorie: {post.puzzle_category}</p>}
+                  {post.puzzle_reference && <p>Réf: {post.puzzle_reference}</p>}
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-white/60 mt-1">
-                {post.puzzle_brand && <span>{post.puzzle_brand}</span>}
-                {post.puzzle_brand && post.puzzle_pieces && <span>•</span>}
-                {post.puzzle_pieces && <span>{post.puzzle_pieces} pieces</span>}
-              </div>
+              {showWishlistButton && (
+                <Button
+                  onClick={handleAddToWishlist}
+                  size="sm"
+                  variant="ghost"
+                  className={`rounded-lg h-8 px-3 ${
+                    isInWishlist 
+                      ? 'text-orange-400 bg-orange-500/20 hover:bg-orange-500/30' 
+                      : 'text-orange-400 hover:text-orange-300 hover:bg-orange-500/10'
+                  }`}
+                >
+                  {isInWishlist ? (
+                    <>
+                      <BookmarkCheck className="w-4 h-4 mr-1" />
+                      Dans la wishlist
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className="w-4 h-4 mr-1" />
+                      Wishlist
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
-            {user && (
-              <Button
-                onClick={handleAddToWishlist}
-                size="sm"
-                variant="ghost"
-                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 rounded-lg h-7 px-2 ml-2"
-              >
-                <Heart className="w-4 h-4 mr-1" />
-                Wishlist
-              </Button>
-            )}
           </div>
         </div>
       )}
