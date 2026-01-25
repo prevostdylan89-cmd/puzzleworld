@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import CommentSection from './CommentSection';
 import UserProfileDialog from './UserProfileDialog';
+import UserBadge from '@/components/shared/UserBadge';
 
 export default function PostCard({ post, user }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -198,6 +199,7 @@ export default function PostCard({ post, user }) {
             >
               {post.author_name}
             </button>
+            <UserBadge userEmail={post.created_by} size="xs" showLabel={false} />
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Puzzle className="w-3 h-3 mr-1" />

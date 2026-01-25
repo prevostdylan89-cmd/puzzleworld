@@ -24,6 +24,7 @@ import { formatDistanceToNow } from 'date-fns';
 import AchievementBadge from '@/components/shared/AchievementBadge';
 import CompletedPuzzlesSection from '@/components/profile/CompletedPuzzlesSection';
 import WishlistSection from '@/components/profile/WishlistSection';
+import UserBadge from '@/components/shared/UserBadge';
 
 
 
@@ -36,7 +37,9 @@ export default function Profile() {
     completed: 0,
     hours: 0,
     achievements: 0,
-    wishlist: 0
+    wishlist: 0,
+    followers: 0,
+    following: 0
   });
   const [achievements, setAchievements] = useState([]);
 
@@ -50,17 +53,21 @@ export default function Profile() {
       setUser(currentUser);
       
       // Load stats
-      const [completedPuzzles, userAchievements, wishlistItems] = await Promise.all([
+      const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
         base44.entities.CompletedPuzzle.filter({ created_by: currentUser.email }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
-        base44.entities.Wishlist.filter({ created_by: currentUser.email })
+        base44.entities.Wishlist.filter({ created_by: currentUser.email }),
+        base44.entities.Follow.filter({ following_email: currentUser.email }),
+        base44.entities.Follow.filter({ follower_email: currentUser.email })
       ]);
 
       setStats({
         completed: completedPuzzles.length,
-        hours: Math.floor(completedPuzzles.length * 8.5), // Estimate
+        hours: Math.floor(completedPuzzles.length * 8.5),
         achievements: userAchievements.length,
-        wishlist: wishlistItems.length
+        wishlist: wishlistItems.length,
+        followers: followers.length,
+        following: following.length
       });
 
       setAchievements(userAchievements);
@@ -156,7 +163,10 @@ export default function Profile() {
             <div className="flex-1 pb-4">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.full_name || user.email}</h1>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.full_name || user.email}</h1>
+                    <UserBadge userEmail={user.email} size="lg" showLabel={true} />
+                  </div>
                   <p className="text-white/50">@{user.email.split('@')[0]}</p>
                 </div>
                 <Button 
@@ -172,10 +182,16 @@ export default function Profile() {
                 {t('welcomeToDashboard')}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-white/50">
-                <span className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                <span className="flex items-center gap-1.5 text-white/50">
                   <Calendar className="w-4 h-4 text-orange-400" />
                   {t('joined')} {joinedDate}
+                </span>
+                <span className="text-white/70">
+                  <span className="font-semibold text-white">{stats.followers}</span> Followers
+                </span>
+                <span className="text-white/70">
+                  <span className="font-semibold text-white">{stats.following}</span> Abonnements
                 </span>
               </div>
             </div>
