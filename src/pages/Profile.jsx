@@ -26,6 +26,7 @@ import AchievementBadge from '@/components/shared/AchievementBadge';
 import CompletedPuzzlesSection from '@/components/profile/CompletedPuzzlesSection';
 import WishlistSection from '@/components/profile/WishlistSection';
 import UserBadge from '@/components/shared/UserBadge';
+import PuzzleStatusManager from '@/components/profile/PuzzleStatusManager';
 
 
 
@@ -33,7 +34,7 @@ export default function Profile() {
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('completed');
+  const [activeTab, setActiveTab] = useState('collection');
   const [stats, setStats] = useState({
     completed: 0,
     hours: 0,
@@ -244,6 +245,13 @@ export default function Profile() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white/5 border border-white/10 w-full lg:w-auto">
             <TabsTrigger 
+              value="collection" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+            >
+              <Puzzle className="w-4 h-4 mr-2" />
+              Ma Collection
+            </TabsTrigger>
+            <TabsTrigger 
               value="completed" 
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
@@ -257,14 +265,11 @@ export default function Profile() {
               <Trophy className="w-4 h-4 mr-2" />
               {t('achievements')}
             </TabsTrigger>
-            <TabsTrigger 
-              value="wishlist"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              {t('wishlist')}
-            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="collection" className="mt-6">
+            <PuzzleStatusManager user={user} />
+          </TabsContent>
 
           <TabsContent value="completed" className="mt-6">
             <CompletedPuzzlesSection user={user} />
@@ -301,9 +306,7 @@ export default function Profile() {
             )}
           </TabsContent>
 
-          <TabsContent value="wishlist" className="mt-6">
-            <WishlistSection user={user} />
-          </TabsContent>
+
         </Tabs>
 
         {/* My Events Section */}
