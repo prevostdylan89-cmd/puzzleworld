@@ -34,6 +34,7 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('social'), icon: Users, page: 'Social' },
     { name: t('collection'), icon: Grid3X3, page: 'Collection' },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
+    { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
   ];
 

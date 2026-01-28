@@ -92,6 +92,9 @@ const translations = {
     noAchievements: 'Aucun succès pour le moment',
     completeToUnlock: 'Complétez des puzzles pour débloquer des badges!',
     welcomeToDashboard: 'Bienvenue sur votre tableau de bord de puzzle! Suivez vos puzzles complétés et construisez votre liste de souhaits.',
+    myEvents: 'Mes Événements',
+    upcomingEvents: 'Événements à venir',
+    noEvents: 'Aucun événement inscrit',
     
     // Online Puzzles Page
     onlinePuzzles: 'Puzzles En Ligne',
@@ -234,6 +237,9 @@ const translations = {
     noAchievements: 'No achievements yet',
     completeToUnlock: 'Complete puzzles to unlock badges!',
     welcomeToDashboard: 'Welcome to your puzzle journey dashboard! Track your completed puzzles and build your wishlist.',
+    myEvents: 'My Events',
+    upcomingEvents: 'Upcoming Events',
+    noEvents: 'No events registered',
     
     // Online Puzzles Page
     onlinePuzzles: 'Online Puzzles',
