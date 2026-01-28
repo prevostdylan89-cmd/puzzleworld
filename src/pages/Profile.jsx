@@ -398,7 +398,7 @@ function MyEventsSection({ user }) {
           <h3 className="text-lg font-semibold text-white mb-4">{t('upcomingEvents')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {upcomingEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} onUnregister={loadUserEvents} />
             ))}
           </div>
         </div>
@@ -419,9 +419,47 @@ function MyEventsSection({ user }) {
   );
 }
 
-function EventCard({ event }) {
+function EventCard({ event, onUnregister }) {
+  const [loading, setLoading] = useState(false);
   const eventDate = event.event_date ? new Date(event.event_date) : null;
   const isPast = eventDate && eventDate < new Date();
+
+  const handleUnregister = async (e) => {
+    e.stopPropagation();
+    
+    if (!confirm('Voulez-vous vraiment vous désinscrire de cet événement ?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await base44.auth.me();
+      
+      // Find and delete participation
+      const participations = await base44.entities.EventParticipant.filter({
+        event_id: event.id,
+        user_email: user.email
+      });
+
+      if (participations.length > 0) {
+        await base44.entities.EventParticipant.delete(participations[0].id);
+        
+        // Update participant count
+        await base44.entities.Event.update(event.id, {
+          current_participants: Math.max(0, event.current_participants - 1)
+        });
+
+        if (onUnregister) {
+          onUnregister();
+        }
+      }
+    } catch (error) {
+      console.error('Error unregistering:', error);
+      alert('Erreur lors de la désinscription');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all">
@@ -435,7 +473,7 @@ function EventCard({ event }) {
       <div className="p-4">
         <h4 className="text-white font-semibold mb-2 line-clamp-1">{event.title}</h4>
         {eventDate && (
-          <div className="flex items-center gap-2 text-white/60 text-sm">
+          <div className="flex items-center gap-2 text-white/60 text-sm mb-3">
             <Calendar className="w-4 h-4 text-orange-400" />
             <span>
               {format(eventDate, 'dd MMM yyyy', { locale: fr })}
@@ -443,10 +481,20 @@ function EventCard({ event }) {
             </span>
           </div>
         )}
-        {isPast && (
-          <span className="inline-block mt-2 text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
+        {isPast ? (
+          <span className="inline-block text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
             Terminé
           </span>
+        ) : (
+          <Button
+            onClick={handleUnregister}
+            disabled={loading}
+            size="sm"
+            variant="outline"
+            className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+          >
+            {loading ? 'Désinscription...' : 'Se désinscrire'}
+          </Button>
         )}
       </div>
     </div>
