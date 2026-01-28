@@ -20,7 +20,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { base44 } from '@/api/base44Client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import AchievementBadge from '@/components/shared/AchievementBadge';
 import CompletedPuzzlesSection from '@/components/profile/CompletedPuzzlesSection';
 import WishlistSection from '@/components/profile/WishlistSection';
@@ -304,6 +305,149 @@ export default function Profile() {
             <WishlistSection user={user} />
           </TabsContent>
         </Tabs>
+
+        {/* My Events Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <Calendar className="w-6 h-6 text-orange-400" />
+            {t('myEvents')}
+          </h2>
+          <MyEventsSection user={user} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MyEventsSection({ user }) {
+  const { t } = useLanguage();
+  const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUserEvents();
+  }, [user]);
+
+  const loadUserEvents = async () => {
+    try {
+      // Get user's event participations
+      const participations = await base44.entities.EventParticipant.filter({
+        user_email: user.email
+      });
+
+      if (participations.length === 0) {
+        setRegisteredEvents([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get event details for each participation
+      const eventIds = participations.map(p => p.event_id);
+      const allEvents = await base44.entities.Event.list();
+      const userEvents = allEvents.filter(event => eventIds.includes(event.id));
+
+      // Sort by date
+      userEvents.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+
+      setRegisteredEvents(userEvents);
+    } catch (error) {
+      console.error('Error loading user events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (registeredEvents.length === 0) {
+    return (
+      <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
+        <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
+        <p className="text-white/50">{t('noEvents')}</p>
+        <p className="text-white/30 text-sm mt-2">Inscrivez-vous à des événements pour les voir ici</p>
+      </div>
+    );
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = registeredEvents.filter(event => {
+    const eventDate = new Date(event.event_date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  });
+
+  const pastEvents = registeredEvents.filter(event => {
+    const eventDate = new Date(event.event_date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate < today;
+  });
+
+  return (
+    <div className="space-y-8">
+      {/* Upcoming Events */}
+      {upcomingEvents.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4">{t('upcomingEvents')}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Past Events */}
+      {pastEvents.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-white/70 mb-4">Événements passés</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
+            {pastEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EventCard({ event }) {
+  const eventDate = event.event_date ? new Date(event.event_date) : null;
+  const isPast = eventDate && eventDate < new Date();
+
+  return (
+    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all">
+      <div className="aspect-[16/9] overflow-hidden">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="p-4">
+        <h4 className="text-white font-semibold mb-2 line-clamp-1">{event.title}</h4>
+        {eventDate && (
+          <div className="flex items-center gap-2 text-white/60 text-sm">
+            <Calendar className="w-4 h-4 text-orange-400" />
+            <span>
+              {format(eventDate, 'dd MMM yyyy', { locale: fr })}
+              {event.event_time && ` • ${event.event_time}`}
+            </span>
+          </div>
+        )}
+        {isPast && (
+          <span className="inline-block mt-2 text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
+            Terminé
+          </span>
+        )}
       </div>
     </div>
   );
