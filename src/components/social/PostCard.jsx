@@ -54,9 +54,10 @@ export default function PostCard({ post, user }) {
 
   const checkIfInWishlist = async () => {
     if (!user) return;
-    const existing = await base44.entities.Wishlist.filter({
+    const existing = await base44.entities.UserPuzzle.filter({
       puzzle_name: post.puzzle_name,
-      created_by: user.email
+      created_by: user.email,
+      status: 'wishlist'
     });
     setIsInWishlist(existing.length > 0);
   };
@@ -107,22 +108,24 @@ export default function PostCard({ post, user }) {
 
     try {
       if (isInWishlist) {
-        const existing = await base44.entities.Wishlist.filter({
+        const existing = await base44.entities.UserPuzzle.filter({
           puzzle_name: post.puzzle_name,
-          created_by: user.email
+          created_by: user.email,
+          status: 'wishlist'
         });
         if (existing.length > 0) {
-          await base44.entities.Wishlist.delete(existing[0].id);
+          await base44.entities.UserPuzzle.delete(existing[0].id);
           setIsInWishlist(false);
           toast.success('Retiré de votre wishlist');
         }
       } else {
-        await base44.entities.Wishlist.create({
+        await base44.entities.UserPuzzle.create({
           puzzle_name: post.puzzle_name,
           puzzle_brand: post.puzzle_brand || '',
           puzzle_pieces: post.puzzle_pieces || 0,
+          puzzle_reference: post.puzzle_reference || '',
           image_url: post.image_url || '',
-          priority: 'medium'
+          status: 'wishlist'
         });
         setIsInWishlist(true);
         toast.success('Ajouté à votre wishlist!');
