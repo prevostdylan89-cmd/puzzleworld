@@ -27,6 +27,9 @@ import CompletedPuzzlesSection from '@/components/profile/CompletedPuzzlesSectio
 import WishlistSection from '@/components/profile/WishlistSection';
 import UserBadge from '@/components/shared/UserBadge';
 import PuzzleStatusManager from '@/components/profile/PuzzleStatusManager';
+import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/components/profile/StatsModal';
+import BadgesModal from '@/components/profile/BadgesModal';
+import { Crown } from 'lucide-react';
 
 
 
@@ -37,13 +40,17 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState('collection');
   const [stats, setStats] = useState({
     completed: 0,
-    hours: 0,
     achievements: 0,
     wishlist: 0,
     followers: 0,
     following: 0
   });
   const [achievements, setAchievements] = useState([]);
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const [showWishlistModal, setShowWishlistModal] = useState(false);
+  const [showBadgesModal, setShowBadgesModal] = useState(false);
+  const [currentBadge, setCurrentBadge] = useState(null);
 
   useEffect(() => {
     loadUserData();
@@ -55,17 +62,17 @@ export default function Profile() {
       setUser(currentUser);
       
       // Load stats
-      const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
-        base44.entities.CompletedPuzzle.filter({ created_by: currentUser.email }),
+      const [completedPuzzles, userAchievements, wishlistItems, followers, following, userBadges] = await Promise.all([
+        base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
-        base44.entities.Wishlist.filter({ created_by: currentUser.email }),
+        base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
-        base44.entities.Follow.filter({ follower_email: currentUser.email })
+        base44.entities.Follow.filter({ follower_email: currentUser.email }),
+        base44.entities.UserBadge.filter({ created_by: currentUser.email, is_active: true })
       ]);
 
       setStats({
         completed: completedPuzzles.length,
-        hours: Math.floor(completedPuzzles.length * 8.5),
         achievements: userAchievements.length,
         wishlist: wishlistItems.length,
         followers: followers.length,
@@ -73,6 +80,10 @@ export default function Profile() {
       });
 
       setAchievements(userAchievements);
+      
+      if (userBadges.length > 0) {
+        setCurrentBadge(userBadges[0]);
+      }
     } catch (error) {
       console.log('User not logged in');
     } finally {
@@ -126,10 +137,9 @@ export default function Profile() {
   };
 
   const statItems = [
-    { label: t('completed'), value: stats.completed, icon: Puzzle },
-    { label: t('hours'), value: stats.hours, icon: Clock },
-    { label: t('achievements'), value: stats.achievements, icon: Trophy },
-    { label: t('wishlist'), value: stats.wishlist, icon: Heart }
+    { label: t('completed'), value: stats.completed, icon: Puzzle, onClick: () => setShowCompletedModal(true) },
+    { label: t('achievements'), value: stats.achievements, icon: Trophy, onClick: () => setShowAchievementsModal(true) },
+    { label: t('wishlist'), value: stats.wishlist, icon: Heart, onClick: () => setShowWishlistModal(true) }
   ];
 
   return (
@@ -167,7 +177,15 @@ export default function Profile() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.full_name || user.email}</h1>
-                    <UserBadge userEmail={user.email} size="lg" showLabel={true} />
+                    {currentBadge && (
+                      <button
+                        onClick={() => setShowBadgesModal(true)}
+                        className="flex items-center gap-2 px-3 py-1 rounded-xl bg-orange-500/20 border border-orange-500/30 hover:bg-orange-500/30 transition-all"
+                      >
+                        <Crown className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400 font-semibold text-sm">{currentBadge.badge_name}</span>
+                      </button>
+                    )}
                   </div>
                   <p className="text-white/50">@{user.email.split('@')[0]}</p>
                 </div>
@@ -200,19 +218,20 @@ export default function Profile() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-3 gap-4 mt-8">
             {statItems.map((stat, index) => (
-              <motion.div
+              <motion.button
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center"
+                onClick={stat.onClick}
+                className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center hover:border-orange-500/30 hover:bg-white/5 transition-all cursor-pointer"
               >
                 <stat.icon className="w-6 h-6 text-orange-400 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-white">{stat.value}</div>
                 <div className="text-sm text-white/50">{stat.label}</div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
 
@@ -318,6 +337,12 @@ export default function Profile() {
           <MyEventsSection user={user} />
         </div>
       </div>
+
+      {/* Modals */}
+      <CompletedPuzzlesModal open={showCompletedModal} onClose={() => setShowCompletedModal(false)} user={user} />
+      <AchievementsModal open={showAchievementsModal} onClose={() => setShowAchievementsModal(false)} user={user} />
+      <WishlistModal open={showWishlistModal} onClose={() => setShowWishlistModal(false)} user={user} />
+      <BadgesModal open={showBadgesModal} onClose={() => setShowBadgesModal(false)} user={user} />
     </div>
   );
 }
