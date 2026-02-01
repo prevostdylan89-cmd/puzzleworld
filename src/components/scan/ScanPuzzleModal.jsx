@@ -28,6 +28,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
     image: '',
     sku: ''
   });
+  const [showBarcodeInput, setShowBarcodeInput] = useState(false);
+  const [barcodeInput, setBarcodeInput] = useState('');
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -107,11 +109,18 @@ export default function ScanPuzzleModal({ open, onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log("🖥️ Tentative de scan sur Desktop...", { 
+      fileName: file.name, 
+      fileSize: file.size, 
+      fileType: file.type 
+    });
+
     // Reset file input
     e.target.value = '';
 
-    // Stop camera if active
-    if (cameraReady) {
+    // FORCER l'arrêt de la caméra pour libérer les ressources PC
+    if (cameraReady || scanning) {
+      console.log("🛑 Arrêt du flux caméra avant upload...");
       await stopScanner();
       setCameraReady(false);
       setScanning(false);
@@ -119,22 +128,31 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
     // VERROUILLER la modale en mode chargement
     setLoading(true);
+    setShowBarcodeInput(false);
     toast.info('Analyse du code-barres en cours...', { duration: 10000 });
 
-    try {
-      // Compress/resize image if too large (> 2MB)
-      let processedFile = file;
-      if (file.size > 2 * 1024 * 1024) {
-        toast.info('Compression de l\'image...', { duration: 2000 });
-        processedFile = await compressImage(file);
+    // Timer de secours pour PC (2 secondes)
+    const fallbackTimer = setTimeout(() => {
+      if (loading && !puzzleData) {
+        console.warn("⏱️ Timeout de scan - activation du mode secours");
+        setLoading(false);
+        setShowBarcodeInput(true);
+        toast.warning('Code-barres introuvable. Saisis les 13 chiffres manuellement.');
       }
+    }, 2000);
+
+    try {
+      // Normaliser l'image pour optimiser la lecture sur PC
+      const processedFile = await normalizeImageForScan(file);
+      console.log("✅ Image normalisée pour le scan");
 
       // Create a temporary scanner instance for file scanning
       const tempScanner = new Html5Qrcode("file-reader-temp");
       
-      console.log("Tentative de scan du fichier...");
+      console.log("🔍 Tentative de décodage avec html5-qrcode...");
       const decodedText = await tempScanner.scanFile(processedFile, true);
       
+      clearTimeout(fallbackTimer);
       console.log("✅ Code EAN détecté depuis l'image : " + decodedText);
       
       if (navigator.vibrate) {
@@ -147,17 +165,32 @@ export default function ScanPuzzleModal({ open, onClose }) {
       await fetchPuzzleData(decodedText);
       
     } catch (error) {
+      clearTimeout(fallbackTimer);
       console.error('❌ Erreur lors du scan de l\'image:', error);
       setLoading(false);
       
-      // Basculer vers l'onglet manuel en cas d'échec SANS fermer la modale
-      toast.error('Aucun code-barres détecté. Vérifie la netteté ou saisis-le manuellement.');
-      setActiveTab('manual');
+      // Activer le mode secours avec saisie manuelle
+      setShowBarcodeInput(true);
+      toast.error('Code-barres introuvable. Tape les 13 chiffres ci-dessous.');
     }
   };
 
-  const compressImage = (file) => {
-    return new Promise((resolve) => {
+  const handleBarcodeInputChange = (value) => {
+    const cleanValue = value.replace(/\D/g, '').slice(0, 13);
+    setBarcodeInput(cleanValue);
+    
+    // Auto-lancer la recherche dès 13 chiffres saisis
+    if (cleanValue.length === 13) {
+      console.log("✅ 13 chiffres saisis, lancement auto de la recherche");
+      setShowBarcodeInput(false);
+      setBarcodeInput('');
+      fetchPuzzleData(cleanValue);
+    }
+  };
+
+  const normalizeImageForScan = (file) => {
+    return new Promise((resolve, reject) => {
+      console.log("📐 Normalisation de l'image pour le scan PC...");
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -166,8 +199,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
           let width = img.width;
           let height = img.height;
           
-          // Resize if too large (max 1500px)
-          const maxDim = 1500;
+          // Redimensionner pour optimiser la lecture (max 800px pour scan)
+          const maxDim = 800;
           if (width > maxDim || height > maxDim) {
             if (width > height) {
               height = (height / width) * maxDim;
@@ -182,14 +215,36 @@ export default function ScanPuzzleModal({ open, onClose }) {
           canvas.height = height;
           
           const ctx = canvas.getContext('2d');
+          
+          // Dessiner l'image
           ctx.drawImage(img, 0, 0, width, height);
           
+          // Augmenter le contraste pour améliorer la lecture du code-barres
+          const imageData = ctx.getImageData(0, 0, width, height);
+          const data = imageData.data;
+          const contrast = 1.5;
+          const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+          
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = factor * (data[i] - 128) + 128;     // R
+            data[i + 1] = factor * (data[i + 1] - 128) + 128; // G
+            data[i + 2] = factor * (data[i + 2] - 128) + 128; // B
+          }
+          
+          ctx.putImageData(imageData, 0, 0);
+          
           canvas.toBlob((blob) => {
-            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          }, 'image/jpeg', 0.85);
+            if (blob) {
+              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            } else {
+              reject(new Error('Échec de la conversion canvas'));
+            }
+          }, 'image/jpeg', 0.95);
         };
+        img.onerror = reject;
         img.src = e.target.result;
       };
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
@@ -335,6 +390,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setRating(0);
     setCameraReady(false);
     setLoading(false);
+    setShowBarcodeInput(false);
+    setBarcodeInput('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -385,7 +442,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/webp,image/*"
+                      capture="environment"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
@@ -427,6 +485,28 @@ export default function ScanPuzzleModal({ open, onClose }) {
                         <p className="text-orange-400/70 text-xs mt-3">Veuillez ne pas fermer cette fenêtre</p>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {showBarcodeInput && !loading && (
+                  <div className="space-y-4 py-6">
+                    <div className="text-center mb-4">
+                      <p className="text-white font-semibold mb-2">Code-barres introuvable</p>
+                      <p className="text-white/60 text-sm">Tape les 13 chiffres du code-barres ci-dessous</p>
+                    </div>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="3 070900 123456"
+                      value={barcodeInput}
+                      onChange={(e) => handleBarcodeInputChange(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white text-center text-2xl tracking-wider font-mono"
+                      autoFocus
+                      maxLength={13}
+                    />
+                    <p className="text-white/40 text-xs text-center">
+                      {barcodeInput.length}/13 chiffres • Recherche automatique à 13
+                    </p>
                   </div>
                 )}
               </div>
