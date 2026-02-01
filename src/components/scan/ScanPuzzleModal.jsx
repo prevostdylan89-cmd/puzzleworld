@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { Loader2, Barcode, Edit, Star, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Barcode, Edit, Star, Image as ImageIcon, Check, Edit2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
@@ -29,6 +30,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
     sku: ''
   });
   const [barcodeInput, setBarcodeInput] = useState('');
+  const [editingField, setEditingField] = useState(null);
+  const [verifiedFields, setVerifiedFields] = useState({});
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -322,7 +325,14 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setCameraReady(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
+    setEditingField(null);
+    setVerifiedFields({});
     onClose();
+  };
+
+  const handleFieldVerify = (fieldName) => {
+    setVerifiedFields(prev => ({ ...prev, [fieldName]: true }));
+    setEditingField(null);
   };
 
   const handleBarcodeSubmit = async () => {
@@ -487,53 +497,173 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
         {puzzleData && !showRating && (
           <div className="space-y-4">
-            <div className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative">
+            {/* Image - Animation 1 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0, duration: 0.4 }}
+              className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative"
+            >
               {puzzleData.image ? (
                 <img 
                   src={puzzleData.image} 
                   alt={puzzleData.name}
-                  className="w-full h-64 object-cover"
-                  onLoad={() => console.log("Image chargée avec succès:", puzzleData.image)}
-                  onError={(e) => {
-                    console.error("Erreur de chargement de l'image:", puzzleData.image);
-                    e.target.src = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-                  }}
+                  className="w-full h-48 object-cover"
                 />
               ) : (
-                <div className="w-full h-64 flex items-center justify-center bg-white/5">
-                  <div className="text-center space-y-2">
-                    <ImageIcon className="w-16 h-16 text-white/30 mx-auto" />
-                    <p className="text-white/50 text-sm">Aucune image disponible</p>
-                  </div>
+                <div className="w-full h-48 flex items-center justify-center bg-white/5">
+                  <ImageIcon className="w-12 h-12 text-white/30" />
                 </div>
               )}
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-white text-lg font-semibold leading-relaxed break-words">
-                {puzzleData.name}
-              </h3>
-              <div className="flex gap-2 text-white/60 text-sm">
-                {puzzleData.brand && <span>{puzzleData.brand}</span>}
-                {puzzleData.pieces && <span>• {puzzleData.pieces} pièces</span>}
-              </div>
-            </div>
+            </motion.div>
 
-            <div className="flex gap-3">
+            {/* Nom - Animation 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className={`relative rounded-lg bg-white/5 border ${!puzzleData.name ? 'border-orange-500' : 'border-white/10'} p-3`}
+            >
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
+                  {editingField === 'name' ? (
+                    <input
+                      type="text"
+                      value={puzzleData.name}
+                      onChange={(e) => setPuzzleData({...puzzleData, name: e.target.value})}
+                      onBlur={() => handleFieldVerify('name')}
+                      autoFocus
+                      className="w-full bg-transparent text-white text-sm border-none outline-none"
+                    />
+                  ) : (
+                    <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
+                  )}
+                </div>
+                {verifiedFields.name ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex-shrink-0"
+                  >
+                    <Check className="w-5 h-5 text-green-400" />
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={() => setEditingField('name')}
+                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Marque - Animation 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="relative rounded-lg bg-white/5 border border-white/10 p-3"
+            >
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <label className="text-white/50 text-xs mb-1 block">Marque</label>
+                  {editingField === 'brand' ? (
+                    <input
+                      type="text"
+                      value={puzzleData.brand}
+                      onChange={(e) => setPuzzleData({...puzzleData, brand: e.target.value})}
+                      onBlur={() => handleFieldVerify('brand')}
+                      autoFocus
+                      className="w-full bg-transparent text-white text-sm border-none outline-none"
+                    />
+                  ) : (
+                    <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
+                  )}
+                </div>
+                {verifiedFields.brand ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex-shrink-0"
+                  >
+                    <Check className="w-5 h-5 text-green-400" />
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={() => setEditingField('brand')}
+                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Pièces - Animation 4 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.4 }}
+              className={`relative rounded-lg bg-white/5 border ${!puzzleData.pieces ? 'border-orange-500 shadow-lg shadow-orange-500/20' : 'border-white/10'} p-3`}
+            >
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <label className="text-white/50 text-xs mb-1 block">Nombre de pièces {!puzzleData.pieces && <span className="text-orange-400">*</span>}</label>
+                  {editingField === 'pieces' ? (
+                    <input
+                      type="number"
+                      value={puzzleData.pieces || ''}
+                      onChange={(e) => setPuzzleData({...puzzleData, pieces: parseInt(e.target.value) || null})}
+                      onBlur={() => handleFieldVerify('pieces')}
+                      autoFocus
+                      className="w-full bg-transparent text-white text-sm border-none outline-none"
+                    />
+                  ) : (
+                    <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'À remplir'}</p>
+                  )}
+                </div>
+                {verifiedFields.pieces ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex-shrink-0"
+                  >
+                    <Check className="w-5 h-5 text-green-400" />
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={() => setEditingField('pieces')}
+                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Boutons - Animation 5 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.4 }}
+              className="flex flex-col gap-3 pt-2"
+            >
+              <Button
+                onClick={handleAddToCollection}
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+              >
+                ✓ Confirmer et Noter
+              </Button>
               <Button
                 onClick={handleAddToWishlist}
                 variant="outline"
-                className="flex-1 border-white/20 text-white hover:bg-white/5"
+                className="w-full border-white/20 text-white hover:bg-white/5"
               >
-                Ajouter à ma Wishlist
+                Mettre en Wishlist
               </Button>
-              <Button
-                onClick={handleAddToCollection}
-                className="flex-1 bg-orange-500 hover:bg-orange-600"
-              >
-                Ajouter à ma Collection
-              </Button>
-            </div>
+            </motion.div>
           </div>
         )}
 
