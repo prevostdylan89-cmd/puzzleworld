@@ -74,6 +74,6 @@ export default function EventCard({ event }) {
           </Button>
         </div>
       </div>
-    </motion.div>
+    </motion.button>
   );
 }

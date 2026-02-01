@@ -106,11 +106,11 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
         
-        <div className="relative px-4 lg:px-8 py-12 lg:py-16">
+        <div className="relative px-4 lg:px-8 py-12 lg:py-16 max-w-4xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl"
+            className="text-center"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-6">
               <Sparkles className="w-4 h-4" />
@@ -121,24 +121,52 @@ export default function Home() {
                 {t('heroTitle')}
               </span>
             </h1>
-            <p className="text-white/60 text-lg mb-8 max-w-lg">
+            <p className="text-white/60 text-lg mb-8 max-w-2xl mx-auto">
               {t('heroSubtitle')}
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => setShowScanModal(true)}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6"
-              >
-                <Scan className="w-4 h-4 mr-2" />
-                Scanner un code-barres
-              </Button>
-              <Link to={createPageUrl('Collection')}>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6">
-                  {t('exploreCollection')}
-                </Button>
-              </Link>
-            </div>
           </motion.div>
+
+          {/* Action Blocks */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              onClick={() => setShowScanModal(true)}
+              className="group relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 p-8 text-left transition-all hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/20"
+            >
+              <div className="relative z-10 flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl">➕</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl mb-2">Ajouter votre puzzle</h3>
+                  <p className="text-white/80 text-sm">Scannez le code-barres ou ajoutez manuellement</p>
+                </div>
+              </div>
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </motion.button>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Link to={createPageUrl('Collection')}>
+                <button className="group w-full relative overflow-hidden rounded-[2rem] bg-white/5 border-2 border-white/10 hover:border-orange-500/30 hover:bg-white/10 p-8 text-left transition-all hover:scale-[1.02]">
+                  <div className="relative z-10 flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                      <ChevronRight className="w-6 h-6 text-orange-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-bold text-xl mb-2">Explorer la collection</h3>
+                      <p className="text-white/60 text-sm">Découvrez des milliers de puzzles</p>
+                    </div>
+                  </div>
+                </button>
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </section>
 

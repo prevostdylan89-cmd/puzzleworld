@@ -103,6 +103,32 @@ export default function ScanPuzzleModal({ open, onClose }) {
     }
   };
 
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    toast.info('Analyse de l\'image en cours...');
+
+    try {
+      const html5QrcodeScanner = new Html5Qrcode("reader");
+      
+      const decodedText = await html5QrcodeScanner.scanFile(file, true);
+      
+      console.log("Code détecté depuis l'image : " + decodedText);
+      
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      await fetchPuzzleData(decodedText);
+    } catch (error) {
+      console.error('Error scanning file:', error);
+      toast.error('Aucun code-barres détecté dans l\'image');
+      setLoading(false);
+    }
+  };
+
   const fetchPuzzleData = async (barcode) => {
     setLoading(true);
     toast.info('Recherche du puzzle en cours...');
