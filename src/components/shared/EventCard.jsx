@@ -70,7 +70,10 @@ export default function EventCard({ event }) {
             {timeLeft}
           </span>
           <Button 
-            onClick={() => toast.success('Event registration coming soon! Stay tuned.')}
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.success('Event registration coming soon! Stay tuned.');
+            }}
             size="sm" 
             className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4"
           >
