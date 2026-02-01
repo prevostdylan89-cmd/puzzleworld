@@ -181,7 +181,12 @@ function LayoutContent({ children, currentPageName }) {
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <span className="text-sm font-medium text-white">{user.full_name || user.email}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-white">{user.full_name || user.email}</span>
+                      {user.current_badge_icon && (
+                        <span className="text-lg">{user.current_badge_icon}</span>
+                      )}
+                    </div>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
@@ -312,9 +317,72 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="min-h-screen pt-16 pb-20 lg:pb-0">
+      <main className="min-h-screen pt-16 pb-20 lg:pb-6">
         {children}
       </main>
+
+      {/* Footer */}
+      <footer className="bg-[#0a0a2e] border-t border-white/[0.06] mt-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                  <Puzzle className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-lg text-white">PuzzleWorld</span>
+              </div>
+              <p className="text-white/50 text-sm">Votre communauté puzzle ultime</p>
+              <div className="flex gap-3">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                  <span className="text-white/70">📷</span>
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                  <span className="text-white/70">👍</span>
+                </a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                  <span className="text-white/70">🎵</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Explore */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Explore</h3>
+              <ul className="space-y-2">
+                <li><Link to={createPageUrl('Collection')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Collection</Link></li>
+                <li><Link to={createPageUrl('OnlinePuzzles')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Séries</Link></li>
+                <li><Link to={createPageUrl('Events')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Nouveautés</Link></li>
+              </ul>
+            </div>
+
+            {/* Learn */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Learn</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Blog</a></li>
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Guide des pièces</a></li>
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Tutoriels</a></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">FAQ</a></li>
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Contact</a></li>
+                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Aide</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-white/[0.06] text-center">
+            <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
+          </div>
+        </div>
+      </footer>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       </div>

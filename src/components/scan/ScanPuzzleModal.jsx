@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { Loader2, Barcode, Edit, Star } from 'lucide-react';
+import { Loader2, Barcode, Edit, Star, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
@@ -31,6 +31,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -275,6 +276,23 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <p className="text-white/50 text-sm text-center">
                       Positionnez le code-barres devant la caméra
                     </p>
+                    <div className="text-center">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        variant="outline"
+                        className="border-white/20 text-white hover:bg-white/5"
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Choisir une photo
+                      </Button>
+                    </div>
                   </>
                 )}
                 
