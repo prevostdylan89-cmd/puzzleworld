@@ -28,8 +28,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
     image: '',
     sku: ''
   });
-  const [showBarcodeInput, setShowBarcodeInput] = useState(false);
-  const [barcodeInput, setBarcodeInput] = useState('');
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -109,88 +107,51 @@ export default function ScanPuzzleModal({ open, onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    console.log("🖥️ Tentative de scan sur Desktop...", { 
-      fileName: file.name, 
-      fileSize: file.size, 
-      fileType: file.type 
-    });
-
     // Reset file input
     e.target.value = '';
 
-    // FORCER l'arrêt de la caméra pour libérer les ressources PC
-    if (cameraReady || scanning) {
-      console.log("🛑 Arrêt du flux caméra avant upload...");
+    // Stop camera if active
+    if (cameraReady) {
       await stopScanner();
       setCameraReady(false);
       setScanning(false);
     }
 
-    // VERROUILLER la modale en mode chargement
     setLoading(true);
-    setShowBarcodeInput(false);
-    toast.info('Analyse du code-barres en cours...', { duration: 10000 });
-
-    // Timer de secours pour PC (2 secondes)
-    const fallbackTimer = setTimeout(() => {
-      if (loading && !puzzleData) {
-        console.warn("⏱️ Timeout de scan - activation du mode secours");
-        setLoading(false);
-        setShowBarcodeInput(true);
-        toast.warning('Code-barres introuvable. Saisis les 13 chiffres manuellement.');
-      }
-    }, 2000);
+    toast.info('Analyse de l\'image en cours...');
 
     try {
-      // Normaliser l'image pour optimiser la lecture sur PC
-      const processedFile = await normalizeImageForScan(file);
-      console.log("✅ Image normalisée pour le scan");
+      // Compress/resize image if too large (> 2MB)
+      let processedFile = file;
+      if (file.size > 2 * 1024 * 1024) {
+        processedFile = await compressImage(file);
+      }
 
       // Create a temporary scanner instance for file scanning
       const tempScanner = new Html5Qrcode("file-reader-temp");
       
-      console.log("🔍 Tentative de décodage avec html5-qrcode...");
       const decodedText = await tempScanner.scanFile(processedFile, true);
       
-      clearTimeout(fallbackTimer);
-      console.log("✅ Code EAN détecté depuis l'image : " + decodedText);
+      console.log("Code détecté depuis l'image : " + decodedText);
       
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
 
-      toast.success('Code-barres détecté ! Recherche en cours...', { duration: 3000 });
-      
-      // NE PAS arrêter le loading ici - fetchPuzzleData le fera
+      toast.success('Code-barres détecté !');
       await fetchPuzzleData(decodedText);
-      
     } catch (error) {
-      clearTimeout(fallbackTimer);
-      console.error('❌ Erreur lors du scan de l\'image:', error);
+      console.error('Error scanning file:', error);
       setLoading(false);
       
-      // Activer le mode secours avec saisie manuelle
-      setShowBarcodeInput(true);
-      toast.error('Code-barres introuvable. Tape les 13 chiffres ci-dessous.');
+      // Basculer vers l'onglet manuel en cas d'échec
+      toast.error('Code-barres illisible sur cette photo, merci de saisir les infos manuellement');
+      setActiveTab('manual');
     }
   };
 
-  const handleBarcodeInputChange = (value) => {
-    const cleanValue = value.replace(/\D/g, '').slice(0, 13);
-    setBarcodeInput(cleanValue);
-    
-    // Auto-lancer la recherche dès 13 chiffres saisis
-    if (cleanValue.length === 13) {
-      console.log("✅ 13 chiffres saisis, lancement auto de la recherche");
-      setShowBarcodeInput(false);
-      setBarcodeInput('');
-      fetchPuzzleData(cleanValue);
-    }
-  };
-
-  const normalizeImageForScan = (file) => {
-    return new Promise((resolve, reject) => {
-      console.log("📐 Normalisation de l'image pour le scan PC...");
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -199,8 +160,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
           let width = img.width;
           let height = img.height;
           
-          // Redimensionner pour optimiser la lecture (max 800px pour scan)
-          const maxDim = 800;
+          // Resize if too large (max 1500px)
+          const maxDim = 1500;
           if (width > maxDim || height > maxDim) {
             if (width > height) {
               height = (height / width) * maxDim;
@@ -215,56 +176,29 @@ export default function ScanPuzzleModal({ open, onClose }) {
           canvas.height = height;
           
           const ctx = canvas.getContext('2d');
-          
-          // Dessiner l'image
           ctx.drawImage(img, 0, 0, width, height);
           
-          // Augmenter le contraste pour améliorer la lecture du code-barres
-          const imageData = ctx.getImageData(0, 0, width, height);
-          const data = imageData.data;
-          const contrast = 1.5;
-          const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-          
-          for (let i = 0; i < data.length; i += 4) {
-            data[i] = factor * (data[i] - 128) + 128;     // R
-            data[i + 1] = factor * (data[i + 1] - 128) + 128; // G
-            data[i + 2] = factor * (data[i + 2] - 128) + 128; // B
-          }
-          
-          ctx.putImageData(imageData, 0, 0);
-          
           canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-            } else {
-              reject(new Error('Échec de la conversion canvas'));
-            }
-          }, 'image/jpeg', 0.95);
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.85);
         };
-        img.onerror = reject;
         img.src = e.target.result;
       };
-      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
   const fetchPuzzleData = async (barcode) => {
-    // Le loading est déjà à true depuis handleFileSelect ou le scan caméra
-    console.log("🔍 Recherche API pour le code-barres:", barcode);
-    toast.info('Recherche du puzzle en cours...', { duration: 5000 });
+    setLoading(true);
+    toast.info('Recherche du puzzle en cours...');
     
     try {
       const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode.trim()}`
+        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
       );
       
-      if (!response.ok) {
-        throw new Error(`API HTTP Error: ${response.status}`);
-      }
-      
       const data = await response.json();
-      console.log("📦 Réponse API complète:", data);
+      console.log("Réponse API complète:", data);
       
       if (data.product) {
         const product = data.product;
@@ -273,16 +207,16 @@ export default function ScanPuzzleModal({ open, onClose }) {
         const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
         const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
         
-        // SÉCURITÉ: Garantir une image - fallback générique
+        // Sécurité pour l'image avec fallback
         let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
         if (!imageUrl) {
           imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-          console.warn("⚠️ Aucune image API, utilisation image par défaut");
+          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
         }
-        console.log("🖼️ Image URL finale:", imageUrl);
+        console.log("Image URL récupérée:", imageUrl);
         
         const puzzleInfo = {
-          name: product.title || 'Puzzle sans titre',
+          name: product.title || '',
           brand: product.brand || '',
           image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
@@ -290,22 +224,24 @@ export default function ScanPuzzleModal({ open, onClose }) {
           pieces: pieces
         };
         
-        console.log("✅ Données puzzle créées:", puzzleInfo);
-        
-        // FORCER l'affichage du résultat
+        console.log("Données puzzle créées:", puzzleInfo);
         setPuzzleData(puzzleInfo);
-        setLoading(false);
         
         toast.success('Puzzle trouvé !');
       } else {
-        console.error("❌ Aucun produit dans la réponse API");
-        toast.error('Produit non trouvé dans la base de données');
+        console.error("Aucun produit dans la réponse API");
+        toast.error('Produit non trouvé');
         setLoading(false);
       }
     } catch (error) {
-      console.error('❌ Erreur API:', error);
+      console.error('API Error:', error);
       toast.error('Erreur lors de la recherche du produit');
       setLoading(false);
+    } finally {
+      // S'assurer que loading est toujours arrêté
+      if (!puzzleData) {
+        setLoading(false);
+      }
     }
   };
 
@@ -378,20 +314,11 @@ export default function ScanPuzzleModal({ open, onClose }) {
   };
 
   const handleClose = () => {
-    // Empêcher la fermeture si en cours de chargement
-    if (loading) {
-      toast.warning('Veuillez patienter pendant l\'analyse...');
-      return;
-    }
-    
     stopScanner();
     setPuzzleData(null);
     setShowRating(false);
     setRating(0);
     setCameraReady(false);
-    setLoading(false);
-    setShowBarcodeInput(false);
-    setBarcodeInput('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -442,8 +369,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp,image/*"
-                      capture="environment"
+                      accept="image/*"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
@@ -476,37 +402,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 )}
                 
                 {loading && (
-                  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-                    <div className="bg-[#0a0a2e]/90 border border-white/10 rounded-2xl p-8 space-y-4 max-w-sm mx-4">
-                      <Loader2 className="w-16 h-16 text-orange-400 animate-spin mx-auto" />
-                      <div className="text-center">
-                        <p className="text-white font-semibold text-lg mb-2">Analyse en cours...</p>
-                        <p className="text-white/50 text-sm">Décodage du code-barres et recherche du puzzle</p>
-                        <p className="text-orange-400/70 text-xs mt-3">Veuillez ne pas fermer cette fenêtre</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {showBarcodeInput && !loading && (
-                  <div className="space-y-4 py-6">
-                    <div className="text-center mb-4">
-                      <p className="text-white font-semibold mb-2">Code-barres introuvable</p>
-                      <p className="text-white/60 text-sm">Tape les 13 chiffres du code-barres ci-dessous</p>
-                    </div>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="3 070900 123456"
-                      value={barcodeInput}
-                      onChange={(e) => handleBarcodeInputChange(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white text-center text-2xl tracking-wider font-mono"
-                      autoFocus
-                      maxLength={13}
-                    />
-                    <p className="text-white/40 text-xs text-center">
-                      {barcodeInput.length}/13 chiffres • Recherche automatique à 13
-                    </p>
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <Loader2 className="w-12 h-12 text-orange-400 animate-spin" />
+                    <p className="text-white font-semibold">Recherche du puzzle en cours...</p>
+                    <p className="text-white/50 text-sm">Nous récupérons les informations</p>
                   </div>
                 )}
               </div>
