@@ -218,6 +218,11 @@ export default function Home() {
       </motion.section>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
+      <EventModal 
+        open={!!selectedEvent} 
+        event={selectedEvent} 
+        onClose={() => setSelectedEvent(null)} 
+      />
     </div>
   );
 }
