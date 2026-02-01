@@ -62,13 +62,14 @@ export default function Profile() {
       setUser(currentUser);
       
       // Load stats
-      const [completedPuzzles, userAchievements, wishlistItems, followers, following, userBadges] = await Promise.all([
+      const [completedPuzzles, userAchievements, wishlistItems, followers, following, userBadges, allBadges] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
         base44.entities.Follow.filter({ follower_email: currentUser.email }),
-        base44.entities.UserBadge.filter({ created_by: currentUser.email, is_active: true })
+        base44.entities.UserBadge.filter({ created_by: currentUser.email, is_active: true }),
+        base44.entities.Badge.list()
       ]);
 
       setStats({
@@ -82,7 +83,10 @@ export default function Profile() {
       setAchievements(userAchievements);
       
       if (userBadges.length > 0) {
-        setCurrentBadge(userBadges[0]);
+        const badgeDetails = allBadges.find(b => b.id === userBadges[0].badge_id);
+        if (badgeDetails) {
+          setCurrentBadge({ ...userBadges[0], ...badgeDetails });
+        }
       }
     } catch (error) {
       console.log('User not logged in');
@@ -175,15 +179,21 @@ export default function Profile() {
             <div className="flex-1 pb-4">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.full_name || user.email}</h1>
                     {currentBadge && (
                       <button
                         onClick={() => setShowBadgesModal(true)}
-                        className="flex items-center gap-2 px-3 py-1 rounded-xl bg-orange-500/20 border border-orange-500/30 hover:bg-orange-500/30 transition-all"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all hover:scale-105"
+                        style={{
+                          backgroundColor: `${currentBadge.color}20`,
+                          borderColor: `${currentBadge.color}50`
+                        }}
                       >
-                        <Crown className="w-4 h-4 text-orange-400" />
-                        <span className="text-orange-400 font-semibold text-sm">{currentBadge.badge_name}</span>
+                        <span className="text-2xl">{currentBadge.icon || '🏆'}</span>
+                        <span className="font-semibold text-sm" style={{ color: currentBadge.color }}>
+                          {currentBadge.name}
+                        </span>
                       </button>
                     )}
                   </div>
