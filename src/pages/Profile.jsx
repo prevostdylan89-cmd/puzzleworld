@@ -172,7 +172,7 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
         >
-          <h2 className="text-2xl font-bold text-white mb-4">{t('welcomeProfile')}</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Bienvenue sur PuzzleWorld</h2>
           <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}

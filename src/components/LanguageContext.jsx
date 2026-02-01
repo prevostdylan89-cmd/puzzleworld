@@ -78,7 +78,7 @@ const translations = {
     live: 'En Direct',
     
     // Profile Page
-    welcomeProfile: 'Bienvenue sur PuzzleHub',
+    welcomeProfile: 'Bienvenue sur PuzzleWorld',
     logInToViewProfile: 'Connectez-vous pour voir votre profil, suivre les puzzles complétés et gérer votre liste de souhaits',
     joined: 'Inscrit',
     completed: 'Complétés',
@@ -223,7 +223,7 @@ const translations = {
     live: 'Live',
     
     // Profile Page
-    welcomeProfile: 'Welcome to PuzzleHub',
+    welcomeProfile: 'Welcome to PuzzleWorld',
     logInToViewProfile: 'Log in to view your profile, track completed puzzles, and manage your wishlist',
     joined: 'Joined',
     completed: 'Completed',

@@ -109,7 +109,7 @@ function LayoutContent({ children, currentPageName }) {
               <Puzzle className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-              PuzzleHub
+              PuzzleWorld
             </span>
           </Link>
 
@@ -214,7 +214,7 @@ function LayoutContent({ children, currentPageName }) {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <Puzzle className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-lg">PuzzleHub</span>
+            <span className="font-bold text-lg">PuzzleWorld</span>
           </Link>
 
           <div className="flex items-center gap-2">
