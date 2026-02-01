@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function ScanPuzzleModal({ open, onClose }) {
   const [activeTab, setActiveTab] = useState('scanner');
+  const [cameraReady, setCameraReady] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [puzzleData, setPuzzleData] = useState(null);
@@ -32,18 +33,19 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const html5QrcodeScannerRef = useRef(null);
 
   useEffect(() => {
-    if (open && activeTab === 'scanner' && !scanning) {
-      startScanner();
-    }
-    
     return () => {
       stopScanner();
     };
-  }, [open, activeTab]);
+  }, [open]);
 
-  const startScanner = async () => {
+  const handleActivateCamera = async () => {
+    setCameraReady(true);
     try {
       setScanning(true);
+      
+      // Wait a bit for the DOM to be ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const html5QrcodeScanner = new Html5Qrcode("reader");
       html5QrcodeScannerRef.current = html5QrcodeScanner;
 
@@ -56,6 +58,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
         async (decodedText) => {
           await html5QrcodeScanner.stop();
           setScanning(false);
+          setCameraReady(false);
           await fetchPuzzleData(decodedText);
         },
         (errorMessage) => {
@@ -65,7 +68,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
     } catch (err) {
       console.error('Scanner error:', err);
       setScanning(false);
-      toast.error('Impossible de démarrer la caméra');
+      setCameraReady(false);
+      toast.error('Impossible de démarrer la caméra. Vérifiez les permissions.');
     }
   };
 
@@ -187,6 +191,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setPuzzleData(null);
     setShowRating(false);
     setRating(0);
+    setCameraReady(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -219,12 +224,36 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
             <TabsContent value="scanner" className="mt-4">
               <div className="space-y-4">
-                <div 
-                  id="reader" 
-                  ref={scannerRef}
-                  className="w-full rounded-lg overflow-hidden bg-black/50 border border-white/10"
-                  style={{ minHeight: '300px' }}
-                />
+                {!cameraReady && !loading && (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
+                      <Barcode className="w-12 h-12 text-orange-400" />
+                    </div>
+                    <Button
+                      onClick={handleActivateCamera}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                    >
+                      📸 Activer la Caméra
+                    </Button>
+                    <p className="text-white/50 text-sm text-center max-w-sm">
+                      Autorisez l'accès à la caméra pour scanner le code-barres de votre puzzle
+                    </p>
+                  </div>
+                )}
+                
+                {cameraReady && (
+                  <>
+                    <div 
+                      id="reader" 
+                      ref={scannerRef}
+                      className="w-full rounded-lg overflow-hidden bg-black/50 border border-white/10"
+                      style={{ minHeight: '300px' }}
+                    />
+                    <p className="text-white/50 text-sm text-center">
+                      Positionnez le code-barres devant la caméra
+                    </p>
+                  </>
+                )}
                 
                 {loading && (
                   <div className="flex items-center justify-center py-8">
@@ -232,10 +261,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <span className="ml-2 text-white/70">Recherche en cours...</span>
                   </div>
                 )}
-                
-                <p className="text-white/50 text-sm text-center">
-                  Positionnez le code-barres devant la caméra
-                </p>
               </div>
             </TabsContent>
 
