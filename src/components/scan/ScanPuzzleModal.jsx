@@ -142,8 +142,11 @@ export default function ScanPuzzleModal({ open, onClose }) {
       await fetchPuzzleData(decodedText);
     } catch (error) {
       console.error('Error scanning file:', error);
-      toast.error('Impossible de lire le code-barres sur cette photo. Assure-toi qu\'il est bien net et éclairé.');
       setLoading(false);
+      
+      // Basculer vers l'onglet manuel en cas d'échec
+      toast.error('Code-barres illisible sur cette photo, merci de saisir les infos manuellement');
+      setActiveTab('manual');
     }
   };
 
@@ -204,7 +207,12 @@ export default function ScanPuzzleModal({ open, onClose }) {
         const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
         const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
         
-        const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+        // Sécurité pour l'image avec fallback
+        let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+        if (!imageUrl) {
+          imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
+          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
+        }
         console.log("Image URL récupérée:", imageUrl);
         
         const puzzleInfo = {
@@ -223,12 +231,17 @@ export default function ScanPuzzleModal({ open, onClose }) {
       } else {
         console.error("Aucun produit dans la réponse API");
         toast.error('Produit non trouvé');
+        setLoading(false);
       }
     } catch (error) {
       console.error('API Error:', error);
       toast.error('Erreur lors de la recherche du produit');
-    } finally {
       setLoading(false);
+    } finally {
+      // S'assurer que loading est toujours arrêté
+      if (!puzzleData) {
+        setLoading(false);
+      }
     }
   };
 
