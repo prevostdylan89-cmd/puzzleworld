@@ -115,10 +115,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
       fileType: file.type 
     });
 
-    // Reset file input
     e.target.value = '';
 
-    // FORCER l'arrêt de la caméra pour libérer les ressources PC
     if (cameraReady || scanning) {
       console.log("🛑 Arrêt du flux caméra avant upload...");
       await stopScanner();
@@ -126,52 +124,61 @@ export default function ScanPuzzleModal({ open, onClose }) {
       setScanning(false);
     }
 
-    // VERROUILLER la modale en mode chargement
     setLoading(true);
     setShowBarcodeInput(false);
     toast.info('Analyse du code-barres en cours...', { duration: 10000 });
 
-    // Timer de secours pour PC (2 secondes)
-    const fallbackTimer = setTimeout(() => {
+    const fallbackTimer = setTimeout(async () => {
       if (loading && !puzzleData) {
-        console.warn("⏱️ Timeout de scan - activation du mode secours");
-        setLoading(false);
-        setShowBarcodeInput(true);
-        toast.warning('Code-barres introuvable. Saisis les 13 chiffres manuellement.');
+        console.warn("⏱️ Timeout - tentative avec contraste élevé...");
+        
+        try {
+          const highContrastFile = await normalizeImageForScan(file, 2.5);
+          const tempScanner2 = new Html5Qrcode("file-reader-temp");
+          const decodedText = await tempScanner2.scanFile(highContrastFile, true);
+          
+          console.log("✅ Code détecté en contraste élevé:", decodedText);
+          if (navigator.vibrate) navigator.vibrate(200);
+          toast.success('Code-barres détecté !');
+          await fetchPuzzleData(decodedText);
+        } catch (retryError) {
+          console.warn("❌ Échec double tentative");
+          setLoading(false);
+          setShowBarcodeInput(true);
+          
+          // Auto-coller depuis le presse-papier si disponible
+          try {
+            const clipText = await navigator.clipboard.readText();
+            if (/^\d{13}$/.test(clipText.trim())) {
+              setBarcodeInput(clipText.trim());
+              toast.info('Code collé depuis le presse-papier');
+            }
+          } catch (e) {
+            console.log("Presse-papier non accessible");
+          }
+          
+          toast.warning('Code introuvable. Tape les 13 chiffres ci-dessous.');
+        }
       }
     }, 2000);
 
     try {
-      // Normaliser l'image pour optimiser la lecture sur PC
       const processedFile = await normalizeImageForScan(file);
-      console.log("✅ Image normalisée pour le scan");
+      console.log("✅ Image normalisée");
 
-      // Create a temporary scanner instance for file scanning
       const tempScanner = new Html5Qrcode("file-reader-temp");
-      
-      console.log("🔍 Tentative de décodage avec html5-qrcode...");
+      console.log("🔍 Tentative 1 - contraste normal...");
       const decodedText = await tempScanner.scanFile(processedFile, true);
       
       clearTimeout(fallbackTimer);
-      console.log("✅ Code EAN détecté depuis l'image : " + decodedText);
+      console.log("✅ Code EAN détecté:", decodedText);
       
-      if (navigator.vibrate) {
-        navigator.vibrate(200);
-      }
-
-      toast.success('Code-barres détecté ! Recherche en cours...', { duration: 3000 });
-      
-      // NE PAS arrêter le loading ici - fetchPuzzleData le fera
+      if (navigator.vibrate) navigator.vibrate(200);
+      toast.success('Code-barres détecté ! Recherche en cours...');
       await fetchPuzzleData(decodedText);
       
     } catch (error) {
-      clearTimeout(fallbackTimer);
-      console.error('❌ Erreur lors du scan de l\'image:', error);
-      setLoading(false);
-      
-      // Activer le mode secours avec saisie manuelle
-      setShowBarcodeInput(true);
-      toast.error('Code-barres introuvable. Tape les 13 chiffres ci-dessous.');
+      console.log("⏱️ Tentative 1 échouée, timer de secours actif...");
     }
   };
 
@@ -179,18 +186,42 @@ export default function ScanPuzzleModal({ open, onClose }) {
     const cleanValue = value.replace(/\D/g, '').slice(0, 13);
     setBarcodeInput(cleanValue);
     
-    // Auto-lancer la recherche dès 13 chiffres saisis
     if (cleanValue.length === 13) {
-      console.log("✅ 13 chiffres saisis, lancement auto de la recherche");
+      console.log("✅ 13 chiffres saisis, lancement auto");
       setShowBarcodeInput(false);
       setBarcodeInput('');
+      setLoading(true);
       fetchPuzzleData(cleanValue);
     }
   };
 
-  const normalizeImageForScan = (file) => {
+  const handlePasteBarcode = async () => {
+    try {
+      const clipText = await navigator.clipboard.readText();
+      const cleanValue = clipText.replace(/\D/g, '').slice(0, 13);
+      
+      if (cleanValue.length === 13) {
+        console.log("✅ Code collé et validé:", cleanValue);
+        setShowBarcodeInput(false);
+        setBarcodeInput('');
+        setLoading(true);
+        toast.success('Code collé !');
+        fetchPuzzleData(cleanValue);
+      } else if (cleanValue.length > 0) {
+        setBarcodeInput(cleanValue);
+        toast.info(`${cleanValue.length}/13 chiffres collés`);
+      } else {
+        toast.error('Aucun code valide dans le presse-papier');
+      }
+    } catch (error) {
+      console.error('Erreur presse-papier:', error);
+      toast.error('Impossible d\'accéder au presse-papier');
+    }
+  };
+
+  const normalizeImageForScan = (file, contrastLevel = 1.5) => {
     return new Promise((resolve, reject) => {
-      console.log("📐 Normalisation de l'image pour le scan PC...");
+      console.log(`📐 Normalisation image (contraste: ${contrastLevel})...`);
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -199,7 +230,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
           let width = img.width;
           let height = img.height;
           
-          // Redimensionner pour optimiser la lecture (max 800px pour scan)
           const maxDim = 800;
           if (width > maxDim || height > maxDim) {
             if (width > height) {
@@ -213,22 +243,17 @@ export default function ScanPuzzleModal({ open, onClose }) {
           
           canvas.width = width;
           canvas.height = height;
-          
           const ctx = canvas.getContext('2d');
-          
-          // Dessiner l'image
           ctx.drawImage(img, 0, 0, width, height);
           
-          // Augmenter le contraste pour améliorer la lecture du code-barres
           const imageData = ctx.getImageData(0, 0, width, height);
           const data = imageData.data;
-          const contrast = 1.5;
-          const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+          const factor = (259 * (contrastLevel + 255)) / (255 * (259 - contrastLevel));
           
           for (let i = 0; i < data.length; i += 4) {
-            data[i] = factor * (data[i] - 128) + 128;     // R
-            data[i + 1] = factor * (data[i + 1] - 128) + 128; // G
-            data[i + 2] = factor * (data[i + 2] - 128) + 128; // B
+            data[i] = factor * (data[i] - 128) + 128;
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;
           }
           
           ctx.putImageData(imageData, 0, 0);
@@ -494,16 +519,25 @@ export default function ScanPuzzleModal({ open, onClose }) {
                       <p className="text-white font-semibold mb-2">Code-barres introuvable</p>
                       <p className="text-white/60 text-sm">Tape les 13 chiffres du code-barres ci-dessous</p>
                     </div>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="3 070900 123456"
-                      value={barcodeInput}
-                      onChange={(e) => handleBarcodeInputChange(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white text-center text-2xl tracking-wider font-mono"
-                      autoFocus
-                      maxLength={13}
-                    />
+                    <div className="space-y-3">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="3 070900 123456"
+                        value={barcodeInput}
+                        onChange={(e) => handleBarcodeInputChange(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white text-center text-2xl tracking-wider font-mono"
+                        autoFocus
+                        maxLength={13}
+                      />
+                      <Button
+                        onClick={handlePasteBarcode}
+                        variant="outline"
+                        className="w-full border-white/20 text-white hover:bg-white/5"
+                      >
+                        📋 Coller le code-barres
+                      </Button>
+                    </div>
                     <p className="text-white/40 text-xs text-center">
                       {barcodeInput.length}/13 chiffres • Recherche automatique à 13
                     </p>
