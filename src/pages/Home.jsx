@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
-import { Sparkles, TrendingUp, Calendar, ChevronRight, Play } from 'lucide-react';
+import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
 import SectionHeader from '@/components/shared/SectionHeader';
+import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 
 const mostPlayedPuzzles = [
   {
@@ -82,6 +83,7 @@ const monthlyEvents = [
 
 export default function Home() {
   const { t } = useLanguage();
+  const [showScanModal, setShowScanModal] = useState(false);
   
   const container = {
     hidden: { opacity: 0 },
@@ -123,12 +125,13 @@ export default function Home() {
               {t('heroSubtitle')}
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link to={createPageUrl('Collection')}>
-                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6">
-                  <Play className="w-4 h-4 mr-2" />
-                  {t('startCollection')}
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => setShowScanModal(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6"
+              >
+                <Scan className="w-4 h-4 mr-2" />
+                Scanner un code-barres
+              </Button>
               <Link to={createPageUrl('Collection')}>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl px-6">
                   {t('exploreCollection')}
@@ -186,7 +189,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-
+      <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
     </div>
   );
 }

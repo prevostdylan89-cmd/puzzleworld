@@ -11,7 +11,8 @@ import {
   Gamepad2,
   Puzzle,
   LogOut,
-  Languages
+  Languages,
+  Scan
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -23,11 +24,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
+  const [showScanModal, setShowScanModal] = useState(false);
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home' },
@@ -263,7 +266,34 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40">
         <div className="flex items-center justify-around h-full">
-          {navItems.slice(0, 5).map((item) => {
+          {navItems.slice(0, 2).map((item) => {
+            const isActive = currentPageName === item.page;
+            return (
+              <Link
+                key={item.name}
+                to={createPageUrl(item.page)}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+                  isActive ? 'text-orange-400' : 'text-white/40'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+
+          {/* Central Scan Button */}
+          <button
+            onClick={() => setShowScanModal(true)}
+            className="flex flex-col items-center gap-1 -mt-6"
+          >
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <Scan className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-[10px] font-medium text-orange-400">Scan</span>
+          </button>
+
+          {navItems.slice(2, 4).map((item) => {
             const isActive = currentPageName === item.page;
             return (
               <Link
@@ -285,9 +315,11 @@ function LayoutContent({ children, currentPageName }) {
       <main className="min-h-screen pt-16 pb-20 lg:pb-0">
         {children}
       </main>
-    </div>
-  );
-}
+
+      <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
+      </div>
+      );
+      }
 
 export default function Layout({ children, currentPageName }) {
   return (
