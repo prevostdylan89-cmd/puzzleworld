@@ -510,11 +510,9 @@ export default function ScanPuzzleModal({ open, onClose }) {
             </div>
             
             <div className="space-y-2">
-              <Input
-                value={puzzleData.name}
-                onChange={(e) => setPuzzleData({...puzzleData, name: e.target.value})}
-                className="bg-white/5 border-white/10 text-white text-lg font-semibold"
-              />
+              <h3 className="text-white text-lg font-semibold leading-relaxed break-words">
+                {puzzleData.name}
+              </h3>
               <div className="flex gap-2 text-white/60 text-sm">
                 {puzzleData.brand && <span>{puzzleData.brand}</span>}
                 {puzzleData.pieces && <span>• {puzzleData.pieces} pièces</span>}
