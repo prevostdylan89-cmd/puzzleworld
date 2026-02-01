@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Loader2, Barcode, Edit, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,12 +53,31 @@ export default function ScanPuzzleModal({ open, onClose }) {
         { facingMode: "environment" },
         {
           fps: 10,
-          qrbox: { width: 280, height: 150 }
+          qrbox: { width: 280, height: 150 },
+          formatsToSupport: [ 
+            Html5QrcodeSupportedFormats.EAN_13, 
+            Html5QrcodeSupportedFormats.EAN_8 
+          ]
         },
         async (decodedText) => {
-          await html5QrcodeScanner.stop();
+          console.log("Code détecté : " + decodedText);
+          
+          // Vibrate if available
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
+          
+          // Stop scanner immediately
+          try {
+            await html5QrcodeScanner.stop();
+          } catch (e) {
+            console.log("Error stopping scanner:", e);
+          }
+          
           setScanning(false);
           setCameraReady(false);
+          
+          // Start API fetch
           await fetchPuzzleData(decodedText);
         },
         (errorMessage) => {
@@ -85,6 +104,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
   const fetchPuzzleData = async (barcode) => {
     setLoading(true);
+    toast.info('Recherche du puzzle en cours...');
+    
     try {
       const response = await fetch(
         `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
@@ -107,6 +128,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
           sku: product.model_number || barcode,
           pieces: pieces
         });
+        
+        toast.success('Puzzle trouvé !');
       } else {
         toast.error('Produit non trouvé');
       }
@@ -256,9 +279,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 )}
                 
                 {loading && (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
-                    <span className="ml-2 text-white/70">Recherche en cours...</span>
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <Loader2 className="w-12 h-12 text-orange-400 animate-spin" />
+                    <p className="text-white font-semibold">Recherche du puzzle en cours...</p>
+                    <p className="text-white/50 text-sm">Nous récupérons les informations</p>
                   </div>
                 )}
               </div>
