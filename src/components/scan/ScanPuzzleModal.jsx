@@ -195,6 +195,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
       );
       
       const data = await response.json();
+      console.log("Réponse API complète:", data);
       
       if (data.product) {
         const product = data.product;
@@ -203,17 +204,24 @@ export default function ScanPuzzleModal({ open, onClose }) {
         const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
         const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
         
-        setPuzzleData({
+        const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+        console.log("Image URL récupérée:", imageUrl);
+        
+        const puzzleInfo = {
           name: product.title || '',
           brand: product.brand || '',
-          image: product.main_image?.link || '',
+          image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
           sku: product.model_number || barcode,
           pieces: pieces
-        });
+        };
+        
+        console.log("Données puzzle créées:", puzzleInfo);
+        setPuzzleData(puzzleInfo);
         
         toast.success('Puzzle trouvé !');
       } else {
+        console.error("Aucun produit dans la réponse API");
         toast.error('Produit non trouvé');
       }
     } catch (error) {
@@ -451,12 +459,26 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
         {puzzleData && !showRating && (
           <div className="space-y-4">
-            <div className="rounded-lg overflow-hidden border border-white/10">
-              <img 
-                src={puzzleData.image || 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop'} 
-                alt={puzzleData.name}
-                className="w-full h-64 object-cover"
-              />
+            <div className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative">
+              {puzzleData.image ? (
+                <img 
+                  src={puzzleData.image} 
+                  alt={puzzleData.name}
+                  className="w-full h-64 object-cover"
+                  onLoad={() => console.log("Image chargée avec succès:", puzzleData.image)}
+                  onError={(e) => {
+                    console.error("Erreur de chargement de l'image:", puzzleData.image);
+                    e.target.src = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-64 flex items-center justify-center bg-white/5">
+                  <div className="text-center space-y-2">
+                    <ImageIcon className="w-16 h-16 text-white/30 mx-auto" />
+                    <p className="text-white/50 text-sm">Aucune image disponible</p>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">
