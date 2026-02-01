@@ -62,14 +62,12 @@ export default function Profile() {
       setUser(currentUser);
       
       // Load stats
-      const [completedPuzzles, userAchievements, wishlistItems, followers, following, userBadges, allBadges] = await Promise.all([
+      const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
-        base44.entities.Follow.filter({ follower_email: currentUser.email }),
-        base44.entities.UserBadge.filter({ created_by: currentUser.email, is_active: true }),
-        base44.entities.Badge.list()
+        base44.entities.Follow.filter({ follower_email: currentUser.email })
       ]);
 
       setStats({
@@ -82,16 +80,78 @@ export default function Profile() {
 
       setAchievements(userAchievements);
       
-      if (userBadges.length > 0) {
-        const badgeDetails = allBadges.find(b => b.id === userBadges[0].badge_id);
-        if (badgeDetails) {
-          setCurrentBadge({ ...userBadges[0], ...badgeDetails });
-        }
-      }
+      // Load and initialize badges
+      await initializeBadges(currentUser, completedPuzzles.length);
     } catch (error) {
       console.log('User not logged in');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const initializeBadges = async (currentUser, completedCount) => {
+    try {
+      // Load all system badges
+      let allBadges = await base44.entities.Badge.list();
+      
+      // If no badges exist, create default ones
+      if (allBadges.length === 0) {
+        const defaultBadges = [
+          { name: 'Novice', description: 'Bienvenue ! Commencez votre aventure puzzle', icon: '🧩', color: '#94a3b8', requirement_type: 'puzzles_completed', requirement_value: 0, level: 1 },
+          { name: 'Amateur', description: 'Complétez 5 puzzles', icon: '🎯', color: '#60a5fa', requirement_type: 'puzzles_completed', requirement_value: 5, level: 2 },
+          { name: 'Passionné', description: 'Complétez 15 puzzles', icon: '⭐', color: '#fbbf24', requirement_type: 'puzzles_completed', requirement_value: 15, level: 3 },
+          { name: 'Expert', description: 'Complétez 30 puzzles', icon: '💎', color: '#a78bfa', requirement_type: 'puzzles_completed', requirement_value: 30, level: 4 },
+          { name: 'Maître', description: 'Complétez 50 puzzles', icon: '👑', color: '#f97316', requirement_type: 'puzzles_completed', requirement_value: 50, level: 5 },
+          { name: 'Légende', description: 'Complétez 100 puzzles', icon: '🏆', color: '#ef4444', requirement_type: 'puzzles_completed', requirement_value: 100, level: 6 }
+        ];
+
+        for (const badge of defaultBadges) {
+          await base44.entities.Badge.create(badge);
+        }
+        
+        allBadges = await base44.entities.Badge.list();
+      }
+
+      // Find which badge user should have based on completed puzzles
+      const sortedBadges = allBadges
+        .filter(b => b.requirement_type === 'puzzles_completed')
+        .sort((a, b) => b.requirement_value - a.requirement_value);
+
+      const earnedBadge = sortedBadges.find(b => completedCount >= b.requirement_value) || sortedBadges[sortedBadges.length - 1];
+
+      if (earnedBadge) {
+        // Check if user already has this badge
+        const userBadges = await base44.entities.UserBadge.filter({
+          created_by: currentUser.email
+        });
+
+        const hasBadge = userBadges.some(ub => ub.badge_id === earnedBadge.id);
+
+        if (!hasBadge) {
+          // Deactivate all other badges
+          for (const ub of userBadges) {
+            await base44.entities.UserBadge.update(ub.id, { is_active: false });
+          }
+          
+          // Create and activate the earned badge
+          await base44.entities.UserBadge.create({
+            badge_id: earnedBadge.id,
+            badge_name: earnedBadge.name,
+            is_active: true
+          });
+        } else {
+          // Make sure the correct badge is active
+          for (const ub of userBadges) {
+            await base44.entities.UserBadge.update(ub.id, {
+              is_active: ub.badge_id === earnedBadge.id
+            });
+          }
+        }
+
+        setCurrentBadge(earnedBadge);
+      }
+    } catch (error) {
+      console.error('Error initializing badges:', error);
     }
   };
 
