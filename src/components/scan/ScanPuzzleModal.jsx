@@ -107,13 +107,17 @@ export default function ScanPuzzleModal({ open, onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Reset file input so the same file can be selected again
+    e.target.value = '';
+
     setLoading(true);
     toast.info('Analyse de l\'image en cours...');
 
     try {
-      const html5QrcodeScanner = new Html5Qrcode("reader");
+      // Create a temporary scanner instance for file scanning
+      const tempScanner = new Html5Qrcode("file-reader-temp");
       
-      const decodedText = await html5QrcodeScanner.scanFile(file, true);
+      const decodedText = await tempScanner.scanFile(file, true);
       
       console.log("Code détecté depuis l'image : " + decodedText);
       
@@ -274,6 +278,9 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
             <TabsContent value="scanner" className="mt-4">
               <div className="space-y-4">
+                {/* Hidden div for file scanning */}
+                <div id="file-reader-temp" style={{ display: 'none' }}></div>
+                
                 {!cameraReady && !loading && (
                   <div className="flex flex-col items-center justify-center py-12 space-y-4">
                     <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
