@@ -170,9 +170,13 @@ function LayoutContent({ children, currentPageName }) {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 transition-colors">
                     <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                        {userInitials}
-                      </AvatarFallback>
+                      {user.profile_photo ? (
+                        <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                          {userInitials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <span className="text-sm font-medium text-white">{user.full_name || user.email}</span>
                   </button>
@@ -219,9 +223,13 @@ function LayoutContent({ children, currentPageName }) {
                 <DropdownMenuTrigger asChild>
                   <button className="p-1 rounded-lg hover:bg-white/5 transition-colors">
                     <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                        {userInitials}
-                      </AvatarFallback>
+                      {user.profile_photo ? (
+                        <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                          {userInitials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </button>
                 </DropdownMenuTrigger>

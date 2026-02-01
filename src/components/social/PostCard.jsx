@@ -11,6 +11,39 @@ import CommentSection from './CommentSection';
 import UserProfileDialog from './UserProfileDialog';
 import UserBadge from '@/components/shared/UserBadge';
 
+function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
+  const [authorUser, setAuthorUser] = useState(null);
+
+  useEffect(() => {
+    loadAuthorUser();
+  }, [authorEmail]);
+
+  const loadAuthorUser = async () => {
+    try {
+      const users = await base44.entities.User.filter({ email: authorEmail });
+      if (users.length > 0) {
+        setAuthorUser(users[0]);
+      }
+    } catch (error) {
+      console.error('Error loading author:', error);
+    }
+  };
+
+  return (
+    <button onClick={onClick}>
+      <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 cursor-pointer hover:ring-orange-500/40 transition-all">
+        {authorUser?.profile_photo ? (
+          <img src={authorUser.profile_photo} alt={authorEmail} className="w-full h-full object-cover" />
+        ) : (
+          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+            {authorInitials}
+          </AvatarFallback>
+        )}
+      </Avatar>
+    </button>
+  );
+}
+
 export default function PostCard({ post, user }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
@@ -187,13 +220,8 @@ export default function PostCard({ post, user }) {
     >
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <button onClick={() => setShowUserProfile(true)}>
-          <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 cursor-pointer hover:ring-orange-500/40 transition-all">
-            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
-              {authorInitials}
-            </AvatarFallback>
-          </Avatar>
-        </button>
+        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => setShowUserProfile(true)} />
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <button 

@@ -29,7 +29,8 @@ import UserBadge from '@/components/shared/UserBadge';
 import PuzzleStatusManager from '@/components/profile/PuzzleStatusManager';
 import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/components/profile/StatsModal';
 import BadgesModal from '@/components/profile/BadgesModal';
-import { Crown } from 'lucide-react';
+import EditProfileDialog from '@/components/profile/EditProfileDialog';
+import { Crown, Camera } from 'lucide-react';
 
 
 
@@ -211,13 +212,16 @@ export default function Profile() {
       {/* Profile Header */}
       <div className="relative">
         {/* Cover Image */}
-        <div className="h-48 lg:h-64 relative overflow-hidden">
+        <div className="h-48 lg:h-64 relative overflow-hidden group">
           <img
-            src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1200&h=400&fit=crop"
+            src={user.cover_photo || "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1200&h=400&fit=crop"}
             alt="Cover"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#000019] via-[#000019]/50 to-transparent" />
+          <div className="absolute top-4 right-4">
+            <EditProfileDialog user={user} onUpdate={loadUserData} />
+          </div>
         </div>
 
         {/* Profile Info */}
@@ -227,11 +231,16 @@ export default function Profile() {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
+              className="relative"
             >
               <Avatar className="h-32 w-32 lg:h-40 lg:w-40 ring-4 ring-[#000019] border-4 border-orange-500/30">
-                <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-3xl lg:text-4xl">
-                  {userInitials}
-                </AvatarFallback>
+                {user.profile_photo ? (
+                  <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-3xl lg:text-4xl">
+                    {userInitials}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </motion.div>
 
