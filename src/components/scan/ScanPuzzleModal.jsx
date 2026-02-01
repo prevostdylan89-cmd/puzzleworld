@@ -285,8 +285,24 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     >
                       📸 Activer la Caméra
                     </Button>
+                    <div className="text-white/50 text-sm text-center">ou</div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      variant="outline"
+                      className="border-white/20 text-white hover:bg-white/5"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Choisir une photo
+                    </Button>
                     <p className="text-white/50 text-sm text-center max-w-sm">
-                      Autorisez l'accès à la caméra pour scanner le code-barres de votre puzzle
+                      Scannez en direct ou importez une photo du code-barres
                     </p>
                   </div>
                 )}
@@ -302,23 +318,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <p className="text-white/50 text-sm text-center">
                       Positionnez le code-barres devant la caméra
                     </p>
-                    <div className="text-center">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="outline"
-                        className="border-white/20 text-white hover:bg-white/5"
-                      >
-                        <ImageIcon className="w-4 h-4 mr-2" />
-                        Choisir une photo
-                      </Button>
-                    </div>
                   </>
                 )}
                 
