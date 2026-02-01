@@ -28,6 +28,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     image: '',
     sku: ''
   });
+  const [barcodeInput, setBarcodeInput] = useState('');
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -320,7 +321,16 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setRating(0);
     setCameraReady(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
+    setBarcodeInput('');
     onClose();
+  };
+
+  const handleBarcodeSubmit = async () => {
+    if (barcodeInput.length !== 13) {
+      toast.error('Le code-barres doit contenir 13 chiffres');
+      return;
+    }
+    await fetchPuzzleData(barcodeInput);
   };
 
   return (
@@ -353,9 +363,9 @@ export default function ScanPuzzleModal({ open, onClose }) {
               <div className="space-y-4">
                 {/* Hidden div for file scanning */}
                 <div id="file-reader-temp" style={{ display: 'none' }}></div>
-                
+
                 {!cameraReady && !loading && (
-                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="flex flex-col items-center justify-center py-8 space-y-6">
                     <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
                       <Barcode className="w-12 h-12 text-orange-400" />
                     </div>
@@ -365,25 +375,30 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     >
                       📸 Activer la Caméra
                     </Button>
-                    <div className="text-white/50 text-sm text-center">ou</div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      variant="outline"
-                      className="border-white/20 text-white hover:bg-white/5"
-                    >
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Choisir une photo
-                    </Button>
-                    <p className="text-white/50 text-sm text-center max-w-sm">
-                      Scannez en direct ou importez une photo du code-barres
-                    </p>
+
+                    <div className="w-full max-w-sm">
+                      <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="13 chiffres"
+                          value={barcodeInput}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                            setBarcodeInput(value);
+                          }}
+                          className="bg-white/5 border-white/10 text-white text-center tracking-wider"
+                          maxLength={13}
+                        />
+                        <Button
+                          onClick={handleBarcodeSubmit}
+                          disabled={barcodeInput.length !== 13}
+                          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+                        >
+                          OK
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
