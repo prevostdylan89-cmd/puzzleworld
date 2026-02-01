@@ -117,35 +117,41 @@ export default function ScanPuzzleModal({ open, onClose }) {
       setScanning(false);
     }
 
+    // VERROUILLER la modale en mode chargement
     setLoading(true);
-    toast.info('Analyse de l\'image en cours...');
+    toast.info('Analyse du code-barres en cours...', { duration: 10000 });
 
     try {
       // Compress/resize image if too large (> 2MB)
       let processedFile = file;
       if (file.size > 2 * 1024 * 1024) {
+        toast.info('Compression de l\'image...', { duration: 2000 });
         processedFile = await compressImage(file);
       }
 
       // Create a temporary scanner instance for file scanning
       const tempScanner = new Html5Qrcode("file-reader-temp");
       
+      console.log("Tentative de scan du fichier...");
       const decodedText = await tempScanner.scanFile(processedFile, true);
       
-      console.log("Code détecté depuis l'image : " + decodedText);
+      console.log("✅ Code EAN détecté depuis l'image : " + decodedText);
       
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
 
-      toast.success('Code-barres détecté !');
+      toast.success('Code-barres détecté ! Recherche en cours...', { duration: 3000 });
+      
+      // NE PAS arrêter le loading ici - fetchPuzzleData le fera
       await fetchPuzzleData(decodedText);
+      
     } catch (error) {
-      console.error('Error scanning file:', error);
+      console.error('❌ Erreur lors du scan de l\'image:', error);
       setLoading(false);
       
-      // Basculer vers l'onglet manuel en cas d'échec
-      toast.error('Code-barres illisible sur cette photo, merci de saisir les infos manuellement');
+      // Basculer vers l'onglet manuel en cas d'échec SANS fermer la modale
+      toast.error('Aucun code-barres détecté. Vérifie la netteté ou saisis-le manuellement.');
       setActiveTab('manual');
     }
   };
@@ -189,16 +195,21 @@ export default function ScanPuzzleModal({ open, onClose }) {
   };
 
   const fetchPuzzleData = async (barcode) => {
-    setLoading(true);
-    toast.info('Recherche du puzzle en cours...');
+    // Le loading est déjà à true depuis handleFileSelect ou le scan caméra
+    console.log("🔍 Recherche API pour le code-barres:", barcode);
+    toast.info('Recherche du puzzle en cours...', { duration: 5000 });
     
     try {
       const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
+        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode.trim()}`
       );
       
+      if (!response.ok) {
+        throw new Error(`API HTTP Error: ${response.status}`);
+      }
+      
       const data = await response.json();
-      console.log("Réponse API complète:", data);
+      console.log("📦 Réponse API complète:", data);
       
       if (data.product) {
         const product = data.product;
@@ -207,16 +218,16 @@ export default function ScanPuzzleModal({ open, onClose }) {
         const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
         const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
         
-        // Sécurité pour l'image avec fallback
+        // SÉCURITÉ: Garantir une image - fallback générique
         let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
         if (!imageUrl) {
           imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
+          console.warn("⚠️ Aucune image API, utilisation image par défaut");
         }
-        console.log("Image URL récupérée:", imageUrl);
+        console.log("🖼️ Image URL finale:", imageUrl);
         
         const puzzleInfo = {
-          name: product.title || '',
+          name: product.title || 'Puzzle sans titre',
           brand: product.brand || '',
           image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
@@ -224,24 +235,22 @@ export default function ScanPuzzleModal({ open, onClose }) {
           pieces: pieces
         };
         
-        console.log("Données puzzle créées:", puzzleInfo);
+        console.log("✅ Données puzzle créées:", puzzleInfo);
+        
+        // FORCER l'affichage du résultat
         setPuzzleData(puzzleInfo);
+        setLoading(false);
         
         toast.success('Puzzle trouvé !');
       } else {
-        console.error("Aucun produit dans la réponse API");
-        toast.error('Produit non trouvé');
+        console.error("❌ Aucun produit dans la réponse API");
+        toast.error('Produit non trouvé dans la base de données');
         setLoading(false);
       }
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('❌ Erreur API:', error);
       toast.error('Erreur lors de la recherche du produit');
       setLoading(false);
-    } finally {
-      // S'assurer que loading est toujours arrêté
-      if (!puzzleData) {
-        setLoading(false);
-      }
     }
   };
 
@@ -314,11 +323,18 @@ export default function ScanPuzzleModal({ open, onClose }) {
   };
 
   const handleClose = () => {
+    // Empêcher la fermeture si en cours de chargement
+    if (loading) {
+      toast.warning('Veuillez patienter pendant l\'analyse...');
+      return;
+    }
+    
     stopScanner();
     setPuzzleData(null);
     setShowRating(false);
     setRating(0);
     setCameraReady(false);
+    setLoading(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -402,10 +418,15 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 )}
                 
                 {loading && (
-                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                    <Loader2 className="w-12 h-12 text-orange-400 animate-spin" />
-                    <p className="text-white font-semibold">Recherche du puzzle en cours...</p>
-                    <p className="text-white/50 text-sm">Nous récupérons les informations</p>
+                  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                    <div className="bg-[#0a0a2e]/90 border border-white/10 rounded-2xl p-8 space-y-4 max-w-sm mx-4">
+                      <Loader2 className="w-16 h-16 text-orange-400 animate-spin mx-auto" />
+                      <div className="text-center">
+                        <p className="text-white font-semibold text-lg mb-2">Analyse en cours...</p>
+                        <p className="text-white/50 text-sm">Décodage du code-barres et recherche du puzzle</p>
+                        <p className="text-orange-400/70 text-xs mt-3">Veuillez ne pas fermer cette fenêtre</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
