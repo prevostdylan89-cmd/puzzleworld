@@ -192,6 +192,28 @@ export default function ScanPuzzleModal({ open, onClose }) {
     });
   };
 
+  const cleanTitle = (title, brand, pieces) => {
+    let cleanedTitle = title;
+    
+    // Enlever la marque du titre
+    if (brand) {
+      cleanedTitle = cleanedTitle.replace(new RegExp(brand, 'gi'), '').trim();
+    }
+    
+    // Enlever le nombre de pièces
+    if (pieces) {
+      cleanedTitle = cleanedTitle.replace(/\d+\s*(pièces?|pieces?)/gi, '').trim();
+    }
+    
+    // Enlever les dimensions (ex: 70x50, 70 x 50 cm, etc)
+    cleanedTitle = cleanedTitle.replace(/\d+\s*[xX×]\s*\d+\s*(cm|mm)?/g, '').trim();
+    
+    // Nettoyer les tirets, virgules et espaces multiples
+    cleanedTitle = cleanedTitle.replace(/^[\s\-,]+|[\s\-,]+$/g, '').replace(/\s+/g, ' ');
+    
+    return cleanedTitle;
+  };
+
   const fetchPuzzleData = async (barcode) => {
     setLoading(true);
     toast.info('Recherche du puzzle en cours...');
@@ -211,6 +233,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
         const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
         const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
         
+        // Extract dimensions from title (ex: 70x50, 70 x 50 cm)
+        const dimensionsMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+        const dimensions = dimensionsMatch ? `${dimensionsMatch[1]} x ${dimensionsMatch[2]} cm` : '';
+        
         // Sécurité pour l'image avec fallback
         let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
         if (!imageUrl) {
@@ -219,13 +245,17 @@ export default function ScanPuzzleModal({ open, onClose }) {
         }
         console.log("Image URL récupérée:", imageUrl);
         
+        // Clean the title
+        const cleanedName = cleanTitle(product.title || '', product.brand || '', pieces);
+        
         const puzzleInfo = {
-          name: product.title || '',
+          name: cleanedName,
           brand: product.brand || '',
           image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
           sku: product.model_number || barcode,
-          pieces: pieces
+          pieces: pieces,
+          dimensions: dimensions
         };
         
         console.log("Données puzzle créées:", puzzleInfo);
@@ -643,11 +673,54 @@ export default function ScanPuzzleModal({ open, onClose }) {
               </div>
             </motion.div>
 
-            {/* Boutons - Animation 5 */}
-            <motion.div 
+            {/* Dimensions - Animation 5 */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.4 }}
+              className="relative rounded-lg bg-white/5 border border-white/10 p-3"
+            >
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
+                  {editingField === 'dimensions' ? (
+                    <input
+                      type="text"
+                      value={puzzleData.dimensions || ''}
+                      onChange={(e) => setPuzzleData({...puzzleData, dimensions: e.target.value})}
+                      onBlur={() => handleFieldVerify('dimensions')}
+                      placeholder="Ex: 70 x 50 cm"
+                      autoFocus
+                      className="w-full bg-transparent text-white text-sm border-none outline-none"
+                    />
+                  ) : (
+                    <p className="text-white text-sm">{puzzleData.dimensions || 'Non renseigné'}</p>
+                  )}
+                </div>
+                {verifiedFields.dimensions ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex-shrink-0"
+                  >
+                    <Check className="w-5 h-5 text-green-400" />
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={() => setEditingField('dimensions')}
+                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Boutons - Animation 6 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75, duration: 0.4 }}
               className="flex flex-col gap-3 pt-2"
             >
               <Button
