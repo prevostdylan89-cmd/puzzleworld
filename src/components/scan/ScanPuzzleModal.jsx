@@ -107,17 +107,30 @@ export default function ScanPuzzleModal({ open, onClose }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset file input so the same file can be selected again
+    // Reset file input
     e.target.value = '';
+
+    // Stop camera if active
+    if (cameraReady) {
+      await stopScanner();
+      setCameraReady(false);
+      setScanning(false);
+    }
 
     setLoading(true);
     toast.info('Analyse de l\'image en cours...');
 
     try {
+      // Compress/resize image if too large (> 2MB)
+      let processedFile = file;
+      if (file.size > 2 * 1024 * 1024) {
+        processedFile = await compressImage(file);
+      }
+
       // Create a temporary scanner instance for file scanning
       const tempScanner = new Html5Qrcode("file-reader-temp");
       
-      const decodedText = await tempScanner.scanFile(file, true);
+      const decodedText = await tempScanner.scanFile(processedFile, true);
       
       console.log("Code détecté depuis l'image : " + decodedText);
       
@@ -125,12 +138,51 @@ export default function ScanPuzzleModal({ open, onClose }) {
         navigator.vibrate(200);
       }
 
+      toast.success('Code-barres détecté !');
       await fetchPuzzleData(decodedText);
     } catch (error) {
       console.error('Error scanning file:', error);
-      toast.error('Aucun code-barres détecté dans l\'image');
+      toast.error('Impossible de lire le code-barres sur cette photo. Assure-toi qu\'il est bien net et éclairé.');
       setLoading(false);
     }
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Resize if too large (max 1500px)
+          const maxDim = 1500;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = (height / width) * maxDim;
+              width = maxDim;
+            } else {
+              width = (width / height) * maxDim;
+              height = maxDim;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.85);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const fetchPuzzleData = async (barcode) => {
