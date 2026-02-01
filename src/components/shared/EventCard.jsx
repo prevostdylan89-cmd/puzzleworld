@@ -21,10 +21,15 @@ export default function EventCard({ event }) {
     community: 'from-blue-500 to-cyan-500'
   };
 
+  const handleCardClick = () => {
+    window.location.href = '/Events';
+  };
+
   return (
-    <motion.div
+    <motion.button
+      onClick={handleCardClick}
       whileHover={{ scale: 1.02 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.08]"
+      className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.08] hover:border-orange-500/30 transition-all cursor-pointer text-left"
     >
       {/* Image Header */}
       <div className="relative h-32 overflow-hidden">
