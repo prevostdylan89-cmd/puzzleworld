@@ -9,6 +9,7 @@ import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
 import SectionHeader from '@/components/shared/SectionHeader';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
+import EventModal from '@/components/events/EventModal';
 
 const mostPlayedPuzzles = [
   {
@@ -84,6 +85,7 @@ const monthlyEvents = [
 export default function Home() {
   const { t } = useLanguage();
   const [showScanModal, setShowScanModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   
   const container = {
     hidden: { opacity: 0 },
@@ -210,19 +212,28 @@ export default function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {monthlyEvents.map((event, index) => (
-            <motion.div key={index} variants={item}>
-              <EventCard event={event} />
+            <motion.div 
+              key={index} 
+              variants={item}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+            >
+              <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
+                <EventCard event={event} />
+              </div>
             </motion.div>
           ))}
         </div>
       </motion.section>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
-      <EventModal 
-        open={!!selectedEvent} 
-        event={selectedEvent} 
-        onClose={() => setSelectedEvent(null)} 
-      />
+      
+      {selectedEvent && (
+        <EventModal 
+          open={true} 
+          event={selectedEvent} 
+          onClose={() => setSelectedEvent(null)} 
+        />
+      )}
     </div>
   );
 }
