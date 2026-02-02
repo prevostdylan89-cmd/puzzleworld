@@ -23,6 +23,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const [loading, setLoading] = useState(false);
   const [puzzleData, setPuzzleData] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showRatingChoice, setShowRatingChoice] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
   const [manualData, setManualData] = useState({
     name: '',
     brand: '',
@@ -337,7 +339,24 @@ export default function ScanPuzzleModal({ open, onClose }) {
     });
   };
 
-  const handleAddPuzzle = async (status) => {
+  const handleStatusChoice = (choice) => {
+    if (choice === 'done') {
+      // Show rating choice for completed puzzles
+      setShowRatingChoice(true);
+      setPendingStatus('done');
+    } else {
+      // Direct add for inbox and wishlist
+      handleAddPuzzle(choice);
+    }
+  };
+
+  const handleRatingChoice = (liked) => {
+    // Add puzzle with done status and cemetery_type if not liked
+    const finalStatus = liked ? 'done' : 'cemetery';
+    handleAddPuzzle(finalStatus, liked ? null : 'disliked');
+  };
+
+  const handleAddPuzzle = async (status, cemeteryType = null) => {
     try {
       // Check if puzzle exists in catalog, if not create it
       if (!existingPuzzle && puzzleData.sku) {
@@ -353,22 +372,30 @@ export default function ScanPuzzleModal({ open, onClose }) {
             price: 0
           });
         } catch (catalogError) {
-          // Ignore if already exists (race condition)
           console.log('Catalog entry might already exist:', catalogError);
         }
       }
       
-      // Add to user's collection
-      await base44.entities.UserPuzzle.create({
+      // Prepare puzzle data
+      const puzzleToCreate = {
         puzzle_name: puzzleData.name,
         puzzle_brand: puzzleData.brand,
         puzzle_pieces: puzzleData.pieces,
         image_url: puzzleData.image,
         puzzle_reference: puzzleData.sku,
         status: status
-      });
+      };
+
+      // Add cemetery type if applicable
+      if (cemeteryType) {
+        puzzleToCreate.cemetery_type = cemeteryType;
+      }
+      
+      // Add to user's collection
+      await base44.entities.UserPuzzle.create(puzzleToCreate);
       
       setShowSuccess(true);
+      setShowRatingChoice(false);
       
       // Refresh data in background
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
@@ -396,6 +423,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const handleReset = () => {
     setPuzzleData(null);
     setShowSuccess(false);
+    setShowRatingChoice(false);
+    setPendingStatus(null);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setEditingField(null);
@@ -815,36 +844,61 @@ export default function ScanPuzzleModal({ open, onClose }) {
             </motion.div>
 
             {/* Boutons de choix - Animation 6 */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75, duration: 0.4 }}
-              className="space-y-3 pt-2"
-            >
-              <p className="text-white/70 text-sm text-center mb-4">Comment souhaitez-vous classer ce puzzle ?</p>
-
-              <Button
-                onClick={() => handleAddPuzzle('cemetery')}
-                variant="outline"
-                className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10"
+            {!showRatingChoice ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.75, duration: 0.4 }}
+                className="space-y-3 pt-2"
               >
-                👎 Je n'ai pas aimé
-              </Button>
+                <p className="text-white/70 text-sm text-center mb-4">Où souhaitez-vous classer ce puzzle ?</p>
 
-              <Button
-                onClick={() => handleAddPuzzle('inbox')}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-              >
-                👍 J'ai aimé
-              </Button>
+                <Button
+                  onClick={() => handleStatusChoice('inbox')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex items-center justify-center gap-2"
+                >
+                  📦 Dans sa boîte
+                </Button>
 
-              <Button
-                onClick={() => handleAddPuzzle('wishlist')}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                <Button
+                  onClick={() => handleStatusChoice('done')}
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white flex items-center justify-center gap-2"
+                >
+                  ✅ Puzzle Terminé
+                </Button>
+
+                <Button
+                  onClick={() => handleStatusChoice('wishlist')}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white flex items-center justify-center gap-2"
+                >
+                  ⭐ Wishlist
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-3 pt-2"
               >
-                ⭐ Wishlist
-              </Button>
-            </motion.div>
+                <p className="text-white text-sm text-center mb-4 font-semibold">Avez-vous aimé ce puzzle ?</p>
+
+                <Button
+                  onClick={() => handleRatingChoice(true)}
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white flex items-center justify-center gap-2"
+                >
+                  👍 J'ai aimé
+                </Button>
+
+                <Button
+                  onClick={() => handleRatingChoice(false)}
+                  variant="outline"
+                  className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center gap-2"
+                >
+                  👎 Je n'ai pas aimé
+                </Button>
+              </motion.div>
+            )}
           </div>
         )}
 
