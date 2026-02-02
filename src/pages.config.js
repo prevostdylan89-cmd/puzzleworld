@@ -48,25 +48,25 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Collection from './pages/Collection';
+import Discover from './pages/Discover';
 import Events from './pages/Events';
 import Home from './pages/Home';
 import OnlinePuzzles from './pages/OnlinePuzzles';
 import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
-import Discover from './pages/Discover';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Collection": Collection,
+    "Discover": Discover,
     "Events": Events,
     "Home": Home,
     "OnlinePuzzles": OnlinePuzzles,
     "Profile": Profile,
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
-    "Discover": Discover,
 }
 
 export const pagesConfig = {

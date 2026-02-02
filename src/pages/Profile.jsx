@@ -350,11 +350,18 @@ export default function Profile() {
               Ma Collection
             </TabsTrigger>
             <TabsTrigger 
-              value="completed" 
+              value="wishlist" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Wishlist
+            </TabsTrigger>
+            <TabsTrigger 
+              value="exchange"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
               <Grid3X3 className="w-4 h-4 mr-2" />
-              {t('completed')}
+              À Vendre / Échanger
             </TabsTrigger>
             <TabsTrigger 
               value="achievements"
@@ -366,11 +373,15 @@ export default function Profile() {
           </TabsList>
 
           <TabsContent value="collection" className="mt-6">
-            <PuzzleStatusManager user={user} />
+            <CollectionSection user={user} />
           </TabsContent>
 
-          <TabsContent value="completed" className="mt-6">
-            <CompletedPuzzlesSection user={user} />
+          <TabsContent value="wishlist" className="mt-6">
+            <WishlistSection user={user} />
+          </TabsContent>
+
+          <TabsContent value="exchange" className="mt-6">
+            <ExchangeSection user={user} />
           </TabsContent>
 
           <TabsContent value="achievements" className="mt-6">
