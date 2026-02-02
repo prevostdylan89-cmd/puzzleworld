@@ -32,10 +32,20 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const [barcodeInput, setBarcodeInput] = useState('');
   const [editingField, setEditingField] = useState(null);
   const [verifiedFields, setVerifiedFields] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -381,25 +391,27 @@ export default function ScanPuzzleModal({ open, onClose }) {
         </DialogHeader>
 
         {!puzzleData && !showRating && (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white/5 border border-white/10 w-full">
-              <TabsTrigger 
-                value="scanner" 
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1"
-              >
-                <Barcode className="w-4 h-4 mr-2" />
-                Scanner
-              </TabsTrigger>
-              <TabsTrigger 
-                value="manual"
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Saisie Manuelle
-              </TabsTrigger>
-            </TabsList>
+          <>
+            {isMobile ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="bg-white/5 border border-white/10 w-full">
+                  <TabsTrigger 
+                    value="scanner" 
+                    className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1"
+                  >
+                    <Barcode className="w-4 h-4 mr-2" />
+                    Scanner
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="manual"
+                    className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Saisie Manuelle
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="scanner" className="mt-4">
+                <TabsContent value="scanner" className="mt-4">
               <div className="space-y-4">
                 {/* Hidden div for file scanning */}
                 <div id="file-reader-temp" style={{ display: 'none' }}></div>
@@ -522,8 +534,47 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 </Button>
               </div>
             </TabsContent>
-          </Tabs>
-        )}
+              </Tabs>
+            ) : (
+              <div className="space-y-4 mt-4">
+                <div className="text-center mb-6">
+                  <Barcode className="w-16 h-16 text-orange-500 mx-auto mb-3" />
+                  <h3 className="text-white text-lg font-semibold mb-1">Saisir le code-barres</h3>
+                  <p className="text-white/60 text-sm">Entrez les 13 chiffres du code-barres</p>
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="13 chiffres"
+                    value={barcodeInput}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                      setBarcodeInput(value);
+                    }}
+                    className="bg-white/5 border-white/10 text-white text-center tracking-wider text-lg"
+                    maxLength={13}
+                    disabled={loading}
+                  />
+                  <Button
+                    onClick={handleBarcodeSubmit}
+                    disabled={barcodeInput.length !== 13 || loading}
+                    className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 px-6"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'OK'}
+                  </Button>
+                </div>
+
+                {loading && (
+                  <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                    <Loader2 className="w-12 h-12 text-orange-400 animate-spin" />
+                    <p className="text-white font-semibold">Recherche du puzzle en cours...</p>
+                  </div>
+                )}
+              </div>
+            )}
+            </>
+            )}
 
         {puzzleData && !showRating && (
           <div className="space-y-4">
