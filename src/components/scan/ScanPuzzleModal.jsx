@@ -20,8 +20,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [puzzleData, setPuzzleData] = useState(null);
-  const [showRating, setShowRating] = useState(false);
-  const [rating, setRating] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [manualData, setManualData] = useState({
     name: '',
     brand: '',
@@ -303,7 +302,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     });
   };
 
-  const handleAddToWishlist = async () => {
+  const handleAddPuzzle = async (status) => {
     try {
       await base44.entities.UserPuzzle.create({
         puzzle_name: puzzleData.name,
@@ -311,47 +310,17 @@ export default function ScanPuzzleModal({ open, onClose }) {
         puzzle_pieces: puzzleData.pieces,
         image_url: puzzleData.image,
         puzzle_reference: puzzleData.sku,
-        status: 'wishlist'
+        status: status
       });
       
-      toast.success('Ajouté aux souhaits');
-      handleClose();
-    } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      toast.error('Erreur lors de l\'ajout');
-    }
-  };
-
-  const handleAddToCollection = () => {
-    setShowRating(true);
-  };
-
-  const handleConfirmRating = async () => {
-    if (rating === 0) {
-      toast.error('Veuillez donner une note');
-      return;
-    }
-
-    try {
-      await base44.entities.UserPuzzle.create({
-        puzzle_name: puzzleData.name,
-        puzzle_brand: puzzleData.brand,
-        puzzle_pieces: puzzleData.pieces,
-        image_url: puzzleData.image,
-        puzzle_reference: puzzleData.sku,
-        status: 'inbox',
-        notes: `Note: ${rating}/5`
-      });
+      setShowSuccess(true);
       
-      toast.success('Ajouté à votre collection');
-      handleClose();
-      
-      // Redirect to collection page
+      // Reload page after animation
       setTimeout(() => {
-        window.location.href = '/Collection';
-      }, 500);
+        window.location.reload();
+      }, 2000);
     } catch (error) {
-      console.error('Error adding to collection:', error);
+      console.error('Error adding puzzle:', error);
       toast.error('Erreur lors de l\'ajout');
     }
   };
@@ -359,13 +328,22 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const handleClose = () => {
     stopScanner();
     setPuzzleData(null);
-    setShowRating(false);
-    setRating(0);
+    setShowSuccess(false);
     setCameraReady(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setEditingField(null);
+    setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
+  };
+
+  const handleReset = () => {
+    setPuzzleData(null);
+    setShowSuccess(false);
+    setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
+    setBarcodeInput('');
+    setEditingField(null);
+    setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
 
@@ -385,7 +363,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
           <DialogTitle className="text-white text-xl">Ajouter un Puzzle</DialogTitle>
         </DialogHeader>
 
-        {!puzzleData && !showRating && (
+        {!puzzleData && !showSuccess && (
           <>
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -594,7 +572,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
             </>
             )}
 
-        {puzzleData && !showRating && (
+        {puzzleData && !showSuccess && (
           <div className="space-y-4">
             {/* Image - Animation 1 */}
             <motion.div 
@@ -745,61 +723,93 @@ export default function ScanPuzzleModal({ open, onClose }) {
               </div>
             </motion.div>
 
-            {/* Boutons - Animation 6 */}
+            {/* Boutons de choix - Animation 6 */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.75, duration: 0.4 }}
-              className="flex flex-col gap-3 pt-2"
+              className="space-y-3 pt-2"
             >
+              <p className="text-white/70 text-sm text-center mb-4">Comment souhaitez-vous classer ce puzzle ?</p>
+
               <Button
-                onClick={handleAddToCollection}
+                onClick={() => handleAddPuzzle('cemetery')}
+                variant="outline"
+                className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10"
+              >
+                👎 Je n'ai pas aimé
+              </Button>
+
+              <Button
+                onClick={() => handleAddPuzzle('inbox')}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+              >
+                👍 J'ai aimé
+              </Button>
+
+              <Button
+                onClick={() => handleAddPuzzle('wishlist')}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
               >
-                ✓ Confirmer et Noter
-              </Button>
-              <Button
-                onClick={handleAddToWishlist}
-                variant="outline"
-                className="w-full border-white/20 text-white hover:bg-white/5"
-              >
-                Mettre en Wishlist
+                ⭐ Wishlist
               </Button>
             </motion.div>
           </div>
         )}
 
-        {showRating && (
-          <div className="space-y-6 text-center py-4">
-            <h3 className="text-xl font-semibold text-white">
-              Quelle note donnes-tu à ce puzzle ?
-            </h3>
-            
-            <div className="flex justify-center gap-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="transition-all hover:scale-110"
-                >
-                  <Star
-                    className={`w-12 h-12 ${
-                      star <= rating 
-                        ? 'fill-orange-400 text-orange-400' 
-                        : 'text-white/20'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <Button
-              onClick={handleConfirmRating}
-              disabled={rating === 0}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+        {showSuccess && (
+          <div className="space-y-6 py-8">
+            {/* Animation de pièces de puzzle */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex justify-center items-center gap-4 mb-6"
             >
-              Confirmer
-            </Button>
+              <motion.div
+                initial={{ x: -50, rotate: -45 }}
+                animate={{ x: 0, rotate: 0 }}
+                transition={{ delay: 0.3, duration: 0.5, type: "spring" }}
+                className="text-6xl"
+              >
+                🧩
+              </motion.div>
+              <motion.div
+                initial={{ x: 50, rotate: 45 }}
+                animate={{ x: 0, rotate: 0 }}
+                transition={{ delay: 0.3, duration: 0.5, type: "spring" }}
+                className="text-6xl"
+              >
+                🧩
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.4 }}
+              className="text-center"
+            >
+              <h3 className="text-2xl font-bold text-white mb-2">Puzzle ajouté !</h3>
+              <p className="text-white/60 mb-6">Votre collection a été mise à jour</p>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handleReset}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                >
+                  📸 Scanner un autre puzzle
+                </Button>
+
+                <Button
+                  onClick={handleClose}
+                  variant="outline"
+                  className="w-full border-white/20 text-white hover:bg-white/5"
+                >
+                  ✓ Terminer
+                </Button>
+              </div>
+            </motion.div>
           </div>
         )}
       </DialogContent>
