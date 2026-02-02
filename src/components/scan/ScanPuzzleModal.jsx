@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function ScanPuzzleModal({ open, onClose }) {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('scanner');
   const [cameraReady, setCameraReady] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -315,10 +317,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
       
       setShowSuccess(true);
       
-      // Reload page after animation
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      // Refresh data in background
+      queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
+      queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlistPuzzles'] });
     } catch (error) {
       console.error('Error adding puzzle:', error);
       toast.error('Erreur lors de l\'ajout');
