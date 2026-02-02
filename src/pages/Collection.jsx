@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -10,7 +12,8 @@ import {
   LayoutGrid,
   ChevronDown,
   X,
-  Puzzle
+  Puzzle,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +32,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import PuzzleCard from '@/components/shared/PuzzleCard';
 
 const allPuzzles = [
   {
@@ -145,10 +147,19 @@ const allPuzzles = [
 export default function Collection() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('popular');
+  const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
   const [minPieces, setMinPieces] = useState('');
   const [maxPieces, setMaxPieces] = useState('');
+
+  // Fetch puzzles from global catalog
+  const { data: globalPuzzles = [], isLoading } = useQuery({
+    queryKey: ['globalPuzzles'],
+    queryFn: async () => {
+      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 200);
+      return puzzles;
+    }
+  });
 
   const clearFilters = () => {
     setMinPieces('');
@@ -157,11 +168,11 @@ export default function Collection() {
   };
 
   // Filter puzzles
-  const filteredPuzzles = allPuzzles.filter(puzzle => {
-    const matchesSearch = puzzle.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          puzzle.creator.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMinPieces = !minPieces || puzzle.pieces >= parseInt(minPieces);
-    const matchesMaxPieces = !maxPieces || puzzle.pieces <= parseInt(maxPieces);
+  const filteredPuzzles = globalPuzzles.filter(puzzle => {
+    const matchesSearch = puzzle.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          puzzle.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMinPieces = !minPieces || (puzzle.piece_count >= parseInt(minPieces));
+    const matchesMaxPieces = !maxPieces || (puzzle.piece_count <= parseInt(maxPieces));
     
     return matchesSearch && matchesMinPieces && matchesMaxPieces;
   });
@@ -169,16 +180,14 @@ export default function Collection() {
   // Sort puzzles
   const sortedPuzzles = [...filteredPuzzles].sort((a, b) => {
     switch(sortBy) {
-      case 'popular':
-        return b.plays - a.plays;
       case 'newest':
-        return 0; // Keep original order for "newest"
-      case 'rating':
-        return b.rating - a.rating;
+        return new Date(b.created_date) - new Date(a.created_date);
+      case 'popular':
+        return (b.total_likes + b.total_superlikes) - (a.total_likes + a.total_superlikes);
       case 'pieces-asc':
-        return a.pieces - b.pieces;
+        return (a.piece_count || 0) - (b.piece_count || 0);
       case 'pieces-desc':
-        return b.pieces - a.pieces;
+        return (b.piece_count || 0) - (a.piece_count || 0);
       default:
         return 0;
     }
@@ -204,8 +213,10 @@ export default function Collection() {
         <div className="px-4 lg:px-8 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">{t('puzzleCollection')}</h1>
-              <p className="text-white/50 text-sm mt-1">{sortedPuzzles.length} puzzles disponibles</p>
+              <h1 className="text-2xl font-bold text-white">Collection Communautaire</h1>
+              <p className="text-white/50 text-sm mt-1">
+                {isLoading ? 'Chargement...' : `${sortedPuzzles.length} puzzles partagés par la communauté`}
+              </p>
             </div>
 
             {/* Search & Actions */}
@@ -302,18 +313,6 @@ export default function Collection() {
 
             <div className="flex items-center gap-2">
               <Button
-                variant={sortBy === 'popular' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setSortBy('popular')}
-                className={`rounded-full ${
-                  sortBy === 'popular'
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Popular
-              </Button>
-              <Button
                 variant={sortBy === 'newest' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('newest')}
@@ -323,16 +322,27 @@ export default function Collection() {
                     : 'text-white/70 hover:text-white hover:bg-white/5'
                 }`}
               >
-                New
+                Nouveautés
+              </Button>
+              <Button
+                variant={sortBy === 'popular' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setSortBy('popular')}
+                className={`rounded-full ${
+                  sortBy === 'popular'
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Populaires
               </Button>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
                   <SelectValue placeholder="Plus..." />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  <SelectItem value="rating" className="text-white text-sm">{t('highestRated')}</SelectItem>
-                  <SelectItem value="pieces-asc" className="text-white text-sm">{t('piecesLowToHigh')}</SelectItem>
-                  <SelectItem value="pieces-desc" className="text-white text-sm">{t('piecesHighToLow')}</SelectItem>
+                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -342,29 +352,34 @@ export default function Collection() {
 
       {/* Puzzle Grid */}
       <div className="px-4 lg:px-8 py-6">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className={`grid gap-4 ${
-            viewMode === 'large' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-              : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-          }`}
-        >
-          {sortedPuzzles.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/50">Aucun puzzle trouvé avec ces critères</p>
-            </div>
-          ) : (
-            sortedPuzzles.map((puzzle, index) => (
-              <motion.div key={index} variants={item}>
-                <PuzzleCard puzzle={puzzle} variant={viewMode === 'large' ? 'large' : 'default'} />
-              </motion.div>
-            ))
-          )}
-        </motion.div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          </div>
+        ) : (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className={`grid gap-4 ${
+              viewMode === 'large' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            }`}
+          >
+            {sortedPuzzles.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                <p className="text-white/50">Aucun puzzle trouvé</p>
+                <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
+              </div>
+            ) : (
+              sortedPuzzles.map((puzzle, index) => (
+                <CommunityPuzzleCard key={puzzle.id} puzzle={puzzle} index={index} variant={viewMode === 'large' ? 'large' : 'default'} />
+              ))
+            )}
+          </motion.div>
+        )}
 
         {/* Load More */}
         <div className="flex justify-center mt-12">
@@ -382,5 +397,42 @@ export default function Collection() {
         </div>
       </div>
     </div>
-  );
-}
+    );
+    }
+
+    function CommunityPuzzleCard({ puzzle, index, variant }) {
+    return (
+    <motion.div
+      variants={item}
+      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group"
+    >
+      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-white/5`}>
+        {puzzle.image_hd ? (
+          <img
+            src={puzzle.image_hd}
+            alt={puzzle.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Puzzle className="w-12 h-12 text-white/20" />
+          </div>
+        )}
+      </div>
+      <div className="p-3">
+        <h3 className="text-white text-sm font-semibold line-clamp-2 mb-1">
+          {puzzle.title}
+        </h3>
+        <div className="flex items-center justify-between text-xs text-white/50 mb-2">
+          <span>{puzzle.brand || 'Unknown'}</span>
+          <span>{puzzle.piece_count} pcs</span>
+        </div>
+        {(puzzle.total_likes > 0 || puzzle.total_superlikes > 0) && (
+          <div className="flex items-center gap-1 text-xs text-orange-400">
+            <span>❤️ {puzzle.total_likes + puzzle.total_superlikes}</span>
+          </div>
+        )}
+      </div>
+    </motion.div>
+    );
+    }

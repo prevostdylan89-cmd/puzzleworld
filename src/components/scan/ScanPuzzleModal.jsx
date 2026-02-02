@@ -357,40 +357,57 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
   const handleAddPuzzle = async (status, cemeteryType = null) => {
     try {
-      // Check if puzzle exists in catalog, if not create it
-      if (!existingPuzzle && puzzleData.sku) {
-        try {
-          await base44.entities.PuzzleCatalog.create({
-            asin: puzzleData.sku,
-            image_hd: puzzleData.image,
-            title: puzzleData.name,
-            brand: puzzleData.brand,
-            piece_count: puzzleData.pieces,
-            amazon_link: puzzleData.link || '',
-            category_tag: '',
-            price: 0
-          });
-        } catch (catalogError) {
-          console.log('Catalog entry might already exist:', catalogError);
+      let catalogPuzzleId = null;
+      
+      // ÉTAPE 1: Vérification Globale - Chercher dans PuzzleCatalog par EAN
+      if (puzzleData.sku) {
+        const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ asin: puzzleData.sku });
+        
+        if (existingInCatalog.length > 0) {
+          // ACTION B: Le puzzle existe déjà dans la collection globale
+          catalogPuzzleId = existingInCatalog[0].id;
+          console.log('✓ Puzzle déjà dans la collection globale');
+        } else {
+          // ACTION A: Nouveau puzzle - Créer dans la collection globale
+          try {
+            const newCatalogEntry = await base44.entities.PuzzleCatalog.create({
+              asin: puzzleData.sku,
+              image_hd: puzzleData.image,
+              title: puzzleData.name,
+              brand: puzzleData.brand,
+              piece_count: puzzleData.pieces,
+              amazon_link: puzzleData.link || '',
+              category_tag: '',
+              price: 0
+            });
+            catalogPuzzleId = newCatalogEntry.id;
+            console.log('✓ Nouveau puzzle ajouté à la collection globale');
+          } catch (catalogError) {
+            // Protection contre race condition (2 users simultanés)
+            console.log('Race condition détectée, récupération du puzzle existant...');
+            const retry = await base44.entities.PuzzleCatalog.filter({ asin: puzzleData.sku });
+            if (retry.length > 0) {
+              catalogPuzzleId = retry[0].id;
+            }
+          }
         }
       }
       
-      // Prepare puzzle data
+      // FINALISATION: Ajouter à la collection personnelle (UserPuzzle)
       const puzzleToCreate = {
         puzzle_name: puzzleData.name,
         puzzle_brand: puzzleData.brand,
         puzzle_pieces: puzzleData.pieces,
         image_url: puzzleData.image,
-        puzzle_reference: puzzleData.sku,
+        puzzle_reference: puzzleData.sku, // EAN comme clé primaire
+        catalog_puzzle_id: catalogPuzzleId, // Lien vers la fiche globale
         status: status
       };
 
-      // Add cemetery type if applicable
       if (cemeteryType) {
         puzzleToCreate.cemetery_type = cemeteryType;
       }
       
-      // Add to user's collection
       await base44.entities.UserPuzzle.create(puzzleToCreate);
       
       // Award XP if adding as completed
@@ -407,6 +424,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['wishlistPuzzles'] });
+      queryClient.invalidateQueries({ queryKey: ['globalPuzzles'] });
     } catch (error) {
       console.error('Error adding puzzle:', error);
       toast.error('Erreur lors de l\'ajout');
