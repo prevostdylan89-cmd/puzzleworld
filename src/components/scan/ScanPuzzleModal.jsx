@@ -543,6 +543,29 @@ export default function ScanPuzzleModal({ open, onClose }) {
                   <p className="text-white/60 text-sm">Entrez les 13 chiffres du code-barres</p>
                 </div>
 
+                {/* Visual guide */}
+                <div className="bg-white/5 rounded-lg p-4 mb-4 border border-white/10">
+                  <p className="text-white/70 text-xs text-center mb-3">Les chiffres se trouvent sous les barres :</p>
+                  <div className="flex flex-col items-center gap-2">
+                    {/* Barcode bars */}
+                    <div className="flex gap-[2px] justify-center">
+                      {[1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,1,1,0].map((bar, i) => (
+                        <div 
+                          key={i} 
+                          className={`w-1 h-12 ${bar ? 'bg-black' : 'bg-white'}`}
+                        />
+                      ))}
+                    </div>
+                    {/* Numbers with red box */}
+                    <div className="relative">
+                      <div className="absolute -top-1 -left-1 right-[-4px] bottom-[-4px] border-2 border-red-500 rounded animate-pulse"></div>
+                      <div className="text-black font-mono text-sm tracking-wider bg-white px-2 py-1 rounded">
+                        5 412345 678901
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
                   <Input
                     type="text"
