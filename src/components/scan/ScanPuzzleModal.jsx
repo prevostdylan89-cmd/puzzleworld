@@ -31,7 +31,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
   });
   const [barcodeInput, setBarcodeInput] = useState('');
   const [editingField, setEditingField] = useState(null);
-  const [verifiedFields, setVerifiedFields] = useState({});
   const [isMobile, setIsMobile] = useState(false);
   
   const scannerRef = useRef(null);
@@ -366,14 +365,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setEditingField(null);
-    setVerifiedFields({});
     onClose();
   };
 
-  const handleFieldVerify = (fieldName) => {
-    setVerifiedFields(prev => ({ ...prev, [fieldName]: true }));
-    setEditingField(null);
-  };
+
 
   const handleBarcodeSubmit = async () => {
     if (barcodeInput.length !== 13) {
@@ -636,30 +631,20 @@ export default function ScanPuzzleModal({ open, onClose }) {
                       type="text"
                       value={puzzleData.name}
                       onChange={(e) => setPuzzleData({...puzzleData, name: e.target.value})}
-                      onBlur={() => handleFieldVerify('name')}
+                      onBlur={() => setEditingField(null)}
                       autoFocus
                       className="w-full bg-transparent text-white text-sm border-none outline-none"
                     />
                   ) : (
                     <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
                   )}
-                </div>
-                {verifiedFields.name ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex-shrink-0"
-                  >
-                    <Check className="w-5 h-5 text-green-400" />
-                  </motion.div>
-                ) : (
+                  </div>
                   <button
-                    onClick={() => setEditingField('name')}
-                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  onClick={() => setEditingField('name')}
+                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" />
                   </button>
-                )}
               </div>
             </motion.div>
 
@@ -678,30 +663,20 @@ export default function ScanPuzzleModal({ open, onClose }) {
                       type="text"
                       value={puzzleData.brand}
                       onChange={(e) => setPuzzleData({...puzzleData, brand: e.target.value})}
-                      onBlur={() => handleFieldVerify('brand')}
+                      onBlur={() => setEditingField(null)}
                       autoFocus
                       className="w-full bg-transparent text-white text-sm border-none outline-none"
                     />
                   ) : (
                     <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
                   )}
-                </div>
-                {verifiedFields.brand ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex-shrink-0"
-                  >
-                    <Check className="w-5 h-5 text-green-400" />
-                  </motion.div>
-                ) : (
+                  </div>
                   <button
-                    onClick={() => setEditingField('brand')}
-                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  onClick={() => setEditingField('brand')}
+                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" />
                   </button>
-                )}
               </div>
             </motion.div>
 
@@ -720,30 +695,20 @@ export default function ScanPuzzleModal({ open, onClose }) {
                       type="number"
                       value={puzzleData.pieces || ''}
                       onChange={(e) => setPuzzleData({...puzzleData, pieces: parseInt(e.target.value) || null})}
-                      onBlur={() => handleFieldVerify('pieces')}
+                      onBlur={() => setEditingField(null)}
                       autoFocus
                       className="w-full bg-transparent text-white text-sm border-none outline-none"
                     />
                   ) : (
                     <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'À remplir'}</p>
                   )}
-                </div>
-                {verifiedFields.pieces ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex-shrink-0"
-                  >
-                    <Check className="w-5 h-5 text-green-400" />
-                  </motion.div>
-                ) : (
+                  </div>
                   <button
-                    onClick={() => setEditingField('pieces')}
-                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  onClick={() => setEditingField('pieces')}
+                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" />
                   </button>
-                )}
               </div>
             </motion.div>
 
@@ -762,7 +727,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
                       type="text"
                       value={puzzleData.dimensions || ''}
                       onChange={(e) => setPuzzleData({...puzzleData, dimensions: e.target.value})}
-                      onBlur={() => handleFieldVerify('dimensions')}
+                      onBlur={() => setEditingField(null)}
                       placeholder="Ex: 70 x 50 cm"
                       autoFocus
                       className="w-full bg-transparent text-white text-sm border-none outline-none"
@@ -770,23 +735,13 @@ export default function ScanPuzzleModal({ open, onClose }) {
                   ) : (
                     <p className="text-white text-sm">{puzzleData.dimensions || 'Non renseigné'}</p>
                   )}
-                </div>
-                {verifiedFields.dimensions ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="flex-shrink-0"
-                  >
-                    <Check className="w-5 h-5 text-green-400" />
-                  </motion.div>
-                ) : (
+                  </div>
                   <button
-                    onClick={() => setEditingField('dimensions')}
-                    className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
+                  onClick={() => setEditingField('dimensions')}
+                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" />
                   </button>
-                )}
               </div>
             </motion.div>
 
