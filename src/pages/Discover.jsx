@@ -8,58 +8,8 @@ import { toast } from 'sonner';
 import SwipeCard from '@/components/swipe/SwipeCard';
 import SessionResultModal from '@/components/swipe/SessionResultModal';
 
-const MOCK_PUZZLES = [
-  {
-    id: '1',
-    asin: 'B001',
-    image_hd: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&h=800&fit=crop',
-    title: 'Nuit Étoilée Abstraite',
-    brand: 'Ravensburger',
-    piece_count: 1000,
-    category_tag: 'Abstract',
-    price: 24.99
-  },
-  {
-    id: '2',
-    asin: 'B002',
-    image_hd: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=800&fit=crop',
-    title: 'Montagne Majestueuse au Coucher du Soleil',
-    brand: 'Clementoni',
-    piece_count: 1500,
-    category_tag: 'Nature',
-    price: 29.99
-  },
-  {
-    id: '3',
-    asin: 'B003',
-    image_hd: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&h=800&fit=crop',
-    title: 'Plage Tropicale Paradisiaque',
-    brand: 'Educa',
-    piece_count: 2000,
-    category_tag: 'Nature',
-    price: 34.99
-  },
-  {
-    id: '4',
-    asin: 'B004',
-    image_hd: 'https://images.unsplash.com/photo-1514539079130-25950c84af65?w=800&h=800&fit=crop',
-    title: 'Concert Rock Ambiance',
-    brand: 'Schmidt',
-    piece_count: 1000,
-    category_tag: 'Art',
-    price: 22.99
-  },
-  {
-    id: '5',
-    asin: 'B005',
-    image_hd: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop',
-    title: 'Ville Nocturne Illuminée',
-    brand: 'Ravensburger',
-    piece_count: 1500,
-    category_tag: 'Urban',
-    price: 27.99
-  }
-];
+const SEARCH_THEMES = ['Nature', 'Art', 'Disney', 'Panorama', 'Animals', 'Cities'];
+const MIN_UNSEEN_PUZZLES = 50;
 
 export default function Discover() {
   const [user, setUser] = useState(null);
@@ -73,6 +23,117 @@ export default function Discover() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const extractPieceCount = (title) => {
+    const match = title.match(/(\d+)\s*(pièces?|pieces?|pcs)/i);
+    return match ? parseInt(match[1]) : null;
+  };
+
+  const extractCategory = (breadcrumbs) => {
+    if (!breadcrumbs || breadcrumbs.length === 0) return 'Other';
+    
+    const categoryMap = {
+      'nature': 'Nature',
+      'animaux': 'Animals',
+      'paysage': 'Nature',
+      'ville': 'Urban',
+      'art': 'Art',
+      'disney': 'Disney',
+      'panorama': 'Panorama',
+      'abstrait': 'Abstract'
+    };
+
+    for (let crumb of breadcrumbs) {
+      const name = crumb.name?.toLowerCase() || '';
+      for (let [key, value] of Object.entries(categoryMap)) {
+        if (name.includes(key)) return value;
+      }
+    }
+    
+    return 'Other';
+  };
+
+  const cleanTitle = (title, brand, pieces) => {
+    let cleaned = title;
+    if (brand) cleaned = cleaned.replace(new RegExp(brand, 'gi'), '').trim();
+    if (pieces) cleaned = cleaned.replace(/\d+\s*(pièces?|pieces?|pcs)/gi, '').trim();
+    cleaned = cleaned.replace(/\d+\s*[xX×]\s*\d+\s*(cm|mm)?/g, '').trim();
+    cleaned = cleaned.replace(/^[\s\-,]+|[\s\-,]+$/g, '').replace(/\s+/g, ' ');
+    return cleaned;
+  };
+
+  const fetchPuzzlesFromRainforest = async (theme) => {
+    try {
+      const response = await fetch(
+        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=search&amazon_domain=amazon.fr&search_term=puzzle ${theme}&sort_by=featured`
+      );
+      
+      const data = await response.json();
+      
+      if (!data.search_results || data.search_results.length === 0) {
+        return [];
+      }
+
+      const newPuzzles = [];
+      
+      for (let product of data.search_results.slice(0, 20)) {
+        if (!product.asin) continue;
+
+        // Check if ASIN already exists
+        const existing = await base44.entities.PuzzleCatalog.filter({ asin: product.asin });
+        if (existing.length > 0) continue;
+
+        const pieces = extractPieceCount(product.title || '');
+        const category = extractCategory(product.breadcrumbs);
+        const cleanedTitle = cleanTitle(product.title || '', product.brand || '', pieces);
+
+        const puzzleData = {
+          asin: product.asin,
+          image_hd: product.image || 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=800&h=800&fit=crop',
+          title: cleanedTitle,
+          brand: product.brand || '',
+          piece_count: pieces,
+          category_tag: category,
+          price: product.price?.value || 0,
+          amazon_link: product.link || ''
+        };
+
+        const created = await base44.entities.PuzzleCatalog.create(puzzleData);
+        newPuzzles.push(created);
+      }
+
+      return newPuzzles;
+    } catch (error) {
+      console.error('Error fetching from Rainforest:', error);
+      return [];
+    }
+  };
+
+  const checkAndReplenishStock = async () => {
+    // Get user's seen puzzles
+    const seenPuzzles = await base44.entities.UserSeenPuzzle.list();
+    const seenASINs = new Set(seenPuzzles.map(p => p.puzzle_asin));
+
+    // Get total catalog
+    const allPuzzles = await base44.entities.PuzzleCatalog.list();
+    
+    // Count unseen
+    const unseenCount = allPuzzles.filter(p => !seenASINs.has(p.asin)).length;
+
+    if (unseenCount < MIN_UNSEEN_PUZZLES) {
+      toast.info('Chargement de nouveaux puzzles...');
+      
+      // Get next theme (rotate)
+      const lastThemeIndex = parseInt(localStorage.getItem('lastThemeIndex') || '0');
+      const nextThemeIndex = (lastThemeIndex + 1) % SEARCH_THEMES.length;
+      const theme = SEARCH_THEMES[nextThemeIndex];
+      
+      localStorage.setItem('lastThemeIndex', nextThemeIndex.toString());
+
+      await fetchPuzzlesFromRainforest(theme);
+      toast.success(`Nouveaux puzzles ${theme} ajoutés !`);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -93,8 +154,20 @@ export default function Discover() {
         setUserDNA(dnaRecords[0]);
       }
 
-      // Load puzzles (use mock for now)
-      setPuzzles(MOCK_PUZZLES);
+      // Check and replenish puzzle stock
+      await checkAndReplenishStock();
+
+      // Load unseen puzzles
+      const seenPuzzles = await base44.entities.UserSeenPuzzle.list();
+      const seenASINs = new Set(seenPuzzles.map(p => p.puzzle_asin));
+      
+      const allPuzzles = await base44.entities.PuzzleCatalog.list();
+      const unseenPuzzles = allPuzzles.filter(p => !seenASINs.has(p.asin));
+      
+      // Shuffle for variety
+      const shuffled = unseenPuzzles.sort(() => Math.random() - 0.5);
+      
+      setPuzzles(shuffled.slice(0, 100)); // Load batch of 100
       setLoading(false);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -175,6 +248,11 @@ export default function Discover() {
     let interactionType = 'dislike';
     let updateFields = {};
 
+    // Mark as seen
+    await base44.entities.UserSeenPuzzle.create({
+      puzzle_asin: puzzle.asin
+    });
+
     if (direction === 'dislike') {
       scoreChange = -0.5;
       interactionType = 'dislike';
@@ -193,6 +271,7 @@ export default function Discover() {
         puzzle_brand: puzzle.brand,
         puzzle_pieces: puzzle.piece_count,
         image_url: puzzle.image_hd,
+        puzzle_reference: puzzle.asin,
         status: 'wishlist'
       });
       
@@ -217,6 +296,11 @@ export default function Discover() {
     }
 
     setCurrentIndex(prev => prev + 1);
+
+    // Check if we need to reload more puzzles
+    if (currentIndex >= puzzles.length - 10) {
+      await checkAndReplenishStock();
+    }
   };
 
   const handleContinueSession = async () => {
