@@ -33,6 +33,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const [barcodeInput, setBarcodeInput] = useState('');
   const [editingField, setEditingField] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [existingPuzzle, setExistingPuzzle] = useState(null);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -224,8 +225,40 @@ export default function ScanPuzzleModal({ open, onClose }) {
     return cleanedTitle;
   };
 
+  const checkExistingPuzzle = async (barcode) => {
+    try {
+      const existing = await base44.entities.PuzzleCatalog.filter({ asin: barcode });
+      if (existing && existing.length > 0) {
+        setExistingPuzzle(existing[0]);
+        return existing[0];
+      }
+      return null;
+    } catch (error) {
+      console.error('Error checking existing puzzle:', error);
+      return null;
+    }
+  };
+
   const fetchPuzzleData = async (barcode) => {
     setLoading(true);
+    
+    // Check if puzzle already exists in catalog
+    const existing = await checkExistingPuzzle(barcode);
+    if (existing) {
+      toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+      setPuzzleData({
+        name: existing.title,
+        brand: existing.brand,
+        image: existing.image_hd,
+        link: existing.amazon_link,
+        sku: existing.asin,
+        pieces: existing.piece_count,
+        dimensions: ''
+      });
+      setLoading(false);
+      return;
+    }
+    
     toast.info('Recherche du puzzle en cours...');
     
     try {
@@ -306,6 +339,26 @@ export default function ScanPuzzleModal({ open, onClose }) {
 
   const handleAddPuzzle = async (status) => {
     try {
+      // Check if puzzle exists in catalog, if not create it
+      if (!existingPuzzle && puzzleData.sku) {
+        try {
+          await base44.entities.PuzzleCatalog.create({
+            asin: puzzleData.sku,
+            image_hd: puzzleData.image,
+            title: puzzleData.name,
+            brand: puzzleData.brand,
+            piece_count: puzzleData.pieces,
+            amazon_link: puzzleData.link || '',
+            category_tag: '',
+            price: 0
+          });
+        } catch (catalogError) {
+          // Ignore if already exists (race condition)
+          console.log('Catalog entry might already exist:', catalogError);
+        }
+      }
+      
+      // Add to user's collection
       await base44.entities.UserPuzzle.create({
         puzzle_name: puzzleData.name,
         puzzle_brand: puzzleData.brand,
@@ -335,6 +388,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setEditingField(null);
+    setExistingPuzzle(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
   };
@@ -345,6 +399,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setEditingField(null);
+    setExistingPuzzle(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
@@ -406,17 +461,27 @@ export default function ScanPuzzleModal({ open, onClose }) {
                     <div className="w-full max-w-sm">
                       <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
                       <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          placeholder="13 chiffres"
-                          value={barcodeInput}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '').slice(0, 13);
-                            setBarcodeInput(value);
-                          }}
-                          className="bg-white/5 border-white/10 text-white text-center tracking-wider"
-                          maxLength={13}
-                        />
+                        <div className="flex-1">
+                          <Input
+                            type="text"
+                            placeholder="13 chiffres"
+                            value={barcodeInput}
+                            onChange={async (e) => {
+                              const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                              setBarcodeInput(value);
+                              
+                              // Check if puzzle exists when 13 digits are entered
+                              if (value.length === 13) {
+                                const existing = await checkExistingPuzzle(value);
+                                if (existing) {
+                                  toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+                                }
+                              }
+                            }}
+                            className="bg-white/5 border-white/10 text-white text-center tracking-wider"
+                            maxLength={13}
+                          />
+                        </div>
                         <Button
                           onClick={handleBarcodeSubmit}
                           disabled={barcodeInput.length !== 13}
@@ -542,18 +607,28 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 </div>
 
                 <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="13 chiffres"
-                    value={barcodeInput}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 13);
-                      setBarcodeInput(value);
-                    }}
-                    className="bg-white/5 border-white/10 text-white text-center tracking-wider text-lg"
-                    maxLength={13}
-                    disabled={loading}
-                  />
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      placeholder="13 chiffres"
+                      value={barcodeInput}
+                      onChange={async (e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                        setBarcodeInput(value);
+                        
+                        // Check if puzzle exists when 13 digits are entered
+                        if (value.length === 13) {
+                          const existing = await checkExistingPuzzle(value);
+                          if (existing) {
+                            toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+                          }
+                        }
+                      }}
+                      className="bg-white/5 border-white/10 text-white text-center tracking-wider text-lg"
+                      maxLength={13}
+                      disabled={loading}
+                    />
+                  </div>
                   <Button
                     onClick={handleBarcodeSubmit}
                     disabled={barcodeInput.length !== 13 || loading}
@@ -595,6 +670,20 @@ export default function ScanPuzzleModal({ open, onClose }) {
                 </div>
               )}
             </motion.div>
+
+            {/* Badge communauté si puzzle existant */}
+            {existingPuzzle && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
+              >
+                <p className="text-orange-400 text-sm">
+                  ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
+                </p>
+              </motion.div>
+            )}
 
             {/* Nom - Animation 2 */}
             <motion.div
