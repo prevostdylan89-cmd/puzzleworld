@@ -12,7 +12,8 @@ import {
   Puzzle,
   LogOut,
   Languages,
-  Scan
+  Scan,
+  Sparkles
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ function LayoutContent({ children, currentPageName }) {
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home' },
+    { name: 'Discover', icon: Sparkles, page: 'Discover' },
     { name: t('social'), icon: Users, page: 'Social' },
     { name: t('collection'), icon: Grid3X3, page: 'Collection' },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },

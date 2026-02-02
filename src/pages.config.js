@@ -54,6 +54,7 @@ import OnlinePuzzles from './pages/OnlinePuzzles';
 import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
+import Discover from './pages/Discover';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "Profile": Profile,
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
+    "Discover": Discover,
 }
 
 export const pagesConfig = {
