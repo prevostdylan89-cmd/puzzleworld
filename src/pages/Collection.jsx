@@ -144,6 +144,19 @@ const allPuzzles = [
   }
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export default function Collection() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
