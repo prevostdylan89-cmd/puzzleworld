@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 
 export default function CollectionSection({ user }) {
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
@@ -66,7 +74,7 @@ export default function CollectionSection({ user }) {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {inboxPuzzles.map((puzzle, index) => (
-              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} />
+              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} />
             ))}
           </div>
         )}
@@ -82,7 +90,7 @@ export default function CollectionSection({ user }) {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {completedPuzzles.map((puzzle, index) => (
-              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} />
+              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} />
             ))}
           </div>
         )}
@@ -91,14 +99,98 @@ export default function CollectionSection({ user }) {
   );
 }
 
-function PuzzleCard({ puzzle, index }) {
+function PuzzleCard({ puzzle, index, onUpdate }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleMove = async () => {
+    if (isUpdating) return;
+    
+    setIsUpdating(true);
+    try {
+      const newStatus = puzzle.status === 'inbox' ? 'done' : 'inbox';
+      
+      // Update puzzle status
+      await base44.entities.UserPuzzle.update(puzzle.id, { status: newStatus });
+      
+      // Award XP if moving to done
+      if (newStatus === 'done') {
+        const user = await base44.auth.me();
+        const currentXP = user.xp || 0;
+        await base44.auth.updateMe({ xp: currentXP + 100 });
+        toast.success('🎉 +100 XP ! Puzzle terminé !');
+      }
+      
+      toast.success(newStatus === 'done' ? 'Puzzle marqué comme terminé !' : 'Puzzle remis dans sa boîte !');
+      
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error updating puzzle:', error);
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (isUpdating) return;
+    
+    if (!confirm('Êtes-vous sûr de vouloir retirer ce puzzle de votre collection ?')) {
+      return;
+    }
+    
+    setIsUpdating(true);
+    try {
+      await base44.entities.UserPuzzle.delete(puzzle.id);
+      toast.success('Puzzle retiré de votre collection');
+      
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error('Error deleting puzzle:', error);
+      toast.error('Erreur lors de la suppression');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group"
+      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative"
     >
+      {/* Menu d'actions */}
+      <div className="absolute top-2 right-2 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              disabled={isUpdating}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+            <DropdownMenuItem 
+              onClick={handleMove}
+              className="text-white cursor-pointer hover:bg-white/10"
+            >
+              <ArrowRight className="w-4 h-4 mr-2" />
+              {puzzle.status === 'inbox' ? 'Marquer comme terminé' : 'Remettre dans sa boîte'}
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleDelete}
+              className="text-red-400 cursor-pointer hover:bg-white/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Retirer de ma collection
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <div className="aspect-square overflow-hidden bg-white/5">
         {puzzle.image_url ? (
           <img

@@ -33,7 +33,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
     sku: ''
   });
   const [barcodeInput, setBarcodeInput] = useState('');
-  const [editingField, setEditingField] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [existingPuzzle, setExistingPuzzle] = useState(null);
   
@@ -394,6 +393,13 @@ export default function ScanPuzzleModal({ open, onClose }) {
       // Add to user's collection
       await base44.entities.UserPuzzle.create(puzzleToCreate);
       
+      // Award XP if adding as completed
+      if (status === 'done') {
+        const user = await base44.auth.me();
+        const currentXP = user.xp || 0;
+        await base44.auth.updateMe({ xp: currentXP + 100 });
+      }
+      
       setShowSuccess(true);
       setShowRatingChoice(false);
       
@@ -414,7 +420,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setCameraReady(false);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
-    setEditingField(null);
     setExistingPuzzle(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
@@ -427,7 +432,6 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setPendingStatus(null);
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
-    setEditingField(null);
     setExistingPuzzle(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
@@ -714,133 +718,38 @@ export default function ScanPuzzleModal({ open, onClose }) {
               </motion.div>
             )}
 
-            {/* Nom - Animation 2 */}
+            {/* Informations du puzzle (non éditables) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.4 }}
-              className={`relative rounded-lg bg-white/5 border ${!puzzleData.name ? 'border-orange-500' : 'border-white/10'} p-3`}
+              className="space-y-3"
             >
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
-                  {editingField === 'name' ? (
-                    <input
-                      type="text"
-                      value={puzzleData.name}
-                      onChange={(e) => setPuzzleData({...puzzleData, name: e.target.value})}
-                      onBlur={() => setEditingField(null)}
-                      autoFocus
-                      className="w-full bg-transparent text-white text-sm border-none outline-none"
-                    />
-                  ) : (
-                    <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
-                  )}
-                  </div>
-                  <button
-                  onClick={() => setEditingField('name')}
-                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
-                  >
-                  <Edit2 className="w-4 h-4" />
-                  </button>
+              {/* Nom */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
+                <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
               </div>
-            </motion.div>
 
-            {/* Marque - Animation 3 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="relative rounded-lg bg-white/5 border border-white/10 p-3"
-            >
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  <label className="text-white/50 text-xs mb-1 block">Marque</label>
-                  {editingField === 'brand' ? (
-                    <input
-                      type="text"
-                      value={puzzleData.brand}
-                      onChange={(e) => setPuzzleData({...puzzleData, brand: e.target.value})}
-                      onBlur={() => setEditingField(null)}
-                      autoFocus
-                      className="w-full bg-transparent text-white text-sm border-none outline-none"
-                    />
-                  ) : (
-                    <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
-                  )}
-                  </div>
-                  <button
-                  onClick={() => setEditingField('brand')}
-                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
-                  >
-                  <Edit2 className="w-4 h-4" />
-                  </button>
+              {/* Marque */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Marque</label>
+                <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
               </div>
-            </motion.div>
 
-            {/* Pièces - Animation 4 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.4 }}
-              className={`relative rounded-lg bg-white/5 border ${!puzzleData.pieces ? 'border-orange-500 shadow-lg shadow-orange-500/20' : 'border-white/10'} p-3`}
-            >
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  <label className="text-white/50 text-xs mb-1 block">Nombre de pièces {!puzzleData.pieces && <span className="text-orange-400">*</span>}</label>
-                  {editingField === 'pieces' ? (
-                    <input
-                      type="number"
-                      value={puzzleData.pieces || ''}
-                      onChange={(e) => setPuzzleData({...puzzleData, pieces: parseInt(e.target.value) || null})}
-                      onBlur={() => setEditingField(null)}
-                      autoFocus
-                      className="w-full bg-transparent text-white text-sm border-none outline-none"
-                    />
-                  ) : (
-                    <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'À remplir'}</p>
-                  )}
-                  </div>
-                  <button
-                  onClick={() => setEditingField('pieces')}
-                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
-                  >
-                  <Edit2 className="w-4 h-4" />
-                  </button>
+              {/* Pièces */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
+                <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
               </div>
-            </motion.div>
 
-            {/* Dimensions - Animation 5 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.4 }}
-              className="relative rounded-lg bg-white/5 border border-white/10 p-3"
-            >
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
+              {/* Dimensions */}
+              {puzzleData.dimensions && (
+                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
                   <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
-                  {editingField === 'dimensions' ? (
-                    <input
-                      type="text"
-                      value={puzzleData.dimensions || ''}
-                      onChange={(e) => setPuzzleData({...puzzleData, dimensions: e.target.value})}
-                      onBlur={() => setEditingField(null)}
-                      placeholder="Ex: 70 x 50 cm"
-                      autoFocus
-                      className="w-full bg-transparent text-white text-sm border-none outline-none"
-                    />
-                  ) : (
-                    <p className="text-white text-sm">{puzzleData.dimensions || 'Non renseigné'}</p>
-                  )}
-                  </div>
-                  <button
-                  onClick={() => setEditingField('dimensions')}
-                  className="flex-shrink-0 text-white/40 hover:text-orange-400 transition-colors"
-                  >
-                  <Edit2 className="w-4 h-4" />
-                  </button>
-              </div>
+                  <p className="text-white text-sm">{puzzleData.dimensions}</p>
+                </div>
+              )}
             </motion.div>
 
             {/* Boutons de choix - Animation 6 */}
@@ -906,27 +815,41 @@ export default function ScanPuzzleModal({ open, onClose }) {
           <div className="space-y-6 py-8">
             {/* Animation de pièces de puzzle */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex justify-center items-center gap-4 mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center items-center mb-6 relative h-24"
             >
+              {/* Pièce gauche */}
               <motion.div
-                initial={{ x: -50, rotate: -45 }}
+                initial={{ x: -100, rotate: -15 }}
                 animate={{ x: 0, rotate: 0 }}
-                transition={{ delay: 0.3, duration: 0.5, type: "spring" }}
-                className="text-6xl"
+                transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
+                className="text-6xl absolute"
+                style={{ left: 'calc(50% - 48px)' }}
               >
                 🧩
               </motion.div>
+
+              {/* Pièce droite */}
               <motion.div
-                initial={{ x: 50, rotate: 45 }}
+                initial={{ x: 100, rotate: 15 }}
                 animate={{ x: 0, rotate: 0 }}
-                transition={{ delay: 0.3, duration: 0.5, type: "spring" }}
-                className="text-6xl"
+                transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
+                className="text-6xl absolute"
+                style={{ right: 'calc(50% - 48px)' }}
               >
                 🧩
               </motion.div>
+
+              {/* Effet de brillance au centre */}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.5, 0], opacity: [0, 1, 0] }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+                className="absolute w-16 h-16 rounded-full bg-gradient-to-r from-orange-400 to-yellow-400"
+                style={{ filter: 'blur(20px)' }}
+              />
             </motion.div>
 
             <motion.div

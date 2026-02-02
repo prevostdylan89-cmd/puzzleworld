@@ -193,11 +193,21 @@ export default function Profile() {
     ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true })
     : 'Recently';
 
+  const currentXP = user?.xp || 0;
+  
+  const getLevelInfo = (xp) => {
+    if (xp < 500) return { level: 1, name: 'Novice', nextXP: 500 };
+    if (xp < 1500) return { level: 2, name: 'Assembleur', nextXP: 1500 };
+    if (xp < 3000) return { level: 3, name: 'Expert du Puzzle', nextXP: 3000 };
+    return { level: 3, name: 'Expert du Puzzle', nextXP: 3000 };
+  };
+
+  const levelInfo = getLevelInfo(currentXP);
   const levelProgress = {
-    current: Math.floor(stats.completed / 5) + 1,
-    xp: stats.completed * 100,
-    nextLevelXp: (Math.floor(stats.completed / 5) + 1) * 500,
-    title: stats.completed > 50 ? t('puzzleMaster') : stats.completed > 20 ? t('puzzleExpert') : t('puzzleEnthusiast')
+    current: levelInfo.level,
+    xp: currentXP,
+    nextLevelXp: levelInfo.nextXP,
+    title: levelInfo.name
   };
 
   const statItems = [
