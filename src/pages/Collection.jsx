@@ -5,6 +5,7 @@ import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -164,6 +165,8 @@ export default function Collection() {
   const [viewMode, setViewMode] = useState('grid');
   const [minPieces, setMinPieces] = useState('');
   const [maxPieces, setMaxPieces] = useState('');
+  const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading } = useQuery({
@@ -351,35 +354,44 @@ export default function Collection() {
       </div>
 
       {/* Puzzle Grid */}
-      <div className="px-4 lg:px-8 py-6">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
-          </div>
-        ) : (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className={`grid gap-4 ${
-              viewMode === 'large' 
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-                : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-            }`}
-          >
-            {sortedPuzzles.length === 0 ? (
-              <div className="col-span-full text-center py-12">
-                <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                <p className="text-white/50">Aucun puzzle trouvé</p>
-                <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
-              </div>
-            ) : (
-              sortedPuzzles.map((puzzle, index) => (
-                <CommunityPuzzleCard key={puzzle.id} puzzle={puzzle} index={index} variant={viewMode === 'large' ? 'large' : 'default'} />
-              ))
-            )}
-          </motion.div>
-        )}
+        <div className="px-4 lg:px-8 py-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+            </div>
+          ) : (
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className={`grid gap-4 ${
+                viewMode === 'large' 
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                  : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              }`}
+            >
+              {sortedPuzzles.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/50">Aucun puzzle trouvé</p>
+                  <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
+                </div>
+              ) : (
+                sortedPuzzles.map((puzzle, index) => (
+                  <CommunityPuzzleCard 
+                    key={puzzle.id} 
+                    puzzle={puzzle} 
+                    index={index} 
+                    variant={viewMode === 'large' ? 'large' : 'default'}
+                    onClick={() => {
+                      setSelectedPuzzle(puzzle);
+                      setShowDetailModal(true);
+                    }}
+                  />
+                ))
+              )}
+            </motion.div>
+          )}
 
         {/* Load More */}
         <div className="flex justify-center mt-12">
@@ -395,17 +407,25 @@ export default function Collection() {
             <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
           </Button>
         </div>
-      </div>
-    </div>
-    );
-    }
+        </div>
 
-    function CommunityPuzzleCard({ puzzle, index, variant }) {
-    return (
-    <motion.div
-      variants={item}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group"
-    >
+        {/* Puzzle Detail Modal */}
+        <PuzzleDetailModal
+        open={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        puzzle={selectedPuzzle}
+        />
+        </div>
+        );
+        }
+
+        function CommunityPuzzleCard({ puzzle, index, variant, onClick }) {
+        return (
+        <motion.div
+        variants={item}
+        onClick={onClick}
+        className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer"
+        >
       <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-white/5`}>
         {puzzle.image_hd ? (
           <img
