@@ -42,28 +42,65 @@ export default function Discover() {
     return match ? parseInt(match[1]) : null;
   };
 
-  const extractCategory = (breadcrumbs) => {
-    if (!breadcrumbs || breadcrumbs.length === 0) return 'Other';
+  const extractCategory = (product) => {
+    const title = (product.title || '').toLowerCase();
+    const breadcrumbs = product.breadcrumbs || [];
+    const categories = product.categories || [];
     
-    const categoryMap = {
-      'nature': 'Nature',
-      'animaux': 'Animals',
-      'paysage': 'Nature',
-      'ville': 'Urban',
-      'art': 'Art',
-      'disney': 'Disney',
-      'panorama': 'Panorama',
-      'abstrait': 'Abstract'
+    // Combine all text sources for analysis
+    const allText = [
+      title,
+      ...breadcrumbs.map(b => (b.name || '').toLowerCase()),
+      ...categories.map(c => (c.name || '').toLowerCase())
+    ].join(' ');
+
+    // Macro-Catégories avec mots-clés
+    const categoryRules = {
+      'Nature': [
+        'landscape', 'forest', 'sea', 'mountain', 'flowers', 'nature', 
+        'paysage', 'forêt', 'mer', 'montagne', 'fleurs', 'ocean', 'lake',
+        'beach', 'sunset', 'sunrise', 'tree', 'garden', 'wildlife'
+      ],
+      'Urbain': [
+        'city', 'architecture', 'building', 'street', 'monument',
+        'paris', 'new york', 'london', 'urban', 'skyline', 'ville',
+        'tour eiffel', 'cathédrale', 'château', 'bridge', 'town'
+      ],
+      'Disney': [
+        'disney', 'pixar', 'mickey', 'minnie', 'princess', 'cartoon',
+        'marvel', 'star wars', 'frozen', 'simba', 'princesse'
+      ],
+      'Art': [
+        'painting', 'art', 'artist', 'impressionist', 'van gogh', 
+        'monet', 'picasso', 'renaissance', 'museum', 'artiste',
+        'tableau', 'peinture', 'oeuvre'
+      ],
+      'Animaux': [
+        'animal', 'cat', 'dog', 'bird', 'lion', 'tiger', 'elephant',
+        'wolf', 'horse', 'pet', 'wildlife', 'animaux', 'chat', 'chien',
+        'oiseau', 'faune', 'zoo'
+      ],
+      'Monochrome': [
+        'black and white', 'noir et blanc', 'monochrome', 'gradient',
+        'color splash', 'sepia', 'grayscale'
+      ],
+      'Vintage': [
+        'vintage', 'retro', 'old', 'antique', 'classic', 'historical',
+        'ancien', 'rétro', 'classique', 'nostalgique'
+      ]
     };
 
-    for (let crumb of breadcrumbs) {
-      const name = crumb.name?.toLowerCase() || '';
-      for (let [key, value] of Object.entries(categoryMap)) {
-        if (name.includes(key)) return value;
+    // Check each category
+    for (const [category, keywords] of Object.entries(categoryRules)) {
+      for (const keyword of keywords) {
+        if (allText.includes(keyword)) {
+          return category;
+        }
       }
     }
     
-    return 'Other';
+    // Fallback
+    return 'Autre';
   };
 
   const cleanTitle = (title, brand, pieces) => {
@@ -175,7 +212,7 @@ export default function Discover() {
           }
         }
 
-        const category = extractCategory(product.breadcrumbs);
+        const category = extractCategory(product);
         const cleanedTitle = cleanTitle(product.title || '', product.brand || '', pieces);
         const bestImage = selectBestImage(product);
 

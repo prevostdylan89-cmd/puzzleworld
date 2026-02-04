@@ -158,6 +158,18 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
+const CATEGORY_FILTERS = [
+  { id: 'all', label: 'Tous', icon: '🌍' },
+  { id: 'Nature', label: 'Nature', icon: '🌳' },
+  { id: 'Urbain', label: 'Urbain', icon: '🏙️' },
+  { id: 'Disney', label: 'Disney', icon: '🏰' },
+  { id: 'Art', label: 'Art', icon: '🎨' },
+  { id: 'Animaux', label: 'Animaux', icon: '🦁' },
+  { id: 'Monochrome', label: 'Monochrome', icon: '⚫' },
+  { id: 'Vintage', label: 'Vintage', icon: '📜' },
+  { id: 'Autre', label: 'Autre', icon: '🧩' }
+];
+
 export default function Collection() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -167,6 +179,7 @@ export default function Collection() {
   const [maxPieces, setMaxPieces] = useState('');
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading } = useQuery({
@@ -181,6 +194,7 @@ export default function Collection() {
     setMinPieces('');
     setMaxPieces('');
     setSearchQuery('');
+    setSelectedCategory('all');
   };
 
   // Filter puzzles
@@ -189,8 +203,9 @@ export default function Collection() {
                           puzzle.brand?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMinPieces = !minPieces || (puzzle.piece_count >= parseInt(minPieces));
     const matchesMaxPieces = !maxPieces || (puzzle.piece_count <= parseInt(maxPieces));
+    const matchesCategory = selectedCategory === 'all' || puzzle.category_tag === selectedCategory;
     
-    return matchesSearch && matchesMinPieces && matchesMaxPieces;
+    return matchesSearch && matchesMinPieces && matchesMaxPieces && matchesCategory;
   });
 
   // Sort puzzles
@@ -304,6 +319,26 @@ export default function Collection() {
                   <LayoutGrid className="w-4 h-4" />
                 </Button>
               </div>
+            </div>
+          </div>
+
+          {/* Category Filters */}
+          <div className="mt-4 mb-4">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {CATEGORY_FILTERS.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                    selectedCategory === category.id
+                      ? 'bg-orange-500 text-white shadow-lg'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <span className="text-lg">{category.icon}</span>
+                  <span className="text-sm font-medium">{category.label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
