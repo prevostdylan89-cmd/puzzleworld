@@ -43,6 +43,7 @@ export default function Discover() {
   };
 
   const extractCategory = (product) => {
+    // NORMALISATION: lowercase pour éviter les erreurs de casse
     const title = (product.title || '').toLowerCase();
     const breadcrumbs = product.breadcrumbs || [];
     const categories = product.categories || [];
@@ -54,7 +55,7 @@ export default function Discover() {
       ...categories.map(c => (c.name || '').toLowerCase())
     ].join(' ');
 
-    // Macro-Catégories avec mots-clés
+    // Macro-Catégories avec mots-clés (EXACTEMENT comme dans ReclassifyButton)
     const categoryRules = {
       'Nature': [
         'landscape', 'forest', 'sea', 'mountain', 'flowers', 'nature', 
@@ -64,11 +65,11 @@ export default function Discover() {
       'Urbain': [
         'city', 'architecture', 'building', 'street', 'monument',
         'paris', 'new york', 'london', 'urban', 'skyline', 'ville',
-        'tour eiffel', 'cathédrale', 'château', 'bridge', 'town'
+        'tour eiffel', 'cathédrale', 'château', 'bridge', 'town', 'tour', 'urbain'
       ],
       'Disney': [
         'disney', 'pixar', 'mickey', 'minnie', 'princess', 'cartoon',
-        'marvel', 'star wars', 'frozen', 'simba', 'princesse'
+        'marvel', 'star wars', 'frozen', 'simba', 'princesse', 'animation'
       ],
       'Art': [
         'painting', 'art', 'artist', 'impressionist', 'van gogh', 

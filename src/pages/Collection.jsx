@@ -6,6 +6,7 @@ import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
+import ReclassifyButton from '@/components/collection/ReclassifyButton';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -182,10 +183,10 @@ export default function Collection() {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Fetch puzzles from global catalog
-  const { data: globalPuzzles = [], isLoading } = useQuery({
+  const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
     queryKey: ['globalPuzzles'],
     queryFn: async () => {
-      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 200);
+      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 500);
       return puzzles;
     }
   });
@@ -350,6 +351,7 @@ export default function Collection() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ReclassifyButton onComplete={() => refetch()} />
               <Button
                 variant={sortBy === 'newest' ? 'default' : 'ghost'}
                 size="sm"
