@@ -113,11 +113,12 @@ export default function Discover() {
     try {
       // Build search term based on filters
       let searchTerm = 'jigsaw puzzle';
+      const selected_pieces = filters.pieceCount;
       
       if (filters.kidsMode) {
-        searchTerm += ' kids enfant';
+        searchTerm = 'jigsaw puzzle kids 24 48 100 pieces';
       } else {
-        searchTerm += ` ${filters.pieceCount} pieces`;
+        searchTerm = `jigsaw puzzle ${selected_pieces} pieces`;
       }
       
       searchTerm += ` ${theme}`;
@@ -148,16 +149,20 @@ export default function Discover() {
 
         const pieces = extractPieceCount(product.title || '');
         
-        // Skip if kids mode and too many pieces
-        if (filters.kidsMode && pieces && pieces > 150) {
-          continue;
-        }
-        
-        // Skip if not kids mode and pieces don't match filter range
-        if (!filters.kidsMode && pieces) {
-          const tolerance = 200;
-          if (Math.abs(pieces - filters.pieceCount) > tolerance) {
+        // FILTRAGE POST-APPEL
+        if (filters.kidsMode) {
+          // Mode Enfant: accepter uniquement 24-150 pièces
+          if (!pieces || pieces > 150) {
             continue;
+          }
+        } else {
+          // Mode Normal: le nombre de pièces doit correspondre à selected_pieces (+/- tolérance)
+          if (!pieces) {
+            continue; // Rejeter si pas de nombre de pièces détecté
+          }
+          const tolerance = 100;
+          if (Math.abs(pieces - filters.pieceCount) > tolerance) {
+            continue; // Rejeter si hors de la plage
           }
         }
 
