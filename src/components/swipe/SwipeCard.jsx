@@ -33,7 +33,7 @@ export default function SwipeCard({ puzzle, onSwipe, style, dragControls }) {
           <img 
             src={puzzle.image_hd} 
             alt={puzzle.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain bg-gradient-to-br from-slate-100 to-slate-200"
           />
           
           {/* Overlays de swipe */}

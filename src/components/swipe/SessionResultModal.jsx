@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { TrendingUp, Heart, Star, Target } from 'lucide-react';
 
 export default function SessionResultModal({ open, onClose, stats, onContinue }) {
-  const { topCategory, categoryPercentage, totalLikes, totalSuperLikes } = stats;
+  const { topCategory, categoryPercentage, totalLikes, totalSuperLikes, topBrand, kidsMode } = stats;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-gradient-to-br from-[#0a0a2e] to-[#1a1a4e] border-white/10 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
-            🎉 Bilan de Session !
+            {kidsMode ? '🎉 Super travail !' : '🎉 Bilan de Session !'}
           </DialogTitle>
         </DialogHeader>
 
@@ -28,7 +28,9 @@ export default function SessionResultModal({ open, onClose, stats, onContinue })
               <div className="text-6xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
                 25
               </div>
-              <p className="text-white/70 text-sm mt-1">Puzzles découverts</p>
+              <p className="text-white/70 text-sm mt-1">
+                {kidsMode ? 'Puzzles découverts 🌟' : 'Puzzles découverts'}
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-6">
@@ -63,10 +65,21 @@ export default function SessionResultModal({ open, onClose, stats, onContinue })
                   <TrendingUp className="w-5 h-5 text-orange-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-white font-semibold mb-1">Votre préférence</p>
-                  <p className="text-white/80 text-sm">
-                    Vous avez aimé <span className="text-orange-400 font-bold">{categoryPercentage}%</span> de puzzles <span className="text-orange-400 font-bold">{topCategory}</span> !
+                  <p className="text-white font-semibold mb-1">
+                    {kidsMode ? '🎨 Tes préférences' : 'Votre préférence'}
                   </p>
+                  <p className="text-white/80 text-sm">
+                    {kidsMode ? (
+                      <>Tu as adoré <span className="text-orange-400 font-bold">{categoryPercentage}%</span> de puzzles <span className="text-orange-400 font-bold">{topCategory}</span> ! 🎉</>
+                    ) : (
+                      <>Vous avez aimé <span className="text-orange-400 font-bold">{categoryPercentage}%</span> de puzzles <span className="text-orange-400 font-bold">{topCategory}</span> !</>
+                    )}
+                  </p>
+                  {topBrand && !kidsMode && (
+                    <p className="text-white/60 text-xs mt-2">
+                      Marque favorite: <span className="text-orange-400">{topBrand}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             </motion.div>

@@ -7,6 +7,7 @@ import { Heart, X, Star, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import SwipeCard from '@/components/swipe/SwipeCard';
 import SessionResultModal from '@/components/swipe/SessionResultModal';
+import ConfigModal from '@/components/swipe/ConfigModal';
 
 const SEARCH_THEMES = ['Nature', 'Art', 'Disney', 'Panorama', 'Animals', 'Cities'];
 const MIN_UNSEEN_PUZZLES = 50;
