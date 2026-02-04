@@ -11,6 +11,13 @@ import SessionResultModal from '@/components/swipe/SessionResultModal';
 const SEARCH_THEMES = ['Nature', 'Art', 'Disney', 'Panorama', 'Animals', 'Cities'];
 const MIN_UNSEEN_PUZZLES = 50;
 
+// Anti-gadget keywords
+const ACCESSORY_KEYWORDS = [
+  'tapis', 'colle', 'rangement', 'accessoire', 'tri', 'plateau', 
+  'conservateur', 'roll', 'mural', 'cadre vide', 'table', 'lampe',
+  'storage', 'mat', 'glue', 'frame', 'organizer'
+];
+
 export default function Discover() {
   const [user, setUser] = useState(null);
   const [userDNA, setUserDNA] = useState(null);
@@ -19,6 +26,11 @@ export default function Discover() {
   const [loading, setLoading] = useState(true);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [sessionStats, setSessionStats] = useState({});
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [filters, setFilters] = useState({
+    pieceCount: 1000,
+    kidsMode: false
+  });
 
   useEffect(() => {
     loadData();
@@ -62,10 +74,55 @@ export default function Discover() {
     return cleaned;
   };
 
+  const isAccessory = (title, breadcrumbs) => {
+    const titleLower = (title || '').toLowerCase();
+    
+    // Check title for accessory keywords
+    if (ACCESSORY_KEYWORDS.some(keyword => titleLower.includes(keyword))) {
+      return true;
+    }
+    
+    // Check breadcrumbs for "Accessoires"
+    if (breadcrumbs) {
+      const hasAccessoryCategory = breadcrumbs.some(crumb => 
+        (crumb.name || '').toLowerCase().includes('accessoire')
+      );
+      if (hasAccessoryCategory) return true;
+    }
+    
+    return false;
+  };
+
+  const selectBestImage = (product) => {
+    // Priority: Find assembled puzzle image or flat shot
+    const images = product.images_flat || product.images || [];
+    
+    if (images.length > 1) {
+      // Try to find image without too much text/packaging
+      for (let i = 1; i < Math.min(images.length, 4); i++) {
+        return images[i];
+      }
+    }
+    
+    // Fallback to main image
+    return product.image || 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=800&h=800&fit=crop';
+  };
+
   const fetchPuzzlesFromRainforest = async (theme) => {
     try {
+      // Build search term based on filters
+      let searchTerm = 'jigsaw puzzle';
+      
+      if (filters.kidsMode) {
+        searchTerm += ' kids enfant';
+      } else {
+        searchTerm += ` ${filters.pieceCount} pieces`;
+      }
+      
+      searchTerm += ` ${theme}`;
+
       const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=search&amazon_domain=amazon.fr&search_term=puzzle ${theme}&sort_by=featured`
+        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=search&amazon_domain=amazon.fr&search_term=${encodeURIComponent(searchTerm)}&sort_by=featured`
       );
       
       const data = await response.json();
@@ -79,23 +136,43 @@ export default function Discover() {
       for (let product of data.search_results.slice(0, 20)) {
         if (!product.asin) continue;
 
+        // ANTI-GADGET FILTER
+        if (isAccessory(product.title, product.breadcrumbs)) {
+          continue;
+        }
+
         // Check if ASIN already exists
         const existing = await base44.entities.PuzzleCatalog.filter({ asin: product.asin });
         if (existing.length > 0) continue;
 
         const pieces = extractPieceCount(product.title || '');
+        
+        // Skip if kids mode and too many pieces
+        if (filters.kidsMode && pieces && pieces > 150) {
+          continue;
+        }
+        
+        // Skip if not kids mode and pieces don't match filter range
+        if (!filters.kidsMode && pieces) {
+          const tolerance = 200;
+          if (Math.abs(pieces - filters.pieceCount) > tolerance) {
+            continue;
+          }
+        }
+
         const category = extractCategory(product.breadcrumbs);
         const cleanedTitle = cleanTitle(product.title || '', product.brand || '', pieces);
+        const bestImage = selectBestImage(product);
 
         const puzzleData = {
           asin: product.asin,
-          image_hd: product.image || 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=800&h=800&fit=crop',
+          image_hd: bestImage,
           title: cleanedTitle,
           brand: product.brand || '',
           piece_count: pieces,
           category_tag: category,
           price: product.price?.value || 0,
-          amazon_link: product.link || ''
+          amazon_link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : ''
         };
 
         const created = await base44.entities.PuzzleCatalog.create(puzzleData);
@@ -230,11 +307,24 @@ export default function Discover() {
     const topCategoryCount = categoryCounts[topCategory] || 0;
     const categoryPercentage = Math.round((topCategoryCount / 25) * 100);
 
+    // Find top brand
+    const brandCounts = {};
+    interactions.forEach(i => {
+      if (i.interaction_type !== 'dislike' && i.puzzle_brand) {
+        brandCounts[i.puzzle_brand] = (brandCounts[i.puzzle_brand] || 0) + 1;
+      }
+    });
+
+    const topBrand = Object.keys(brandCounts).reduce((a, b) => 
+      brandCounts[a] > brandCounts[b] ? a : b, '');
+
     setSessionStats({
       topCategory,
       categoryPercentage,
+      topBrand,
       totalLikes: likes,
-      totalSuperLikes: superlikes
+      totalSuperLikes: superlikes,
+      kidsMode: filters.kidsMode
     });
 
     setShowSessionModal(true);
@@ -342,14 +432,50 @@ export default function Discover() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#000019] via-[#0a0a2e] to-[#1a1a4e]">
+      {/* Config Modal */}
+      <ConfigModal 
+        open={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters(newFilters);
+          setShowConfigModal(false);
+          toast.success('Filtres appliqués !');
+          // Reload puzzles with new filters
+          loadData();
+        }}
+      />
+
       {/* Header avec progression */}
       <div className="sticky top-16 lg:top-16 z-20 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-4">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white/70 text-sm">Session en cours</span>
-            <span className="text-orange-400 font-bold">
-              {(userDNA?.current_session_count || 0) % 25}/25
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-white/70 text-sm">Session en cours</span>
+              {filters.kidsMode && (
+                <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
+                  👶 Mode Enfant
+                </span>
+              )}
+              {!filters.kidsMode && (
+                <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
+                  {filters.pieceCount} pcs
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                size="icon" 
+                variant="ghost"
+                onClick={() => setShowConfigModal(true)}
+                className="text-white/70 hover:text-white h-8 w-8"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </Button>
+              <span className="text-orange-400 font-bold">
+                {(userDNA?.current_session_count || 0) % 25}/25
+              </span>
+            </div>
           </div>
           <Progress value={progressPercentage} className="h-2 bg-white/10" />
         </div>
