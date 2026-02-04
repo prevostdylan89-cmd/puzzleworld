@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Heart, X, Star, Sparkles, Loader2 } from 'lucide-react';
+import { Heart, X, Star, Sparkles, Loader2, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import SwipeCard from '@/components/swipe/SwipeCard';
 import SessionResultModal from '@/components/swipe/SessionResultModal';
