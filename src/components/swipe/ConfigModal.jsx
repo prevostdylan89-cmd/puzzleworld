@@ -6,11 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Settings, Baby, Puzzle } from 'lucide-react';
 
 const PIECE_OPTIONS = [
-  { value: 500, label: '500 pièces', difficulty: 'Débutant' },
+  { value: 50, label: '50 pièces', difficulty: 'Mini' },
+  { value: 200, label: '200 pièces', difficulty: 'Débutant' },
+  { value: 500, label: '500 pièces', difficulty: 'Facile' },
   { value: 1000, label: '1000 pièces', difficulty: 'Intermédiaire' },
-  { value: 1500, label: '1500 pièces', difficulty: 'Avancé' },
-  { value: 2000, label: '2000 pièces', difficulty: 'Expert' },
-  { value: 3000, label: '3000+ pièces', difficulty: 'Maître' }
+  { value: 2000, label: '2000 pièces', difficulty: 'Expert' }
 ];
 
 export default function ConfigModal({ open, onClose, filters, onApply }) {

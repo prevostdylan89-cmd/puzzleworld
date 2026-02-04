@@ -149,20 +149,29 @@ export default function Discover() {
 
         const pieces = extractPieceCount(product.title || '');
         
-        // FILTRAGE POST-APPEL
+        // FILTRAGE POST-APPEL STRICT
         if (filters.kidsMode) {
           // Mode Enfant: accepter uniquement 24-150 pièces
           if (!pieces || pieces > 150) {
             continue;
           }
         } else {
-          // Mode Normal: le nombre de pièces doit correspondre à selected_pieces (+/- tolérance)
+          // Mode Normal: validation stricte du nombre de pièces
           if (!pieces) {
             continue; // Rejeter si pas de nombre de pièces détecté
           }
-          const tolerance = 100;
-          if (Math.abs(pieces - filters.pieceCount) > tolerance) {
-            continue; // Rejeter si hors de la plage
+          
+          // Tolérance adaptative selon le nombre de pièces demandé
+          let tolerance;
+          if (selected_pieces <= 50) tolerance = 20;
+          else if (selected_pieces <= 200) tolerance = 50;
+          else if (selected_pieces <= 500) tolerance = 100;
+          else if (selected_pieces <= 1000) tolerance = 150;
+          else tolerance = 200;
+          
+          // Validation stricte: rejeter si hors tolérance
+          if (Math.abs(pieces - selected_pieces) > tolerance) {
+            continue;
           }
         }
 
@@ -447,7 +456,10 @@ export default function Discover() {
           setFilters(newFilters);
           setShowConfigModal(false);
           toast.success('Filtres appliqués !');
-          // Reload puzzles with new filters
+          // Clear current puzzles and reload with new filters
+          setPuzzles([]);
+          setCurrentIndex(0);
+          setLoading(true);
           loadData();
         }}
       />
