@@ -394,8 +394,8 @@ export default function Collection() {
       </div>
 
       {/* Puzzle Grid */}
-        <PullToRefresh onRefresh={() => refetch()}>
-          <div className="px-4 lg:px-8 py-6">
+      <PullToRefresh onRefresh={() => refetch()}>
+        <div className="px-4 lg:px-8 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
@@ -434,34 +434,31 @@ export default function Collection() {
             </motion.div>
           )}
 
-        {/* Load More */}
-        <div className="flex justify-center mt-12">
-          <Button 
-            onClick={() => {
-              // Scroll to top to see more puzzles
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            variant="outline" 
-            className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
-          >
-            {t('backToTop')}
-            <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
-          </Button>
+          {/* Load More */}
+          <div className="flex justify-center mt-12">
+            <Button 
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              variant="outline" 
+              className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
+            >
+              {t('backToTop')}
+              <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
+            </Button>
+          </div>
         </div>
-        </div>
+      </PullToRefresh>
 
-        </div>
-        </PullToRefresh>
-
-        {/* Puzzle Detail Modal */}
-        <PuzzleDetailModal
+      {/* Puzzle Detail Modal */}
+      <PuzzleDetailModal
         open={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         puzzle={selectedPuzzle}
-        />
-        </div>
-        );
-        }
+      />
+    </div>
+  );
+}
 
         function CommunityPuzzleCard({ puzzle, index, variant, onClick }) {
         return (
