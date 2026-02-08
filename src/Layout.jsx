@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
   Users, 
@@ -80,33 +80,58 @@ function LayoutContent({ children, currentPageName }) {
           --accent-foreground: 0 0% 100%;
           --border: 240 10% 15%;
         }
-        
+
+        @media (prefers-color-scheme: light) {
+          :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 5%;
+            --card: 0 0% 98%;
+            --card-foreground: 0 0% 5%;
+            --muted: 240 10% 95%;
+            --muted-foreground: 240 5% 45%;
+            --accent: 240 10% 90%;
+            --accent-foreground: 0 0% 5%;
+            --border: 240 10% 90%;
+          }
+        }
+
+        html, body {
+          overscroll-behavior: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, [role="button"] {
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
+        }
+
         * {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 107, 53, 0.3) transparent;
         }
-        
+
         *::-webkit-scrollbar {
           width: 6px;
           height: 6px;
         }
-        
+
         *::-webkit-scrollbar-track {
           background: transparent;
         }
-        
+
         *::-webkit-scrollbar-thumb {
           background: rgba(255, 107, 53, 0.3);
           border-radius: 3px;
         }
-        
+
         *::-webkit-scrollbar-thumb:hover {
           background: rgba(255, 107, 53, 0.5);
         }
       `}</style>
 
       {/* Desktop Header */}
-      <header className="hidden lg:block fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50">
+      <header className="hidden lg:block fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-full px-6">
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
@@ -218,7 +243,7 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(4rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between h-full px-4">
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
@@ -271,7 +296,7 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 'calc(4rem + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-around h-full">
           {navItems.slice(0, 2).map((item) => {
             const isActive = currentPageName === item.page;
@@ -297,7 +322,7 @@ function LayoutContent({ children, currentPageName }) {
             <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
               <Scan className="w-6 h-6 text-white" />
             </div>
-            <span className="text-[10px] font-medium text-orange-400">Scan</span>
+            <span className="text-xs font-medium text-orange-400">Scan</span>
           </button>
 
           {navItems.slice(2, 4).map((item) => {
@@ -319,8 +344,18 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="min-h-screen pt-16 pb-20 lg:pb-6">
-        {children}
+      <main className="min-h-screen lg:pb-6" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={currentPageName}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}

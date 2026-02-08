@@ -24,6 +24,7 @@ export default function Social() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const observerTarget = useRef(null);
   const POSTS_PER_PAGE = 10;
 
@@ -127,6 +128,14 @@ export default function Social() {
     loadInitialPosts();
   };
 
+  const handleRefresh = async (event, info) => {
+    if (info.offset.y > 100 && !isRefreshing && !isLoading) {
+      setIsRefreshing(true);
+      await loadInitialPosts();
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
+
 
 
   return (
@@ -163,7 +172,20 @@ export default function Social() {
       </div>
 
       <div className="px-4 lg:px-8 py-6">
-        <div className="max-w-4xl mx-auto">
+        <motion.div 
+          className="max-w-4xl mx-auto"
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleRefresh}
+        >
+          {/* Pull to Refresh Indicator */}
+          {isRefreshing && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
+            </div>
+          )}
+
           {/* Create Post */}
           {user && (
             <CreatePostForm user={user} onPostCreated={handlePostCreated} />
@@ -219,7 +241,7 @@ export default function Social() {
               </>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
 
