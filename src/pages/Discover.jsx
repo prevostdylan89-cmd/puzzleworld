@@ -504,7 +504,9 @@ export default function Discover() {
 
       {/* Header avec progression */}
       <div className="sticky top-16 lg:top-16 z-20 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-4">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto relative">
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#000019]/80 to-transparent pointer-events-none z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#000019]/80 to-transparent pointer-events-none z-10"></div>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-white/70 text-sm">Session en cours</span>

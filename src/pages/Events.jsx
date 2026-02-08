@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/components/LanguageContext';
 import EventCard from '@/components/events/EventCard';
 import EventModal from '@/components/events/EventModal';
+import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function Events() {
   const { t } = useLanguage();
@@ -69,8 +70,9 @@ export default function Events() {
       </div>
 
       {/* Events Grid */}
-      <div className="px-4 lg:px-8 py-8">
-        <div className="max-w-7xl mx-auto">
+      <PullToRefresh onRefresh={loadEvents}>
+        <div className="px-4 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
@@ -95,8 +97,9 @@ export default function Events() {
               ))}
             </motion.div>
           )}
+          </div>
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Event Modal */}
       {selectedEvent && (
