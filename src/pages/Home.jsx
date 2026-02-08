@@ -11,6 +11,8 @@ import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
 import { base44 } from '@/api/base44Client';
 import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
+import FeaturedPuzzleSelector from '@/components/home/FeaturedPuzzleSelector';
+import { Edit3 } from 'lucide-react';
 
 const monthlyEvents = [
   {
@@ -49,18 +51,52 @@ export default function Home() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [topPuzzles, setTopPuzzles] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showSelector, setShowSelector] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState(null);
 
   useEffect(() => {
     loadTopPuzzles();
+    checkAdminStatus();
   }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const user = await base44.auth.me();
+      setIsAdmin(user?.role === 'admin');
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  };
 
   const loadTopPuzzles = async () => {
     try {
-      const puzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 4);
-      setTopPuzzles(puzzles);
+      // Load featured puzzles
+      const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
+      
+      if (featured.length === 4) {
+        // Load full puzzle data for each featured puzzle
+        const puzzlesData = [];
+        for (const f of featured) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ id: f.puzzle_catalog_id });
+          if (puzzles.length > 0) {
+            puzzlesData.push(puzzles[0]);
+          }
+        }
+        setTopPuzzles(puzzlesData);
+      } else {
+        // Fallback to top liked if no featured puzzles
+        const puzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 4);
+        setTopPuzzles(puzzles);
+      }
     } catch (error) {
       console.error('Error loading top puzzles:', error);
     }
+  };
+
+  const handleEditSlot = (index) => {
+    setSelectedPosition(index + 1);
+    setShowSelector(true);
   };
   
   const container = {
@@ -165,8 +201,16 @@ export default function Home() {
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {topPuzzles.map((puzzle, index) => (
-            <motion.div key={puzzle.id} variants={item}>
+            <motion.div key={puzzle.id} variants={item} className="relative group">
               <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
+              {isAdmin && (
+                <button
+                  onClick={() => handleEditSlot(index)}
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-orange-600 z-10"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+              )}
             </motion.div>
           ))}
         </div>
@@ -210,6 +254,13 @@ export default function Home() {
           onClose={() => setSelectedEvent(null)} 
         />
       )}
+
+      <FeaturedPuzzleSelector
+        open={showSelector}
+        onClose={() => setShowSelector(false)}
+        position={selectedPosition}
+        onUpdate={loadTopPuzzles}
+      />
     </div>
   );
 }
