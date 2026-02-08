@@ -26,6 +26,7 @@ import AchievementBadge from '@/components/shared/AchievementBadge';
 import WishlistSection from '@/components/profile/WishlistSection';
 import CollectionSection from '@/components/profile/CollectionSection';
 import ExchangeSection from '@/components/profile/ExchangeSection';
+import LikedPuzzlesSection from '@/components/profile/LikedPuzzlesSection';
 import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/components/profile/StatsModal';
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
@@ -366,6 +367,13 @@ export default function Profile() {
               Wishlist
             </TabsTrigger>
             <TabsTrigger 
+              value="liked" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+            >
+              <Heart className="w-4 h-4 mr-2 fill-current" />
+              Puzzles Likés
+            </TabsTrigger>
+            <TabsTrigger 
               value="exchange"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
@@ -387,6 +395,10 @@ export default function Profile() {
 
           <TabsContent value="wishlist" className="mt-6">
             <WishlistSection user={user} />
+          </TabsContent>
+
+          <TabsContent value="liked" className="mt-6">
+            <LikedPuzzlesSection userEmail={user.email} />
           </TabsContent>
 
           <TabsContent value="exchange" className="mt-6">

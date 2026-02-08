@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckCircle2, Package } from 'lucide-react';
 
 export default function ScanPuzzleModal({ open, onClose }) {
   const queryClient = useQueryClient();
@@ -22,9 +24,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [puzzleData, setPuzzleData] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showRatingChoice, setShowRatingChoice] = useState(false);
-  const [pendingStatus, setPendingStatus] = useState(null);
   const [manualData, setManualData] = useState({
     name: '',
     brand: '',
@@ -32,6 +33,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
     image: '',
     sku: ''
   });
+  const [barcode, setBarcode] = useState('');
   const [barcodeInput, setBarcodeInput] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [existingPuzzle, setExistingPuzzle] = useState(null);
@@ -240,11 +242,30 @@ export default function ScanPuzzleModal({ open, onClose }) {
     }
   };
 
-  const fetchPuzzleData = async (barcode) => {
+  const fetchPuzzleData = async (code) => {
+    setBarcode(code);
     setLoading(true);
-    
-    // Check if puzzle already exists in catalog
-    const existing = await checkExistingPuzzle(barcode);
+    setPuzzleData(null);
+
+    try {
+      // Check if already in user's personal collection (anti-doublon)
+      const user = await base44.auth.me();
+      const existingInCollection = await base44.entities.UserPuzzle.filter({
+        puzzle_reference: code,
+        created_by: user.email
+      });
+
+      if (existingInCollection.length > 0) {
+        toast.error('Vous possédez déjà ce puzzle dans votre collection!');
+        setLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking user collection:', error);
+    }
+
+    // Check if puzzle already exists in global catalog
+    const existing = await checkExistingPuzzle(code);
     if (existing) {
       toast.success('✨ Ce puzzle est déjà connu par la communauté !');
       setPuzzleData({
@@ -338,24 +359,11 @@ export default function ScanPuzzleModal({ open, onClose }) {
     });
   };
 
-  const handleStatusChoice = (choice) => {
-    if (choice === 'done') {
-      // Show rating choice for completed puzzles
-      setShowRatingChoice(true);
-      setPendingStatus('done');
-    } else {
-      // Direct add for inbox and wishlist
-      handleAddPuzzle(choice);
+  const handleAddPuzzle = async () => {
+    if (!puzzleData || !selectedStatus) {
+      toast.error('Veuillez sélectionner un statut');
+      return;
     }
-  };
-
-  const handleRatingChoice = (liked) => {
-    // Add puzzle with done status and cemetery_type if not liked
-    const finalStatus = liked ? 'done' : 'cemetery';
-    handleAddPuzzle(finalStatus, liked ? null : 'disliked');
-  };
-
-  const handleAddPuzzle = async (status, cemeteryType = null) => {
     try {
       let catalogPuzzleId = null;
       
@@ -394,31 +402,33 @@ export default function ScanPuzzleModal({ open, onClose }) {
       }
       
       // FINALISATION: Ajouter à la collection personnelle (UserPuzzle)
+      const statusMapping = {
+        'liked': 'done',
+        'not_liked': 'done',
+        'wishlist': 'wishlist'
+      };
+
       const puzzleToCreate = {
         puzzle_name: puzzleData.name,
         puzzle_brand: puzzleData.brand,
         puzzle_pieces: puzzleData.pieces,
         image_url: puzzleData.image,
-        puzzle_reference: puzzleData.sku, // EAN comme clé primaire
-        catalog_puzzle_id: catalogPuzzleId, // Lien vers la fiche globale
-        status: status
+        puzzle_reference: barcode || puzzleData.sku || '',
+        catalog_puzzle_id: catalogPuzzleId,
+        status: statusMapping[selectedStatus] || 'inbox',
+        notes: selectedStatus === 'not_liked' ? 'Non aimé' : ''
       };
-
-      if (cemeteryType) {
-        puzzleToCreate.cemetery_type = cemeteryType;
-      }
       
       await base44.entities.UserPuzzle.create(puzzleToCreate);
       
-      // Award XP if adding as completed
-      if (status === 'done') {
+      // Award XP if adding as liked
+      if (selectedStatus === 'liked') {
         const user = await base44.auth.me();
         const currentXP = user.xp || 0;
         await base44.auth.updateMe({ xp: currentXP + 100 });
       }
       
       setShowSuccess(true);
-      setShowRatingChoice(false);
       
       // Refresh data in background
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
@@ -436,6 +446,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setPuzzleData(null);
     setShowSuccess(false);
     setCameraReady(false);
+    setSelectedStatus('');
+    setBarcode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setExistingPuzzle(null);
@@ -446,8 +458,8 @@ export default function ScanPuzzleModal({ open, onClose }) {
   const handleReset = () => {
     setPuzzleData(null);
     setShowSuccess(false);
-    setShowRatingChoice(false);
-    setPendingStatus(null);
+    setSelectedStatus('');
+    setBarcode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setExistingPuzzle(null);
@@ -770,62 +782,43 @@ export default function ScanPuzzleModal({ open, onClose }) {
               )}
             </motion.div>
 
-            {/* Boutons de choix - Animation 6 */}
-            {!showRatingChoice ? (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.75, duration: 0.4 }}
-                className="space-y-3 pt-2"
+            {/* Status Selection */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                    <SelectValue placeholder="Choisir un statut..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0a0a2e] border-white/10">
+                    <SelectItem value="liked" className="text-white">
+                      ❤️ J'ai aimé
+                    </SelectItem>
+                    <SelectItem value="not_liked" className="text-white">
+                      👎 Je n'ai pas aimé
+                    </SelectItem>
+                    <SelectItem value="wishlist" className="text-white">
+                      ⭐ Wishlist (à faire plus tard)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Validate Button */}
+              <Button
+                onClick={handleAddPuzzle}
+                disabled={!selectedStatus}
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
               >
-                <p className="text-white/70 text-sm text-center mb-4">Où souhaitez-vous classer ce puzzle ?</p>
-
-                <Button
-                  onClick={() => handleStatusChoice('inbox')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex items-center justify-center gap-2"
-                >
-                  📦 Dans sa boîte
-                </Button>
-
-                <Button
-                  onClick={() => handleStatusChoice('done')}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white flex items-center justify-center gap-2"
-                >
-                  ✅ Puzzle Terminé
-                </Button>
-
-                <Button
-                  onClick={() => handleStatusChoice('wishlist')}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white flex items-center justify-center gap-2"
-                >
-                  ⭐ Wishlist
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="space-y-3 pt-2"
-              >
-                <p className="text-white text-sm text-center mb-4 font-semibold">Avez-vous aimé ce puzzle ?</p>
-
-                <Button
-                  onClick={() => handleRatingChoice(true)}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white flex items-center justify-center gap-2"
-                >
-                  👍 J'ai aimé
-                </Button>
-
-                <Button
-                  onClick={() => handleRatingChoice(false)}
-                  variant="outline"
-                  className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center gap-2"
-                >
-                  👎 Je n'ai pas aimé
-                </Button>
-              </motion.div>
-            )}
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Valider l'ajout
+              </Button>
+            </motion.div>
           </div>
         )}
 
