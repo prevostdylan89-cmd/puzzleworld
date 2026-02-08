@@ -30,6 +30,7 @@ import LikedPuzzlesSection from '@/components/profile/LikedPuzzlesSection';
 import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/components/profile/StatsModal';
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
+import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
 import { Crown, Camera } from 'lucide-react';
 
 
@@ -446,6 +447,12 @@ export default function Profile() {
             {t('myEvents')}
           </h2>
           <MyEventsSection user={user} />
+        </div>
+
+        {/* Delete Account Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-white mb-6">Paramètres du compte</h2>
+          <DeleteAccountSection />
         </div>
       </div>
 
