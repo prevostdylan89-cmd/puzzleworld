@@ -294,12 +294,26 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(4rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between h-full px-4">
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <Puzzle className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-lg">PuzzleWorld</span>
-          </Link>
+          {['Home', 'Discover', 'Social', 'Collection', 'OnlinePuzzles', 'Events', 'Profile'].includes(currentPageName) ? (
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                <Puzzle className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-lg">PuzzleWorld</span>
+            </Link>
+          ) : (
+            <button 
+              onClick={() => window.history.back()} 
+              className="flex items-center gap-2 text-white hover:text-orange-400 transition-colors"
+            >
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </div>
+              <span className="font-medium">Retour</span>
+            </button>
+          )}
 
           <div className="flex items-center gap-2">
             {user ? (

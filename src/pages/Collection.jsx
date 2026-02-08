@@ -7,6 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 import ReclassifyButton from '@/components/collection/ReclassifyButton';
+import PullToRefresh from '@/components/shared/PullToRefresh';
 import { 
   Search, 
   SlidersHorizontal, 
@@ -324,7 +325,9 @@ export default function Collection() {
           </div>
 
           {/* Category Filters */}
-          <div className="mt-4 mb-4">
+          <div className="mt-4 mb-4 relative">
+            <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
+            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {CATEGORY_FILTERS.map((category) => (
                 <button
@@ -391,7 +394,8 @@ export default function Collection() {
       </div>
 
       {/* Puzzle Grid */}
-        <div className="px-4 lg:px-8 py-6">
+        <PullToRefresh onRefresh={() => refetch()}>
+          <div className="px-4 lg:px-8 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
@@ -445,6 +449,9 @@ export default function Collection() {
           </Button>
         </div>
         </div>
+
+        </div>
+        </PullToRefresh>
 
         {/* Puzzle Detail Modal */}
         <PuzzleDetailModal
