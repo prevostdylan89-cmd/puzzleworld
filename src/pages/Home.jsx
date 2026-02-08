@@ -5,50 +5,12 @@ import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import PuzzleCard from '@/components/shared/PuzzleCard';
 import EventCard from '@/components/shared/EventCard';
 import SectionHeader from '@/components/shared/SectionHeader';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
-
-const mostPlayedPuzzles = [
-  {
-    title: 'Cosmic Galaxy',
-    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=400&fit=crop',
-    pieces: 1500,
-    difficulty: 'Hard',
-    plays: 5672,
-    rating: 4.9,
-    creator: 'SpaceExplorer'
-  },
-  {
-    title: 'Cherry Blossoms',
-    image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=400&fit=crop',
-    pieces: 750,
-    difficulty: 'Medium',
-    plays: 4231,
-    rating: 4.6,
-    creator: 'JapanLover'
-  },
-  {
-    title: 'City Lights',
-    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=400&fit=crop',
-    pieces: 1000,
-    difficulty: 'Medium',
-    plays: 3892,
-    rating: 4.7,
-    creator: 'UrbanArt'
-  },
-  {
-    title: 'Aurora Borealis',
-    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=400&fit=crop',
-    pieces: 2000,
-    difficulty: 'Hard',
-    plays: 3456,
-    rating: 4.8,
-    creator: 'NorthernLights'
-  }
-];
+import { base44 } from '@/api/base44Client';
+import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
 
 const monthlyEvents = [
   {
@@ -86,6 +48,20 @@ export default function Home() {
   const { t } = useLanguage();
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [topPuzzles, setTopPuzzles] = useState([]);
+
+  useEffect(() => {
+    loadTopPuzzles();
+  }, []);
+
+  const loadTopPuzzles = async () => {
+    try {
+      const puzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 4);
+      setTopPuzzles(puzzles);
+    } catch (error) {
+      console.error('Error loading top puzzles:', error);
+    }
+  };
   
   const container = {
     hidden: { opacity: 0 },
@@ -188,9 +164,9 @@ export default function Home() {
         />
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {mostPlayedPuzzles.map((puzzle, index) => (
-            <motion.div key={index} variants={item}>
-              <PuzzleCard puzzle={puzzle} />
+          {topPuzzles.map((puzzle, index) => (
+            <motion.div key={puzzle.id} variants={item}>
+              <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
             </motion.div>
           ))}
         </div>

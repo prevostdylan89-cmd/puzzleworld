@@ -53,9 +53,11 @@ export default function PostCard({ post, user }) {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
   const showWishlistButton = !isOwnPost && post.is_completion_post && post.puzzle_name && user;
+  const isCompletionPost = post.is_completion_post && post.puzzle_name;
 
   useEffect(() => {
     if (user) {
@@ -63,6 +65,9 @@ export default function PostCard({ post, user }) {
       checkIfFollowing();
       if (showWishlistButton) {
         checkIfInWishlist();
+      }
+      if (isCompletionPost) {
+        checkIfPuzzleLiked();
       }
     }
   }, [post.id, user?.email]);
@@ -93,6 +98,15 @@ export default function PostCard({ post, user }) {
       status: 'wishlist'
     });
     setIsInWishlist(existing.length > 0);
+  };
+
+  const checkIfPuzzleLiked = async () => {
+    if (!user) return;
+    const likes = await base44.entities.UserPuzzleLike.filter({
+      post_id: post.id,
+      created_by: user.email
+    });
+    setIsPuzzleLiked(likes.length > 0);
   };
 
   const handleLike = async () => {
@@ -197,6 +211,44 @@ export default function PostCard({ post, user }) {
     } catch (error) {
       console.error('Error toggling follow:', error);
       toast.error('Échec de la mise à jour du suivi');
+    }
+  };
+
+  const handlePuzzleLike = async () => {
+    if (!user) {
+      toast.error('Connectez-vous pour liker des puzzles');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      if (isPuzzleLiked) {
+        const likes = await base44.entities.UserPuzzleLike.filter({
+          post_id: post.id,
+          created_by: user.email
+        });
+        if (likes.length > 0) {
+          await base44.entities.UserPuzzleLike.delete(likes[0].id);
+          setIsPuzzleLiked(false);
+          toast.success('Puzzle retiré de vos likes');
+        }
+      } else {
+        await base44.entities.UserPuzzleLike.create({
+          post_id: post.id,
+          puzzle_asin: post.puzzle_reference || '',
+          puzzle_name: post.puzzle_name,
+          puzzle_brand: post.puzzle_brand || '',
+          puzzle_pieces: post.puzzle_pieces || 0,
+          puzzle_image: post.image_url || ''
+        });
+        setIsPuzzleLiked(true);
+        toast.success('Puzzle ajouté à vos likes!');
+      }
+    } catch (error) {
+      console.error('Error toggling puzzle like:', error);
+      toast.error('Échec de la mise à jour');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -345,6 +397,19 @@ export default function PostCard({ post, user }) {
           <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="text-sm">{commentsCount}</span>
         </button>
+        {isCompletionPost && user && (
+          <button 
+            onClick={handlePuzzleLike}
+            disabled={isProcessing}
+            className="flex items-center gap-2 text-white/50 hover:text-green-400 transition-colors group disabled:opacity-50 ml-auto"
+          >
+            <div className="relative">
+              <Puzzle className={`w-5 h-5 group-hover:scale-110 transition-transform ${isPuzzleLiked ? 'text-green-400' : ''}`} />
+              <Heart className={`w-3 h-3 absolute -bottom-0.5 -right-0.5 ${isPuzzleLiked ? 'fill-green-400 text-green-400' : ''}`} />
+            </div>
+            <span className="text-xs">{isPuzzleLiked ? 'Puzzle liké' : 'J\'aime ce puzzle'}</span>
+          </button>
+        )}
       </div>
 
       {/* Comments Section */}
