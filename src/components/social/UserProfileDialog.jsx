@@ -72,28 +72,35 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       return;
     }
 
+    // Optimistic update
+    const previousFollowing = isFollowing;
+    const previousStats = stats;
+    setIsFollowing(!isFollowing);
+    setStats(prev => ({ 
+      ...prev, 
+      followers: isFollowing ? prev.followers - 1 : prev.followers + 1 
+    }));
+    toast.success(isFollowing ? 'Suivi retiré' : 'Vous suivez cet utilisateur');
+
     try {
-      if (isFollowing) {
+      if (previousFollowing) {
         const follows = await base44.entities.Follow.filter({
           follower_email: currentUser.email,
           following_email: userEmail
         });
         if (follows.length > 0) {
           await base44.entities.Follow.delete(follows[0].id);
-          setIsFollowing(false);
-          setStats(prev => ({ ...prev, followers: prev.followers - 1 }));
-          toast.success('Vous ne suivez plus cet utilisateur');
         }
       } else {
         await base44.entities.Follow.create({
           follower_email: currentUser.email,
           following_email: userEmail
         });
-        setIsFollowing(true);
-        setStats(prev => ({ ...prev, followers: prev.followers + 1 }));
-        toast.success('Vous suivez maintenant cet utilisateur!');
       }
     } catch (error) {
+      // Revert on error
+      setIsFollowing(previousFollowing);
+      setStats(previousStats);
       console.error('Error toggling follow:', error);
       toast.error('Échec de la mise à jour du suivi');
     }

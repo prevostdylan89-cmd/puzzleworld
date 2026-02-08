@@ -115,18 +115,21 @@ export default function PostCard({ post, user }) {
       return;
     }
 
-    setIsProcessing(true);
+    // Optimistic update
+    const previousLiked = isLiked;
+    const previousCount = likesCount;
+    setIsLiked(!isLiked);
+    setLikesCount(isLiked ? Math.max(0, likesCount - 1) : likesCount + 1);
+
     try {
-      if (isLiked) {
+      if (previousLiked) {
         const likes = await base44.entities.Like.filter({
           post_id: post.id,
           user_id: user.email
         });
         if (likes.length > 0) {
           await base44.entities.Like.delete(likes[0].id);
-          setIsLiked(false);
-          const newCount = Math.max(0, likesCount - 1);
-          setLikesCount(newCount);
+          const newCount = Math.max(0, previousCount - 1);
           await base44.entities.Post.update(post.id, { likes_count: newCount });
         }
       } else {
@@ -134,16 +137,15 @@ export default function PostCard({ post, user }) {
           post_id: post.id,
           user_id: user.email
         });
-        setIsLiked(true);
-        const newCount = likesCount + 1;
-        setLikesCount(newCount);
+        const newCount = previousCount + 1;
         await base44.entities.Post.update(post.id, { likes_count: newCount });
       }
     } catch (error) {
+      // Revert on error
+      setIsLiked(previousLiked);
+      setLikesCount(previousCount);
       console.error('Error toggling like:', error);
       toast.error('Échec de la mise à jour du like');
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -189,26 +191,29 @@ export default function PostCard({ post, user }) {
       return;
     }
 
+    // Optimistic update
+    const previousFollowing = isFollowing;
+    setIsFollowing(!isFollowing);
+    toast.success(isFollowing ? 'Suivi retiré' : 'Vous suivez cet utilisateur');
+
     try {
-      if (isFollowing) {
+      if (previousFollowing) {
         const follows = await base44.entities.Follow.filter({
           follower_email: user.email,
           following_email: post.created_by
         });
         if (follows.length > 0) {
           await base44.entities.Follow.delete(follows[0].id);
-          setIsFollowing(false);
-          toast.success('Vous ne suivez plus cet utilisateur');
         }
       } else {
         await base44.entities.Follow.create({
           follower_email: user.email,
           following_email: post.created_by
         });
-        setIsFollowing(true);
-        toast.success('Vous suivez maintenant cet utilisateur!');
       }
     } catch (error) {
+      // Revert on error
+      setIsFollowing(previousFollowing);
       console.error('Error toggling follow:', error);
       toast.error('Échec de la mise à jour du suivi');
     }
@@ -220,17 +225,19 @@ export default function PostCard({ post, user }) {
       return;
     }
 
-    setIsProcessing(true);
+    // Optimistic update
+    const previousLiked = isPuzzleLiked;
+    setIsPuzzleLiked(!isPuzzleLiked);
+    toast.success(isPuzzleLiked ? 'Puzzle retiré' : 'Puzzle ajouté à vos likes');
+
     try {
-      if (isPuzzleLiked) {
+      if (previousLiked) {
         const likes = await base44.entities.UserPuzzleLike.filter({
           post_id: post.id,
           created_by: user.email
         });
         if (likes.length > 0) {
           await base44.entities.UserPuzzleLike.delete(likes[0].id);
-          setIsPuzzleLiked(false);
-          toast.success('Puzzle retiré de vos likes');
         }
       } else {
         await base44.entities.UserPuzzleLike.create({
@@ -241,14 +248,12 @@ export default function PostCard({ post, user }) {
           puzzle_pieces: post.puzzle_pieces || 0,
           puzzle_image: post.image_url || ''
         });
-        setIsPuzzleLiked(true);
-        toast.success('Puzzle ajouté à vos likes!');
       }
     } catch (error) {
+      // Revert on error
+      setIsPuzzleLiked(previousLiked);
       console.error('Error toggling puzzle like:', error);
       toast.error('Échec de la mise à jour');
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -320,7 +325,7 @@ export default function PostCard({ post, user }) {
 
       {/* Content */}
       <div className="px-4 pb-3">
-        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap select-text">{post.content}</p>
       </div>
 
       {/* Puzzle Details */}

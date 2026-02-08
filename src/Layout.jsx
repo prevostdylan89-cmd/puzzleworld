@@ -32,16 +32,52 @@ function LayoutContent({ children, currentPageName }) {
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const [showScanModal, setShowScanModal] = useState(false);
+  const [tabHistory, setTabHistory] = useState({
+    Home: ['Home'],
+    Discover: ['Discover'],
+    Social: ['Social'],
+    Collection: ['Collection']
+  });
 
   const navItems = [
-    { name: t('home'), icon: Home, page: 'Home' },
-    { name: 'Discover', icon: Sparkles, page: 'Discover' },
-    { name: t('social'), icon: Users, page: 'Social' },
-    { name: t('collection'), icon: Grid3X3, page: 'Collection' },
+    { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
+    { name: 'Discover', icon: Sparkles, page: 'Discover', hasHistory: true },
+    { name: t('social'), icon: Users, page: 'Social', hasHistory: true },
+    { name: t('collection'), icon: Grid3X3, page: 'Collection', hasHistory: true },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
   ];
+
+  const handleNavClick = (item) => {
+    if (!item.hasHistory) return;
+    
+    const currentTab = item.page;
+    const history = tabHistory[currentTab] || [currentTab];
+    const isCurrentTab = currentPageName === currentTab || history.includes(currentPageName);
+    
+    if (isCurrentTab && currentPageName === history[history.length - 1]) {
+      // Clicked active tab at root - do nothing or scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (isCurrentTab) {
+      // Return to tab root
+      setTabHistory(prev => ({
+        ...prev,
+        [currentTab]: [currentTab]
+      }));
+    } else {
+      // Switching to different tab - remember current page
+      const currentRootTab = Object.keys(tabHistory).find(tab => 
+        tabHistory[tab].includes(currentPageName)
+      );
+      if (currentRootTab) {
+        setTabHistory(prev => ({
+          ...prev,
+          [currentRootTab]: [...prev[currentRootTab].filter(p => p !== currentPageName), currentPageName]
+        }));
+      }
+    }
+  };
 
   useEffect(() => {
     loadUser();
@@ -100,10 +136,16 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-tap-highlight-color: transparent;
         }
 
-        button, a, [role="button"] {
+        button, a, [role="button"], nav, header {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .select-text {
+          user-select: text;
+          -webkit-user-select: text;
         }
 
         * {
@@ -151,6 +193,13 @@ function LayoutContent({ children, currentPageName }) {
                 <Link
                   key={item.name}
                   to={createPageUrl(item.page)}
+                  onClick={(e) => {
+                    if (item.hasHistory) {
+                      e.preventDefault();
+                      handleNavClick(item);
+                      window.location.href = createPageUrl(item.page);
+                    }
+                  }}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 group relative ${
                     isActive 
                       ? 'bg-orange-500/10 text-orange-400' 
@@ -304,6 +353,13 @@ function LayoutContent({ children, currentPageName }) {
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
+                onClick={(e) => {
+                  if (item.hasHistory) {
+                    e.preventDefault();
+                    handleNavClick(item);
+                    window.location.href = createPageUrl(item.page);
+                  }
+                }}
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
                   isActive ? 'text-orange-400' : 'text-white/40'
                 }`}
@@ -331,6 +387,13 @@ function LayoutContent({ children, currentPageName }) {
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
+                onClick={(e) => {
+                  if (item.hasHistory) {
+                    e.preventDefault();
+                    handleNavClick(item);
+                    window.location.href = createPageUrl(item.page);
+                  }
+                }}
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
                   isActive ? 'text-orange-400' : 'text-white/40'
                 }`}
