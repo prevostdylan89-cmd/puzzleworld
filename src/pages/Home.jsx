@@ -12,6 +12,7 @@ import EventModal from '@/components/events/EventModal';
 import { base44 } from '@/api/base44Client';
 import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
 import FeaturedPuzzleSelector from '@/components/home/FeaturedPuzzleSelector';
+import PuzzleReplacementModal from '@/components/home/PuzzleReplacementModal';
 import { Edit3 } from 'lucide-react';
 
 const monthlyEvents = [

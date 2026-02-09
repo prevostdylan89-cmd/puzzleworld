@@ -492,8 +492,28 @@ function LayoutContent({ children, currentPageName }) {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/[0.06] text-center">
-            <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
+          <div className="pt-8 border-t border-white/[0.06]">
+            <div className="text-center mb-4">
+              <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/30">
+              <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-400 transition-colors">
+                Politique de confidentialité
+              </Link>
+              <span>•</span>
+              <Link to={createPageUrl('Terms')} className="hover:text-orange-400 transition-colors">
+                CGU
+              </Link>
+              <span>•</span>
+              <a href="mailto:contact@puzzleworld.app" className="hover:text-orange-400 transition-colors">
+                Contact
+              </a>
+            </div>
+            <div className="text-center mt-4">
+              <p className="text-xs text-white/30 italic">
+                En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
