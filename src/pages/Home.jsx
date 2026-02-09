@@ -73,33 +73,11 @@ export default function Home() {
   const loadTopPuzzles = async () => {
     setLoadingPuzzles(true);
     try {
-      // Load featured puzzles
-      const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
-      
-      if (featured.length === 4) {
-        // Load full puzzle data for each featured puzzle
-        const puzzlesData = [];
-        for (const f of featured) {
-          const puzzles = await base44.entities.PuzzleCatalog.filter({ id: f.puzzle_catalog_id });
-          if (puzzles.length > 0) {
-            puzzlesData.push(puzzles[0]);
-          }
-        }
-        setTopPuzzles(puzzlesData);
-      } else {
-        // Fallback to top liked if no featured puzzles
-        const puzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 4);
-        setTopPuzzles(puzzles);
-      }
+      // Load last 4 puzzles added to community collection
+      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+      setTopPuzzles(puzzles);
     } catch (error) {
-      console.error('Error loading top puzzles:', error);
-      // Fallback: try to load any puzzles
-      try {
-        const fallbackPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
-        setTopPuzzles(fallbackPuzzles);
-      } catch (err) {
-        console.error('Error loading fallback puzzles:', err);
-      }
+      console.error('Error loading puzzles:', error);
     } finally {
       setLoadingPuzzles(false);
     }
