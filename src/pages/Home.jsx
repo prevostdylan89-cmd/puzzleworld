@@ -74,11 +74,40 @@ export default function Home() {
   const loadTopPuzzles = async () => {
     setLoadingPuzzles(true);
     try {
-      // Load last 4 puzzles added to community collection
-      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
-      setTopPuzzles(puzzles);
+      // Load featured puzzles (positions 1-4)
+      const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
+      
+      if (featured.length > 0) {
+        // Load full puzzle data for each featured puzzle
+        const puzzlesData = [];
+        for (const f of featured) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ id: f.puzzle_catalog_id });
+          if (puzzles.length > 0) {
+            puzzlesData.push(puzzles[0]);
+          }
+        }
+        
+        // Fill remaining slots with latest puzzles if needed
+        if (puzzlesData.length < 4) {
+          const latestPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4 - puzzlesData.length);
+          puzzlesData.push(...latestPuzzles);
+        }
+        
+        setTopPuzzles(puzzlesData);
+      } else {
+        // No featured puzzles yet, show latest 4
+        const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+        setTopPuzzles(puzzles);
+      }
     } catch (error) {
       console.error('Error loading puzzles:', error);
+      // Fallback
+      try {
+        const fallbackPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+        setTopPuzzles(fallbackPuzzles);
+      } catch (err) {
+        console.error('Fallback failed:', err);
+      }
     } finally {
       setLoadingPuzzles(false);
     }
