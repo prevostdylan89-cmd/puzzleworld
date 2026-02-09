@@ -55,6 +55,8 @@ import OnlinePuzzles from './pages/OnlinePuzzles';
 import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +69,8 @@ export const PAGES = {
     "Profile": Profile,
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
+    "PrivacyPolicy": PrivacyPolicy,
+    "Terms": Terms,
 }
 
 export const pagesConfig = {
