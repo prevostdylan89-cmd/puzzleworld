@@ -55,6 +55,7 @@ export default function Home() {
   const [showSelector, setShowSelector] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [loadingPuzzles, setLoadingPuzzles] = useState(true);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     loadTopPuzzles();
