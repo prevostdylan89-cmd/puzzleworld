@@ -210,21 +210,33 @@ export default function Home() {
           icon={TrendingUp}
         />
         
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {topPuzzles.map((puzzle, index) => (
-            <motion.div key={puzzle.id} variants={item} className="relative group">
-              <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
-              {isAdmin && (
-                <button
-                  onClick={() => handleEditSlot(index)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-orange-600 z-10"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
-              )}
-            </motion.div>
-          ))}
-        </div>
+        {loadingPuzzles ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="aspect-square bg-white/5 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : topPuzzles.length > 0 ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {topPuzzles.map((puzzle, index) => (
+              <motion.div key={puzzle.id} variants={item} className="relative group">
+                <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleEditSlot(index)}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-orange-600 z-10"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white/5 rounded-xl">
+            <p className="text-white/50 text-sm">Aucun puzzle disponible</p>
+          </div>
+        )}
       </motion.section>
 
       {/* Monthly Events */}
