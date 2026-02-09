@@ -115,7 +115,7 @@ export default function Home() {
   };
 
   const handleEditSlot = (index) => {
-    setSelectedPosition(index + 1);
+    setSelectedPosition(index);
     setShowSelector(true);
   };
   
@@ -310,11 +310,19 @@ export default function Home() {
         />
       )}
 
-      <FeaturedPuzzleSelector
+      <PuzzleReplacementModal
         open={showSelector}
-        onClose={() => setShowSelector(false)}
+        onClose={() => {
+          setShowSelector(false);
+          setSelectedPosition(null);
+        }}
         position={selectedPosition}
-        onUpdate={loadTopPuzzles}
+        currentPuzzle={selectedPosition !== null ? topPuzzles[selectedPosition] : null}
+        onReplace={() => {
+          loadTopPuzzles();
+          setShowSelector(false);
+          setSelectedPosition(null);
+        }}
       />
     </div>
   );

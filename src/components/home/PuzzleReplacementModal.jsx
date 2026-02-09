@@ -34,6 +34,8 @@ export default function PuzzleReplacementModal({ open, onClose, position, curren
       // Check if featured puzzle entry exists for this position
       const existing = await base44.entities.FeaturedPuzzle.filter({ position: position + 1 });
 
+      const positionNumber = position + 1;
+      
       if (existing.length > 0) {
         // Update existing
         await base44.entities.FeaturedPuzzle.update(existing[0].id, {
@@ -45,7 +47,7 @@ export default function PuzzleReplacementModal({ open, onClose, position, curren
       } else {
         // Create new
         await base44.entities.FeaturedPuzzle.create({
-          position: position + 1,
+          position: positionNumber,
           puzzle_catalog_id: selectedPuzzle.id,
           puzzle_asin: selectedPuzzle.asin || '',
           puzzle_title: selectedPuzzle.title,
