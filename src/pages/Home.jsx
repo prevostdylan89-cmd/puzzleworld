@@ -71,6 +71,7 @@ export default function Home() {
   };
 
   const loadTopPuzzles = async () => {
+    setLoadingPuzzles(true);
     try {
       // Load featured puzzles
       const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
@@ -92,6 +93,15 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error loading top puzzles:', error);
+      // Fallback: try to load any puzzles
+      try {
+        const fallbackPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+        setTopPuzzles(fallbackPuzzles);
+      } catch (err) {
+        console.error('Error loading fallback puzzles:', err);
+      }
+    } finally {
+      setLoadingPuzzles(false);
     }
   };
 
