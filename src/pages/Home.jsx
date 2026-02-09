@@ -133,6 +133,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* Admin Edit Mode Toggle */}
+      {isAdmin && (
+        <div className="fixed top-20 right-4 lg:right-8 z-40">
+          <Button
+            onClick={() => setEditMode(!editMode)}
+            className={`rounded-full shadow-lg ${
+              editMode 
+                ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+            }`}
+          >
+            {editMode ? '🔓 Mode Édition Activé' : '🔒 Mode Édition'}
+          </Button>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-purple-500/10" />
