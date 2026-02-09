@@ -248,10 +248,17 @@ export default function Home() {
                 {isAdmin && (
                   <button
                     onClick={() => handleEditSlot(index)}
-                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-orange-600 z-10"
+                    className={`absolute top-2 right-2 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg hover:bg-orange-600 z-10 transition-all ${
+                      editMode ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100'
+                    }`}
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
+                )}
+                {isAdmin && editMode && (
+                  <div className="absolute bottom-2 left-2 right-2 bg-orange-500/90 backdrop-blur-sm text-white text-xs py-1 px-2 rounded-lg text-center font-medium">
+                    Position {index + 1}
+                  </div>
                 )}
               </motion.div>
             ))}
