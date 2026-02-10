@@ -29,16 +29,31 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
         puzzle_asin: puzzle.asin 
       });
 
-      // Calculate days since creation
+      // Calculate detailed stats
       const createdDate = new Date(puzzle.created_date);
       const today = new Date();
       const daysOnSite = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
 
-      // Calculate engagement rate
+      // Count unique interactions by type
+      const uniqueLikes = new Set();
+      const uniqueSuperlikes = new Set();
+      const uniqueDislikes = new Set();
+      
+      swipes.forEach(s => {
+        if (s.interaction_type === 'like') uniqueLikes.add(s.created_by);
+        else if (s.interaction_type === 'superlike') uniqueSuperlikes.add(s.created_by);
+        else if (s.interaction_type === 'dislike') uniqueDislikes.add(s.created_by);
+      });
+
+      const likeCount = uniqueLikes.size;
+      const superlikeCount = uniqueSuperlikes.size;
+      const dislikeCount = uniqueDislikes.size;
+      
+      // Calculate score: like=1pt, superlike=2pt, dislike=-0.5pt
+      const calculatedScore = (likeCount * 1) + (superlikeCount * 2) + (dislikeCount * -0.5);
+      
       const totalInteractions = swipes.length;
-      const positiveInteractions = swipes.filter(s => 
-        s.interaction_type === 'like' || s.interaction_type === 'superlike'
-      ).length;
+      const positiveInteractions = likeCount + superlikeCount;
       const engagementRate = totalInteractions > 0 
         ? ((positiveInteractions / totalInteractions) * 100).toFixed(1)
         : 0;
@@ -54,9 +69,10 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
         daysOnSite,
         totalLikes: likes.length,
         totalSwipes: swipes.length,
-        likesCount: swipes.filter(s => s.interaction_type === 'like').length,
-        superlikesCount: swipes.filter(s => s.interaction_type === 'superlike').length,
-        dislikesCount: swipes.filter(s => s.interaction_type === 'dislike').length,
+        likesCount: likeCount,
+        superlikesCount: superlikeCount,
+        dislikesCount: dislikeCount,
+        calculatedScore: calculatedScore,
         engagementRate,
         likesOverTime,
         avgLikesPerDay: daysOnSite > 0 ? (likes.length / daysOnSite).toFixed(2) : 0
@@ -173,11 +189,11 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
 
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Heart className="w-4 h-4 text-pink-400" />
-                  <span className="text-white/60 text-xs">Total Likes</span>
+                  <TrendingUp className="w-4 h-4 text-orange-400" />
+                  <span className="text-white/60 text-xs">Score Total</span>
                 </div>
-                <div className="text-2xl font-bold text-white">{analytics?.totalLikes}</div>
-                <div className="text-white/40 text-xs">{analytics?.avgLikesPerDay}/jour</div>
+                <div className="text-2xl font-bold text-white">{analytics?.calculatedScore?.toFixed(1)}</div>
+                <div className="text-white/40 text-xs">pts calculés</div>
               </div>
 
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
@@ -196,6 +212,28 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
                 </div>
                 <div className="text-2xl font-bold text-white">{analytics?.engagementRate}%</div>
                 <div className="text-white/40 text-xs">positif</div>
+              </div>
+            </div>
+
+            {/* Score Breakdown */}
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-6">
+              <h4 className="text-white font-semibold mb-4">Détail du Score</h4>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="text-3xl font-bold text-green-400">{analytics?.likesCount}</div>
+                  <div className="text-white/70 text-sm mt-1">❤️ Likes</div>
+                  <div className="text-green-400 text-xs mt-1">+{analytics?.likesCount} pts</div>
+                </div>
+                <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                  <div className="text-3xl font-bold text-orange-400">{analytics?.superlikesCount}</div>
+                  <div className="text-white/70 text-sm mt-1">⭐ Superlikes</div>
+                  <div className="text-orange-400 text-xs mt-1">+{(analytics?.superlikesCount * 2)} pts</div>
+                </div>
+                <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
+                  <div className="text-3xl font-bold text-red-400">{analytics?.dislikesCount}</div>
+                  <div className="text-white/70 text-sm mt-1">👎 Dislikes</div>
+                  <div className="text-red-400 text-xs mt-1">{(analytics?.dislikesCount * -0.5).toFixed(1)} pts</div>
+                </div>
               </div>
             </div>
 
@@ -224,9 +262,9 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
                   <p className="text-white font-medium">{analytics?.totalLikes}</p>
                 </div>
                 <div>
-                  <span className="text-white/60">Score d'engagement:</span>
+                  <span className="text-white/60">Score calculé:</span>
                   <p className="text-white font-medium">
-                    {(puzzle.total_likes || 0) + (puzzle.total_superlikes || 0) * 2}
+                    {analytics?.calculatedScore?.toFixed(1)} points
                   </p>
                 </div>
               </div>

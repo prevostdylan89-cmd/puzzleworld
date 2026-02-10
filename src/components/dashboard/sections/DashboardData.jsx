@@ -12,6 +12,8 @@ export default function DashboardData() {
   const [topPuzzles, setTopPuzzles] = useState([]);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [activeTab, setActiveTab] = useState('users');
+  const [sortBy, setSortBy] = useState('score');
+  const [pieceFilter, setPieceFilter] = useState('all');
 
   useEffect(() => {
     loadData();
@@ -50,7 +52,7 @@ export default function DashboardData() {
       // Load all puzzles
       const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 1000);
       
-      // Count real likes for each puzzle (unique per user)
+      // Count real likes for each puzzle with complete scoring system
       const puzzlesWithRealLikes = await Promise.all(puzzles.map(async (puzzle) => {
         try {
           const [likes, swipes] = await Promise.all([
@@ -58,42 +60,53 @@ export default function DashboardData() {
             base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin })
           ]);
           
-          // Count unique users who liked/superliked in swipes
+          // Count interactions by type (unique per user)
           const uniqueSwipeLikes = new Map();
           const uniqueSwipeSuperlikes = new Map();
+          const uniqueSwipeDislikes = new Map();
           
           swipes.forEach(s => {
             if (s.interaction_type === 'like') {
               uniqueSwipeLikes.set(s.created_by, true);
             } else if (s.interaction_type === 'superlike') {
               uniqueSwipeSuperlikes.set(s.created_by, true);
+            } else if (s.interaction_type === 'dislike') {
+              uniqueSwipeDislikes.set(s.created_by, true);
             }
           });
           
           const likeCount = uniqueSwipeLikes.size;
           const superlikeCount = uniqueSwipeSuperlikes.size;
-          const uniquePostLikes = likes.length; // Already unique per user per puzzle
-          const totalEngagement = likeCount + (superlikeCount * 2) + uniquePostLikes;
+          const dislikeCount = uniqueSwipeDislikes.size;
+          const uniquePostLikes = likes.length;
+          
+          // Scoring: like = 1pt, superlike = 2pt, dislike = -0.5pt
+          const totalScore = (likeCount * 1) + (superlikeCount * 2) + (dislikeCount * -0.5) + uniquePostLikes;
+          const totalInteractions = likeCount + superlikeCount + dislikeCount + uniquePostLikes;
           
           return {
             ...puzzle,
-            real_likes: likeCount,
-            real_superlikes: superlikeCount,
-            unique_likes: uniquePostLikes,
-            total_engagement: totalEngagement
+            like_count: likeCount,
+            superlike_count: superlikeCount,
+            dislike_count: dislikeCount,
+            post_like_count: uniquePostLikes,
+            total_score: totalScore,
+            total_interactions: totalInteractions
           };
         } catch (error) {
           return {
             ...puzzle,
-            real_likes: 0,
-            real_superlikes: 0,
-            unique_likes: 0,
-            total_engagement: 0
+            like_count: 0,
+            superlike_count: 0,
+            dislike_count: 0,
+            post_like_count: 0,
+            total_score: 0,
+            total_interactions: 0
           };
         }
       }));
       
-      const sortedPuzzles = puzzlesWithRealLikes.sort((a, b) => b.total_engagement - a.total_engagement);
+      const sortedPuzzles = puzzlesWithRealLikes.sort((a, b) => b.total_score - a.total_score);
 
       setTopPuzzles(sortedPuzzles);
     } catch (error) {
@@ -104,6 +117,34 @@ export default function DashboardData() {
     }
   };
 
+  // Filtered and sorted puzzles
+  const getFilteredPuzzles = () => {
+    let filtered = [...topPuzzles];
+    
+    // Filter by piece count
+    if (pieceFilter !== 'all') {
+      const targetPieces = parseInt(pieceFilter);
+      filtered = filtered.filter(p => p.piece_count === targetPieces);
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'score':
+        filtered.sort((a, b) => b.total_score - a.total_score);
+        break;
+      case 'superlikes':
+        filtered.sort((a, b) => b.superlike_count - a.superlike_count);
+        break;
+      case 'likes':
+        filtered.sort((a, b) => b.like_count - a.like_count);
+        break;
+      default:
+        break;
+    }
+    
+    return filtered;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -111,6 +152,9 @@ export default function DashboardData() {
       </div>
     );
   }
+
+  const filteredPuzzles = getFilteredPuzzles();
+  const availablePieceCounts = [...new Set(topPuzzles.map(p => p.piece_count))].sort((a, b) => a - b);
 
   return (
     <div>
@@ -173,9 +217,37 @@ export default function DashboardData() {
         {/* Top Puzzles Tab */}
         <TabsContent value="puzzles" className="space-y-4">
           <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Puzzles triés par Engagement</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">Puzzles - {filteredPuzzles.length} résultats</h3>
+              
+              <div className="flex gap-3">
+                {/* Sort By */}
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="score">Trier par Score</option>
+                  <option value="superlikes">Trier par Superlikes</option>
+                  <option value="likes">Trier par Likes</option>
+                </select>
+
+                {/* Filter by Pieces */}
+                <select 
+                  value={pieceFilter}
+                  onChange={(e) => setPieceFilter(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="all">Toutes les pièces</option>
+                  {availablePieceCounts.map(count => (
+                    <option key={count} value={count}>{count} pièces</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {topPuzzles.map((puzzle, index) => (
+              {filteredPuzzles.map((puzzle, index) => (
                 <div
                   key={puzzle.id}
                   className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 hover:border-orange-500/30 transition-all cursor-pointer group"
@@ -196,17 +268,21 @@ export default function DashboardData() {
                         {puzzle.brand} • {puzzle.piece_count} pièces • {puzzle.category_tag}
                       </p>
                     </div>
-                    <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-4 text-sm">
                       <div className="text-center">
-                        <div className="text-orange-400 font-bold">❤️ {puzzle.real_likes || 0}</div>
+                        <div className="text-green-400 font-bold">❤️ {puzzle.like_count || 0}</div>
                         <div className="text-white/50 text-xs">Likes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-pink-400 font-bold">⭐ {puzzle.real_superlikes || 0}</div>
+                        <div className="text-orange-400 font-bold">⭐ {puzzle.superlike_count || 0}</div>
                         <div className="text-white/50 text-xs">Superlikes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-purple-400 font-bold">{puzzle.total_engagement || 0}</div>
+                        <div className="text-red-400 font-bold">👎 {puzzle.dislike_count || 0}</div>
+                        <div className="text-white/50 text-xs">Dislikes</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-purple-400 font-bold text-lg">{puzzle.total_score?.toFixed(1) || 0}</div>
                         <div className="text-white/50 text-xs">Score</div>
                       </div>
                     </div>
