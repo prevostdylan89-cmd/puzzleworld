@@ -51,22 +51,60 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [topPuzzles, setTopPuzzles] = useState([]);
   const [loadingPuzzles, setLoadingPuzzles] = useState(true);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   useEffect(() => {
     loadTopPuzzles();
+    loadFeaturedEvents();
   }, []);
 
   const loadTopPuzzles = async () => {
     setLoadingPuzzles(true);
     try {
-      // Always load latest 4 puzzles from catalog
-      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
-      setTopPuzzles(puzzles);
+      // Load featured puzzles from FeaturedPuzzle entity
+      const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
+      
+      if (featured.length > 0) {
+        // Load full puzzle details
+        const puzzlePromises = featured.map(fp => 
+          base44.entities.PuzzleCatalog.filter({ id: fp.puzzle_catalog_id })
+        );
+        const puzzleResults = await Promise.all(puzzlePromises);
+        const puzzles = puzzleResults.map(r => r[0]).filter(p => p);
+        setTopPuzzles(puzzles);
+      } else {
+        // Fallback to latest puzzles
+        const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+        setTopPuzzles(puzzles);
+      }
     } catch (error) {
       console.error('Error loading puzzles:', error);
       setTopPuzzles([]);
     } finally {
       setLoadingPuzzles(false);
+    }
+  };
+
+  const loadFeaturedEvents = async () => {
+    setLoadingEvents(true);
+    try {
+      // Load featured events
+      const featured = await base44.entities.FeaturedEvent.list('position', 3);
+      
+      if (featured.length > 0) {
+        // Load full event details
+        const eventPromises = featured.map(fe => 
+          base44.entities.Event.filter({ id: fe.event_id })
+        );
+        const eventResults = await Promise.all(eventPromises);
+        const events = eventResults.map(r => r[0]).filter(e => e);
+        setFeaturedEvents(events);
+      }
+    } catch (error) {
+      console.error('Error loading events:', error);
+    } finally {
+      setLoadingEvents(false);
     }
   };
   
@@ -207,19 +245,41 @@ export default function Home() {
           icon={Calendar}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {monthlyEvents.map((event, index) => (
-            <motion.div 
-              key={index} 
-              variants={item}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-            >
-              <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
-                <EventCard event={event} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {loadingEvents ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : featuredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {featuredEvents.map((event, index) => (
+              <motion.div 
+                key={event.id} 
+                variants={item}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              >
+                <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
+                  <EventCard event={event} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {monthlyEvents.map((event, index) => (
+              <motion.div 
+                key={index} 
+                variants={item}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              >
+                <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
+                  <EventCard event={event} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.section>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
