@@ -13,35 +13,7 @@ import { base44 } from '@/api/base44Client';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 
 
-const monthlyEvents = [
-  {
-    title: 'Speed Puzzle Challenge',
-    description: 'Race against time to complete puzzles faster than anyone else',
-    image: 'https://images.unsplash.com/photo-1553481187-be93c21490a9?w=400&h=200&fit=crop',
-    date: 'Jan 15-31',
-    participants: 2847,
-    timeLeft: '5 days left',
-    type: 'challenge'
-  },
-  {
-    title: 'Winter Tournament',
-    description: 'Compete in the seasonal championship for exclusive rewards',
-    image: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400&h=200&fit=crop',
-    date: 'Jan 20 - Feb 10',
-    participants: 1523,
-    timeLeft: '12 days left',
-    type: 'tournament'
-  },
-  {
-    title: 'Community Build',
-    description: 'Collaborate with others to complete a massive 10,000 piece puzzle',
-    image: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=400&h=200&fit=crop',
-    date: 'Ongoing',
-    participants: 892,
-    timeLeft: 'Join anytime',
-    type: 'community'
-  }
-];
+
 
 
 
@@ -84,21 +56,19 @@ export default function Home() {
   const loadFeaturedEvents = async () => {
     setLoadingEvents(true);
     try {
-      // Load featured events sorted by position
       const featured = await base44.entities.FeaturedEvent.list('position', 3);
-      console.log('Featured events loaded:', featured);
       
       if (featured.length > 0) {
-        // Load full event details for each featured event
-        const eventPromises = featured.map(fe => 
-          base44.entities.Event.filter({ id: fe.event_id })
-        );
-        const eventResults = await Promise.all(eventPromises);
-        const events = eventResults.map(r => r[0]).filter(e => e);
-        console.log('Full events loaded:', events);
+        const eventPromises = featured
+          .filter(f => f.position <= 3)
+          .map(async (fe) => {
+            const eventList = await base44.entities.Event.filter({ id: fe.event_id });
+            return eventList[0];
+          });
+        
+        const events = (await Promise.all(eventPromises)).filter(e => e);
         setFeaturedEvents(events);
       } else {
-        console.log('No featured events found');
         setFeaturedEvents([]);
       }
     } catch (error) {
@@ -242,7 +212,7 @@ export default function Home() {
         </motion.section>
       )}
 
-      {/* Monthly Events */}
+      {/* Événements Mensuels */}
       <motion.section 
         variants={container}
         initial="hidden"
@@ -251,7 +221,7 @@ export default function Home() {
         className="px-4 lg:px-8 py-8"
       >
         <SectionHeader 
-          title={t('monthlyEvents')}
+          title="Événements à Venir"
           subtitle=""
           icon={Calendar}
         />
@@ -264,17 +234,40 @@ export default function Home() {
           </div>
         ) : featuredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {featuredEvents.map((event) => (
+            {featuredEvents.map((event, idx) => (
               <motion.div 
                 key={event.id} 
                 variants={item}
-                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                onClick={() => setSelectedEvent(event)}
+                className="group cursor-pointer"
               >
-                <EventCard 
-                  event={event}
-                  onRegisterClick={(e) => setSelectedEvent(e)}
-                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
-                />
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all hover:scale-[1.02]">
+                  <div className="aspect-video relative overflow-hidden">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-white/60 text-sm mb-3 line-clamp-2">
+                      {event.short_description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-orange-400 text-sm">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                      <div className="text-white/50 text-sm">
+                        {event.current_participants || 0}/{event.max_capacity} inscrits
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
