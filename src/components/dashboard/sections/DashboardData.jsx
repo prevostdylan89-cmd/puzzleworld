@@ -50,7 +50,7 @@ export default function DashboardData() {
       // Load all puzzles
       const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 1000);
       
-      // Count real likes for each puzzle
+      // Count real likes for each puzzle (unique per user)
       const puzzlesWithRealLikes = await Promise.all(puzzles.map(async (puzzle) => {
         try {
           const [likes, swipes] = await Promise.all([
@@ -58,15 +58,28 @@ export default function DashboardData() {
             base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin })
           ]);
           
-          const likeCount = swipes.filter(s => s.interaction_type === 'like').length;
-          const superlikeCount = swipes.filter(s => s.interaction_type === 'superlike').length;
-          const totalEngagement = likeCount + (superlikeCount * 2) + likes.length;
+          // Count unique users who liked/superliked in swipes
+          const uniqueSwipeLikes = new Map();
+          const uniqueSwipeSuperlikes = new Map();
+          
+          swipes.forEach(s => {
+            if (s.interaction_type === 'like') {
+              uniqueSwipeLikes.set(s.created_by, true);
+            } else if (s.interaction_type === 'superlike') {
+              uniqueSwipeSuperlikes.set(s.created_by, true);
+            }
+          });
+          
+          const likeCount = uniqueSwipeLikes.size;
+          const superlikeCount = uniqueSwipeSuperlikes.size;
+          const uniquePostLikes = likes.length; // Already unique per user per puzzle
+          const totalEngagement = likeCount + (superlikeCount * 2) + uniquePostLikes;
           
           return {
             ...puzzle,
             real_likes: likeCount,
             real_superlikes: superlikeCount,
-            unique_likes: likes.length,
+            unique_likes: uniquePostLikes,
             total_engagement: totalEngagement
           };
         } catch (error) {

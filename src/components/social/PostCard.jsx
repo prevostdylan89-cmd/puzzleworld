@@ -101,9 +101,9 @@ export default function PostCard({ post, user }) {
   };
 
   const checkIfPuzzleLiked = async () => {
-    if (!user) return;
+    if (!user || !post.puzzle_reference) return;
     const likes = await base44.entities.UserPuzzleLike.filter({
-      post_id: post.id,
+      puzzle_asin: post.puzzle_reference,
       created_by: user.email
     });
     setIsPuzzleLiked(likes.length > 0);
@@ -232,7 +232,7 @@ export default function PostCard({ post, user }) {
     try {
       if (previousLiked) {
         const likes = await base44.entities.UserPuzzleLike.filter({
-          post_id: post.id,
+          puzzle_asin: post.puzzle_reference,
           created_by: user.email
         });
         if (likes.length > 0) {
@@ -240,6 +240,18 @@ export default function PostCard({ post, user }) {
           toast.success('Puzzle retiré de vos likes');
         }
       } else {
+        // Check if user already liked this puzzle (to avoid duplicates)
+        const existingLikes = await base44.entities.UserPuzzleLike.filter({
+          puzzle_asin: post.puzzle_reference,
+          created_by: user.email
+        });
+        
+        if (existingLikes.length > 0) {
+          toast.info('Vous avez déjà liké ce puzzle!');
+          setIsPuzzleLiked(true);
+          return;
+        }
+        
         // Try to fetch complete puzzle data if ASIN exists
         let puzzleImage = post.image_url || '';
         let puzzleBrand = post.puzzle_brand || '';
@@ -262,7 +274,6 @@ export default function PostCard({ post, user }) {
         }
         
         await base44.entities.UserPuzzleLike.create({
-          post_id: post.id,
           puzzle_asin: post.puzzle_reference || '',
           puzzle_name: post.puzzle_name,
           puzzle_brand: puzzleBrand,
