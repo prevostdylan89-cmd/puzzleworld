@@ -403,6 +403,20 @@ export default function Discover() {
       scoreChange = 1.0;
       interactionType = 'like';
       updateFields.total_likes = (userDNA.total_likes || 0) + 1;
+      
+      // Add to UserPuzzleLike collection
+      try {
+        await base44.entities.UserPuzzleLike.create({
+          puzzle_asin: puzzle.asin,
+          puzzle_name: puzzle.title,
+          puzzle_brand: puzzle.brand,
+          puzzle_pieces: puzzle.piece_count,
+          puzzle_image: puzzle.image_hd,
+          post_id: ''
+        });
+      } catch (error) {
+        console.error('Error adding to liked puzzles:', error);
+      }
     } else if (direction === 'superlike') {
       scoreChange = 2.0;
       interactionType = 'superlike';

@@ -228,7 +228,6 @@ export default function PostCard({ post, user }) {
     // Optimistic update
     const previousLiked = isPuzzleLiked;
     setIsPuzzleLiked(!isPuzzleLiked);
-    toast.success(isPuzzleLiked ? 'Puzzle retiré' : 'Puzzle ajouté à vos likes');
 
     try {
       if (previousLiked) {
@@ -238,16 +237,40 @@ export default function PostCard({ post, user }) {
         });
         if (likes.length > 0) {
           await base44.entities.UserPuzzleLike.delete(likes[0].id);
+          toast.success('Puzzle retiré de vos likes');
         }
       } else {
+        // Try to fetch complete puzzle data if ASIN exists
+        let puzzleImage = post.image_url || '';
+        let puzzleBrand = post.puzzle_brand || '';
+        
+        if (post.puzzle_reference && post.puzzle_reference.length === 13) {
+          try {
+            toast.info('Récupération des infos du puzzle...');
+            const response = await fetch(
+              `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${post.puzzle_reference}`
+            );
+            const data = await response.json();
+            
+            if (data.product) {
+              puzzleImage = data.product.main_image?.link || data.product.images?.[0]?.link || puzzleImage;
+              puzzleBrand = data.product.brand || puzzleBrand;
+            }
+          } catch (apiError) {
+            console.error('Error fetching puzzle data from API:', apiError);
+          }
+        }
+        
         await base44.entities.UserPuzzleLike.create({
           post_id: post.id,
           puzzle_asin: post.puzzle_reference || '',
           puzzle_name: post.puzzle_name,
-          puzzle_brand: post.puzzle_brand || '',
+          puzzle_brand: puzzleBrand,
           puzzle_pieces: post.puzzle_pieces || 0,
-          puzzle_image: post.image_url || ''
+          puzzle_image: puzzleImage
         });
+        
+        toast.success('✨ Puzzle ajouté à vos likes !');
       }
     } catch (error) {
       // Revert on error
