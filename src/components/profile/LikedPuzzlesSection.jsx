@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Puzzle, Loader2 } from 'lucide-react';
+import { Heart, Puzzle, Loader2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function LikedPuzzlesSection({ userEmail }) {
   const [likedPuzzles, setLikedPuzzles] = useState([]);
@@ -19,7 +21,7 @@ export default function LikedPuzzlesSection({ userEmail }) {
         created_by: userEmail
       });
       
-      // Fetch full puzzle data for each liked puzzle
+      // Fetch full puzzle data for each liked puzzle with like ID
       const puzzlesData = [];
       for (const like of likes) {
         if (like.puzzle_asin) {
@@ -27,7 +29,10 @@ export default function LikedPuzzlesSection({ userEmail }) {
             asin: like.puzzle_asin
           });
           if (catalogPuzzles.length > 0) {
-            puzzlesData.push(catalogPuzzles[0]);
+            puzzlesData.push({
+              ...catalogPuzzles[0],
+              likeId: like.id
+            });
           }
         }
       }
@@ -37,6 +42,17 @@ export default function LikedPuzzlesSection({ userEmail }) {
       console.error('Error loading liked puzzles:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRemoveLike = async (puzzle) => {
+    try {
+      await base44.entities.UserPuzzleLike.delete(puzzle.likeId);
+      setLikedPuzzles(prev => prev.filter(p => p.id !== puzzle.id));
+      toast.success('Puzzle retiré de vos likes');
+    } catch (error) {
+      console.error('Error removing like:', error);
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -73,8 +89,17 @@ export default function LikedPuzzlesSection({ userEmail }) {
           key={puzzle.id}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
+          className="relative group"
         >
           <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
+          <Button
+            onClick={() => handleRemoveLike(puzzle)}
+            size="icon"
+            variant="destructive"
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </motion.div>
       ))}
     </div>
