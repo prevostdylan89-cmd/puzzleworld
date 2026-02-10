@@ -223,20 +223,23 @@ export default function Home() {
               <motion.div 
                 key={puzzle.id} 
                 variants={item}
-                onClick={() => setSelectedPuzzle(puzzle)}
+                onClick={() => window.location.href = createPageUrl('Collection')}
                 className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
                 <img
-                  src={puzzle.image_hd}
-                  alt={puzzle.title}
+                  src={puzzle.image_hd || 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400'}
+                  alt={puzzle.title || 'Puzzle'}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity" />
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold inline-block">
-                    {puzzle.piece_count} pièces
+                    {puzzle.piece_count || '1000'} pièces
                   </div>
                 </div>
               </motion.div>
@@ -314,13 +317,7 @@ export default function Home() {
         />
       )}
 
-      {selectedPuzzle && (
-        <PuzzleDetailModal
-          open={true}
-          onClose={() => setSelectedPuzzle(null)}
-          puzzle={selectedPuzzle}
-        />
-      )}
+
 
 
     </div>

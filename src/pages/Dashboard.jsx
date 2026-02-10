@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Sparkles, Grid3X3, Users, Calendar, User, Settings, BarChart3 } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, BarChart3, Gamepad2 } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
-import DashboardDiscovery from '@/components/dashboard/sections/DashboardDiscovery';
 import DashboardMyCollection from '@/components/dashboard/sections/DashboardMyCollection';
 import DashboardSocial from '@/components/dashboard/sections/DashboardSocial';
 import DashboardEvents from '@/components/dashboard/sections/DashboardEvents';
 import DashboardProfile from '@/components/dashboard/sections/DashboardProfile';
 import DashboardSettings from '@/components/dashboard/sections/DashboardSettings';
 import DashboardData from '@/components/dashboard/sections/DashboardData';
+import DashboardOnline from '@/components/dashboard/sections/DashboardOnline';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
-  { id: 'discovery', label: 'Découverte', icon: Sparkles, component: DashboardDiscovery },
   { id: 'mycollection', label: 'Ma Collection', icon: Grid3X3, component: DashboardMyCollection },
   { id: 'social', label: 'Social', icon: Users, component: DashboardSocial },
   { id: 'events', label: 'Événements', icon: Calendar, component: DashboardEvents },
+  { id: 'online', label: 'En Ligne', icon: Gamepad2, component: DashboardOnline },
   { id: 'data', label: 'Données', icon: BarChart3, component: DashboardData },
   { id: 'profile', label: 'Utilisateurs', icon: User, component: DashboardProfile },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
