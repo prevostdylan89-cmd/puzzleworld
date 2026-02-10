@@ -84,8 +84,9 @@ export default function Home() {
   const loadFeaturedEvents = async () => {
     setLoadingEvents(true);
     try {
-      // Load featured events (with cached event data)
+      // Load featured events sorted by position
       const featured = await base44.entities.FeaturedEvent.list('position', 3);
+      console.log('Featured events loaded:', featured);
       
       if (featured.length > 0) {
         // Load full event details for each featured event
@@ -94,7 +95,11 @@ export default function Home() {
         );
         const eventResults = await Promise.all(eventPromises);
         const events = eventResults.map(r => r[0]).filter(e => e);
+        console.log('Full events loaded:', events);
         setFeaturedEvents(events);
+      } else {
+        console.log('No featured events found');
+        setFeaturedEvents([]);
       }
     } catch (error) {
       console.error('Error loading events:', error);
@@ -238,45 +243,47 @@ export default function Home() {
       )}
 
       {/* Monthly Events */}
-      {(loadingEvents || featuredEvents.length > 0) && (
-        <motion.section 
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="px-4 lg:px-8 py-8"
-        >
-          <SectionHeader 
-            title={t('monthlyEvents')}
-            subtitle=""
-            icon={Calendar}
-          />
-          
-          {loadingEvents ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {featuredEvents.map((event) => (
-                <motion.div 
-                  key={event.id} 
-                  variants={item}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                >
-                  <EventCard 
-                    event={event}
-                    onRegisterClick={(e) => setSelectedEvent(e)}
-                    onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </motion.section>
-      )}
+      <motion.section 
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="px-4 lg:px-8 py-8"
+      >
+        <SectionHeader 
+          title={t('monthlyEvents')}
+          subtitle=""
+          icon={Calendar}
+        />
+        
+        {loadingEvents ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : featuredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {featuredEvents.map((event) => (
+              <motion.div 
+                key={event.id} 
+                variants={item}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              >
+                <EventCard 
+                  event={event}
+                  onRegisterClick={(e) => setSelectedEvent(e)}
+                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-white/50">Aucun événement sélectionné. Ajoutez-en depuis la page admin.</p>
+          </div>
+        )}
+      </motion.section>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       
