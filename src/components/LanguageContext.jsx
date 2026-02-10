@@ -6,6 +6,7 @@ const translations = {
   fr: {
     // Navigation
     home: 'Accueil',
+    discover: 'Découverte',
     social: 'Social',
     collection: 'Collection',
     online: 'En Ligne',
@@ -151,6 +152,7 @@ const translations = {
   en: {
     // Navigation
     home: 'Home',
+    discover: 'Discover',
     social: 'Social',
     collection: 'Collection',
     online: 'Online',

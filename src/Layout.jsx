@@ -42,7 +42,7 @@ function LayoutContent({ children, currentPageName }) {
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
-    { name: 'Discover', icon: Sparkles, page: 'Discover', hasHistory: true },
+    { name: t('discover'), icon: Sparkles, page: 'Discover', hasHistory: true },
     { name: t('social'), icon: Users, page: 'Social', hasHistory: true },
     { name: t('collection'), icon: Grid3X3, page: 'Collection', hasHistory: true },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
