@@ -192,6 +192,18 @@ export default function Collection() {
     }
   });
 
+  useEffect(() => {
+    const asin = localStorage.getItem('selectedPuzzleAsin');
+    if (asin && globalPuzzles.length > 0) {
+      localStorage.removeItem('selectedPuzzleAsin');
+      const puzzle = globalPuzzles.find(p => p.asin === asin);
+      if (puzzle) {
+        setSelectedPuzzle(puzzle);
+        setShowDetailModal(true);
+      }
+    }
+  }, [globalPuzzles]);
+
   const clearFilters = () => {
     setMinPieces('');
     setMaxPieces('');
