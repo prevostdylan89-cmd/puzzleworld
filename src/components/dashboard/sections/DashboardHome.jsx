@@ -118,15 +118,15 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Top 4 Events Section */}
+      {/* Top 3 Events Section */}
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
-        <h3 className="text-xl font-semibold text-white mb-4">Top 4 Événements en Vedette</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">Top 3 Événements en Vedette</h3>
         <p className="text-white/60 text-sm mb-6">
-          Sélectionnez les 4 événements à afficher sur la page d'accueil
+          Sélectionnez les 3 événements à afficher sur la page d'accueil
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((position) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((position) => {
             const event = featuredEvents.find(e => e.position === position);
             
             return (
