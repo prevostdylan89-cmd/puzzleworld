@@ -4,6 +4,7 @@ import { Grid3X3, Search, Edit2, Trash2, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import PuzzleEditModal from '@/components/dashboard/PuzzleEditModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,11 +16,27 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+const CATEGORY_FILTERS = [
+  { id: 'all', label: 'Tous', icon: '🌍' },
+  { id: 'Nature', label: 'Nature', icon: '🌳' },
+  { id: 'Urban', label: 'Urbain', icon: '🏙️' },
+  { id: 'Disney', label: 'Disney', icon: '🏰' },
+  { id: 'Art', label: 'Art', icon: '🎨' },
+  { id: 'Animals', label: 'Animaux', icon: '🦁' },
+  { id: 'Abstract', label: 'Abstrait', icon: '🎨' },
+  { id: 'Space', label: 'Espace', icon: '🌌' },
+  { id: 'Architecture', label: 'Architecture', icon: '🏛️' },
+  { id: 'Vintage', label: 'Vintage', icon: '📜' },
+  { id: 'Autre', label: 'Autre', icon: '🧩' }
+];
+
 export default function DashboardMyCollection() {
   const [puzzles, setPuzzles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [deletingPuzzle, setDeletingPuzzle] = useState(null);
+  const [editingPuzzle, setEditingPuzzle] = useState(null);
 
   useEffect(() => {
     loadPuzzles();
@@ -52,10 +69,12 @@ export default function DashboardMyCollection() {
     }
   };
 
-  const filteredPuzzles = puzzles.filter(p => 
-    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPuzzles = puzzles.filter(p => {
+    const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         p.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || p.category_tag === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -76,7 +95,7 @@ export default function DashboardMyCollection() {
 
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
         <div className="mb-6">
-          <div className="relative">
+          <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <Input
               value={searchQuery}
@@ -85,7 +104,26 @@ export default function DashboardMyCollection() {
               className="pl-10 bg-white/5 border-white/10 text-white"
             />
           </div>
-          <p className="text-white/50 text-sm mt-2">
+
+          {/* Category Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
+            {CATEGORY_FILTERS.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full whitespace-nowrap transition-all text-sm ${
+                  selectedCategory === category.id
+                    ? 'bg-orange-500 text-white shadow-lg'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <span>{category.icon}</span>
+                <span className="font-medium">{category.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <p className="text-white/50 text-sm">
             {filteredPuzzles.length} puzzle(s) trouvé(s)
           </p>
         </div>
@@ -112,6 +150,13 @@ export default function DashboardMyCollection() {
               </div>
               <div className="flex gap-2">
                 <Button
+                  onClick={() => setEditingPuzzle(puzzle)}
+                  size="sm"
+                  className="bg-white/10 hover:bg-white/20 text-white"
+                >
+                  <Edit2 className="w-3 h-3" />
+                </Button>
+                <Button
                   onClick={() => setDeletingPuzzle(puzzle)}
                   size="sm"
                   variant="destructive"
@@ -124,6 +169,16 @@ export default function DashboardMyCollection() {
           ))}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingPuzzle && (
+        <PuzzleEditModal
+          open={!!editingPuzzle}
+          onClose={() => setEditingPuzzle(null)}
+          puzzle={editingPuzzle}
+          onUpdate={loadPuzzles}
+        />
+      )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingPuzzle} onOpenChange={() => setDeletingPuzzle(null)}>
