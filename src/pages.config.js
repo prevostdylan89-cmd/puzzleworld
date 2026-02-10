@@ -58,6 +58,7 @@ import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import Terms from './pages/Terms';
 import AdminEvents from './pages/AdminEvents';
+import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +74,7 @@ export const PAGES = {
     "Social": Social,
     "Terms": Terms,
     "AdminEvents": AdminEvents,
+    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
