@@ -11,9 +11,7 @@ import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
 import { base44 } from '@/api/base44Client';
 import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
-import FeaturedPuzzleSelector from '@/components/home/FeaturedPuzzleSelector';
-import PuzzleReplacementModal from '@/components/home/PuzzleReplacementModal';
-import { Edit3 } from 'lucide-react';
+
 
 const monthlyEvents = [
   {
@@ -52,71 +50,24 @@ export default function Home() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [topPuzzles, setTopPuzzles] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showSelector, setShowSelector] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState(null);
   const [loadingPuzzles, setLoadingPuzzles] = useState(true);
-  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     loadTopPuzzles();
-    checkAdminStatus();
   }, []);
-
-  const checkAdminStatus = async () => {
-    try {
-      const user = await base44.auth.me();
-      setIsAdmin(user?.role === 'admin');
-    } catch (error) {
-      setIsAdmin(false);
-    }
-  };
 
   const loadTopPuzzles = async () => {
     setLoadingPuzzles(true);
     try {
-      // Load featured puzzles (positions 1-4)
-      const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
-      
-      if (featured.length > 0) {
-        // Load full puzzle data for each featured puzzle
-        const puzzlesData = [];
-        for (const f of featured) {
-          const puzzles = await base44.entities.PuzzleCatalog.filter({ id: f.puzzle_catalog_id });
-          if (puzzles.length > 0) {
-            puzzlesData.push(puzzles[0]);
-          }
-        }
-        
-        // Fill remaining slots with latest puzzles if needed
-        if (puzzlesData.length < 4) {
-          const latestPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4 - puzzlesData.length);
-          puzzlesData.push(...latestPuzzles);
-        }
-        
-        setTopPuzzles(puzzlesData);
-      } else {
-        // No featured puzzles yet, show latest 4
-        const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
-        setTopPuzzles(puzzles);
-      }
+      // Always load latest 4 puzzles from catalog
+      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
+      setTopPuzzles(puzzles);
     } catch (error) {
       console.error('Error loading puzzles:', error);
-      // Fallback
-      try {
-        const fallbackPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
-        setTopPuzzles(fallbackPuzzles);
-      } catch (err) {
-        console.error('Fallback failed:', err);
-      }
+      setTopPuzzles([]);
     } finally {
       setLoadingPuzzles(false);
     }
-  };
-
-  const handleEditSlot = (index) => {
-    setSelectedPosition(index);
-    setShowSelector(true);
   };
   
   const container = {
@@ -134,21 +85,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Admin Edit Mode Toggle */}
-      {isAdmin && (
-        <div className="fixed top-20 right-4 lg:right-8 z-40">
-          <Button
-            onClick={() => setEditMode(!editMode)}
-            className={`rounded-full shadow-lg ${
-              editMode 
-                ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-            }`}
-          >
-            {editMode ? '🔓 Mode Édition Activé' : '🔒 Mode Édition'}
-          </Button>
-        </div>
-      )}
+
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -243,24 +180,9 @@ export default function Home() {
           </div>
         ) : topPuzzles.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {topPuzzles.map((puzzle, index) => (
-              <motion.div key={puzzle.id} variants={item} className="relative group">
+            {topPuzzles.map((puzzle) => (
+              <motion.div key={puzzle.id} variants={item}>
                 <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
-                {isAdmin && (
-                  <button
-                    onClick={() => handleEditSlot(index)}
-                    className={`absolute top-2 right-2 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg hover:bg-orange-600 z-10 transition-all ${
-                      editMode ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100'
-                    }`}
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                )}
-                {isAdmin && editMode && (
-                  <div className="absolute bottom-2 left-2 right-2 bg-orange-500/90 backdrop-blur-sm text-white text-xs py-1 px-2 rounded-lg text-center font-medium">
-                    Position {index + 1}
-                  </div>
-                )}
               </motion.div>
             ))}
           </div>
@@ -310,20 +232,7 @@ export default function Home() {
         />
       )}
 
-      <PuzzleReplacementModal
-        open={showSelector}
-        onClose={() => {
-          setShowSelector(false);
-          setSelectedPosition(null);
-        }}
-        position={selectedPosition}
-        currentPuzzle={selectedPosition !== null ? topPuzzles[selectedPosition] : null}
-        onReplace={() => {
-          loadTopPuzzles();
-          setShowSelector(false);
-          setSelectedPosition(null);
-        }}
-      />
+
     </div>
   );
 }
