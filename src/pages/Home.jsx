@@ -227,53 +227,30 @@ export default function Home() {
         />
         
         {loadingEvents ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-80 bg-white/5 rounded-2xl animate-pulse" />
+              <div key={i} className="h-72 bg-orange-500/10 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : featuredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {featuredEvents.map((event, idx) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredEvents.map((event) => (
               <motion.div 
                 key={event.id} 
                 variants={item}
                 onClick={() => setSelectedEvent(event)}
-                className="group cursor-pointer"
+                className="group cursor-pointer relative aspect-[4/3] rounded-2xl overflow-hidden border-2 border-orange-500/30 hover:border-orange-500 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20"
               >
-                <div className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl overflow-hidden hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:scale-[1.02]">
-                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-orange-500/20 to-purple-500/20">
-                    {event.image ? (
-                      <>
-                        <img
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Calendar className="w-16 h-16 text-white/20" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5 bg-[#0a0a2e]/80 backdrop-blur-sm">
-                    <h3 className="text-white font-bold text-xl mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-white/70 text-sm mb-4 line-clamp-2">
-                      {event.short_description}
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                      <div className="flex items-center gap-2 text-orange-400 text-sm font-medium">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                      </div>
-                      <div className="text-white/60 text-sm font-medium">
-                        {event.current_participants || 0}/{event.max_capacity}
-                      </div>
-                    </div>
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-full font-semibold">
+                    <Calendar className="w-5 h-5" />
+                    <span>{new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                   </div>
                 </div>
               </motion.div>
@@ -281,7 +258,11 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-white/50">Aucun événement sélectionné. Ajoutez-en depuis la page admin.</p>
+            <div className="inline-block p-8 bg-orange-500/10 rounded-2xl border-2 border-orange-500/20">
+              <Calendar className="w-12 h-12 text-orange-500 mb-4 mx-auto" />
+              <p className="text-white/70 text-lg">Aucun événement sélectionné</p>
+              <p className="text-white/50 text-sm">Ajoutez-en depuis la page admin</p>
+            </div>
           </div>
         )}
       </motion.section>
