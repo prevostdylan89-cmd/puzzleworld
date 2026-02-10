@@ -10,7 +10,7 @@ import SectionHeader from '@/components/shared/SectionHeader';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
 import { base44 } from '@/api/base44Client';
-import CommunityPuzzleCard from '@/components/collection/CommunityPuzzleCard';
+import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 
 
 const monthlyEvents = [
@@ -53,6 +53,7 @@ export default function Home() {
   const [loadingPuzzles, setLoadingPuzzles] = useState(true);
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [selectedPuzzle, setSelectedPuzzle] = useState(null);
 
   useEffect(() => {
     loadTopPuzzles();
@@ -219,8 +220,25 @@ export default function Home() {
         ) : topPuzzles.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {topPuzzles.map((puzzle) => (
-              <motion.div key={puzzle.id} variants={item}>
-                <CommunityPuzzleCard puzzle={puzzle} showAffiliateLink={true} />
+              <motion.div 
+                key={puzzle.id} 
+                variants={item}
+                onClick={() => setSelectedPuzzle(puzzle)}
+                className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <img
+                  src={puzzle.image_hd}
+                  alt={puzzle.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity" />
+                <div className="absolute bottom-3 left-3 right-3">
+                  <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold inline-block">
+                    {puzzle.piece_count} pièces
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -289,6 +307,14 @@ export default function Home() {
           open={true} 
           event={selectedEvent} 
           onClose={() => setSelectedEvent(null)} 
+        />
+      )}
+
+      {selectedPuzzle && (
+        <PuzzleDetailModal
+          open={true}
+          onClose={() => setSelectedPuzzle(null)}
+          puzzle={selectedPuzzle}
         />
       )}
 
