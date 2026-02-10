@@ -84,11 +84,11 @@ export default function Home() {
   const loadFeaturedEvents = async () => {
     setLoadingEvents(true);
     try {
-      // Load featured events
+      // Load featured events (with cached event data)
       const featured = await base44.entities.FeaturedEvent.list('position', 3);
       
       if (featured.length > 0) {
-        // Load full event details
+        // Load full event details for each featured event
         const eventPromises = featured.map(fe => 
           base44.entities.Event.filter({ id: fe.event_id })
         );
@@ -98,6 +98,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error loading events:', error);
+      setFeaturedEvents([]);
     } finally {
       setLoadingEvents(false);
     }
