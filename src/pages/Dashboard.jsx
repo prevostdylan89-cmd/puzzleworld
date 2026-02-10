@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Sparkles, Grid3X3, Users, Calendar, User, Settings } from 'lucide-react';
+import { Loader2, Home, Sparkles, Grid3X3, Users, Calendar, User, Settings, BarChart3 } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -11,6 +11,7 @@ import DashboardSocial from '@/components/dashboard/sections/DashboardSocial';
 import DashboardEvents from '@/components/dashboard/sections/DashboardEvents';
 import DashboardProfile from '@/components/dashboard/sections/DashboardProfile';
 import DashboardSettings from '@/components/dashboard/sections/DashboardSettings';
+import DashboardData from '@/components/dashboard/sections/DashboardData';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
@@ -18,6 +19,7 @@ const SECTIONS = [
   { id: 'mycollection', label: 'Ma Collection', icon: Grid3X3, component: DashboardMyCollection },
   { id: 'social', label: 'Social', icon: Users, component: DashboardSocial },
   { id: 'events', label: 'Événements', icon: Calendar, component: DashboardEvents },
+  { id: 'data', label: 'Données', icon: BarChart3, component: DashboardData },
   { id: 'profile', label: 'Utilisateurs', icon: User, component: DashboardProfile },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
 ];

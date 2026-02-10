@@ -47,7 +47,9 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminEvents from './pages/AdminEvents';
 import Collection from './pages/Collection';
+import Dashboard from './pages/Dashboard';
 import Discover from './pages/Discover';
 import Events from './pages/Events';
 import Home from './pages/Home';
@@ -57,13 +59,13 @@ import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import Terms from './pages/Terms';
-import AdminEvents from './pages/AdminEvents';
-import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminEvents": AdminEvents,
     "Collection": Collection,
+    "Dashboard": Dashboard,
     "Discover": Discover,
     "Events": Events,
     "Home": Home,
@@ -73,8 +75,6 @@ export const PAGES = {
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
     "Terms": Terms,
-    "AdminEvents": AdminEvents,
-    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
