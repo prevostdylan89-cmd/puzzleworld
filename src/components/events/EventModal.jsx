@@ -186,6 +186,16 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
                 {event.full_description || event.short_description}
               </p>
             </div>
+
+            {/* Plus d'infos button */}
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <Button
+                onClick={() => window.location.href = '/Events'}
+                className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              >
+                Plus d'infos sur tous les événements
+              </Button>
+            </div>
           </div>
         </motion.div>
       </div>
