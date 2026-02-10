@@ -63,20 +63,14 @@ export default function Home() {
   const loadTopPuzzles = async () => {
     setLoadingPuzzles(true);
     try {
-      // Load featured puzzles from FeaturedPuzzle entity
       const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
       
       if (featured.length > 0) {
-        // Load full puzzle details
         const puzzlePromises = featured.map(fp => 
           base44.entities.PuzzleCatalog.filter({ id: fp.puzzle_catalog_id })
         );
         const puzzleResults = await Promise.all(puzzlePromises);
         const puzzles = puzzleResults.map(r => r[0]).filter(p => p);
-        setTopPuzzles(puzzles);
-      } else {
-        // Fallback to latest puzzles
-        const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 4);
         setTopPuzzles(puzzles);
       }
     } catch (error) {
@@ -196,61 +190,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Most Played */}
-      <motion.section 
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="px-4 lg:px-8 py-8"
-      >
-        <SectionHeader 
-          title={t('mostPlayed')}
-          subtitle=""
-          link="Collection"
-          icon={TrendingUp}
-        />
-        
-        {loadingPuzzles ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-square bg-white/5 rounded-xl animate-pulse" />
-            ))}
-          </div>
-        ) : topPuzzles.length > 0 ? (
+      {/* Featured Puzzles */}
+      {topPuzzles.length > 0 && (
+        <motion.section 
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="px-4 lg:px-8 py-8"
+        >
+          <SectionHeader 
+            title="Puzzles en Vedette"
+            subtitle=""
+            link="Collection"
+            icon={TrendingUp}
+          />
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {topPuzzles.map((puzzle) => (
               <motion.div 
                 key={puzzle.id} 
                 variants={item}
-                onClick={() => window.location.href = createPageUrl('Collection')}
+                onClick={() => {
+                  localStorage.setItem('selectedPuzzleAsin', puzzle.asin);
+                  window.location.href = createPageUrl('Collection');
+                }}
                 className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
                 <img
-                  src={puzzle.image_hd || 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400'}
-                  alt={puzzle.title || 'Puzzle'}
+                  src={puzzle.image_hd}
+                  alt={puzzle.title}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=400';
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity" />
                 <div className="absolute bottom-3 left-3 right-3">
                   <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold inline-block">
-                    {puzzle.piece_count || '1000'} pièces
+                    {puzzle.piece_count} pièces
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 bg-white/5 rounded-xl">
-            <p className="text-white/50 text-sm">Aucun puzzle disponible</p>
-          </div>
-        )}
-      </motion.section>
+        </motion.section>
+      )}
 
       {/* Monthly Events */}
       <motion.section 
