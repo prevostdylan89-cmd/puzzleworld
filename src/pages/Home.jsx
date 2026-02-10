@@ -229,7 +229,7 @@ export default function Home() {
         {loadingEvents ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
+              <div key={i} className="h-80 bg-white/5 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : featuredEvents.length > 0 ? (
@@ -241,29 +241,37 @@ export default function Home() {
                 onClick={() => setSelectedEvent(event)}
                 className="group cursor-pointer"
               >
-                <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all hover:scale-[1.02]">
-                  <div className="aspect-video relative overflow-hidden">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl overflow-hidden hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:scale-[1.02]">
+                  <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-orange-500/20 to-purple-500/20">
+                    {event.image ? (
+                      <>
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Calendar className="w-16 h-16 text-white/20" />
+                      </div>
+                    )}
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-white font-semibold text-lg mb-2 line-clamp-2">
+                  <div className="p-5 bg-[#0a0a2e]/80 backdrop-blur-sm">
+                    <h3 className="text-white font-bold text-xl mb-2 line-clamp-2">
                       {event.title}
                     </h3>
-                    <p className="text-white/60 text-sm mb-3 line-clamp-2">
+                    <p className="text-white/70 text-sm mb-4 line-clamp-2">
                       {event.short_description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-orange-400 text-sm">
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                      <div className="flex items-center gap-2 text-orange-400 text-sm font-medium">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                        <span>{new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                       </div>
-                      <div className="text-white/50 text-sm">
-                        {event.current_participants || 0}/{event.max_capacity} inscrits
+                      <div className="text-white/60 text-sm font-medium">
+                        {event.current_participants || 0}/{event.max_capacity}
                       </div>
                     </div>
                   </div>
