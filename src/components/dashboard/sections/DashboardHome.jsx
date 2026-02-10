@@ -1,36 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Puzzle, Edit2, Loader2 } from 'lucide-react';
+import { Puzzle, Edit2, Loader2, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FeaturedPuzzleSelector from '@/components/home/FeaturedPuzzleSelector';
+import FeaturedEventSelector from '@/components/home/FeaturedEventSelector';
 import { toast } from 'sonner';
 
 export default function DashboardHome() {
   const [featuredPuzzles, setFeaturedPuzzles] = useState([]);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showSelector, setShowSelector] = useState(false);
+  const [showPuzzleSelector, setShowPuzzleSelector] = useState(false);
+  const [showEventSelector, setShowEventSelector] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
 
   useEffect(() => {
-    loadFeaturedPuzzles();
+    loadFeatured();
   }, []);
 
-  const loadFeaturedPuzzles = async () => {
+  const loadFeatured = async () => {
     setLoading(true);
     try {
       const puzzles = await base44.entities.FeaturedPuzzle.list('position');
+      const events = await base44.entities.FeaturedEvent.list('position');
       setFeaturedPuzzles(puzzles);
+      setFeaturedEvents(events);
     } catch (error) {
-      console.error('Error loading featured puzzles:', error);
+      console.error('Error loading featured:', error);
       toast.error('Erreur de chargement');
     } finally {
       setLoading(false);
     }
   };
 
-  const openSelector = (position) => {
+  const openPuzzleSelector = (position) => {
     setSelectedPosition(position);
-    setShowSelector(true);
+    setShowPuzzleSelector(true);
+  };
+
+  const openEventSelector = (position) => {
+    setSelectedPosition(position);
+    setShowEventSelector(true);
   };
 
   if (loading) {
@@ -49,7 +59,7 @@ export default function DashboardHome() {
       </div>
 
       {/* Top 4 Puzzles Section */}
-      <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6 mb-8">
         <h3 className="text-xl font-semibold text-white mb-4">Top 4 Puzzles en Vedette</h3>
         <p className="text-white/60 text-sm mb-6">
           Sélectionnez les 4 puzzles à afficher sur la page d'accueil
@@ -78,7 +88,7 @@ export default function DashboardHome() {
                         {puzzle.puzzle_title}
                       </p>
                       <Button
-                        onClick={() => openSelector(position)}
+                        onClick={() => openPuzzleSelector(position)}
                         size="sm"
                         className="w-full bg-white/10 hover:bg-white/20 text-white"
                       >
@@ -94,7 +104,7 @@ export default function DashboardHome() {
                       Position {position} vide
                     </p>
                     <Button
-                      onClick={() => openSelector(position)}
+                      onClick={() => openPuzzleSelector(position)}
                       size="sm"
                       className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
@@ -108,17 +118,91 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Featured Puzzle Selector Modal */}
-      {showSelector && (
+      {/* Top 4 Events Section */}
+      <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Top 4 Événements en Vedette</h3>
+        <p className="text-white/60 text-sm mb-6">
+          Sélectionnez les 4 événements à afficher sur la page d'accueil
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((position) => {
+            const event = featuredEvents.find(e => e.position === position);
+            
+            return (
+              <div
+                key={position}
+                className="bg-white/[0.03] border border-white/[0.06] rounded-lg overflow-hidden hover:border-orange-500/30 transition-all"
+              >
+                {event ? (
+                  <>
+                    <div className="aspect-video bg-white/5">
+                      <img
+                        src={event.event_image}
+                        alt={event.event_title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-3">
+                      <p className="text-white text-sm font-medium line-clamp-2 mb-1">
+                        {event.event_title}
+                      </p>
+                      <p className="text-white/50 text-xs mb-2">{event.event_date}</p>
+                      <Button
+                        onClick={() => openEventSelector(position)}
+                        size="sm"
+                        className="w-full bg-white/10 hover:bg-white/20 text-white"
+                      >
+                        <Edit2 className="w-3 h-3 mr-2" />
+                        Changer
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="aspect-video bg-white/5 flex flex-col items-center justify-center p-4">
+                    <Calendar className="w-12 h-12 text-white/20 mb-3" />
+                    <p className="text-white/50 text-sm mb-3 text-center">
+                      Position {position} vide
+                    </p>
+                    <Button
+                      onClick={() => openEventSelector(position)}
+                      size="sm"
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      Sélectionner
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selectors */}
+      {showPuzzleSelector && (
         <FeaturedPuzzleSelector
-          open={showSelector}
+          open={showPuzzleSelector}
           onClose={() => {
-            setShowSelector(false);
+            setShowPuzzleSelector(false);
             setSelectedPosition(null);
           }}
           position={selectedPosition}
           currentPuzzle={featuredPuzzles.find(p => p.position === selectedPosition)}
-          onUpdate={loadFeaturedPuzzles}
+          onUpdate={loadFeatured}
+        />
+      )}
+
+      {showEventSelector && (
+        <FeaturedEventSelector
+          open={showEventSelector}
+          onClose={() => {
+            setShowEventSelector(false);
+            setSelectedPosition(null);
+          }}
+          position={selectedPosition}
+          currentEvent={featuredEvents.find(e => e.position === selectedPosition)}
+          onUpdate={loadFeatured}
         />
       )}
     </div>

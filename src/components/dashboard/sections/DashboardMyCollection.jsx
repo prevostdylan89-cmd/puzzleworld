@@ -1,24 +1,152 @@
-import React from 'react';
-import { Grid3X3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Grid3X3, Search, Edit2, Trash2, Loader2, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function DashboardMyCollection() {
+  const [puzzles, setPuzzles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [deletingPuzzle, setDeletingPuzzle] = useState(null);
+
+  useEffect(() => {
+    loadPuzzles();
+  }, []);
+
+  const loadPuzzles = async () => {
+    setLoading(true);
+    try {
+      const allPuzzles = await base44.entities.PuzzleCatalog.list('-created_date', 500);
+      setPuzzles(allPuzzles);
+    } catch (error) {
+      console.error('Error loading puzzles:', error);
+      toast.error('Erreur de chargement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingPuzzle) return;
+
+    try {
+      await base44.entities.PuzzleCatalog.delete(deletingPuzzle.id);
+      toast.success('Puzzle supprimé');
+      setDeletingPuzzle(null);
+      loadPuzzles();
+    } catch (error) {
+      console.error('Error deleting puzzle:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const filteredPuzzles = puzzles.filter(p => 
+    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Ma Collection</h2>
-        <p className="text-white/60">Outils de gestion des collections utilisateurs</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white mb-2">Collection Communautaire</h2>
+          <p className="text-white/60">Gérez tous les puzzles de la plateforme</p>
+        </div>
       </div>
 
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
-        <div className="text-center py-12">
-          <Grid3X3 className="w-16 h-16 text-white/20 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">Collections Utilisateurs</h3>
-          <p className="text-white/60 mb-4">
-            Statistiques, gestion des doublons, correction de données
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher par titre ou marque..."
+              className="pl-10 bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <p className="text-white/50 text-sm mt-2">
+            {filteredPuzzles.length} puzzle(s) trouvé(s)
           </p>
-          <p className="text-white/40 text-sm">Section en développement</p>
+        </div>
+
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          {filteredPuzzles.map((puzzle) => (
+            <div
+              key={puzzle.id}
+              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 flex items-center gap-4 hover:border-white/10 transition-all"
+            >
+              <img
+                src={puzzle.image_hd}
+                alt={puzzle.title}
+                className="w-16 h-16 object-cover rounded"
+              />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-white font-medium text-sm line-clamp-1">{puzzle.title}</h4>
+                <p className="text-white/50 text-xs">
+                  {puzzle.brand} • {puzzle.piece_count} pièces • {puzzle.category_tag}
+                </p>
+                <p className="text-orange-400 text-xs mt-1">
+                  ❤️ {puzzle.total_likes + puzzle.total_superlikes} likes
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setDeletingPuzzle(puzzle)}
+                  size="sm"
+                  variant="destructive"
+                  className="bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingPuzzle} onOpenChange={() => setDeletingPuzzle(null)}>
+        <AlertDialogContent className="bg-[#0a0a2e] border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Supprimer le puzzle</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Êtes-vous sûr de vouloir supprimer "{deletingPuzzle?.title}" ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

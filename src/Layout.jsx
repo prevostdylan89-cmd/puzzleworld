@@ -49,6 +49,10 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('profile'), icon: User, page: 'Profile' },
   ];
 
+  const adminNavItems = user?.role === 'admin' 
+    ? [{ name: 'Admin', icon: Settings, page: 'Dashboard' }]
+    : [];
+
   const handleNavClick = (item) => {
     if (!item.hasHistory) return;
     
@@ -187,7 +191,7 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* Navigation */}
           <nav className="flex items-center gap-1">
-            {navItems.map((item) => {
+            {[...navItems, ...adminNavItems].map((item) => {
               const isActive = currentPageName === item.page;
               return (
                 <Link
