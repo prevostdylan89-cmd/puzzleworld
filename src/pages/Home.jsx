@@ -306,8 +306,7 @@ export default function Home() {
         <EventModal 
           open={true} 
           event={selectedEvent} 
-          onClose={() => setSelectedEvent(null)}
-          showMoreInfoButton={true}
+          onClose={() => setSelectedEvent(null)} 
         />
       )}
 

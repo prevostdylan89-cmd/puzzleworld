@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, MapPin, Users, CheckCircle, Info } from 'lucide-react';
+import { X, Calendar, MapPin, Users, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { createPageUrl } from '@/utils';
 
-export default function EventModal({ event, onClose, onRegistrationChange, showMoreInfoButton = false }) {
+export default function EventModal({ event, onClose, onRegistrationChange }) {
   const [user, setUser] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -181,24 +180,12 @@ export default function EventModal({ event, onClose, onRegistrationChange, showM
             </div>
 
             {/* Full Description */}
-            <div className="prose prose-invert max-w-none mb-4">
+            <div className="prose prose-invert max-w-none">
               <h3 className="text-lg font-semibold text-white mb-3">À propos de l'événement</h3>
               <p className="text-white/70 leading-relaxed whitespace-pre-wrap">
                 {event.full_description || event.short_description}
               </p>
             </div>
-
-            {/* More Info Button */}
-            {showMoreInfoButton && (
-              <Button
-                onClick={() => window.location.href = createPageUrl('Events')}
-                variant="outline"
-                className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10"
-              >
-                <Info className="w-4 h-4 mr-2" />
-                Plus d'informations sur les événements
-              </Button>
-            )}
           </div>
         </motion.div>
       </div>
