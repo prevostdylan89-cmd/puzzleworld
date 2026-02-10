@@ -237,59 +237,45 @@ export default function Home() {
       )}
 
       {/* Monthly Events */}
-      <motion.section 
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="px-4 lg:px-8 py-8"
-      >
-        <SectionHeader 
-          title={t('monthlyEvents')}
-          subtitle=""
-          icon={Calendar}
-        />
-        
-        {loadingEvents ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
-            ))}
-          </div>
-        ) : featuredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {featuredEvents.map((event, index) => (
-              <motion.div 
-                key={event.id} 
-                variants={item}
-                whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              >
-                <EventCard 
-                  event={event}
-                  onRegisterClick={(e) => setSelectedEvent(e)}
-                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
-                />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {monthlyEvents.map((event, index) => (
-              <motion.div 
-                key={index} 
-                variants={item}
-                whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              >
-                <EventCard 
-                  event={event}
-                  onRegisterClick={(e) => setSelectedEvent(e)}
-                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </motion.section>
+      {(loadingEvents || featuredEvents.length > 0) && (
+        <motion.section 
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="px-4 lg:px-8 py-8"
+        >
+          <SectionHeader 
+            title={t('monthlyEvents')}
+            subtitle=""
+            icon={Calendar}
+          />
+          
+          {loadingEvents ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-64 bg-white/5 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+              {featuredEvents.map((event) => (
+                <motion.div 
+                  key={event.id} 
+                  variants={item}
+                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                >
+                  <EventCard 
+                    event={event}
+                    onRegisterClick={(e) => setSelectedEvent(e)}
+                    onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.section>
+      )}
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       
