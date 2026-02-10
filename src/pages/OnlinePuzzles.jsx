@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 import { 
@@ -9,7 +9,8 @@ import {
   Monitor,
   Gamepad2,
   Star,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -17,8 +18,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OnlineGameCard from '@/components/shared/OnlineGameCard';
 import SectionHeader from '@/components/shared/SectionHeader';
+import { base44 } from '@/api/base44Client';
 
-const onlineGames = [
+const defaultGames = [
   {
     title: 'Jigsaw Explorer',
     description: 'Thousands of free online jigsaw puzzles with stunning HD images. Choose your difficulty and start puzzling!',
@@ -122,6 +124,35 @@ export default function OnlinePuzzles() {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [onlineGames, setOnlineGames] = useState([]);
+  const [featuredGame, setFeaturedGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadGames();
+  }, []);
+
+  const loadGames = async () => {
+    setLoading(true);
+    try {
+      const games = await base44.entities.OnlineGame.list('-created_date');
+      
+      if (games.length > 0) {
+        setOnlineGames(games);
+        const featured = games.find(g => g.is_featured);
+        if (featured) {
+          setFeaturedGame(featured);
+        }
+      } else {
+        setOnlineGames(defaultGames);
+      }
+    } catch (error) {
+      console.error('Error loading games:', error);
+      setOnlineGames(defaultGames);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -135,6 +166,14 @@ export default function OnlinePuzzles() {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -183,20 +222,21 @@ export default function OnlinePuzzles() {
 
       <div className="px-4 lg:px-8 py-6">
         {/* Featured Game */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="w-5 h-5 text-orange-400 fill-orange-400" />
-            <span className="text-orange-400 font-medium">{t('featured')}</span>
-          </div>
-          
-          <div className="relative overflow-hidden rounded-3xl">
+        {featuredGame && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-5 h-5 text-orange-400 fill-orange-400" />
+              <span className="text-orange-400 font-medium">{t('featured')}</span>
+            </div>
+            
+            <div className="relative overflow-hidden rounded-3xl">
             <div className="aspect-[21/9] lg:aspect-[3/1]">
               <img
-                src={featuredGame.image}
+                src={featuredGame.image || 'https://images.unsplash.com/photo-1494059980473-813e73ee784b?w=1200'}
                 alt={featuredGame.title}
                 className="w-full h-full object-cover"
               />
@@ -204,16 +244,18 @@ export default function OnlinePuzzles() {
             </div>
 
             <div className="absolute inset-0 p-6 lg:p-10 flex flex-col justify-center max-w-2xl">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {featuredGame.tags.map((tag, i) => (
-                  <span 
-                    key={i}
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {featuredGame.tags && featuredGame.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {featuredGame.tags.map((tag, i) => (
+                    <span 
+                      key={i}
+                      className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               
               <h2 className="text-2xl lg:text-4xl font-bold text-white mb-3">{featuredGame.title}</h2>
               <p className="text-white/70 text-sm lg:text-base mb-6 line-clamp-2 lg:line-clamp-none">
@@ -221,18 +263,24 @@ export default function OnlinePuzzles() {
               </p>
               
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                <span className="flex items-center gap-1.5 text-white/60 text-sm">
-                  <Star className="w-4 h-4 text-orange-400 fill-orange-400" />
-                  {featuredGame.rating}
-                </span>
-                <span className="flex items-center gap-1.5 text-white/60 text-sm">
-                  <TrendingUp className="w-4 h-4 text-orange-400" />
-                  {featuredGame.players} {t('players')}
-                </span>
-                <span className="flex items-center gap-1.5 text-white/60 text-sm">
-                  <Globe className="w-4 h-4 text-orange-400" />
-                  {featuredGame.platform}
-                </span>
+                {featuredGame.rating && (
+                  <span className="flex items-center gap-1.5 text-white/60 text-sm">
+                    <Star className="w-4 h-4 text-orange-400 fill-orange-400" />
+                    {featuredGame.rating}
+                  </span>
+                )}
+                {featuredGame.players && (
+                  <span className="flex items-center gap-1.5 text-white/60 text-sm">
+                    <TrendingUp className="w-4 h-4 text-orange-400" />
+                    {featuredGame.players} {t('players')}
+                  </span>
+                )}
+                {featuredGame.platform && (
+                  <span className="flex items-center gap-1.5 text-white/60 text-sm">
+                    <Globe className="w-4 h-4 text-orange-400" />
+                    {featuredGame.platform}
+                  </span>
+                )}
               </div>
 
               <Button 
@@ -244,6 +292,7 @@ export default function OnlinePuzzles() {
             </div>
           </div>
         </motion.section>
+        )}
 
         {/* Trending Section */}
         <section className="mb-12">
