@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Clock, ChevronRight } from 'lucide-react';
+import { Calendar, Users, Clock, ChevronRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-export default function EventCard({ event }) {
+export default function EventCard({ event, onRegisterClick, onMoreInfoClick }) {
   const {
     title = 'Monthly Challenge',
     description = 'Complete the puzzle in record time',
@@ -21,15 +21,10 @@ export default function EventCard({ event }) {
     community: 'from-blue-500 to-cyan-500'
   };
 
-  const handleCardClick = () => {
-    window.location.href = '/Events';
-  };
-
   return (
-    <motion.button
-      onClick={handleCardClick}
+    <motion.div
       whileHover={{ scale: 1.02 }}
-      className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.08] hover:border-orange-500/30 transition-all cursor-pointer text-left"
+      className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.08] hover:border-orange-500/30 transition-all"
     >
       {/* Image Header */}
       <div className="relative h-32 overflow-hidden">
@@ -63,25 +58,32 @@ export default function EventCard({ event }) {
           </span>
         </div>
 
-        {/* Time Left & CTA */}
-        <div className="flex items-center justify-between pt-2">
-          <span className="flex items-center gap-1.5 text-orange-400 text-sm font-medium">
-            <Clock className="w-4 h-4" />
-            {timeLeft}
-          </span>
+        {/* Time Left */}
+        <div className="flex items-center gap-1.5 text-orange-400 text-sm font-medium pt-2">
+          <Clock className="w-4 h-4" />
+          {timeLeft}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 pt-3">
           <Button 
-            onClick={(e) => {
-              e.stopPropagation();
-              toast.success('Event registration coming soon! Stay tuned.');
-            }}
+            onClick={() => onRegisterClick?.(event)}
             size="sm" 
-            className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full"
           >
-            Join
+            S'inscrire
             <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+          <Button 
+            onClick={() => onMoreInfoClick?.(event)}
+            size="sm"
+            variant="outline"
+            className="border-white/20 hover:bg-white/10 text-white rounded-full px-3"
+          >
+            <Info className="w-4 h-4" />
           </Button>
         </div>
       </div>
-    </motion.button>
+    </motion.div>
   );
 }

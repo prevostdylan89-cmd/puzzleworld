@@ -277,9 +277,11 @@ export default function Home() {
                 variants={item}
                 whileHover={{ y: -8, transition: { duration: 0.2 } }}
               >
-                <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
-                  <EventCard event={event} />
-                </div>
+                <EventCard 
+                  event={event}
+                  onRegisterClick={(e) => setSelectedEvent(e)}
+                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
+                />
               </motion.div>
             ))}
           </div>
@@ -291,9 +293,11 @@ export default function Home() {
                 variants={item}
                 whileHover={{ y: -8, transition: { duration: 0.2 } }}
               >
-                <div onClick={() => setSelectedEvent(event)} className="cursor-pointer">
-                  <EventCard event={event} />
-                </div>
+                <EventCard 
+                  event={event}
+                  onRegisterClick={(e) => setSelectedEvent(e)}
+                  onMoreInfoClick={() => window.location.href = createPageUrl('Events')}
+                />
               </motion.div>
             ))}
           </div>
