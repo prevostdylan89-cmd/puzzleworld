@@ -47,14 +47,40 @@ export default function DashboardData() {
 
       setTopUsers(sortedUsers);
 
-      // Load puzzles with likes
-      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 500);
-      const sortedPuzzles = puzzles
-        .map(p => ({
-          ...p,
-          total_engagement: (p.total_likes || 0) + (p.total_superlikes || 0) * 2
-        }))
-        .sort((a, b) => b.total_engagement - a.total_engagement);
+      // Load all puzzles
+      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 1000);
+      
+      // Count real likes for each puzzle
+      const puzzlesWithRealLikes = await Promise.all(puzzles.map(async (puzzle) => {
+        try {
+          const [likes, swipes] = await Promise.all([
+            base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin }),
+            base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin })
+          ]);
+          
+          const likeCount = swipes.filter(s => s.interaction_type === 'like').length;
+          const superlikeCount = swipes.filter(s => s.interaction_type === 'superlike').length;
+          const totalEngagement = likeCount + (superlikeCount * 2) + likes.length;
+          
+          return {
+            ...puzzle,
+            real_likes: likeCount,
+            real_superlikes: superlikeCount,
+            unique_likes: likes.length,
+            total_engagement: totalEngagement
+          };
+        } catch (error) {
+          return {
+            ...puzzle,
+            real_likes: 0,
+            real_superlikes: 0,
+            unique_likes: 0,
+            total_engagement: 0
+          };
+        }
+      }));
+      
+      const sortedPuzzles = puzzlesWithRealLikes.sort((a, b) => b.total_engagement - a.total_engagement);
 
       setTopPuzzles(sortedPuzzles);
     } catch (error) {
@@ -159,15 +185,15 @@ export default function DashboardData() {
                     </div>
                     <div className="flex items-center gap-6 text-sm">
                       <div className="text-center">
-                        <div className="text-orange-400 font-bold">❤️ {puzzle.total_likes || 0}</div>
+                        <div className="text-orange-400 font-bold">❤️ {puzzle.real_likes || 0}</div>
                         <div className="text-white/50 text-xs">Likes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-pink-400 font-bold">⭐ {puzzle.total_superlikes || 0}</div>
+                        <div className="text-pink-400 font-bold">⭐ {puzzle.real_superlikes || 0}</div>
                         <div className="text-white/50 text-xs">Superlikes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-purple-400 font-bold">{puzzle.total_engagement}</div>
+                        <div className="text-purple-400 font-bold">{puzzle.total_engagement || 0}</div>
                         <div className="text-white/50 text-xs">Score</div>
                       </div>
                     </div>
