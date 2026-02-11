@@ -82,11 +82,11 @@ export default function DashboardData() {
           
           const totalInteractions = likeCount + superlikeCount + dislikeCount + uniquePostLikes;
           
-          // Score sur 100: superlike=100pts, like=50pts, dislike=0pts
-          let averageScore = 0;
+          // Score sur 100: dislike=0pts, like=75pts, superlike=100pts
+          let popularityScore = 0;
           if (totalInteractions > 0) {
-            const scoreSum = (superlikeCount * 100) + (likeCount * 50) + (uniquePostLikes * 50) + (dislikeCount * 0);
-            averageScore = scoreSum / totalInteractions;
+            const scoreSum = (likeCount * 75) + (superlikeCount * 100) + (uniquePostLikes * 75) + (dislikeCount * 0);
+            popularityScore = Math.round(scoreSum / totalInteractions);
           }
           
           return {
@@ -95,7 +95,7 @@ export default function DashboardData() {
             superlike_count: superlikeCount,
             dislike_count: dislikeCount,
             post_like_count: uniquePostLikes,
-            average_score: averageScore,
+            popularity_score: popularityScore,
             total_interactions: totalInteractions
           };
         } catch (error) {
@@ -111,7 +111,7 @@ export default function DashboardData() {
         }
       }));
       
-      const sortedPuzzles = puzzlesWithRealLikes.sort((a, b) => b.average_score - a.average_score);
+      const sortedPuzzles = puzzlesWithRealLikes.sort((a, b) => b.popularity_score - a.popularity_score);
 
       setTopPuzzles(sortedPuzzles);
     } catch (error) {
@@ -135,7 +135,7 @@ export default function DashboardData() {
     // Sort
     switch (sortBy) {
       case 'score':
-        filtered.sort((a, b) => b.average_score - a.average_score);
+        filtered.sort((a, b) => b.popularity_score - a.popularity_score);
         break;
       case 'superlikes':
         filtered.sort((a, b) => b.superlike_count - a.superlike_count);
@@ -287,8 +287,12 @@ export default function DashboardData() {
                         <div className="text-white/50 text-xs">Dislikes</div>
                       </div>
                       <div className="text-center min-w-[80px]">
-                        <div className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                          {puzzle.average_score?.toFixed(0) || 0}
+                        <div className={`text-2xl font-bold ${
+                          puzzle.popularity_score >= 80 ? 'text-green-400' :
+                          puzzle.popularity_score >= 50 ? 'text-orange-400' :
+                          'text-red-400'
+                        }`}>
+                          {puzzle.popularity_score || 0}
                         </div>
                         <div className="text-white/50 text-xs">/ 100</div>
                       </div>
