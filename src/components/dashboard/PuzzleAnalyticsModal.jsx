@@ -49,10 +49,16 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
       const superlikeCount = uniqueSuperlikes.size;
       const dislikeCount = uniqueDislikes.size;
       
-      // Calculate score: like=1pt, superlike=2pt, dislike=-0.5pt
-      const calculatedScore = (likeCount * 1) + (superlikeCount * 2) + (dislikeCount * -0.5);
-      
       const totalInteractions = swipes.length;
+      const postLikes = likes.length;
+      const totalAllInteractions = likeCount + superlikeCount + dislikeCount + postLikes;
+      
+      // Score moyen sur 100: superlike=100pts, like=50pts, post_like=50pts, dislike=0pts
+      let averageScore = 0;
+      if (totalAllInteractions > 0) {
+        const scoreSum = (superlikeCount * 100) + (likeCount * 50) + (postLikes * 50) + (dislikeCount * 0);
+        averageScore = scoreSum / totalAllInteractions;
+      }
       const positiveInteractions = likeCount + superlikeCount;
       const engagementRate = totalInteractions > 0 
         ? ((positiveInteractions / totalInteractions) * 100).toFixed(1)
@@ -72,7 +78,9 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
         likesCount: likeCount,
         superlikesCount: superlikeCount,
         dislikesCount: dislikeCount,
-        calculatedScore: calculatedScore,
+        postLikesCount: postLikes,
+        averageScore: averageScore,
+        totalAllInteractions: totalAllInteractions,
         engagementRate,
         likesOverTime,
         avgLikesPerDay: daysOnSite > 0 ? (likes.length / daysOnSite).toFixed(2) : 0
@@ -190,10 +198,12 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4 text-orange-400" />
-                  <span className="text-white/60 text-xs">Score Total</span>
+                  <span className="text-white/60 text-xs">Score Moyen</span>
                 </div>
-                <div className="text-2xl font-bold text-white">{analytics?.calculatedScore?.toFixed(1)}</div>
-                <div className="text-white/40 text-xs">pts calculés</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+                  {analytics?.averageScore?.toFixed(0) || 0}
+                </div>
+                <div className="text-white/40 text-xs">/ 100 points</div>
               </div>
 
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
@@ -217,22 +227,44 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
 
             {/* Score Breakdown */}
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-6">
-              <h4 className="text-white font-semibold mb-4">Détail du Score</h4>
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <h4 className="text-white font-semibold mb-4">Calcul du Score Moyen (/100)</h4>
+              <div className="grid grid-cols-4 gap-3 mb-6">
                 <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                  <div className="text-3xl font-bold text-green-400">{analytics?.likesCount}</div>
-                  <div className="text-white/70 text-sm mt-1">❤️ Likes</div>
-                  <div className="text-green-400 text-xs mt-1">+{analytics?.likesCount} pts</div>
+                  <div className="text-2xl font-bold text-green-400">{analytics?.likesCount}</div>
+                  <div className="text-white/70 text-xs mt-1">❤️ Likes</div>
+                  <div className="text-green-400 text-xs mt-1">50 pts chacun</div>
                 </div>
                 <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <div className="text-3xl font-bold text-orange-400">{analytics?.superlikesCount}</div>
-                  <div className="text-white/70 text-sm mt-1">⭐ Superlikes</div>
-                  <div className="text-orange-400 text-xs mt-1">+{(analytics?.superlikesCount * 2)} pts</div>
+                  <div className="text-2xl font-bold text-orange-400">{analytics?.superlikesCount}</div>
+                  <div className="text-white/70 text-xs mt-1">⭐ Superlikes</div>
+                  <div className="text-orange-400 text-xs mt-1">100 pts chacun</div>
+                </div>
+                <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                  <div className="text-2xl font-bold text-purple-400">{analytics?.postLikesCount || 0}</div>
+                  <div className="text-white/70 text-xs mt-1">💬 Post Likes</div>
+                  <div className="text-purple-400 text-xs mt-1">50 pts chacun</div>
                 </div>
                 <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-                  <div className="text-3xl font-bold text-red-400">{analytics?.dislikesCount}</div>
-                  <div className="text-white/70 text-sm mt-1">👎 Dislikes</div>
-                  <div className="text-red-400 text-xs mt-1">{(analytics?.dislikesCount * -0.5).toFixed(1)} pts</div>
+                  <div className="text-2xl font-bold text-red-400">{analytics?.dislikesCount}</div>
+                  <div className="text-white/70 text-xs mt-1">👎 Dislikes</div>
+                  <div className="text-red-400 text-xs mt-1">0 pts chacun</div>
+                </div>
+              </div>
+              
+              <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-white/70 text-sm">Total interactions: {analytics?.totalAllInteractions}</div>
+                    <div className="text-white/70 text-sm mt-1">
+                      Somme: ({analytics?.likesCount} × 50) + ({analytics?.superlikesCount} × 100) + ({analytics?.postLikesCount || 0} × 50)
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white/50 text-xs">Score Moyen</div>
+                    <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+                      {analytics?.averageScore?.toFixed(0)}/100
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -262,9 +294,9 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
                   <p className="text-white font-medium">{analytics?.totalLikes}</p>
                 </div>
                 <div>
-                  <span className="text-white/60">Score calculé:</span>
+                  <span className="text-white/60">Score moyen:</span>
                   <p className="text-white font-medium">
-                    {analytics?.calculatedScore?.toFixed(1)} points
+                    {analytics?.averageScore?.toFixed(0)}/100
                   </p>
                 </div>
               </div>
