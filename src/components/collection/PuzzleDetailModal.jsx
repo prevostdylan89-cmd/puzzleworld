@@ -3,20 +3,67 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import PopularityScore from '@/components/shared/PopularityScore';
+import { base44 } from '@/api/base44Client';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
+  const [popularityScore, setPopularityScore] = useState(null);
+  const [loadingScore, setLoadingScore] = useState(false);
 
   useEffect(() => {
     if (open && puzzle?.asin) {
       fetchProductDetails();
+      calculatePopularityScore();
     } else {
       setProductData(null);
+      setPopularityScore(null);
     }
   }, [open, puzzle]);
+
+  const calculatePopularityScore = async () => {
+    if (!puzzle) return;
+    
+    setLoadingScore(true);
+    try {
+      const [swipes, postLikes] = await Promise.all([
+        base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin }),
+        base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin })
+      ]);
+
+      const uniqueLikes = new Set();
+      const uniqueSuperlikes = new Set();
+      const uniqueDislikes = new Set();
+      
+      swipes.forEach(s => {
+        if (s.interaction_type === 'like') uniqueLikes.add(s.created_by);
+        else if (s.interaction_type === 'superlike') uniqueSuperlikes.add(s.created_by);
+        else if (s.interaction_type === 'dislike') uniqueDislikes.add(s.created_by);
+      });
+
+      const likeCount = uniqueLikes.size;
+      const superlikeCount = uniqueSuperlikes.size;
+      const dislikeCount = uniqueDislikes.size;
+      const postLikeCount = postLikes.length;
+      
+      const totalVotes = likeCount + superlikeCount + dislikeCount + postLikeCount;
+      
+      let score = 0;
+      if (totalVotes > 0) {
+        const scoreSum = (likeCount * 75) + (superlikeCount * 100) + (postLikeCount * 75) + (dislikeCount * 0);
+        score = Math.round(scoreSum / totalVotes);
+      }
+      
+      setPopularityScore(score);
+    } catch (error) {
+      console.error('Error calculating score:', error);
+    } finally {
+      setLoadingScore(false);
+    }
+  };
 
   const fetchProductDetails = async () => {
     setLoading(true);
@@ -112,6 +159,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
                   <span className="text-2xl">🧩</span>
                   <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
+                </div>
+              )}
+
+              {/* Popularity Score */}
+              {!loadingScore && popularityScore !== null && popularityScore > 0 && (
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                  <PopularityScore score={popularityScore} size="default" />
                 </div>
               )}
 
