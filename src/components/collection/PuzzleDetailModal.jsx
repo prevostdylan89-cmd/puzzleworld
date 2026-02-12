@@ -63,10 +63,11 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   };
 
   const getPriceInfo = () => {
-    if (puzzle?.amazon_price) {
+    const price = puzzle?.amazon_price || puzzle?.price;
+    if (price) {
       return {
         available: true,
-        value: puzzle.amazon_price,
+        value: price,
         currency: '€'
       };
     }
