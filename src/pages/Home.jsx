@@ -202,8 +202,22 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-100 group-hover:opacity-90 transition-opacity" />
                 <div className="absolute bottom-3 left-3 right-3">
-                  <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold inline-block">
-                    {puzzle.piece_count} pièces
+                  <div className="space-y-1">
+                    <div className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold inline-block">
+                      {puzzle.piece_count} pièces
+                    </div>
+                    {puzzle.amazon_rating && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <span className="bg-yellow-500/90 text-black px-2 py-0.5 rounded-full font-semibold">
+                          ⭐ {puzzle.amazon_rating.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                    {puzzle.amazon_price && (
+                      <div className="text-white text-sm font-bold bg-black/50 px-2 py-0.5 rounded-full inline-block">
+                        {puzzle.amazon_price.toFixed(2)}€
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
