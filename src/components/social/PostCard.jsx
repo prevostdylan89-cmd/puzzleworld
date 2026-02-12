@@ -131,6 +131,17 @@ export default function PostCard({ post, user }) {
           await base44.entities.Like.delete(likes[0].id);
           const newCount = Math.max(0, previousCount - 1);
           await base44.entities.Post.update(post.id, { likes_count: newCount });
+          
+          // Update socialScore in PuzzleCatalog if post is linked to a puzzle
+          if (post.puzzle_reference) {
+            const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+            if (puzzles.length > 0) {
+              const puzzle = puzzles[0];
+              await base44.entities.PuzzleCatalog.update(puzzle.id, {
+                socialScore: Math.max(0, (puzzle.socialScore || 0) - 1)
+              });
+            }
+          }
         }
       } else {
         await base44.entities.Like.create({
@@ -139,6 +150,17 @@ export default function PostCard({ post, user }) {
         });
         const newCount = previousCount + 1;
         await base44.entities.Post.update(post.id, { likes_count: newCount });
+        
+        // Update socialScore in PuzzleCatalog if post is linked to a puzzle
+        if (post.puzzle_reference) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+          if (puzzles.length > 0) {
+            const puzzle = puzzles[0];
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              socialScore: (puzzle.socialScore || 0) + 1
+            });
+          }
+        }
       }
     } catch (error) {
       // Revert on error
@@ -166,6 +188,17 @@ export default function PostCard({ post, user }) {
           await base44.entities.UserPuzzle.delete(existing[0].id);
           setIsInWishlist(false);
           toast.success('Retiré de votre wishlist');
+          
+          // Update wishlistCount in PuzzleCatalog
+          if (post.puzzle_reference) {
+            const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+            if (puzzles.length > 0) {
+              const puzzle = puzzles[0];
+              await base44.entities.PuzzleCatalog.update(puzzle.id, {
+                wishlistCount: Math.max(0, (puzzle.wishlistCount || 0) - 1)
+              });
+            }
+          }
         }
       } else {
         await base44.entities.UserPuzzle.create({
@@ -178,6 +211,17 @@ export default function PostCard({ post, user }) {
         });
         setIsInWishlist(true);
         toast.success('Ajouté à votre wishlist!');
+        
+        // Update wishlistCount in PuzzleCatalog
+        if (post.puzzle_reference) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+          if (puzzles.length > 0) {
+            const puzzle = puzzles[0];
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              wishlistCount: (puzzle.wishlistCount || 0) + 1
+            });
+          }
+        }
       }
     } catch (error) {
       console.error('Error managing wishlist:', error);
@@ -238,6 +282,17 @@ export default function PostCard({ post, user }) {
         if (likes.length > 0) {
           await base44.entities.UserPuzzleLike.delete(likes[0].id);
           toast.success('Puzzle retiré de vos likes');
+          
+          // Update total_likes in PuzzleCatalog
+          if (post.puzzle_reference) {
+            const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+            if (puzzles.length > 0) {
+              const puzzle = puzzles[0];
+              await base44.entities.PuzzleCatalog.update(puzzle.id, {
+                total_likes: Math.max(0, (puzzle.total_likes || 0) - 1)
+              });
+            }
+          }
         }
       } else {
         // Check if user already liked this puzzle (to avoid duplicates)
@@ -282,6 +337,17 @@ export default function PostCard({ post, user }) {
         });
         
         toast.success('✨ Puzzle ajouté à vos likes !');
+        
+        // Update total_likes in PuzzleCatalog
+        if (post.puzzle_reference) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+          if (puzzles.length > 0) {
+            const puzzle = puzzles[0];
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              total_likes: (puzzle.total_likes || 0) + 1
+            });
+          }
+        }
       }
     } catch (error) {
       // Revert on error
