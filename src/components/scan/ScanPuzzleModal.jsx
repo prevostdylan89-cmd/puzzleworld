@@ -814,7 +814,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               )}
             </motion.div>
 
-            {/* Status Selection */}
+            {/* Status Selection with Visual Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -823,29 +823,70 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             >
               <div>
                 <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue placeholder="Choisir un statut..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#0a0a2e] border-white/10">
-                    <SelectItem value="liked" className="text-white">
-                      ❤️ J'ai aimé
-                    </SelectItem>
-                    <SelectItem value="not_liked" className="text-white">
-                      👎 Je n'ai pas aimé
-                    </SelectItem>
-                    <SelectItem value="wishlist" className="text-white">
-                      ⭐ Wishlist (à faire plus tard)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Bouton J'ai aimé */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('liked')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'liked'
+                        ? 'border-green-500 bg-green-500/20 text-green-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">👍</span>
+                    <span className="text-sm font-medium">J'ai aimé</span>
+                  </button>
+
+                  {/* Bouton Je n'ai pas aimé */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('not_liked')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'not_liked'
+                        ? 'border-red-500 bg-red-500/20 text-red-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">👎</span>
+                    <span className="text-sm font-medium">Pas aimé</span>
+                  </button>
+
+                  {/* Bouton Wishlist */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('wishlist')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'wishlist'
+                        ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">⭐</span>
+                    <span className="text-sm font-medium">Wishlist</span>
+                  </button>
+
+                  {/* Bouton Dans sa boîte */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('inbox')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'inbox'
+                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">📦</span>
+                    <span className="text-sm font-medium">Dans sa boîte</span>
+                  </button>
+                </div>
               </div>
 
               {/* Validate Button */}
               <Button
                 onClick={handleAddPuzzle}
                 disabled={!selectedStatus}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Valider l'ajout
