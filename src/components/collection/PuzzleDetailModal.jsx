@@ -63,21 +63,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   };
 
   const getPriceInfo = () => {
-    const buybox = productData?.buybox_winner;
-    if (!buybox) return null;
-
-    if (buybox.availability?.type === 'out_of_stock') {
-      return { available: false };
-    }
-
-    if (buybox.price?.value) {
+    if (puzzle?.amazon_price) {
       return {
         available: true,
-        value: buybox.price.value,
-        currency: buybox.price.currency || '€'
+        value: puzzle.amazon_price,
+        currency: '€'
       };
     }
-
     return null;
   };
 
