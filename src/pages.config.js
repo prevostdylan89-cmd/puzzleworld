@@ -52,13 +52,14 @@ import Collection from './pages/Collection';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import Home from './pages/Home';
+import MigratePrices from './pages/MigratePrices';
 import OnlinePuzzles from './pages/OnlinePuzzles';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import Terms from './pages/Terms';
-import MigratePrices from './pages/MigratePrices';
+import FixPuzzlePieces from './pages/FixPuzzlePieces';
 import __Layout from './Layout.jsx';
 
 
@@ -68,13 +69,14 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Events": Events,
     "Home": Home,
+    "MigratePrices": MigratePrices,
     "OnlinePuzzles": OnlinePuzzles,
     "PrivacyPolicy": PrivacyPolicy,
     "Profile": Profile,
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
     "Terms": Terms,
-    "MigratePrices": MigratePrices,
+    "FixPuzzlePieces": FixPuzzlePieces,
 }
 
 export const pagesConfig = {

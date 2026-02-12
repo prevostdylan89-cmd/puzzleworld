@@ -306,7 +306,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (data.product) {
         const product = data.product;
 
-        // Extract pieces count from title using multiple patterns
+        // Extract pieces count from title AND description
         let pieces = null;
 
         // Try different patterns to find piece count
@@ -315,14 +315,39 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           /(\d+)\s*p\b/i,                         // "1000 p"
           /(\d+)\s*teile/i,                       // "1000 Teile" (German)
           /puzzle\s*(\d+)/i,                      // "Puzzle 1000"
-          /(\d{3,4})\s*(?:pc|pcs)/i               // "1000pc"
+          /(\d{3,4})\s*(?:pc|pcs)/i,              // "1000pc"
+          /format\s*(\d+)\s*pièces/i              // "format 1000 pièces"
         ];
 
+        // First try title
         for (const pattern of patterns) {
           const match = product.title?.match(pattern);
-          if (match) {
+          if (match && parseInt(match[1]) >= 100) { // minimum 100 pieces to avoid false positives
             pieces = parseInt(match[1]);
             break;
+          }
+        }
+
+        // If not found in title, try description
+        if (!pieces && product.description) {
+          for (const pattern of patterns) {
+            const match = product.description.match(pattern);
+            if (match && parseInt(match[1]) >= 100) {
+              pieces = parseInt(match[1]);
+              break;
+            }
+          }
+        }
+
+        // If still not found, try feature bullets
+        if (!pieces && product.feature_bullets) {
+          const allBullets = product.feature_bullets.join(' ');
+          for (const pattern of patterns) {
+            const match = allBullets.match(pattern);
+            if (match && parseInt(match[1]) >= 100) {
+              pieces = parseInt(match[1]);
+              break;
+            }
           }
         }
         
