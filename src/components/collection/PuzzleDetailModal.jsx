@@ -15,9 +15,21 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [loadingScore, setLoadingScore] = useState(false);
 
   useEffect(() => {
-    if (open && puzzle?.asin) {
-      fetchProductDetails();
+    if (open && puzzle) {
+      // Use data from PuzzleCatalog instead of API call
+      setProductData({
+        title: puzzle.title,
+        brand: puzzle.brand,
+        main_image: { link: puzzle.image_hd },
+        feature_bullets: puzzle.description ? [puzzle.description] : [],
+        link: puzzle.amazon_link,
+        buybox_winner: puzzle.amazon_price ? {
+          price: { value: puzzle.amazon_price, currency: '€' },
+          availability: { type: 'in_stock' }
+        } : null
+      });
       calculatePopularityScore();
+      setLoading(false);
     } else {
       setProductData(null);
       setPopularityScore(null);
@@ -29,52 +41,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     
     setLoadingScore(true);
     try {
-      const [puzzleLikes, wishlistItems, posts] = await Promise.all([
-        base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin }),
-        base44.entities.UserPuzzle.filter({ puzzle_reference: puzzle.asin, status: 'wishlist' }),
-        base44.entities.Post.filter({ puzzle_reference: puzzle.asin })
-      ]);
-
-      // Compter les dislikes depuis les posts avec is_completion_post = false
-      const dislikeCount = posts.filter(p => !p.is_completion_post && p.puzzle_reference === puzzle.asin).length;
-      const likeCount = puzzleLikes.length;
-      const wishlistCount = wishlistItems.length;
-      
-      const totalVotes = likeCount + wishlistCount + dislikeCount;
-      
-      let score = 0;
-      if (totalVotes > 0) {
-        const scoreSum = (likeCount * 75) + (wishlistCount * 100) + (dislikeCount * 0);
-        score = Math.round(scoreSum / totalVotes);
-      }
-      
-      setPopularityScore(score);
+      // Use socialScore from PuzzleCatalog
+      const score = puzzle.socialScore || 0;
+      setPopularityScore(score > 0 ? Math.min(100, Math.max(0, score * 10)) : 0);
     } catch (error) {
       console.error('Error calculating score:', error);
     } finally {
       setLoadingScore(false);
-    }
-  };
-
-  const fetchProductDetails = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&asin=${puzzle.asin}`
-      );
-      
-      const data = await response.json();
-      
-      if (data.product) {
-        setProductData(data.product);
-      } else {
-        toast.error('Impossible de charger les détails du produit');
-      }
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-      toast.error('Erreur lors du chargement');
-    } finally {
-      setLoading(false);
     }
   };
 
