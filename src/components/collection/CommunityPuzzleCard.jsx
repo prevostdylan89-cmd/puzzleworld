@@ -41,8 +41,26 @@ export default function CommunityPuzzleCard({ puzzle, showAffiliateLink = false 
             <span>{puzzle.brand || 'Unknown'}</span>
             <span>{puzzle.piece_count} pcs</span>
           </div>
+          
+          {/* Amazon Rating */}
+          {puzzle.amazon_rating && (
+            <div className="flex items-center gap-1 text-xs text-yellow-400 mb-1">
+              <span>⭐ {puzzle.amazon_rating.toFixed(1)}</span>
+              {puzzle.amazon_ratings_total > 0 && (
+                <span className="text-white/40">({puzzle.amazon_ratings_total})</span>
+              )}
+            </div>
+          )}
+          
+          {/* Price */}
+          {puzzle.amazon_price && (
+            <div className="text-sm font-semibold text-orange-400 mb-1">
+              {puzzle.amazon_price.toFixed(2)}€
+            </div>
+          )}
+          
           {(puzzle.total_likes > 0 || puzzle.total_superlikes > 0) && (
-            <div className="flex items-center gap-1 text-xs text-orange-400 mb-2">
+            <div className="flex items-center gap-1 text-xs text-white/50 mb-2">
               <span>❤️ {puzzle.total_likes + puzzle.total_superlikes}</span>
             </div>
           )}
