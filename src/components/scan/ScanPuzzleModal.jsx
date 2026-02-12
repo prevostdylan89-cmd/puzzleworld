@@ -439,19 +439,29 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         } else {
           // ACTION A: Nouveau puzzle - Créer dans la collection globale (Collection Communautaire)
           try {
-            const newCatalogEntry = await base44.entities.PuzzleCatalog.create({
+            const catalogData = {
               asin: asinToCheck,
               image_hd: puzzleData.image || puzzleData.image_hd || '',
               title: puzzleData.name || puzzleData.title || '',
               brand: puzzleData.brand || '',
               piece_count: puzzleData.pieces || puzzleData.piece_count || 0,
               amazon_link: puzzleData.link || '',
-              category_tag: 'Autre',
+              category_tag: puzzleData.category_tag || 'Autre',
               socialScore: 0,
               wishlistCount: 0,
               total_likes: 0,
               total_dislikes: 0
-            });
+            };
+            
+            // Add Rainforest data if available
+            if (puzzleData.rainforest_data) {
+              catalogData.amazon_rating = puzzleData.rainforest_data.rating;
+              catalogData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
+              catalogData.amazon_price = puzzleData.rainforest_data.price;
+              catalogData.description = puzzleData.rainforest_data.description;
+            }
+            
+            const newCatalogEntry = await base44.entities.PuzzleCatalog.create(catalogData);
             catalogPuzzleId = newCatalogEntry.id;
             console.log('✓ Nouveau puzzle ajouté à la collection communautaire');
             toast.success('🎉 Nouveau puzzle ajouté à la collection communautaire !');
