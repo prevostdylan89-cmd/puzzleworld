@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle, Bookmark, BookmarkCheck, ThumbsDown } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +54,7 @@ export default function PostCard({ post, user }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
+  const [isPuzzleDisliked, setIsPuzzleDisliked] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
@@ -66,6 +67,7 @@ export default function PostCard({ post, user }) {
       if (showPuzzleActions) {
         checkIfInWishlist();
         checkIfPuzzleLiked();
+        checkIfPuzzleDisliked();
       }
     }
   }, [post.id, user?.email]);
@@ -105,6 +107,16 @@ export default function PostCard({ post, user }) {
       created_by: user.email
     });
     setIsPuzzleLiked(likes.length > 0);
+  };
+
+  const checkIfPuzzleDisliked = async () => {
+    if (!user || !post.puzzle_reference) return;
+    const dislikes = await base44.entities.UserPuzzle.filter({
+      puzzle_reference: post.puzzle_reference,
+      created_by: user.email,
+      notes: 'Non aimé'
+    });
+    setIsPuzzleDisliked(dislikes.length > 0);
   };
 
   const handleLike = async () => {
@@ -258,6 +270,74 @@ export default function PostCard({ post, user }) {
       setIsFollowing(previousFollowing);
       console.error('Error toggling follow:', error);
       toast.error('Échec de la mise à jour du suivi');
+    }
+  };
+
+  const handlePuzzleDislike = async () => {
+    if (!user) {
+      toast.error('Connectez-vous pour disliker des puzzles');
+      return;
+    }
+
+    // Optimistic update
+    const previousDisliked = isPuzzleDisliked;
+    setIsPuzzleDisliked(!isPuzzleDisliked);
+
+    try {
+      if (previousDisliked) {
+        // Remove dislike
+        const dislikes = await base44.entities.UserPuzzle.filter({
+          puzzle_reference: post.puzzle_reference,
+          created_by: user.email,
+          notes: 'Non aimé'
+        });
+        if (dislikes.length > 0) {
+          await base44.entities.UserPuzzle.delete(dislikes[0].id);
+          toast.success('Dislike retiré');
+          
+          // Update socialScore (+1 when removing dislike)
+          if (post.puzzle_reference) {
+            const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+            if (puzzles.length > 0) {
+              const puzzle = puzzles[0];
+              await base44.entities.PuzzleCatalog.update(puzzle.id, {
+                socialScore: (puzzle.socialScore || 0) + 1,
+                total_dislikes: Math.max(0, (puzzle.total_dislikes || 0) - 1)
+              });
+            }
+          }
+        }
+      } else {
+        // Add dislike
+        await base44.entities.UserPuzzle.create({
+          puzzle_name: post.puzzle_name,
+          puzzle_brand: post.puzzle_brand || '',
+          puzzle_pieces: post.puzzle_pieces || 0,
+          puzzle_reference: post.puzzle_reference || '',
+          image_url: post.image_url || '',
+          status: 'done',
+          notes: 'Non aimé'
+        });
+        
+        toast.success('Puzzle disliké');
+        
+        // Update socialScore (-1 for dislike)
+        if (post.puzzle_reference) {
+          const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
+          if (puzzles.length > 0) {
+            const puzzle = puzzles[0];
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              socialScore: (puzzle.socialScore || 0) - 1,
+              total_dislikes: (puzzle.total_dislikes || 0) + 1
+            });
+          }
+        }
+      }
+    } catch (error) {
+      // Revert on error
+      setIsPuzzleDisliked(previousDisliked);
+      console.error('Error toggling puzzle dislike:', error);
+      toast.error('Échec de la mise à jour');
     }
   };
 
@@ -458,7 +538,20 @@ export default function PostCard({ post, user }) {
                   }`}
                 >
                   <Heart className={`w-4 h-4 mr-1 ${isPuzzleLiked ? 'fill-green-400' : ''}`} />
-                  {isPuzzleLiked ? 'J\'aime' : 'J\'aime'}
+                  J'aime
+                </Button>
+                
+                <Button
+                  onClick={handlePuzzleDislike}
+                  size="sm"
+                  className={`flex-1 rounded-lg ${
+                    isPuzzleDisliked 
+                      ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30' 
+                      : 'bg-white/5 text-white/70 hover:bg-red-500/10 hover:text-red-400 border border-white/10'
+                  }`}
+                >
+                  <ThumbsDown className={`w-4 h-4 mr-1 ${isPuzzleDisliked ? 'fill-red-400' : ''}`} />
+                  Pas aimé
                 </Button>
                 
                 <Button
