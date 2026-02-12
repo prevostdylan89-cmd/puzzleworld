@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
+import PuzzleStatsModal from '@/components/dashboard/PuzzleStatsModal';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
@@ -255,9 +255,9 @@ export default function DashboardData() {
         </TabsContent>
       </Tabs>
 
-      {/* Puzzle Detail Modal */}
+      {/* Puzzle Stats Modal */}
       {selectedPuzzle && (
-        <PuzzleDetailModal
+        <PuzzleStatsModal
           open={!!selectedPuzzle}
           onClose={() => setSelectedPuzzle(null)}
           puzzle={selectedPuzzle}
