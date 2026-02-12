@@ -73,17 +73,14 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
 
       setAnalytics({
         daysOnSite,
-        totalLikes: likes.length,
-        totalSwipes: swipes.length,
         likesCount: likeCount,
-        superlikesCount: superlikeCount,
+        wishlistCount: wishlistCount,
         dislikesCount: dislikeCount,
-        postLikesCount: postLikes,
         popularityScore: popularityScore,
-        totalAllInteractions: totalAllInteractions,
+        totalInteractions: totalInteractions,
         engagementRate,
         likesOverTime,
-        avgLikesPerDay: daysOnSite > 0 ? (likes.length / daysOnSite).toFixed(2) : 0
+        avgLikesPerDay: daysOnSite > 0 ? (likeCount / daysOnSite).toFixed(2) : 0
       });
     } catch (error) {
       console.error('Error loading analytics:', error);
@@ -232,21 +229,16 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
             {/* Score Breakdown */}
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-6">
               <h4 className="text-white font-semibold mb-4">Calcul du Score de Popularité</h4>
-              <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                   <div className="text-2xl font-bold text-green-400">{analytics?.likesCount}</div>
                   <div className="text-white/70 text-xs mt-1">❤️ Likes</div>
                   <div className="text-green-400 text-xs mt-1">75 pts chacun</div>
                 </div>
                 <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <div className="text-2xl font-bold text-orange-400">{analytics?.superlikesCount}</div>
-                  <div className="text-white/70 text-xs mt-1">⭐ Superlikes</div>
+                  <div className="text-2xl font-bold text-orange-400">{analytics?.wishlistCount}</div>
+                  <div className="text-white/70 text-xs mt-1">📚 Wishlist</div>
                   <div className="text-orange-400 text-xs mt-1">100 pts chacun</div>
-                </div>
-                <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                  <div className="text-2xl font-bold text-purple-400">{analytics?.postLikesCount || 0}</div>
-                  <div className="text-white/70 text-xs mt-1">💬 Post Likes</div>
-                  <div className="text-purple-400 text-xs mt-1">75 pts chacun</div>
                 </div>
                 <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
                   <div className="text-2xl font-bold text-red-400">{analytics?.dislikesCount}</div>
@@ -262,9 +254,9 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
               }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-white/70 text-sm">Total votes: {analytics?.totalAllInteractions}</div>
+                    <div className="text-white/70 text-sm">Total votes: {analytics?.totalInteractions}</div>
                     <div className="text-white/70 text-sm mt-1">
-                      Formule: (({analytics?.likesCount} × 75) + ({analytics?.superlikesCount} × 100) + ({analytics?.postLikesCount || 0} × 75)) / {analytics?.totalAllInteractions}
+                      Formule: (({analytics?.likesCount} × 75) + ({analytics?.wishlistCount} × 100)) / {analytics?.totalInteractions}
                     </div>
                   </div>
                   <div className="text-right">

@@ -137,8 +137,8 @@ export default function DashboardData() {
       case 'score':
         filtered.sort((a, b) => b.popularity_score - a.popularity_score);
         break;
-      case 'superlikes':
-        filtered.sort((a, b) => b.superlike_count - a.superlike_count);
+      case 'wishlist':
+        filtered.sort((a, b) => b.wishlist_count - a.wishlist_count);
         break;
       case 'likes':
         filtered.sort((a, b) => b.like_count - a.like_count);

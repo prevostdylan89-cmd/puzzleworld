@@ -29,31 +29,22 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     
     setLoadingScore(true);
     try {
-      const [swipes, postLikes] = await Promise.all([
-        base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin }),
-        base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin })
+      const [puzzleLikes, wishlistItems, posts] = await Promise.all([
+        base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin }),
+        base44.entities.UserPuzzle.filter({ puzzle_reference: puzzle.asin, status: 'wishlist' }),
+        base44.entities.Post.filter({ puzzle_reference: puzzle.asin })
       ]);
 
-      const uniqueLikes = new Set();
-      const uniqueSuperlikes = new Set();
-      const uniqueDislikes = new Set();
+      // Compter les dislikes depuis les posts avec is_completion_post = false
+      const dislikeCount = posts.filter(p => !p.is_completion_post && p.puzzle_reference === puzzle.asin).length;
+      const likeCount = puzzleLikes.length;
+      const wishlistCount = wishlistItems.length;
       
-      swipes.forEach(s => {
-        if (s.interaction_type === 'like') uniqueLikes.add(s.created_by);
-        else if (s.interaction_type === 'superlike') uniqueSuperlikes.add(s.created_by);
-        else if (s.interaction_type === 'dislike') uniqueDislikes.add(s.created_by);
-      });
-
-      const likeCount = uniqueLikes.size;
-      const superlikeCount = uniqueSuperlikes.size;
-      const dislikeCount = uniqueDislikes.size;
-      const postLikeCount = postLikes.length;
-      
-      const totalVotes = likeCount + superlikeCount + dislikeCount + postLikeCount;
+      const totalVotes = likeCount + wishlistCount + dislikeCount;
       
       let score = 0;
       if (totalVotes > 0) {
-        const scoreSum = (likeCount * 75) + (superlikeCount * 100) + (postLikeCount * 75) + (dislikeCount * 0);
+        const scoreSum = (likeCount * 75) + (wishlistCount * 100) + (dislikeCount * 0);
         score = Math.round(scoreSum / totalVotes);
       }
       
