@@ -342,6 +342,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           categoryTag = 'Urbain';
         }
         
+        // Extraire la description complète
+        const fullDescription = [
+          product.description || '',
+          ...(product.feature_bullets || [])
+        ].filter(Boolean).join('\n\n');
+
         const puzzleInfo = {
           name: cleanedName,
           brand: product.brand || '',
@@ -359,12 +365,19 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           rainforest_data: {
             rating: product.rating || null,
             ratings_total: product.ratings_total || 0,
-            price: product.price?.value || null,
-            currency: product.price?.currency || 'EUR',
-            description: product.description || '',
+            price: product.buybox_winner?.price?.value || product.price?.value || null,
+            currency: product.buybox_winner?.price?.currency || product.price?.currency || 'EUR',
+            description: fullDescription,
             features: product.feature_bullets || []
           }
         };
+        
+        console.log('📦 Données Rainforest récupérées:', {
+          prix: puzzleInfo.rainforest_data.price,
+          pieces: pieces,
+          description: fullDescription.substring(0, 100) + '...',
+          rating: puzzleInfo.rainforest_data.rating
+        });
         
         console.log("Données puzzle créées:", puzzleInfo);
         setPuzzleData(puzzleInfo);
