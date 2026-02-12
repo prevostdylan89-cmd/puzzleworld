@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ImagePlus, X, Puzzle, Send, Loader2 } from 'lucide-react';
+import { ImagePlus, X, Puzzle, Send, Loader2, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 
 const PUZZLE_CATEGORIES = ['Nature', 'Art & Culture', 'Architecture', 'Abstract'];
 
 export default function CreatePostForm({ user, onPostCreated }) {
   const [content, setContent] = useState('');
-  const [isCompletionPost, setIsCompletionPost] = useState(false);
+  const [postType, setPostType] = useState('text'); // 'text', 'photo', 'puzzle'
   const [puzzleName, setPuzzleName] = useState('');
   const [puzzleBrand, setPuzzleBrand] = useState('');
   const [puzzlePieces, setPuzzlePieces] = useState('');
@@ -23,6 +24,8 @@ export default function CreatePostForm({ user, onPostCreated }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
+  const [puzzleData, setPuzzleData] = useState(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -41,63 +44,77 @@ export default function CreatePostForm({ user, onPostCreated }) {
     setImagePreview('');
   };
 
-  const validatePuzzlePost = () => {
-    if (!isCompletionPost) return true;
+  const handlePuzzleScanned = (puzzle) => {
+    setPuzzleData(puzzle);
+    setPuzzleName(puzzle.title || '');
+    setPuzzleBrand(puzzle.brand || '');
+    setPuzzlePieces(puzzle.piece_count || '');
+    setPuzzleReference(puzzle.asin || '');
+    setImagePreview(puzzle.image_hd || '');
+    setPostType('puzzle');
+    setShowScanModal(false);
+    toast.success('Puzzle ajouté au post!');
+  };
 
-    const errors = [];
-    if (!puzzleCategory) errors.push('Catégorie');
-    if (!puzzlePieces || puzzlePieces <= 0) errors.push('Nombre de pièces');
-    if (!puzzleBrand) errors.push('Marque');
-    if (!imageFile && !imagePreview) errors.push('Photo');
-    if (!puzzleReference) errors.push('Référence');
-
-    if (errors.length > 0) {
-      toast.error(`Champs requis manquants: ${errors.join(', ')}`);
+  const validatePost = () => {
+    if (!content.trim() && postType === 'text') {
+      toast.error('Veuillez ajouter du contenu');
       return false;
     }
+
+    if (postType === 'photo' && !imageFile && !imagePreview) {
+      toast.error('Veuillez ajouter une photo');
+      return false;
+    }
+
+    if (postType === 'puzzle') {
+      const errors = [];
+      if (!puzzleBrand) errors.push('Marque');
+      if (!puzzlePieces || puzzlePieces <= 0) errors.push('Nombre de pièces');
+      if (!puzzleReference) errors.push('Référence');
+      if (!imagePreview) errors.push('Photo du puzzle');
+
+      if (errors.length > 0) {
+        toast.error(`Champs manquants: ${errors.join(', ')}`);
+        return false;
+      }
+    }
+
     return true;
   };
 
   const handleSubmit = async () => {
-    if (!content.trim() && !imageFile) {
-      toast.error('Veuillez ajouter du contenu ou une image');
-      return;
-    }
-
-    if (!validatePuzzlePost()) {
-      return;
-    }
+    if (!validatePost()) return;
 
     setIsSubmitting(true);
 
     try {
-      let imageUrl = '';
+      let imageUrl = imagePreview;
       
+      // Upload image only if it's a local file
       if (imageFile) {
         const uploadResult = await base44.integrations.Core.UploadFile({ file: imageFile });
         imageUrl = uploadResult.file_url;
       }
 
       const postData = {
-        content: content.trim(),
-        is_completion_post: isCompletionPost,
+        content: content.trim() || '',
+        is_completion_post: postType === 'puzzle',
         author_name: user.full_name || user.email,
         likes_count: 0,
         comments_count: 0
       };
 
       if (imageUrl) postData.image_url = imageUrl;
-      if (isCompletionPost) {
+      
+      if (postType === 'puzzle') {
         postData.puzzle_name = puzzleName || 'Puzzle';
         postData.puzzle_brand = puzzleBrand;
         postData.puzzle_pieces = parseInt(puzzlePieces);
-        postData.puzzle_category = puzzleCategory;
+        postData.puzzle_category = puzzleCategory || 'Autre';
         postData.puzzle_reference = puzzleReference;
-      }
 
-      await base44.entities.Post.create(postData);
-
-      if (isCompletionPost) {
+        // Add to completed puzzles
         await base44.entities.CompletedPuzzle.create({
           puzzle_name: puzzleName || 'Puzzle',
           puzzle_brand: puzzleBrand,
@@ -128,13 +145,17 @@ export default function CreatePostForm({ user, onPostCreated }) {
         }
       }
 
+      await base44.entities.Post.create(postData);
+
+      // Reset form
       setContent('');
-      setIsCompletionPost(false);
+      setPostType('text');
       setPuzzleName('');
       setPuzzleBrand('');
       setPuzzlePieces('');
       setPuzzleCategory('');
       setPuzzleReference('');
+      setPuzzleData(null);
       removeImage();
       
       toast.success('Post créé avec succès!');
@@ -190,103 +211,69 @@ export default function CreatePostForm({ user, onPostCreated }) {
             )}
           </AnimatePresence>
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.06]">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+              id="photoUpload"
+            />
+            <label htmlFor="photoUpload">
+              <Button 
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={`rounded-full ${postType === 'photo' ? 'bg-blue-500/20 text-blue-400' : 'text-white/60 hover:text-blue-400'}`}
+                asChild
+              >
+                <span>
+                  <ImagePlus className="w-4 h-4 mr-1" />
+                  Photo
+                </span>
+              </Button>
+            </label>
+
             <Button 
-              onClick={() => setIsCompletionPost(!isCompletionPost)}
-              variant={isCompletionPost ? "default" : "ghost"}
+              onClick={() => setShowScanModal(true)}
+              variant="ghost"
               size="sm"
-              className={`rounded-full ${isCompletionPost ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : 'text-white/60 hover:text-orange-400'}`}
+              className={`rounded-full ${postType === 'puzzle' ? 'bg-orange-500/20 text-orange-400' : 'text-white/60 hover:text-orange-400'}`}
             >
-              <Puzzle className="w-4 h-4 mr-1" />
-              {isCompletionPost ? 'Poste Puzzle Actif' : 'Créer un Poste Puzzle'}
+              <Scan className="w-4 h-4 mr-1" />
+              Scanner Puzzle
             </Button>
           </div>
 
           <AnimatePresence>
-            {isCompletionPost && (
+            {postType === 'puzzle' && puzzleData && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 space-y-3 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20"
+                className="mt-3 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20"
               >
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-white/70 text-xs">Catégorie *</Label>
-                    <Select value={puzzleCategory} onValueChange={setPuzzleCategory}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#0a0a2e] border-white/10">
-                        {PUZZLE_CATEGORIES.map(cat => (
-                          <SelectItem key={cat} value={cat} className="text-white hover:bg-white/10">
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white/70 text-xs">Nombre de pièces *</Label>
-                    <Input
-                      type="number"
-                      value={puzzlePieces}
-                      onChange={(e) => setPuzzlePieces(e.target.value)}
-                      placeholder="ex: 1000"
-                      className="bg-white/5 border-white/10 text-white mt-1"
-                    />
-                  </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-white font-medium text-sm flex items-center gap-2">
+                    <Puzzle className="w-4 h-4 text-orange-400" />
+                    Puzzle scanné
+                  </h4>
+                  <button
+                    onClick={() => {
+                      setPostType('text');
+                      setPuzzleData(null);
+                      removeImage();
+                    }}
+                    className="text-white/60 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <div>
-                  <Label className="text-white/70 text-xs">Marque *</Label>
-                  <Input
-                    value={puzzleBrand}
-                    onChange={(e) => setPuzzleBrand(e.target.value)}
-                    placeholder="ex: Ravensburger"
-                    className="bg-white/5 border-white/10 text-white mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white/70 text-xs">Référence du puzzle *</Label>
-                  <Input
-                    value={puzzleReference}
-                    onChange={(e) => setPuzzleReference(e.target.value)}
-                    placeholder="ex: RAV-12345"
-                    className="bg-white/5 border-white/10 text-white mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white/70 text-xs">Nom du puzzle (optionnel)</Label>
-                  <Input
-                    value={puzzleName}
-                    onChange={(e) => setPuzzleName(e.target.value)}
-                    placeholder="ex: Starry Night"
-                    className="bg-white/5 border-white/10 text-white mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white/70 text-xs mb-1 block">Photo du puzzle *</Label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="puzzleImageUpload"
-                  />
-                  <label htmlFor="puzzleImageUpload">
-                    <Button 
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-white/20 text-white hover:bg-white/10"
-                      asChild
-                    >
-                      <span>
-                        <ImagePlus className="w-4 h-4 mr-2" />
-                        {imageFile ? 'Changer la photo' : 'Ajouter une photo'}
-                      </span>
-                    </Button>
-                  </label>
+                <div className="text-xs text-white/70 space-y-1">
+                  <p><strong>{puzzleName}</strong></p>
+                  <p>Marque: {puzzleBrand}</p>
+                  <p>Pièces: {puzzlePieces}</p>
+                  <p>Réf: {puzzleReference}</p>
                 </div>
               </motion.div>
             )}
@@ -295,7 +282,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
           <div className="flex items-center justify-end mt-3 pt-3 border-t border-white/[0.06]">
             <Button 
               onClick={handleSubmit}
-              disabled={isSubmitting || (!content.trim() && !imageFile)}
+              disabled={isSubmitting}
               className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full px-5"
             >
               {isSubmitting ? (
@@ -313,6 +300,13 @@ export default function CreatePostForm({ user, onPostCreated }) {
           </div>
         </div>
       </div>
+
+      {/* Scan Puzzle Modal */}
+      <ScanPuzzleModal 
+        open={showScanModal} 
+        onClose={() => setShowScanModal(false)}
+        onPuzzleAdded={handlePuzzleScanned}
+      />
     </motion.div>
   );
 }

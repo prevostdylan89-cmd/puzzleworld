@@ -56,17 +56,15 @@ export default function PostCard({ post, user }) {
   const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
-  const showWishlistButton = !isOwnPost && post.is_completion_post && post.puzzle_name && user;
-  const isCompletionPost = post.is_completion_post && post.puzzle_name;
+  const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
+  const showPuzzleActions = !isOwnPost && isCompletionPost && user;
 
   useEffect(() => {
     if (user) {
       checkIfLiked();
       checkIfFollowing();
-      if (showWishlistButton) {
+      if (showPuzzleActions) {
         checkIfInWishlist();
-      }
-      if (isCompletionPost) {
         checkIfPuzzleLiked();
       }
     }
@@ -445,21 +443,37 @@ export default function PostCard({ post, user }) {
                   {post.puzzle_reference && <p>Réf: {post.puzzle_reference}</p>}
                 </div>
               </div>
-              {showWishlistButton && (
+            </div>
+            
+            {/* Puzzle Actions - Only on puzzle posts */}
+            {showPuzzleActions && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
+                <Button
+                  onClick={handlePuzzleLike}
+                  size="sm"
+                  className={`flex-1 rounded-lg ${
+                    isPuzzleLiked 
+                      ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30' 
+                      : 'bg-white/5 text-white/70 hover:bg-green-500/10 hover:text-green-400 border border-white/10'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 mr-1 ${isPuzzleLiked ? 'fill-green-400' : ''}`} />
+                  {isPuzzleLiked ? 'J\'aime' : 'J\'aime'}
+                </Button>
+                
                 <Button
                   onClick={handleAddToWishlist}
                   size="sm"
-                  variant="ghost"
-                  className={`rounded-lg h-8 px-3 ${
+                  className={`flex-1 rounded-lg ${
                     isInWishlist 
-                      ? 'text-orange-400 bg-orange-500/20 hover:bg-orange-500/30' 
-                      : 'text-orange-400 hover:text-orange-300 hover:bg-orange-500/10'
+                      ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30' 
+                      : 'bg-white/5 text-white/70 hover:bg-orange-500/10 hover:text-orange-400 border border-white/10'
                   }`}
                 >
                   {isInWishlist ? (
                     <>
                       <BookmarkCheck className="w-4 h-4 mr-1" />
-                      Dans la wishlist
+                      Wishlist
                     </>
                   ) : (
                     <>
@@ -468,8 +482,8 @@ export default function PostCard({ post, user }) {
                     </>
                   )}
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -485,36 +499,23 @@ export default function PostCard({ post, user }) {
         </div>
       )}
 
-      {/* Actions */}
+      {/* Post Actions (Like & Comment) */}
       <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-6">
         <button 
           onClick={handleLike}
           disabled={isProcessing}
-          className="flex items-center gap-2 text-white/50 hover:text-orange-400 transition-colors group disabled:opacity-50"
+          className="flex items-center gap-2 text-white/50 hover:text-pink-400 transition-colors group disabled:opacity-50"
         >
-          <Heart className={`w-5 h-5 group-hover:scale-110 transition-transform ${isLiked ? 'fill-orange-400 text-orange-400' : ''}`} />
+          <Heart className={`w-5 h-5 group-hover:scale-110 transition-transform ${isLiked ? 'fill-pink-400 text-pink-400' : ''}`} />
           <span className="text-sm">{likesCount}</span>
         </button>
         <button 
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-2 text-white/50 hover:text-orange-400 transition-colors group"
+          className="flex items-center gap-2 text-white/50 hover:text-blue-400 transition-colors group"
         >
           <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="text-sm">{commentsCount}</span>
         </button>
-        {isCompletionPost && user && (
-          <button 
-            onClick={handlePuzzleLike}
-            disabled={isProcessing}
-            className="flex items-center gap-2 text-white/50 hover:text-green-400 transition-colors group disabled:opacity-50 ml-auto"
-          >
-            <div className="relative">
-              <Puzzle className={`w-5 h-5 group-hover:scale-110 transition-transform ${isPuzzleLiked ? 'text-green-400' : ''}`} />
-              <Heart className={`w-3 h-3 absolute -bottom-0.5 -right-0.5 ${isPuzzleLiked ? 'fill-green-400 text-green-400' : ''}`} />
-            </div>
-            <span className="text-xs">{isPuzzleLiked ? 'Puzzle liké' : 'J\'aime ce puzzle'}</span>
-          </button>
-        )}
       </div>
 
       {/* Comments Section */}
