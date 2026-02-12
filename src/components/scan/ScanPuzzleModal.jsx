@@ -399,33 +399,39 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     try {
       let catalogPuzzleId = null;
       
-      // ÉTAPE 1: Vérification Globale - Chercher dans PuzzleCatalog par EAN
-      if (puzzleData.sku) {
-        const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ asin: puzzleData.sku });
+      // ÉTAPE 1: Vérification Globale - Chercher dans PuzzleCatalog par EAN/ASIN
+      const asinToCheck = puzzleData.sku || puzzleData.asin || barcode;
+      if (asinToCheck) {
+        const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ asin: asinToCheck });
         
         if (existingInCatalog.length > 0) {
           // ACTION B: Le puzzle existe déjà dans la collection globale
           catalogPuzzleId = existingInCatalog[0].id;
-          console.log('✓ Puzzle déjà dans la collection globale');
+          console.log('✓ Puzzle déjà dans la collection communautaire');
+          toast.success('✨ Puzzle déjà dans la collection communautaire');
         } else {
-          // ACTION A: Nouveau puzzle - Créer dans la collection globale
+          // ACTION A: Nouveau puzzle - Créer dans la collection globale (Collection Communautaire)
           try {
             const newCatalogEntry = await base44.entities.PuzzleCatalog.create({
-              asin: puzzleData.sku,
-              image_hd: puzzleData.image,
-              title: puzzleData.name,
-              brand: puzzleData.brand,
-              piece_count: puzzleData.pieces,
+              asin: asinToCheck,
+              image_hd: puzzleData.image || puzzleData.image_hd || '',
+              title: puzzleData.name || puzzleData.title || '',
+              brand: puzzleData.brand || '',
+              piece_count: puzzleData.pieces || puzzleData.piece_count || 0,
               amazon_link: puzzleData.link || '',
-              category_tag: '',
-              price: 0
+              category_tag: 'Autre',
+              socialScore: 0,
+              wishlistCount: 0,
+              total_likes: 0,
+              total_dislikes: 0
             });
             catalogPuzzleId = newCatalogEntry.id;
-            console.log('✓ Nouveau puzzle ajouté à la collection globale');
+            console.log('✓ Nouveau puzzle ajouté à la collection communautaire');
+            toast.success('🎉 Nouveau puzzle ajouté à la collection communautaire !');
           } catch (catalogError) {
             // Protection contre race condition (2 users simultanés)
             console.log('Race condition détectée, récupération du puzzle existant...');
-            const retry = await base44.entities.PuzzleCatalog.filter({ asin: puzzleData.sku });
+            const retry = await base44.entities.PuzzleCatalog.filter({ asin: asinToCheck });
             if (retry.length > 0) {
               catalogPuzzleId = retry[0].id;
             }
@@ -437,21 +443,49 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       const statusMapping = {
         'liked': 'done',
         'not_liked': 'done',
-        'wishlist': 'wishlist'
+        'wishlist': 'wishlist',
+        'inbox': 'inbox'
       };
 
       const puzzleToCreate = {
-        puzzle_name: puzzleData.name,
-        puzzle_brand: puzzleData.brand,
-        puzzle_pieces: puzzleData.pieces,
-        image_url: puzzleData.image,
-        puzzle_reference: barcode || puzzleData.sku || '',
+        puzzle_name: puzzleData.name || puzzleData.title || '',
+        puzzle_brand: puzzleData.brand || '',
+        puzzle_pieces: puzzleData.pieces || puzzleData.piece_count || 0,
+        image_url: puzzleData.image || puzzleData.image_hd || '',
+        puzzle_reference: asinToCheck || '',
         catalog_puzzle_id: catalogPuzzleId,
         status: statusMapping[selectedStatus] || 'inbox',
         notes: selectedStatus === 'not_liked' ? 'Non aimé' : ''
       };
       
       await base44.entities.UserPuzzle.create(puzzleToCreate);
+      
+      // Update PuzzleCatalog scores based on status
+      if (catalogPuzzleId) {
+        const catalog = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
+        if (catalog.length > 0) {
+          const puzzle = catalog[0];
+          
+          if (selectedStatus === 'liked') {
+            // Increment socialScore and total_likes
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              socialScore: (puzzle.socialScore || 0) + 1,
+              total_likes: (puzzle.total_likes || 0) + 1
+            });
+          } else if (selectedStatus === 'not_liked') {
+            // Decrement socialScore and increment total_dislikes
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              socialScore: (puzzle.socialScore || 0) - 1,
+              total_dislikes: (puzzle.total_dislikes || 0) + 1
+            });
+          } else if (selectedStatus === 'wishlist') {
+            // Increment wishlistCount
+            await base44.entities.PuzzleCatalog.update(puzzle.id, {
+              wishlistCount: (puzzle.wishlistCount || 0) + 1
+            });
+          }
+        }
+      }
       
       // Award XP if adding as liked
       if (selectedStatus === 'liked') {
