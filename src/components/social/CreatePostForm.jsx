@@ -50,10 +50,12 @@ export default function CreatePostForm({ user, onPostCreated }) {
     setPuzzleBrand(puzzle.brand || '');
     setPuzzlePieces(puzzle.piece_count || '');
     setPuzzleReference(puzzle.asin || '');
-    setImagePreview(puzzle.image_hd || '');
+    // Ne pas garder l'image du catalogue
+    setImagePreview('');
+    setImageFile(null);
     setPostType('puzzle');
     setShowScanModal(false);
-    toast.success('Puzzle ajouté au post!');
+    toast.success('Puzzle scanné ! Ajoutez maintenant votre photo personnelle 📸');
   };
 
   const validatePost = () => {
@@ -72,7 +74,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
       if (!puzzleBrand) errors.push('Marque');
       if (!puzzlePieces || puzzlePieces <= 0) errors.push('Nombre de pièces');
       if (!puzzleReference) errors.push('Référence');
-      if (!imagePreview) errors.push('Photo du puzzle');
+      if (!imageFile && !imagePreview) errors.push('Votre photo personnelle du puzzle');
 
       if (errors.length > 0) {
         toast.error(`Champs manquants: ${errors.join(', ')}`);
@@ -251,30 +253,62 @@ export default function CreatePostForm({ user, onPostCreated }) {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20"
+                className="mt-3 space-y-3"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-white font-medium text-sm flex items-center gap-2">
-                    <Puzzle className="w-4 h-4 text-orange-400" />
-                    Puzzle scanné
-                  </h4>
-                  <button
-                    onClick={() => {
-                      setPostType('text');
-                      setPuzzleData(null);
-                      removeImage();
-                    }}
-                    className="text-white/60 hover:text-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                <div className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-white font-medium text-sm flex items-center gap-2">
+                      <Puzzle className="w-4 h-4 text-orange-400" />
+                      Puzzle scanné
+                    </h4>
+                    <button
+                      onClick={() => {
+                        setPostType('text');
+                        setPuzzleData(null);
+                        removeImage();
+                      }}
+                      className="text-white/60 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="text-xs text-white/70 space-y-1">
+                    <p><strong>{puzzleName}</strong></p>
+                    <p>Marque: {puzzleBrand}</p>
+                    <p>Pièces: {puzzlePieces}</p>
+                    <p>Réf: {puzzleReference}</p>
+                  </div>
                 </div>
-                <div className="text-xs text-white/70 space-y-1">
-                  <p><strong>{puzzleName}</strong></p>
-                  <p>Marque: {puzzleBrand}</p>
-                  <p>Pièces: {puzzlePieces}</p>
-                  <p>Réf: {puzzleReference}</p>
-                </div>
+
+                {/* Demande de photo personnelle */}
+                {!imagePreview && (
+                  <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                    <p className="text-blue-400 text-xs mb-2 flex items-center gap-2">
+                      <ImagePlus className="w-4 h-4" />
+                      Ajoutez votre photo personnelle du puzzle terminé
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="puzzlePhotoUpload"
+                    />
+                    <label htmlFor="puzzlePhotoUpload">
+                      <Button 
+                        type="button"
+                        size="sm"
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                        asChild
+                      >
+                        <span>
+                          <ImagePlus className="w-4 h-4 mr-2" />
+                          Ajouter ma photo
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
