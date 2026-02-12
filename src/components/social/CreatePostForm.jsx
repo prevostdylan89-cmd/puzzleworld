@@ -306,6 +306,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
         open={showScanModal} 
         onClose={() => setShowScanModal(false)}
         onPuzzleAdded={handlePuzzleScanned}
+        skipCollectionAdd={true}
       />
     </motion.div>
   );

@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle2, Package } from 'lucide-react';
 
-export default function ScanPuzzleModal({ open, onClose }) {
+export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('scanner');
   const [cameraReady, setCameraReady] = useState(false);
@@ -247,37 +247,49 @@ export default function ScanPuzzleModal({ open, onClose }) {
     setLoading(true);
     setPuzzleData(null);
 
-    try {
-      // Check if already in user's personal collection (anti-doublon)
-      const user = await base44.auth.me();
-      const existingInCollection = await base44.entities.UserPuzzle.filter({
-        puzzle_reference: code,
-        created_by: user.email
-      });
+    // Only check user collection if not in "post mode"
+    if (!skipCollectionAdd) {
+      try {
+        const user = await base44.auth.me();
+        const existingInCollection = await base44.entities.UserPuzzle.filter({
+          puzzle_reference: code,
+          created_by: user.email
+        });
 
-      if (existingInCollection.length > 0) {
-        toast.error('Vous possédez déjà ce puzzle dans votre collection!');
-        setLoading(false);
-        return;
+        if (existingInCollection.length > 0) {
+          toast.error('Vous possédez déjà ce puzzle dans votre collection!');
+          setLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking user collection:', error);
       }
-    } catch (error) {
-      console.error('Error checking user collection:', error);
     }
 
     // Check if puzzle already exists in global catalog
     const existing = await checkExistingPuzzle(code);
     if (existing) {
       toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-      setPuzzleData({
+      const data = {
         name: existing.title,
         brand: existing.brand,
         image: existing.image_hd,
         link: existing.amazon_link,
         sku: existing.asin,
+        asin: existing.asin,
+        title: existing.title,
+        image_hd: existing.image_hd,
+        piece_count: existing.piece_count,
         pieces: existing.piece_count,
         dimensions: ''
-      });
+      };
+      setPuzzleData(data);
       setLoading(false);
+      
+      // If in post mode, call callback immediately
+      if (skipCollectionAdd && onPuzzleAdded) {
+        onPuzzleAdded(data);
+      }
       return;
     }
     
@@ -319,6 +331,10 @@ export default function ScanPuzzleModal({ open, onClose }) {
           image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
           sku: product.model_number || barcode,
+          asin: code,
+          title: cleanedName,
+          image_hd: imageUrl,
+          piece_count: pieces,
           pieces: pieces,
           dimensions: dimensions
         };
@@ -327,6 +343,11 @@ export default function ScanPuzzleModal({ open, onClose }) {
         setPuzzleData(puzzleInfo);
         
         toast.success('Puzzle trouvé !');
+        
+        // If in post mode, call callback immediately
+        if (skipCollectionAdd && onPuzzleAdded) {
+          onPuzzleAdded(puzzleInfo);
+        }
       } else {
         console.error("Aucun produit dans la réponse API");
         toast.error('Produit non trouvé');
@@ -350,13 +371,24 @@ export default function ScanPuzzleModal({ open, onClose }) {
       return;
     }
     
-    setPuzzleData({
+    const data = {
       name: manualData.name,
       brand: manualData.brand,
       pieces: parseInt(manualData.pieces),
       image: manualData.image,
-      sku: manualData.sku
-    });
+      sku: manualData.sku,
+      asin: manualData.sku,
+      title: manualData.name,
+      image_hd: manualData.image,
+      piece_count: parseInt(manualData.pieces)
+    };
+    
+    setPuzzleData(data);
+    
+    // If in post mode, call callback immediately
+    if (skipCollectionAdd && onPuzzleAdded) {
+      onPuzzleAdded(data);
+    }
   };
 
   const handleAddPuzzle = async () => {
@@ -712,7 +744,7 @@ export default function ScanPuzzleModal({ open, onClose }) {
             </>
             )}
 
-        {puzzleData && !showSuccess && (
+        {puzzleData && !showSuccess && !skipCollectionAdd && (
           <div className="space-y-4">
             {/* Image - Animation 1 */}
             <motion.div 
