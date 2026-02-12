@@ -50,7 +50,6 @@
 import AdminEvents from './pages/AdminEvents';
 import Collection from './pages/Collection';
 import Dashboard from './pages/Dashboard';
-import Discover from './pages/Discover';
 import Events from './pages/Events';
 import Home from './pages/Home';
 import OnlinePuzzles from './pages/OnlinePuzzles';
@@ -66,7 +65,6 @@ export const PAGES = {
     "AdminEvents": AdminEvents,
     "Collection": Collection,
     "Dashboard": Dashboard,
-    "Discover": Discover,
     "Events": Events,
     "Home": Home,
     "OnlinePuzzles": OnlinePuzzles,

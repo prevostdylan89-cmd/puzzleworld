@@ -35,14 +35,12 @@ function LayoutContent({ children, currentPageName }) {
   const [showScanModal, setShowScanModal] = useState(false);
   const [tabHistory, setTabHistory] = useState({
     Home: ['Home'],
-    Discover: ['Discover'],
     Social: ['Social'],
     Collection: ['Collection']
   });
 
   const navItems = [
     { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
-    { name: t('discover'), icon: Sparkles, page: 'Discover', hasHistory: true },
     { name: t('social'), icon: Users, page: 'Social', hasHistory: true },
     { name: t('collection'), icon: Grid3X3, page: 'Collection', hasHistory: true },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
@@ -299,7 +297,7 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(4rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between h-full px-4">
-          {['Home', 'Discover', 'Social', 'Collection', 'OnlinePuzzles', 'Events', 'Profile'].includes(currentPageName) ? (
+          {['Home', 'Social', 'Collection', 'OnlinePuzzles', 'Events', 'Profile'].includes(currentPageName) ? (
             <Link to={createPageUrl('Home')} className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                 <Puzzle className="w-4 h-4 text-white" />
@@ -366,7 +364,7 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 'calc(4rem + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-around h-full">
-          {navItems.slice(0, 2).map((item) => {
+          {navItems.slice(0, 1).map((item) => {
             const isActive = currentPageName === item.page;
             return (
               <Link
@@ -400,7 +398,7 @@ function LayoutContent({ children, currentPageName }) {
             <span className="text-xs font-medium text-orange-400">Scan</span>
           </button>
 
-          {navItems.slice(2, 4).map((item) => {
+          {navItems.slice(1, 3).map((item) => {
             const isActive = currentPageName === item.page;
             return (
               <Link
