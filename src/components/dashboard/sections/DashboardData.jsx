@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
   const [puzzles, setPuzzles] = useState([]);
   const [editingPuzzle, setEditingPuzzle] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', brand: '' });
+  const [selectedPuzzle, setSelectedPuzzle] = useState(null);
 
   useEffect(() => {
     loadPuzzles();
@@ -99,7 +101,12 @@ export default function DashboardData() {
     return (
       <div
         key={puzzle.id}
-        className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 hover:border-white/10 transition-all"
+        className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 hover:border-orange-500/30 transition-all cursor-pointer"
+        onClick={(e) => {
+          if (!isEditing && !e.target.closest('button')) {
+            setSelectedPuzzle(puzzle);
+          }
+        }}
       >
         <div className="flex items-center gap-4">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
@@ -247,6 +254,15 @@ export default function DashboardData() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Puzzle Detail Modal */}
+      {selectedPuzzle && (
+        <PuzzleDetailModal
+          open={!!selectedPuzzle}
+          onClose={() => setSelectedPuzzle(null)}
+          puzzle={selectedPuzzle}
+        />
+      )}
     </div>
   );
 }
