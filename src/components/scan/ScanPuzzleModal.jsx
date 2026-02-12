@@ -305,10 +305,26 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       
       if (data.product) {
         const product = data.product;
-        
-        // Extract pieces count from title using regex
-        const piecesMatch = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
-        const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
+
+        // Extract pieces count from title using multiple patterns
+        let pieces = null;
+
+        // Try different patterns to find piece count
+        const patterns = [
+          /(\d+)\s*(pièces?|pieces?)/i,           // "1000 pièces"
+          /(\d+)\s*p\b/i,                         // "1000 p"
+          /(\d+)\s*teile/i,                       // "1000 Teile" (German)
+          /puzzle\s*(\d+)/i,                      // "Puzzle 1000"
+          /(\d{3,4})\s*(?:pc|pcs)/i               // "1000pc"
+        ];
+
+        for (const pattern of patterns) {
+          const match = product.title?.match(pattern);
+          if (match) {
+            pieces = parseInt(match[1]);
+            break;
+          }
+        }
         
         // Extract dimensions from title (ex: 70x50, 70 x 50 cm)
         const dimensionsMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
