@@ -325,6 +325,23 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         // Clean the title
         const cleanedName = cleanTitle(product.title || '', product.brand || '', pieces);
         
+        // Extract category from Rainforest API data
+        let categoryTag = 'Autre';
+        const categories = product.categories || [];
+        const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
+        
+        if (categoryString.includes('nature') || categoryString.includes('landscape')) {
+          categoryTag = 'Nature';
+        } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
+          categoryTag = 'Disney';
+        } else if (categoryString.includes('art') || categoryString.includes('painting')) {
+          categoryTag = 'Art';
+        } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
+          categoryTag = 'Animaux';
+        } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
+          categoryTag = 'Urbain';
+        }
+        
         const puzzleInfo = {
           name: cleanedName,
           brand: product.brand || '',
@@ -336,7 +353,17 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           image_hd: imageUrl,
           piece_count: pieces,
           pieces: pieces,
-          dimensions: dimensions
+          dimensions: dimensions,
+          category_tag: categoryTag,
+          // Données additionnelles pour PuzzleCatalog
+          rainforest_data: {
+            rating: product.rating || null,
+            ratings_total: product.ratings_total || 0,
+            price: product.price?.value || null,
+            currency: product.price?.currency || 'EUR',
+            description: product.description || '',
+            features: product.feature_bullets || []
+          }
         };
         
         console.log("Données puzzle créées:", puzzleInfo);
