@@ -52,9 +52,14 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   };
 
   const getAffiliateLink = () => {
-    if (!productData?.link) return '#';
-    const link = productData.link;
-    return link.includes('?') ? `${link}&tag=${AFFILIATE_TAG}` : `${link}?tag=${AFFILIATE_TAG}`;
+    // Try amazon_link first, then construct from ASIN
+    if (puzzle?.amazon_link) {
+      return puzzle.amazon_link;
+    }
+    if (puzzle?.asin) {
+      return `https://www.amazon.fr/dp/${puzzle.asin}?tag=${AFFILIATE_TAG}`;
+    }
+    return '#';
   };
 
   const getPriceInfo = () => {
