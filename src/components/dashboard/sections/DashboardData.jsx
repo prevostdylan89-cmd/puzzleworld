@@ -59,7 +59,7 @@ export default function DashboardData() {
       ));
       
       setEditingPuzzle(null);
-      toast.success('Puzzle mis à jour');
+      toast.success('Puzzle mis à jour - Les changements sont visibles dans la Collection Communautaire');
     } catch (error) {
       console.error('Error updating puzzle:', error);
       toast.error('Erreur lors de la mise à jour');

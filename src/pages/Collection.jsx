@@ -189,7 +189,8 @@ export default function Collection() {
     queryFn: async () => {
       const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 500);
       return puzzles;
-    }
+    },
+    refetchInterval: 30000 // Auto-refresh every 30 seconds to sync with admin changes
   });
 
   useEffect(() => {
@@ -228,7 +229,8 @@ export default function Collection() {
       case 'newest':
         return new Date(b.created_date) - new Date(a.created_date);
       case 'popular':
-        return (b.total_likes + b.total_superlikes) - (a.total_likes + a.total_superlikes);
+        // Use socialScore instead of total_likes for popularity
+        return (b.socialScore || 0) - (a.socialScore || 0);
       case 'pieces-asc':
         return (a.piece_count || 0) - (b.piece_count || 0);
       case 'pieces-desc':
@@ -500,11 +502,14 @@ export default function Collection() {
           <span>{puzzle.brand || 'Unknown'}</span>
           <span>{puzzle.piece_count} pcs</span>
         </div>
-        {(puzzle.total_likes > 0 || puzzle.total_superlikes > 0) && (
-          <div className="flex items-center gap-1 text-xs text-orange-400">
-            <span>❤️ {puzzle.total_likes + puzzle.total_superlikes}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-3 text-xs">
+          {puzzle.socialScore > 0 && (
+            <span className="text-green-400">❤️ {puzzle.socialScore}</span>
+          )}
+          {puzzle.wishlistCount > 0 && (
+            <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>
+          )}
+        </div>
       </div>
     </motion.div>
     );
