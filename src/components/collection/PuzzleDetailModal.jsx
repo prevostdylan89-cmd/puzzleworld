@@ -146,34 +146,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 </div>
               )}
 
-              {/* Price Section */}
-              <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-xl p-4 border border-orange-500/20">
-                {(() => {
-                  const priceInfo = getPriceInfo();
-                  if (!priceInfo) {
-                    return <p className="text-white/60 text-sm">Prix non disponible</p>;
-                  }
-                  if (!priceInfo.available) {
-                    return (
-                      <div className="text-center">
-                        <p className="text-red-400 font-semibold">Indisponible actuellement</p>
-                        <p className="text-white/50 text-xs mt-1">Consultez Amazon pour plus d'infos</p>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white/60 text-sm">Prix actuel</p>
-                        <p className="text-3xl font-bold text-white">
-                          {priceInfo.value.toFixed(2)} {priceInfo.currency}
-                        </p>
-                      </div>
-                      <ShoppingCart className="w-8 h-8 text-orange-400" />
-                    </div>
-                  );
-                })()}
-              </div>
+
 
               {/* CTA Button */}
               <Button

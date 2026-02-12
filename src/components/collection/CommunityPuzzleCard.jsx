@@ -52,13 +52,6 @@ export default function CommunityPuzzleCard({ puzzle, showAffiliateLink = false 
             </div>
           )}
           
-          {/* Price */}
-          {puzzle.amazon_price && (
-            <div className="text-sm font-semibold text-orange-400 mb-1">
-              {puzzle.amazon_price.toFixed(2)}€
-            </div>
-          )}
-          
           {(puzzle.total_likes > 0 || puzzle.total_superlikes > 0) && (
             <div className="flex items-center gap-1 text-xs text-white/50 mb-2">
               <span>❤️ {puzzle.total_likes + puzzle.total_superlikes}</span>
