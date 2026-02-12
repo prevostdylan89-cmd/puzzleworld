@@ -52,49 +52,34 @@ export default function DashboardData() {
       // Load all puzzles
       const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 1000);
       
-      // Count real likes for each puzzle with complete scoring system
+      // Count real likes for each puzzle from social
       const puzzlesWithRealLikes = await Promise.all(puzzles.map(async (puzzle) => {
         try {
-          const [likes, swipes] = await Promise.all([
+          const [puzzleLikes, wishlistItems, posts] = await Promise.all([
             base44.entities.UserPuzzleLike.filter({ puzzle_asin: puzzle.asin }),
-            base44.entities.SwipeInteraction.filter({ puzzle_asin: puzzle.asin })
+            base44.entities.UserPuzzle.filter({ puzzle_reference: puzzle.asin, status: 'wishlist' }),
+            base44.entities.Post.filter({ puzzle_reference: puzzle.asin })
           ]);
+
+          // Compter les dislikes depuis les posts avec is_completion_post = false
+          const dislikeCount = posts.filter(p => !p.is_completion_post && p.puzzle_reference === puzzle.asin).length;
+          const likeCount = puzzleLikes.length;
+          const wishlistCount = wishlistItems.length;
           
-          // Count interactions by type (unique per user)
-          const uniqueSwipeLikes = new Map();
-          const uniqueSwipeSuperlikes = new Map();
-          const uniqueSwipeDislikes = new Map();
+          const totalInteractions = likeCount + wishlistCount + dislikeCount;
           
-          swipes.forEach(s => {
-            if (s.interaction_type === 'like') {
-              uniqueSwipeLikes.set(s.created_by, true);
-            } else if (s.interaction_type === 'superlike') {
-              uniqueSwipeSuperlikes.set(s.created_by, true);
-            } else if (s.interaction_type === 'dislike') {
-              uniqueSwipeDislikes.set(s.created_by, true);
-            }
-          });
-          
-          const likeCount = uniqueSwipeLikes.size;
-          const superlikeCount = uniqueSwipeSuperlikes.size;
-          const dislikeCount = uniqueSwipeDislikes.size;
-          const uniquePostLikes = likes.length;
-          
-          const totalInteractions = likeCount + superlikeCount + dislikeCount + uniquePostLikes;
-          
-          // Score sur 100: dislike=0pts, like=75pts, superlike=100pts
+          // Score de popularité: dislike=0pts, like=75pts, wishlist=100pts
           let popularityScore = 0;
           if (totalInteractions > 0) {
-            const scoreSum = (likeCount * 75) + (superlikeCount * 100) + (uniquePostLikes * 75) + (dislikeCount * 0);
+            const scoreSum = (likeCount * 75) + (wishlistCount * 100) + (dislikeCount * 0);
             popularityScore = Math.round(scoreSum / totalInteractions);
           }
-          
+
           return {
             ...puzzle,
             like_count: likeCount,
-            superlike_count: superlikeCount,
+            wishlist_count: wishlistCount,
             dislike_count: dislikeCount,
-            post_like_count: uniquePostLikes,
             popularity_score: popularityScore,
             total_interactions: totalInteractions
           };
@@ -102,10 +87,9 @@ export default function DashboardData() {
           return {
             ...puzzle,
             like_count: 0,
-            superlike_count: 0,
+            wishlist_count: 0,
             dislike_count: 0,
-            post_like_count: 0,
-            total_score: 0,
+            popularity_score: 0,
             total_interactions: 0
           };
         }
@@ -233,7 +217,7 @@ export default function DashboardData() {
                   className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="score">Trier par Score</option>
-                  <option value="superlikes">Trier par Superlikes</option>
+                  <option value="wishlist">Trier par Wishlist</option>
                   <option value="likes">Trier par Likes</option>
                 </select>
 
@@ -279,8 +263,8 @@ export default function DashboardData() {
                         <div className="text-white/50 text-xs">Likes</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-orange-400 font-bold">⭐ {puzzle.superlike_count || 0}</div>
-                        <div className="text-white/50 text-xs">Superlikes</div>
+                        <div className="text-orange-400 font-bold">📚 {puzzle.wishlist_count || 0}</div>
+                        <div className="text-white/50 text-xs">Wishlist</div>
                       </div>
                       <div className="text-center">
                         <div className="text-red-400 font-bold">👎 {puzzle.dislike_count || 0}</div>
