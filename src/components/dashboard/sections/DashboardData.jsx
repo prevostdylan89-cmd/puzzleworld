@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import PuzzleStatsModal from '@/components/dashboard/PuzzleStatsModal';
+import PuzzlePopularityModal from '@/components/dashboard/PuzzlePopularityModal';
+import PuzzleWishlistModal from '@/components/dashboard/PuzzleWishlistModal';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,7 @@ export default function DashboardData() {
   const [editingPuzzle, setEditingPuzzle] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', brand: '' });
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'popularity', 'wishlist', 'added'
 
   useEffect(() => {
     loadPuzzles();
@@ -99,7 +102,7 @@ export default function DashboardData() {
     (b.added_count || 0) - (a.added_count || 0)
   );
 
-  const renderPuzzleRow = (puzzle, index) => {
+  const renderPuzzleRow = (puzzle, index, type) => {
     const isEditing = editingPuzzle === puzzle.id;
 
     return (
@@ -109,6 +112,7 @@ export default function DashboardData() {
         onClick={(e) => {
           if (!isEditing && !e.target.closest('button')) {
             setSelectedPuzzle(puzzle);
+            setModalType(type);
           }
         }}
       >
@@ -244,7 +248,7 @@ export default function DashboardData() {
             </div>
             
             <div className="space-y-2 max-h-[700px] overflow-y-auto">
-              {puzzlesBySocial.map((puzzle, index) => renderPuzzleRow(puzzle, index))}
+              {puzzlesBySocial.map((puzzle, index) => renderPuzzleRow(puzzle, index, 'popularity'))}
             </div>
           </div>
         </TabsContent>
@@ -261,7 +265,7 @@ export default function DashboardData() {
             </div>
             
             <div className="space-y-2 max-h-[700px] overflow-y-auto">
-              {puzzlesByWishlist.map((puzzle, index) => renderPuzzleRow(puzzle, index))}
+              {puzzlesByWishlist.map((puzzle, index) => renderPuzzleRow(puzzle, index, 'wishlist'))}
             </div>
           </div>
         </TabsContent>
@@ -284,17 +288,42 @@ export default function DashboardData() {
             </div>
             
             <div className="space-y-2 max-h-[700px] overflow-y-auto">
-              {puzzlesByAddedCount.map((puzzle, index) => renderPuzzleRow(puzzle, index))}
+              {puzzlesByAddedCount.map((puzzle, index) => renderPuzzleRow(puzzle, index, 'added'))}
             </div>
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Puzzle Stats Modal */}
-      {selectedPuzzle && (
+      {/* Modals */}
+      {selectedPuzzle && modalType === 'popularity' && (
+        <PuzzlePopularityModal
+          open={!!selectedPuzzle}
+          onClose={() => {
+            setSelectedPuzzle(null);
+            setModalType(null);
+          }}
+          puzzle={selectedPuzzle}
+        />
+      )}
+
+      {selectedPuzzle && modalType === 'wishlist' && (
+        <PuzzleWishlistModal
+          open={!!selectedPuzzle}
+          onClose={() => {
+            setSelectedPuzzle(null);
+            setModalType(null);
+          }}
+          puzzle={selectedPuzzle}
+        />
+      )}
+
+      {selectedPuzzle && modalType === 'added' && (
         <PuzzleStatsModal
           open={!!selectedPuzzle}
-          onClose={() => setSelectedPuzzle(null)}
+          onClose={() => {
+            setSelectedPuzzle(null);
+            setModalType(null);
+          }}
           puzzle={selectedPuzzle}
         />
       )}
