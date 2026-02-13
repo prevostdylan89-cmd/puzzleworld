@@ -474,25 +474,18 @@ function LayoutContent({ children, currentPageName }) {
               </ul>
             </div>
 
-            {/* Learn */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Learn</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Blog</a></li>
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Guide des pièces</a></li>
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Tutoriels</a></li>
-              </ul>
-            </div>
-
             {/* Support */}
             <div>
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">FAQ</a></li>
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Contact</a></li>
-                <li><a href="#" className="text-white/50 hover:text-orange-400 text-sm transition-colors">Aide</a></li>
+                <li><Link to={createPageUrl('FAQ')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">FAQ</Link></li>
+                <li><Link to={createPageUrl('Contact')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Contact</Link></li>
+                <li><Link to={createPageUrl('Aide')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Aide</Link></li>
               </ul>
             </div>
+
+            {/* Placeholder for grid layout */}
+            <div></div>
           </div>
 
           <div className="pt-8 border-t border-white/[0.06]">
