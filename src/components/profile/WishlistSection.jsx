@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 
 export default function WishlistSection({ user }) {
   const [wishlist, setWishlist] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPuzzle, setSelectedPuzzle] = useState(null);
 
   useEffect(() => {
     loadWishlist();
@@ -22,7 +24,21 @@ export default function WishlistSection({ user }) {
         { created_by: user.email },
         '-created_date'
       );
-      setWishlist(items);
+      
+      // Fetch full puzzle data from PuzzleCatalog for each wishlist item
+      const enrichedItems = [];
+      for (const item of items) {
+        const catalogPuzzles = await base44.entities.PuzzleCatalog.filter({
+          title: item.puzzle_name
+        });
+        
+        enrichedItems.push({
+          ...item,
+          catalogData: catalogPuzzles.length > 0 ? catalogPuzzles[0] : null
+        });
+      }
+      
+      setWishlist(enrichedItems);
     } catch (error) {
       console.error('Error loading wishlist:', error);
     } finally {
@@ -61,14 +77,16 @@ export default function WishlistSection({ user }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {wishlist.map((item, index) => (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {wishlist.map((item, index) => (
         <motion.div
           key={item.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden hover:border-orange-500/30 transition-colors group"
+          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer"
+          onClick={() => item.catalogData && setSelectedPuzzle(item.catalogData)}
         >
           {item.image_url && (
             <div className="aspect-video overflow-hidden">
@@ -105,7 +123,10 @@ export default function WishlistSection({ user }) {
                 variant="outline"
                 size="sm"
                 className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
-                onClick={() => handleDelete(item.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(item.id);
+                }}
               >
                 <Trash2 className="w-3 h-3 mr-1" />
                 Remove
@@ -113,7 +134,16 @@ export default function WishlistSection({ user }) {
             </div>
           </div>
         </motion.div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {selectedPuzzle && (
+        <PuzzleDetailModal
+          open={!!selectedPuzzle}
+          onClose={() => setSelectedPuzzle(null)}
+          puzzle={selectedPuzzle}
+        />
+      )}
+    </>
   );
 }
