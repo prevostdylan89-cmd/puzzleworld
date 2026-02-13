@@ -34,6 +34,7 @@ export default function DashboardMyCollection() {
   const [puzzles, setPuzzles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
   const [loading, setLoading] = useState(true);
   const [deletingPuzzle, setDeletingPuzzle] = useState(null);
   const [editingPuzzle, setEditingPuzzle] = useState(null);
@@ -69,12 +70,25 @@ export default function DashboardMyCollection() {
     }
   };
 
-  const filteredPuzzles = puzzles.filter(p => {
-    const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         p.brand?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || p.category_tag === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredPuzzles = puzzles
+    .filter(p => {
+      const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           p.brand?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || p.category_tag === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'pieces_asc') {
+        return (a.piece_count || 0) - (b.piece_count || 0);
+      } else if (sortBy === 'pieces_desc') {
+        return (b.piece_count || 0) - (a.piece_count || 0);
+      } else if (sortBy === 'missing_pieces') {
+        const aMissing = !a.piece_count || a.piece_count === 0 ? 1 : 0;
+        const bMissing = !b.piece_count || b.piece_count === 0 ? 1 : 0;
+        return bMissing - aMissing;
+      }
+      return 0; // date order (default from API)
+    });
 
   if (loading) {
     return (
@@ -121,6 +135,21 @@ export default function DashboardMyCollection() {
                 <span className="font-medium">{category.label}</span>
               </button>
             ))}
+          </div>
+
+          {/* Sort Options */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-white/50 text-sm">Trier par:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:outline-none"
+            >
+              <option value="date">Date d'ajout</option>
+              <option value="pieces_asc">Pièces (croissant)</option>
+              <option value="pieces_desc">Pièces (décroissant)</option>
+              <option value="missing_pieces">❌ Pièces manquantes</option>
+            </select>
           </div>
 
           <p className="text-white/50 text-sm">
