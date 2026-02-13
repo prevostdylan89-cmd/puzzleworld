@@ -269,7 +269,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     // Check if puzzle already exists in global catalog
     const existing = await checkExistingPuzzle(code);
     if (existing) {
-      toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+      toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
+      
+      // Use existing catalog data - preserve the original title
       const data = {
         name: existing.title,
         brand: existing.brand,
@@ -281,7 +283,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         image_hd: existing.image_hd,
         piece_count: existing.piece_count,
         pieces: existing.piece_count,
-        dimensions: ''
+        dimensions: '',
+        catalogId: existing.id // Store catalog ID for enrichment
       };
       setPuzzleData(data);
       setLoading(false);
@@ -494,10 +497,52 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           console.log('✓ Puzzle déjà dans la collection communautaire');
           toast.success('✨ Ce puzzle est déjà dans la collection communautaire !');
 
-          // Incrémenter added_count
-          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, {
+          // Enrichissement automatique : mettre à jour les champs manquants
+          const updateData = {
             added_count: (existingInCatalog[0].added_count || 0) + 1
-          });
+          };
+          
+          // Enrichir piece_count si manquant
+          if (!existingInCatalog[0].piece_count && (puzzleData.pieces || puzzleData.piece_count)) {
+            updateData.piece_count = puzzleData.pieces || puzzleData.piece_count;
+            console.log('✓ Enrichissement: Ajout du nombre de pièces');
+          }
+          
+          // Enrichir brand si manquant
+          if (!existingInCatalog[0].brand && puzzleData.brand) {
+            updateData.brand = puzzleData.brand;
+            console.log('✓ Enrichissement: Ajout de la marque');
+          }
+          
+          // Enrichir image_hd si manquante
+          if (!existingInCatalog[0].image_hd && (puzzleData.image || puzzleData.image_hd)) {
+            updateData.image_hd = puzzleData.image || puzzleData.image_hd;
+            console.log('✓ Enrichissement: Ajout de l\'image HD');
+          }
+          
+          // Enrichir amazon_link si manquant
+          if (!existingInCatalog[0].amazon_link && puzzleData.link) {
+            updateData.amazon_link = puzzleData.link;
+            console.log('✓ Enrichissement: Ajout du lien Amazon');
+          }
+          
+          // Enrichir données Amazon si disponibles
+          if (puzzleData.rainforest_data) {
+            if (!existingInCatalog[0].amazon_rating && puzzleData.rainforest_data.rating) {
+              updateData.amazon_rating = puzzleData.rainforest_data.rating;
+            }
+            if (!existingInCatalog[0].amazon_ratings_total && puzzleData.rainforest_data.ratings_total) {
+              updateData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
+            }
+            if (!existingInCatalog[0].amazon_price && puzzleData.rainforest_data.price) {
+              updateData.amazon_price = puzzleData.rainforest_data.price;
+            }
+            if (!existingInCatalog[0].description && puzzleData.rainforest_data.description) {
+              updateData.description = puzzleData.rainforest_data.description;
+            }
+          }
+          
+          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updateData);
         } else {
           // ACTION A: Nouveau puzzle - Créer dans la collection globale (Collection Communautaire)
           try {
