@@ -15,7 +15,10 @@ import {
   Scan,
   Sparkles,
   Settings,
-  MessageCircle
+  MessageCircle,
+  Menu,
+  X as XIcon,
+  Calendar
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -35,22 +38,38 @@ function LayoutContent({ children, currentPageName }) {
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const [showScanModal, setShowScanModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [tabHistory, setTabHistory] = useState({
     Home: ['Home'],
     Social: ['Social'],
     Collection: ['Collection']
   });
 
-  const navItems = [
+  // Bottom nav items (mobile only)
+  const bottomNavItems = [
+    { name: t('social'), icon: Users, page: 'Social' },
+    { name: 'Scan', icon: Scan, page: 'scan', isScan: true },
+    { name: 'Events', icon: Calendar, page: 'Events' },
+  ];
+
+  // Sidebar menu items (mobile drawer)
+  const sidebarMenuItems = [
+    { name: t('home'), icon: Home, page: 'Home' },
+    { name: t('collection'), icon: Grid3X3, page: 'Collection' },
+    { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
+    { name: t('profile'), icon: User, page: 'Profile' },
+    { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: 'Messages', icon: MessageCircle, page: 'Messages' },
+  ];
+
+  // Desktop nav items
+  const desktopNavItems = [
     { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
     { name: t('social'), icon: Users, page: 'Social', hasHistory: true },
     { name: t('collection'), icon: Grid3X3, page: 'Collection', hasHistory: true },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
-  ];
-
-  const extraNavItems = [
     { name: 'Amis', icon: Users, page: 'Friends' },
     { name: 'Messages', icon: MessageCircle, page: 'Messages' }
   ];
@@ -197,7 +216,7 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* Navigation */}
           <nav className="flex items-center gap-1">
-            {[...navItems, ...extraNavItems, ...adminNavItems].map((item) => {
+            {[...desktopNavItems, ...adminNavItems].map((item) => {
               const isActive = currentPageName === item.page;
               return (
                 <Link
@@ -302,64 +321,38 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(4rem + env(safe-area-inset-top))' }}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between h-full px-4">
-          {['Home', 'Social', 'Collection', 'OnlinePuzzles', 'Events', 'Profile'].includes(currentPageName) ? (
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                <Puzzle className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-lg">PuzzleWorld</span>
-            </Link>
-          ) : (
-            <button 
-              onClick={() => window.history.back()} 
-              className="flex items-center gap-2 text-white hover:text-orange-400 transition-colors"
-            >
-              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </div>
-              <span className="font-medium">Retour</span>
-            </button>
-          )}
+          <button 
+            onClick={() => setShowMobileMenu(true)}
+            className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          >
+            <Menu className="w-5 h-5 text-white" />
+          </button>
+
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+              <Puzzle className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-base">PuzzleWorld</span>
+          </div>
 
           <div className="flex items-center gap-2">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1 rounded-lg hover:bg-white/5 transition-colors">
-                    <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-                      {user.profile_photo ? (
-                        <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
-                      ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                          {userInitials}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
-                  <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Profile')} className="cursor-pointer text-white hover:bg-white/10">
-                      <User className="w-4 h-4 mr-2" />
-                      {t('profile')}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:bg-white/10 hover:text-red-300">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    {t('logOut')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
+                {user.profile_photo ? (
+                  <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                    {userInitials}
+                  </AvatarFallback>
+                )}
+              </Avatar>
             ) : (
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
                 size="sm"
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-xs px-3 h-8"
               >
                 {t('logIn')}
               </Button>
@@ -368,62 +361,165 @@ function LayoutContent({ children, currentPageName }) {
         </div>
       </header>
 
+      {/* Mobile Side Menu */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              onClick={() => setShowMobileMenu(false)}
+            />
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-[#000019] border-r border-white/10 z-[70] flex flex-col"
+              style={{ paddingTop: 'env(safe-area-inset-top)' }}
+            >
+              {/* Menu Header */}
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                    <Puzzle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-white">PuzzleWorld</h2>
+                    {user && (
+                      <p className="text-xs text-white/50">{user.full_name || user.email}</p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowMobileMenu(false)}
+                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <XIcon className="w-4 h-4 text-white" />
+                </button>
+              </div>
+
+              {/* Menu Items */}
+              <div className="flex-1 overflow-y-auto py-2">
+                {sidebarMenuItems.map((item) => {
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={createPageUrl(item.page)}
+                      onClick={() => setShowMobileMenu(false)}
+                      className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                        isActive 
+                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  );
+                })}
+
+                {user?.role === 'admin' && (
+                  <>
+                    <div className="h-px bg-white/10 my-2 mx-4" />
+                    <Link
+                      to={createPageUrl('Dashboard')}
+                      onClick={() => setShowMobileMenu(false)}
+                      className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                        currentPageName === 'Dashboard'
+                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <Settings className="w-5 h-5" />
+                      <span className="font-medium">Admin</span>
+                    </Link>
+                  </>
+                )}
+              </div>
+
+              {/* Menu Footer */}
+              <div className="p-4 border-t border-white/10 space-y-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white">
+                      <Languages className="w-5 h-5" />
+                      <span className="text-sm font-medium">{language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}</span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
+                    <DropdownMenuItem 
+                      onClick={() => setLanguage('fr')}
+                      className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                    >
+                      🇫🇷 Français
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setLanguage('en')}
+                      className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                    >
+                      🇬🇧 English
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {user && (
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setShowMobileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">{t('logOut')}</span>
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/90 backdrop-blur-xl border-t border-white/[0.06] z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 'calc(4rem + env(safe-area-inset-bottom))' }}>
-        <div className="flex items-center justify-around h-full">
-          {navItems.slice(0, 1).map((item) => {
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-t border-white/[0.06] z-40 safe-area-bottom">
+        <div className="flex items-center justify-around h-16" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          {bottomNavItems.map((item) => {
+            if (item.isScan) {
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => setShowScanModal(true)}
+                  className="flex flex-col items-center gap-1 -mt-4"
+                >
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                    <Scan className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-orange-400">Scan</span>
+                </button>
+              );
+            }
+
             const isActive = currentPageName === item.page;
             return (
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
-                onClick={(e) => {
-                  if (item.hasHistory) {
-                    e.preventDefault();
-                    handleNavClick(item);
-                    window.location.href = createPageUrl(item.page);
-                  }
-                }}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
-                  isActive ? 'text-orange-400' : 'text-white/40'
+                className={`flex flex-col items-center gap-1 px-4 py-2 transition-all ${
+                  isActive ? 'text-orange-400' : 'text-white/50 active:text-white/70'
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.name}</span>
-              </Link>
-            );
-          })}
-
-          {/* Central Scan Button */}
-          <button
-            onClick={() => setShowScanModal(true)}
-            className="flex flex-col items-center gap-1 -mt-6"
-          >
-            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
-              <Scan className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xs font-medium text-orange-400">Scan</span>
-          </button>
-
-          {navItems.slice(1, 3).map((item) => {
-            const isActive = currentPageName === item.page;
-            return (
-              <Link
-                key={item.name}
-                to={createPageUrl(item.page)}
-                onClick={(e) => {
-                  if (item.hasHistory) {
-                    e.preventDefault();
-                    handleNavClick(item);
-                    window.location.href = createPageUrl(item.page);
-                  }
-                }}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
-                  isActive ? 'text-orange-400' : 'text-white/40'
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.name}</span>
+                <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
+                <span className="text-[10px] font-semibold">{item.name}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabMobile"
+                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-12 h-1 bg-orange-400 rounded-full"
+                  />
+                )}
               </Link>
             );
           })}
@@ -431,7 +527,7 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="min-h-screen lg:pb-6" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>
+      <main className="min-h-screen lg:pb-6" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))', paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentPageName}
