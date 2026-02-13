@@ -29,9 +29,21 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
-      const users = await base44.entities.User.filter({ email: userEmail });
-      if (users.length > 0) {
-        const userData = users[0];
+      // Try to get from UserProfile first (public data)
+      const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
+      let userData = null;
+      
+      if (profiles.length > 0) {
+        userData = profiles[0];
+      } else {
+        // Fallback to User entity if profile not found
+        const users = await base44.entities.User.filter({ email: userEmail });
+        if (users.length > 0) {
+          userData = users[0];
+        }
+      }
+      
+      if (userData) {
         setUser(userData);
         
         // Load stats and puzzles

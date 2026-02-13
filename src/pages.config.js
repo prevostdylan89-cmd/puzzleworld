@@ -48,11 +48,16 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminEvents from './pages/AdminEvents';
+import Aide from './pages/Aide';
 import Collection from './pages/Collection';
+import Contact from './pages/Contact';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
+import FAQ from './pages/FAQ';
 import FixPuzzlePieces from './pages/FixPuzzlePieces';
+import Friends from './pages/Friends';
 import Home from './pages/Home';
+import Messages from './pages/Messages';
 import MigratePrices from './pages/MigratePrices';
 import OnlinePuzzles from './pages/OnlinePuzzles';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -60,21 +65,21 @@ import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import Terms from './pages/Terms';
-import FAQ from './pages/FAQ';
-import Contact from './pages/Contact';
-import Aide from './pages/Aide';
-import Friends from './pages/Friends';
-import Messages from './pages/Messages';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminEvents": AdminEvents,
+    "Aide": Aide,
     "Collection": Collection,
+    "Contact": Contact,
     "Dashboard": Dashboard,
     "Events": Events,
+    "FAQ": FAQ,
     "FixPuzzlePieces": FixPuzzlePieces,
+    "Friends": Friends,
     "Home": Home,
+    "Messages": Messages,
     "MigratePrices": MigratePrices,
     "OnlinePuzzles": OnlinePuzzles,
     "PrivacyPolicy": PrivacyPolicy,
@@ -82,11 +87,6 @@ export const PAGES = {
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
     "Terms": Terms,
-    "FAQ": FAQ,
-    "Contact": Contact,
-    "Aide": Aide,
-    "Friends": Friends,
-    "Messages": Messages,
 }
 
 export const pagesConfig = {

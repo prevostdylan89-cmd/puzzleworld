@@ -31,7 +31,7 @@ export default function Friends() {
 
       const [friendshipsData, usersData] = await Promise.all([
         base44.entities.Friendship.filter({}),
-        base44.entities.User.filter({})
+        base44.entities.UserProfile.filter({})
       ]);
 
       // Amis acceptés

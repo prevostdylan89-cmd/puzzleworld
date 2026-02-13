@@ -21,9 +21,16 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
 
   const loadAuthorUser = async () => {
     try {
-      const users = await base44.entities.User.filter({ email: authorEmail });
-      if (users.length > 0) {
-        setAuthorUser(users[0]);
+      // Try UserProfile first (public data)
+      const profiles = await base44.entities.UserProfile.filter({ email: authorEmail });
+      if (profiles.length > 0) {
+        setAuthorUser(profiles[0]);
+      } else {
+        // Fallback to User entity
+        const users = await base44.entities.User.filter({ email: authorEmail });
+        if (users.length > 0) {
+          setAuthorUser(users[0]);
+        }
       }
     } catch (error) {
       console.error('Error loading author:', error);
