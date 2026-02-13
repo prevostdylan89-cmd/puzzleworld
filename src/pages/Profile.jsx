@@ -62,6 +62,9 @@ export default function Profile() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+
+      // Sync user profile to UserProfile entity
+      await base44.functions.invoke('syncUserProfile', {});
       
       // Load stats
       const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
