@@ -482,14 +482,22 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       
       // ÉTAPE 1: Vérification Globale - Chercher dans PuzzleCatalog par EAN/ASIN
       const asinToCheck = puzzleData.sku || puzzleData.asin || barcode;
+      let isExistingInCatalog = false;
+
       if (asinToCheck) {
         const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ asin: asinToCheck });
-        
+
         if (existingInCatalog.length > 0) {
           // ACTION B: Le puzzle existe déjà dans la collection globale
           catalogPuzzleId = existingInCatalog[0].id;
+          isExistingInCatalog = true;
           console.log('✓ Puzzle déjà dans la collection communautaire');
-          toast.success('✨ Puzzle déjà dans la collection communautaire');
+          toast.success('✨ Ce puzzle est déjà dans la collection communautaire !');
+
+          // Incrémenter added_count
+          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, {
+            added_count: (existingInCatalog[0].added_count || 0) + 1
+          });
         } else {
           // ACTION A: Nouveau puzzle - Créer dans la collection globale (Collection Communautaire)
           try {
@@ -503,6 +511,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               category_tag: puzzleData.category_tag || 'Autre',
               socialScore: 0,
               wishlistCount: 0,
+              added_count: 1,
               total_likes: 0,
               total_dislikes: 0
             };
@@ -591,7 +600,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       }
       
       setShowSuccess(true);
-      
+
+      // Show appropriate success message
+      if (isExistingInCatalog) {
+        toast.success('✅ Puzzle ajouté à votre collection personnelle !');
+      }
+
       // Refresh data in background
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { TrendingUp, Heart, Loader2, Bookmark, Edit2, Trash2, Save, X } from 'lucide-react';
+import { TrendingUp, Heart, Loader2, Bookmark, Edit2, Trash2, Save, X, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -95,6 +95,10 @@ export default function DashboardData() {
     (b.wishlistCount || 0) - (a.wishlistCount || 0)
   );
 
+  const puzzlesByAddedCount = [...puzzles].sort((a, b) => 
+    (b.added_count || 0) - (a.added_count || 0)
+  );
+
   const renderPuzzleRow = (puzzle, index) => {
     const isEditing = editingPuzzle === puzzle.id;
 
@@ -153,6 +157,10 @@ export default function DashboardData() {
             <div className="text-center">
               <div className="text-orange-400 font-bold text-lg">{puzzle.wishlistCount || 0}</div>
               <div className="text-white/50 text-xs">Wishlist</div>
+            </div>
+            <div className="text-center">
+              <div className="text-blue-400 font-bold text-lg">{puzzle.added_count || 0}</div>
+              <div className="text-white/50 text-xs">Ajouts</div>
             </div>
           </div>
 
@@ -217,6 +225,10 @@ export default function DashboardData() {
           <TabsTrigger value="wishlist" className="data-[state=active]:bg-orange-500">
             <Bookmark className="w-4 h-4 mr-2" />
             Classement par Convoitise (Wishlist)
+          </TabsTrigger>
+          <TabsTrigger value="added" className="data-[state=active]:bg-orange-500">
+            <Users className="w-4 h-4 mr-2" />
+            Classement par Ajouts (Collections)
           </TabsTrigger>
         </TabsList>
 
