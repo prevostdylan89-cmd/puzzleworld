@@ -705,17 +705,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                             type="text"
                             placeholder="13 chiffres"
                             value={barcodeInput}
-                            onChange={async (e) => {
+                            onChange={(e) => {
                               const value = e.target.value.replace(/\D/g, '').slice(0, 13);
                               setBarcodeInput(value);
-                              
-                              // Check if puzzle exists when 13 digits are entered
-                              if (value.length === 13) {
-                                const existing = await checkExistingPuzzle(value);
-                                if (existing) {
-                                  toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-                                }
-                              }
                             }}
                             className="bg-white/5 border-white/10 text-white text-center tracking-wider"
                             maxLength={13}
@@ -854,14 +846,6 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                       onChange={async (e) => {
                         const value = e.target.value.replace(/\D/g, '').slice(0, 13);
                         setBarcodeInput(value);
-                        
-                        // Check if puzzle exists when 13 digits are entered
-                        if (value.length === 13) {
-                          const existing = await checkExistingPuzzle(value);
-                          if (existing) {
-                            toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-                          }
-                        }
                       }}
                       className="bg-white/5 border-white/10 text-white text-center tracking-wider text-lg"
                       maxLength={13}
