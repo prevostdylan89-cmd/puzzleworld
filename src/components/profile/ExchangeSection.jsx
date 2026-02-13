@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { ShoppingBag, Loader2, Puzzle } from 'lucide-react';
+import { ShoppingBag, Loader2, Puzzle, ArrowUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function ExchangeSection({ user }) {
   const [exchangePuzzles, setExchangePuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('date-desc');
 
   useEffect(() => {
     loadPuzzles();
@@ -22,6 +30,23 @@ export default function ExchangeSection({ user }) {
       console.error('Error loading exchange puzzles:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getSortedPuzzles = (puzzles) => {
+    const sorted = [...puzzles];
+    
+    switch (sortBy) {
+      case 'date-desc':
+        return sorted.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      case 'date-asc':
+        return sorted.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      case 'pieces-asc':
+        return sorted.sort((a, b) => (a.puzzle_pieces || 0) - (b.puzzle_pieces || 0));
+      case 'pieces-desc':
+        return sorted.sort((a, b) => (b.puzzle_pieces || 0) - (a.puzzle_pieces || 0));
+      default:
+        return sorted;
     }
   };
 
@@ -43,9 +68,49 @@ export default function ExchangeSection({ user }) {
     );
   }
 
+  const sortedPuzzles = getSortedPuzzles(exchangePuzzles);
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      {exchangePuzzles.map((puzzle, index) => (
+    <>
+      <div className="flex justify-end mb-6">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+              <ArrowUpDown className="w-4 h-4 mr-2" />
+              Trier par
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus récent)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus ancien)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Croissant)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Décroissant)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {sortedPuzzles.map((puzzle, index) => (
         <motion.div
           key={puzzle.id}
           initial={{ opacity: 0, y: 20 }}
@@ -80,6 +145,7 @@ export default function ExchangeSection({ user }) {
           </div>
         </motion.div>
       ))}
-    </div>
+      </div>
+    </>
   );
 }

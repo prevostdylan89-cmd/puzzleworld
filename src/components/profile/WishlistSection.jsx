@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Edit3, ExternalLink } from 'lucide-react';
+import { Trash2, Edit3, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function WishlistSection({ user }) {
   const [wishlist, setWishlist] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [sortBy, setSortBy] = useState('date-desc');
 
   useEffect(() => {
     loadWishlist();
@@ -57,6 +64,23 @@ export default function WishlistSection({ user }) {
     }
   };
 
+  const getSortedWishlist = (items) => {
+    const sorted = [...items];
+    
+    switch (sortBy) {
+      case 'date-desc':
+        return sorted.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      case 'date-asc':
+        return sorted.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      case 'pieces-asc':
+        return sorted.sort((a, b) => (a.puzzle_pieces || 0) - (b.puzzle_pieces || 0));
+      case 'pieces-desc':
+        return sorted.sort((a, b) => (b.puzzle_pieces || 0) - (a.puzzle_pieces || 0));
+      default:
+        return sorted;
+    }
+  };
+
   const priorityColors = {
     low: 'bg-blue-100 text-blue-800',
     medium: 'bg-yellow-100 text-yellow-800',
@@ -76,10 +100,49 @@ export default function WishlistSection({ user }) {
     );
   }
 
+  const sortedWishlist = getSortedWishlist(wishlist);
+
   return (
     <>
+      <div className="flex justify-end mb-6">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+              <ArrowUpDown className="w-4 h-4 mr-2" />
+              Trier par
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus récent)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus ancien)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Croissant)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Décroissant)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {wishlist.map((item, index) => (
+        {sortedWishlist.map((item, index) => (
         <motion.div
           key={item.id}
           initial={{ opacity: 0, y: 20 }}

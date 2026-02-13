@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ export default function CollectionSection({ user }) {
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('date-desc'); // 'date-desc', 'date-asc', 'pieces-asc', 'pieces-desc'
 
   useEffect(() => {
     loadPuzzles();
@@ -37,6 +38,23 @@ export default function CollectionSection({ user }) {
     }
   };
 
+  const getSortedPuzzles = (puzzles) => {
+    const sorted = [...puzzles];
+    
+    switch (sortBy) {
+      case 'date-desc':
+        return sorted.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      case 'date-asc':
+        return sorted.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      case 'pieces-asc':
+        return sorted.sort((a, b) => (a.puzzle_pieces || 0) - (b.puzzle_pieces || 0));
+      case 'pieces-desc':
+        return sorted.sort((a, b) => (b.puzzle_pieces || 0) - (a.puzzle_pieces || 0));
+      default:
+        return sorted;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -45,24 +63,64 @@ export default function CollectionSection({ user }) {
     );
   }
 
+  const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
+  const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
+
   return (
     <Tabs defaultValue="inbox" className="w-full">
-      <TabsList className="bg-white/5 border border-white/10 mb-6">
-        <TabsTrigger 
-          value="inbox" 
-          className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-        >
-          <Package className="w-4 h-4 mr-2" />
-          Dans sa boîte ({inboxPuzzles.length})
-        </TabsTrigger>
-        <TabsTrigger 
-          value="completed"
-          className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-        >
-          <CheckCircle className="w-4 h-4 mr-2" />
-          Terminés ({completedPuzzles.length})
-        </TabsTrigger>
-      </TabsList>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <TabsList className="bg-white/5 border border-white/10">
+          <TabsTrigger 
+            value="inbox" 
+            className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Dans sa boîte ({inboxPuzzles.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="completed"
+            className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Terminés ({completedPuzzles.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+              <ArrowUpDown className="w-4 h-4 mr-2" />
+              Trier par
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus récent)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('date-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Date (Plus ancien)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-asc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Croissant)
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setSortBy('pieces-desc')}
+              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
+            >
+              Pièces (Décroissant)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <TabsContent value="inbox">
         {inboxPuzzles.length === 0 ? (
@@ -73,7 +131,7 @@ export default function CollectionSection({ user }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {inboxPuzzles.map((puzzle, index) => (
+            {sortedInboxPuzzles.map((puzzle, index) => (
               <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} />
             ))}
           </div>
@@ -89,7 +147,7 @@ export default function CollectionSection({ user }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {completedPuzzles.map((puzzle, index) => (
+            {sortedCompletedPuzzles.map((puzzle, index) => (
               <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} />
             ))}
           </div>
