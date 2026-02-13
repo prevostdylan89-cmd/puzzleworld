@@ -63,6 +63,8 @@ import Terms from './pages/Terms';
 import FAQ from './pages/FAQ';
 import Contact from './pages/Contact';
 import Aide from './pages/Aide';
+import Friends from './pages/Friends';
+import Messages from './pages/Messages';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +85,8 @@ export const PAGES = {
     "FAQ": FAQ,
     "Contact": Contact,
     "Aide": Aide,
+    "Friends": Friends,
+    "Messages": Messages,
 }
 
 export const pagesConfig = {

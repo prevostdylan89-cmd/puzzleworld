@@ -14,7 +14,8 @@ import {
   Languages,
   Scan,
   Sparkles,
-  Settings
+  Settings,
+  MessageCircle
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,11 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
+  ];
+
+  const extraNavItems = [
+    { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: 'Messages', icon: MessageCircle, page: 'Messages' }
   ];
 
   const adminNavItems = user?.role === 'admin' 
@@ -190,7 +196,7 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* Navigation */}
           <nav className="flex items-center gap-1">
-            {[...navItems, ...adminNavItems].map((item) => {
+            {[...navItems, ...extraNavItems, ...adminNavItems].map((item) => {
               const isActive = currentPageName === item.page;
               return (
                 <Link
