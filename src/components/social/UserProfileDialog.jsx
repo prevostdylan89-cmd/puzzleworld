@@ -14,6 +14,8 @@ export default function UserProfileDialog({ userEmail, onClose }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [stats, setStats] = useState({ completed: 0, achievements: 0, wishlist: 0, followers: 0, following: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
+  const [friendRequestPending, setFriendRequestPending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
 
@@ -50,13 +52,27 @@ export default function UserProfileDialog({ userEmail, onClose }) {
           following: following.length
         });
 
-        // Check if following
+        // Check if following and friend status
         if (loggedUser) {
-          const followCheck = await base44.entities.Follow.filter({
-            follower_email: loggedUser.email,
-            following_email: userEmail
-          });
+          const [followCheck, friendships] = await Promise.all([
+            base44.entities.Follow.filter({
+              follower_email: loggedUser.email,
+              following_email: userEmail
+            }),
+            base44.entities.Friendship.filter({})
+          ]);
           setIsFollowing(followCheck.length > 0);
+
+          // Check if already friends or has pending request
+          const friendship = friendships.find(f => 
+            (f.requester_email === loggedUser.email && f.addressee_email === userEmail) ||
+            (f.addressee_email === loggedUser.email && f.requester_email === userEmail)
+          );
+
+          if (friendship) {
+            setIsFriend(friendship.status === 'accepted');
+            setFriendRequestPending(friendship.status === 'pending');
+          }
         }
       }
     } catch (error) {
@@ -106,6 +122,28 @@ export default function UserProfileDialog({ userEmail, onClose }) {
     }
   };
 
+  const handleSendFriendRequest = async () => {
+    if (!currentUser) {
+      toast.error('Connectez-vous pour ajouter des amis');
+      return;
+    }
+
+    try {
+      await base44.entities.Friendship.create({
+        requester_email: currentUser.email,
+        requester_name: currentUser.full_name || currentUser.email,
+        addressee_email: userEmail,
+        addressee_name: user.full_name || user.email,
+        status: 'pending'
+      });
+      setFriendRequestPending(true);
+      toast.success('Demande d\'ami envoyée');
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast.error('Erreur lors de l\'envoi de la demande');
+    }
+  };
+
   if (!user) return null;
 
   const userInitials = user.full_name 
@@ -144,10 +182,10 @@ export default function UserProfileDialog({ userEmail, onClose }) {
               </AvatarFallback>
             </Avatar>
             {currentUser && currentUser.email !== userEmail && (
-              <div className="flex-1 mb-2">
+              <div className="flex-1 mb-2 flex gap-2">
                 <Button 
                   onClick={handleFollow}
-                  className={`w-full rounded-xl ${
+                  className={`flex-1 rounded-xl ${
                     isFollowing 
                       ? 'bg-white/10 text-white hover:bg-white/20' 
                       : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
@@ -165,6 +203,33 @@ export default function UserProfileDialog({ userEmail, onClose }) {
                     </>
                   )}
                 </Button>
+                
+                {!isFriend && !friendRequestPending && (
+                  <Button 
+                    onClick={handleSendFriendRequest}
+                    className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
+                )}
+                
+                {friendRequestPending && (
+                  <Button 
+                    disabled
+                    className="rounded-xl bg-white/10 text-white/50"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
+                )}
+
+                {isFriend && (
+                  <Button 
+                    disabled
+                    className="rounded-xl bg-green-500/20 text-green-400"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             )}
           </div>
