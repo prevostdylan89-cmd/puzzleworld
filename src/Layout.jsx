@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
+import FloatingChat from '@/components/messages/FloatingChat';
 
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -521,6 +522,7 @@ function LayoutContent({ children, currentPageName }) {
       </footer>
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
+      <FloatingChat />
       </div>
       );
       }

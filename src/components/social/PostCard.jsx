@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import CommentSection from './CommentSection';
 import UserProfileDialog from './UserProfileDialog';
 import UserBadge from '@/components/shared/UserBadge';
+import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
   const [authorUser, setAuthorUser] = useState(null);
@@ -55,6 +56,7 @@ export default function PostCard({ post, user }) {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
   const [isPuzzleDisliked, setIsPuzzleDisliked] = useState(false);
+  const [showPuzzleDetail, setShowPuzzleDetail] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
@@ -509,12 +511,20 @@ export default function PostCard({ post, user }) {
       {/* Puzzle Details */}
       {post.is_completion_post && post.puzzle_name && (
         <div className="px-4 pb-3">
-          <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+          <button
+            onClick={() => post.puzzle_reference && setShowPuzzleDetail(true)}
+            className={`w-full p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl text-left ${
+              post.puzzle_reference ? 'hover:bg-orange-500/15 cursor-pointer transition-colors' : ''
+            }`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Puzzle className="w-4 h-4 text-orange-400" />
                   <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
+                  {post.puzzle_reference && (
+                    <span className="text-orange-400 text-xs">→ Voir détails</span>
+                  )}
                 </div>
                 <div className="space-y-0.5 text-xs text-white/60">
                   {post.puzzle_brand && <p>Marque: {post.puzzle_brand}</p>}
@@ -577,7 +587,7 @@ export default function PostCard({ post, user }) {
                 </Button>
               </div>
             )}
-          </div>
+          </button>
         </div>
       )}
 
@@ -625,6 +635,14 @@ export default function PostCard({ post, user }) {
         <UserProfileDialog 
           userEmail={post.created_by} 
           onClose={() => setShowUserProfile(false)} 
+        />
+      )}
+
+      {/* Puzzle Detail Dialog */}
+      {showPuzzleDetail && post.puzzle_reference && (
+        <PuzzleDetailClickable
+          puzzleReference={post.puzzle_reference}
+          onClose={() => setShowPuzzleDetail(false)}
         />
       )}
     </motion.div>
