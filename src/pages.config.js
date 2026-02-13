@@ -51,6 +51,7 @@ import AdminEvents from './pages/AdminEvents';
 import Collection from './pages/Collection';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
+import FixPuzzlePieces from './pages/FixPuzzlePieces';
 import Home from './pages/Home';
 import MigratePrices from './pages/MigratePrices';
 import OnlinePuzzles from './pages/OnlinePuzzles';
@@ -59,7 +60,6 @@ import Profile from './pages/Profile';
 import PuzzleDetail from './pages/PuzzleDetail';
 import Social from './pages/Social';
 import Terms from './pages/Terms';
-import FixPuzzlePieces from './pages/FixPuzzlePieces';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +68,7 @@ export const PAGES = {
     "Collection": Collection,
     "Dashboard": Dashboard,
     "Events": Events,
+    "FixPuzzlePieces": FixPuzzlePieces,
     "Home": Home,
     "MigratePrices": MigratePrices,
     "OnlinePuzzles": OnlinePuzzles,
@@ -76,7 +77,6 @@ export const PAGES = {
     "PuzzleDetail": PuzzleDetail,
     "Social": Social,
     "Terms": Terms,
-    "FixPuzzlePieces": FixPuzzlePieces,
 }
 
 export const pagesConfig = {

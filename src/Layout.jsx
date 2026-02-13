@@ -469,8 +469,8 @@ function LayoutContent({ children, currentPageName }) {
               <h3 className="text-white font-semibold mb-4">Explore</h3>
               <ul className="space-y-2">
                 <li><Link to={createPageUrl('Collection')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Collection</Link></li>
-                <li><Link to={createPageUrl('OnlinePuzzles')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Séries</Link></li>
-                <li><Link to={createPageUrl('Events')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Nouveautés</Link></li>
+                <li><Link to={createPageUrl('Social')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Social</Link></li>
+                <li><Link to={createPageUrl('Events')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Events</Link></li>
               </ul>
             </div>
 
