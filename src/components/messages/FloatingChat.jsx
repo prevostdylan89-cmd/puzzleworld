@@ -28,9 +28,14 @@ export default function FloatingChat() {
     notificationSound.current = new Audio('data:audio/wav;base64,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');
     
     loadUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    
     const interval = setInterval(checkNewMessages, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user, previousUnreadTotal, soundEnabled]);
 
   const loadUser = async () => {
     try {
@@ -96,13 +101,57 @@ export default function FloatingChat() {
     if (!user) return;
     
     try {
-      await loadConversations(user);
+      // Get all messages involving the user
+      const allMessages = await base44.entities.DirectMessage.list('-created_date', 100);
+      const userMessages = allMessages.filter(
+        m => m.sender_email === user.email || m.receiver_email === user.email
+      );
+
+      // Group by conversation partner
+      const conversationMap = {};
+      userMessages.forEach(msg => {
+        const partnerEmail = msg.sender_email === user.email ? msg.receiver_email : msg.sender_email;
+        const partnerName = msg.sender_email === user.email ? msg.receiver_name : msg.sender_name;
+        
+        if (!conversationMap[partnerEmail]) {
+          conversationMap[partnerEmail] = {
+            email: partnerEmail,
+            name: partnerName,
+            lastMessage: msg.message,
+            lastMessageDate: msg.created_date,
+            unreadCount: 0
+          };
+        }
+        
+        // Count unread messages
+        if (msg.receiver_email === user.email && !msg.is_read) {
+          conversationMap[partnerEmail].unreadCount++;
+        }
+      });
+
+      // Convert to array and sort by last message date
+      const conversationsList = Object.values(conversationMap).sort(
+        (a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate)
+      );
+
+      setConversations(conversationsList);
       
-      // Check for new messages and play sound
-      const currentUnreadTotal = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
-      if (currentUnreadTotal > previousUnreadTotal && soundEnabled) {
+      // Update unread counts
+      const counts = {};
+      conversationsList.forEach(conv => {
+        if (conv.unreadCount > 0) {
+          counts[conv.email] = conv.unreadCount;
+        }
+      });
+      
+      const currentUnreadTotal = Object.values(counts).reduce((sum, count) => sum + count, 0);
+      
+      // Play sound if new unread messages
+      if (currentUnreadTotal > previousUnreadTotal && previousUnreadTotal > 0 && soundEnabled) {
         notificationSound.current?.play().catch(() => {});
       }
+      
+      setUnreadCounts(counts);
       setPreviousUnreadTotal(currentUnreadTotal);
     } catch (error) {
       console.error('Error checking new messages:', error);
