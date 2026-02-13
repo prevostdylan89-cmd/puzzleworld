@@ -265,6 +265,29 @@ export default function DashboardData() {
             </div>
           </div>
         </TabsContent>
+
+        <TabsContent value="added" className="space-y-4">
+          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">
+                Puzzles triés par Nombre d'Ajouts
+              </h3>
+              <div className="text-white/60 text-sm">
+                {puzzlesByAddedCount.length} puzzles • {puzzlesByAddedCount.reduce((sum, p) => sum + (p.added_count || 0), 0)} ajouts totaux
+              </div>
+            </div>
+            
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+              <p className="text-blue-400 text-sm">
+                <strong>📊 Statistique clé :</strong> Ce classement montre combien de fois chaque puzzle a été scanné et ajouté aux collections personnelles des utilisateurs. Plus le nombre est élevé, plus le puzzle est populaire dans les foyers.
+              </p>
+            </div>
+            
+            <div className="space-y-2 max-h-[700px] overflow-y-auto">
+              {puzzlesByAddedCount.map((puzzle, index) => renderPuzzleRow(puzzle, index))}
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Puzzle Stats Modal */}
