@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle } from 'lucide-react';
+import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import PopularityScore from '@/components/shared/PopularityScore';
 import { base44 } from '@/api/base44Client';
@@ -13,9 +13,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [productData, setProductData] = useState(null);
   const [popularityScore, setPopularityScore] = useState(null);
   const [loadingScore, setLoadingScore] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (open && puzzle) {
+      loadUserData();
       // Use data from PuzzleCatalog instead of API call
       setProductData({
         title: puzzle.title,
@@ -29,12 +33,48 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         } : null
       });
       calculatePopularityScore();
+      checkLikeAndWishlistStatus();
       setLoading(false);
     } else {
       setProductData(null);
       setPopularityScore(null);
+      setIsLiked(false);
+      setIsWishlisted(false);
     }
   }, [open, puzzle]);
+
+  const loadUserData = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+    } catch (error) {
+      console.log('User not logged in');
+    }
+  };
+
+  const checkLikeAndWishlistStatus = async () => {
+    if (!puzzle?.asin) return;
+    
+    try {
+      const currentUser = await base44.auth.me();
+      
+      // Check if liked
+      const likes = await base44.entities.UserPuzzleLike.filter({
+        puzzle_asin: puzzle.asin,
+        created_by: currentUser.email
+      });
+      setIsLiked(likes.length > 0);
+      
+      // Check if wishlisted
+      const wishlists = await base44.entities.Wishlist.filter({
+        puzzle_name: puzzle.title,
+        created_by: currentUser.email
+      });
+      setIsWishlisted(wishlists.length > 0);
+    } catch (error) {
+      console.log('Error checking status:', error);
+    }
+  };
 
   const calculatePopularityScore = async () => {
     if (!puzzle) return;
@@ -72,6 +112,76 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
       };
     }
     return null;
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      toast.error('Connectez-vous pour liker ce puzzle');
+      return;
+    }
+    
+    try {
+      if (isLiked) {
+        // Unlike
+        const likes = await base44.entities.UserPuzzleLike.filter({
+          puzzle_asin: puzzle.asin,
+          created_by: user.email
+        });
+        if (likes.length > 0) {
+          await base44.entities.UserPuzzleLike.delete(likes[0].id);
+          setIsLiked(false);
+          toast.success('Retiré de vos likes');
+        }
+      } else {
+        // Like
+        await base44.entities.UserPuzzleLike.create({
+          puzzle_asin: puzzle.asin,
+          puzzle_name: puzzle.title,
+          puzzle_brand: puzzle.brand
+        });
+        setIsLiked(true);
+        toast.success('Ajouté à vos likes ❤️');
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast.error('Erreur lors du like');
+    }
+  };
+
+  const handleWishlist = async () => {
+    if (!user) {
+      toast.error('Connectez-vous pour ajouter à votre wishlist');
+      return;
+    }
+    
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        const wishlists = await base44.entities.Wishlist.filter({
+          puzzle_name: puzzle.title,
+          created_by: user.email
+        });
+        if (wishlists.length > 0) {
+          await base44.entities.Wishlist.delete(wishlists[0].id);
+          setIsWishlisted(false);
+          toast.success('Retiré de votre wishlist');
+        }
+      } else {
+        // Add to wishlist
+        await base44.entities.Wishlist.create({
+          puzzle_name: puzzle.title,
+          puzzle_brand: puzzle.brand,
+          puzzle_pieces: puzzle.piece_count,
+          image_url: puzzle.image_hd,
+          priority: 'medium'
+        });
+        setIsWishlisted(true);
+        toast.success('Ajouté à votre wishlist ⭐');
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      toast.error('Erreur lors de l\'ajout à la wishlist');
+    }
   };
 
   if (!puzzle) return null;
@@ -147,6 +257,34 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
               )}
 
 
+
+              {/* Like & Wishlist Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleLike}
+                  variant="outline"
+                  className={`flex-1 h-12 border-2 transition-all ${
+                    isLiked 
+                      ? 'bg-red-500/20 border-red-500 text-red-400 hover:bg-red-500/30' 
+                      : 'border-white/20 text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                  {isLiked ? 'Liké' : 'Liker'}
+                </Button>
+                
+                <Button
+                  onClick={handleWishlist}
+                  variant="outline"
+                  className={`flex-1 h-12 border-2 transition-all ${
+                    isWishlisted 
+                      ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 hover:bg-yellow-500/30' 
+                      : 'border-white/20 text-white hover:bg-white/5'
+                  }`}
+                >
+                  ⭐ {isWishlisted ? 'En wishlist' : 'Wishlist'}
+                </Button>
+              </div>
 
               {/* CTA Button */}
               <Button
