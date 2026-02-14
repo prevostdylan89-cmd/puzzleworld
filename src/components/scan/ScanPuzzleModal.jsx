@@ -662,6 +662,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           };
 
           setPuzzleData(puzzleInfo);
+          setLoading(false);
           toast.success('Puzzle trouvé !');
 
           if (skipCollectionAdd && onPuzzleAdded) {
