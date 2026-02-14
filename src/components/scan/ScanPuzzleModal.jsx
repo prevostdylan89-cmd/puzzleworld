@@ -655,14 +655,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             pieces: product.pieces,
             dimensions: product.dimensions || '',
             category_tag: product.category_tag || 'Autre',
-            rainforest_data: {
-              rating: product.rating || null,
-              ratings_total: product.ratings_total || 0,
-              price: product.price || null,
-              currency: 'EUR',
-              description: product.description || product.title || '',
-              features: []
-            }
+            amazon_rating: product.rating || null,
+            amazon_ratings_total: product.ratings_total || 0,
+            amazon_price: product.price || null,
+            description: product.description || product.title || ''
           };
 
           setPuzzleData(puzzleInfo);
