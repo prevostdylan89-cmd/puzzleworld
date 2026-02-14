@@ -15,25 +15,29 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Barcode requis' }, { status: 400 });
     }
 
-    // Utiliser Web Scraping simple sur Amazon.fr
-    const amazonUrl = `https://www.amazon.fr/s?k=${barcode}`;
-    
-    const response = await fetch(amazonUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept-Language': 'fr-FR,fr;q=0.9',
+    // Utiliser l'IA avec recherche web pour trouver les infos du puzzle
+    const prompt = `Recherche le puzzle correspondant au code EAN/GTIN ${barcode} sur Amazon.fr et extraie les informations suivantes en format structuré. Cherche bien le produit puzzle avec ce code-barres exact.`;
+
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: prompt,
+      add_context_from_internet: true,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          found: { type: "boolean", description: "Si le produit a été trouvé" },
+          title: { type: "string", description: "Titre complet du puzzle" },
+          brand: { type: "string", description: "Marque du puzzle (Ravensburger, Educa, etc.)" },
+          pieces: { type: "number", description: "Nombre de pièces" },
+          image_url: { type: "string", description: "URL de l'image du produit" },
+          price: { type: "number", description: "Prix en euros" },
+          asin: { type: "string", description: "Code ASIN Amazon" },
+          dimensions: { type: "string", description: "Dimensions du puzzle (ex: 70x50 cm)" }
+        },
+        required: ["found", "title"]
       }
     });
 
-    const html = await response.text();
-
-    // Parser basique HTML pour extraire les infos produit
-    const titleMatch = html.match(/<span class="a-size-[^"]*"[^>]*>([^<]+)<\/span>/);
-    const imageMatch = html.match(/<img[^>]*src="(https:\/\/[^"]*images[^"]*)"[^>]*>/);
-    const priceMatch = html.match(/<span class="a-price-whole">([^<]+)<\/span>/);
-    const asinMatch = html.match(/\/dp\/([A-Z0-9]{10})/);
-
-    if (!titleMatch || !asinMatch) {
+    if (!result.found) {
       return Response.json({ 
         success: false, 
         message: 'Produit non trouvé sur Amazon' 
@@ -41,11 +45,14 @@ Deno.serve(async (req) => {
     }
 
     const productData = {
-      title: titleMatch[1].trim(),
-      asin: asinMatch[1],
-      image_hd: imageMatch ? imageMatch[1] : null,
-      price: priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : null,
-      link: `https://www.amazon.fr/dp/${asinMatch[1]}?tag=puzzleworld0e-21`
+      title: result.title,
+      brand: result.brand || '',
+      image_hd: result.image_url || null,
+      price: result.price || null,
+      pieces: result.pieces || null,
+      dimensions: result.dimensions || '',
+      asin: result.asin || barcode,
+      link: result.asin ? `https://www.amazon.fr/dp/${result.asin}?tag=puzzleworld0e-21` : ''
     };
 
     return Response.json({ 

@@ -314,9 +314,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (data.product) {
         const product = data.product;
         
-        // Données basiques depuis notre scraper
-        const pieces = extractPieceCount(product.title);
-        const brand = extractBrand(product.title);
+        // Données depuis l'IA
+        const pieces = product.pieces || extractPieceCount(product.title);
+        const brand = product.brand || extractBrand(product.title);
+        const dimensions = product.dimensions || '';
 
         // Liste des marques de puzzles connues
         const KNOWN_BRANDS = [
@@ -385,7 +386,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           image_hd: imageUrl,
           piece_count: pieces,
           pieces: pieces,
-          dimensions: '',
+          dimensions: dimensions,
           category_tag: categoryTag,
           // Données additionnelles pour PuzzleCatalog
           rainforest_data: {
