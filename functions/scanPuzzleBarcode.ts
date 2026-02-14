@@ -24,14 +24,14 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Recherche Google Shopping avec forçage Amazon
+    // Recherche Google Shopping avec puzzle + barcode
     console.log(`Recherche Google Shopping pour EAN: ${barcode}`);
-    const searchQuery = `amazon ${barcode}`;
-    const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(searchQuery)}&direct_link=1&hl=fr&gl=fr&api_key=${serpApiKey}`;
+    const searchQuery = `puzzle ${barcode}`;
+    const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(searchQuery)}&hl=fr&gl=fr&api_key=${serpApiKey}`;
     const response = await fetch(serpApiUrl);
     const data = await response.json();
 
-    console.log('SerpApi Google Shopping response:', JSON.stringify(data));
+    console.log('SerpApi Google Shopping response:', JSON.stringify(data, null, 2));
 
     // Vérifier erreur API
     if (data.error) {
@@ -49,8 +49,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Prendre le premier résultat
-    const product = data.shopping_results[0];
+    // Filtrer pour trouver un puzzle dans les résultats
+    let product = null;
+    for (const result of data.shopping_results) {
+      const title = (result.title || '').toLowerCase();
+      if (title.includes('puzzle') || title.includes('pièces') || title.includes('pieces')) {
+        product = result;
+        break;
+      }
+    }
+
+    // Si aucun puzzle trouvé dans les résultats, prendre le premier quand même
+    if (!product) {
+      product = data.shopping_results[0];
+    }
 
     // Extraire l'ASIN et préparer le lien affilié
     let asin = barcode;
