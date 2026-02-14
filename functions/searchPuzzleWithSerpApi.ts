@@ -27,7 +27,17 @@ Deno.serve(async (req) => {
     const searchUrl = `https://serpapi.com/search.json?engine=amazon&q=${barcode}&api_key=${serpApiKey}`;
 
     const serpResponse = await fetch(searchUrl);
+    if (!serpResponse.ok) {
+      console.error('SerpApi HTTP Error:', serpResponse.status, await serpResponse.text());
+      return Response.json({
+        status: 'not_found',
+        message: 'Erreur API SerpApi'
+      }, { status: 404 });
+    }
+
     const serpData = await serpResponse.json();
+
+    console.log('SerpApi Response:', JSON.stringify(serpData, null, 2));
 
     // Vérifier les résultats amazon
     const results = serpData.amazon_results || serpData.shopping_results || [];
