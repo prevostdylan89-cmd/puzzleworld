@@ -23,22 +23,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ÉTAPE 2 : Recherche externe via Amazon Product Advertising API alternative
-    // Fallback: Retourner not_found et laisser l'utilisateur créer manuellement
-    // (Deno Deploy a des limitations réseau pour les appels externes)
-    return Response.json({
-      status: 'not_found',
-      message: 'Mode saisie manuelle : veuillez entrer les détails du puzzle'
-    }, { status: 404 });
+    // ÉTAPE 2 : Recherche externe via SerpApi avec fetch natif
+    const searchUrl = `https://serpapi.com/search.json?engine=amazon&q=${barcode}&api_key=${serpApiKey}`;
 
-    if (!serpData.shopping_results || serpData.shopping_results.length === 0) {
+    const serpResponse = await fetch(searchUrl);
+    const serpData = await serpResponse.json();
+
+    // Vérifier les résultats amazon
+    const results = serpData.amazon_results || serpData.shopping_results || [];
+    if (!results || results.length === 0) {
       return Response.json({
         status: 'not_found',
         message: 'Produit non trouvé, création manuelle requise'
       }, { status: 404 });
     }
 
-    const product = serpData.shopping_results[0];
+    const product = results[0];
     const brands = await base44.entities.Brand.list();
 
     // ÉTAPE 3 : Parsing et création de la fiche communautaire
