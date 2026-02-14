@@ -300,7 +300,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     
     try {
       const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
+        `https://api.rainforestapi.com/request?api_key=C7F6349F0285458EB5352FFBE87B593D&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
       );
       
       const data = await response.json();
