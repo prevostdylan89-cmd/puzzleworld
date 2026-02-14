@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     if (data.error) {
       return Response.json({ 
         success: false, 
-        message: `Erreur API: ${data.error}` 
+        message: 'Produit non trouvé sur Amazon'
       });
     }
 
@@ -82,8 +82,7 @@ Deno.serve(async (req) => {
       product = {
         title: data.knowledge_graph.title,
         thumbnail: data.knowledge_graph.images?.[0]?.thumbnail,
-        link: data.knowledge_graph.website,
-        source: 'Knowledge Graph'
+        link: data.knowledge_graph.website
       };
     }
 
@@ -91,97 +90,9 @@ Deno.serve(async (req) => {
     if (!product) {
       return Response.json({ 
         success: false, 
-        message: 'Aucun puzzle trouvé correspondant à cette image' 
+        message: 'Produit non trouvé sur Amazon'
       });
     }
-
-    // Extraire le nombre de pièces du titre
-    const extractPieces = (title) => {
-      const match = title?.match(/(\d+)\s*(pièces?|pieces?|p\s|p-)/i);
-      return match ? parseInt(match[1]) : null;
-    };
-
-    // Extraire les dimensions
-    const extractDimensions = (title) => {
-      const match = title?.match(/(\d+\s*[xX×]\s*\d+)\s*(cm)?/);
-      return match ? match[1] + ' cm' : '';
-    };
-
-    // Liste des marques connues
-    const KNOWN_BRANDS = [
-      'Ravensburger', 'Educa', 'Clementoni', 'Schmidt Spiele', 'Jumbo', 'Wasgij',
-      'Castorland', 'Trefl', 'Falcon', 'Galison', 'Eurographics', 'Heye',
-      'Bluebird', 'Cobble Hill', 'Pomegranate', 'Grafika', 'Buffalo Games'
-    ];
-
-    const extractBrand = (title) => {
-      if (!title) return '';
-      const titleLower = title.toLowerCase();
-      for (const brand of KNOWN_BRANDS) {
-        if (titleLower.includes(brand.toLowerCase())) {
-          return brand;
-        }
-      }
-      return '';
-    };
-
-    // Extraire l'ASIN de l'URL Amazon si disponible
-    let asin = null;
-    if (product.link) {
-      const asinMatch = product.link.match(/\/dp\/([A-Z0-9]{10})/i) || 
-                        product.link.match(/\/gp\/product\/([A-Z0-9]{10})/i);
-      if (asinMatch) {
-        asin = asinMatch[1];
-      }
-    }
-
-    // Extraire le prix si disponible
-    let price = null;
-    if (product.price) {
-      const priceMatch = product.price.match(/(\d+[.,]\d+)/);
-      if (priceMatch) {
-        price = parseFloat(priceMatch[1].replace(',', '.'));
-      }
-    }
-
-    // Extraire toutes les données nécessaires
-    const pieces = extractPieces(product.title);
-    const brand = extractBrand(product.title);
-    const dimensions = extractDimensions(product.title);
-    
-    // Deviner la catégorie depuis le titre
-    let categoryTag = 'Autre';
-    const titleLower = product.title?.toLowerCase() || '';
-    
-    if (titleLower.includes('nature') || titleLower.includes('paysage') || titleLower.includes('landscape')) {
-      categoryTag = 'Nature';
-    } else if (titleLower.includes('disney')) {
-      categoryTag = 'Disney';
-    } else if (titleLower.includes('art') || titleLower.includes('tableau')) {
-      categoryTag = 'Art';
-    } else if (titleLower.includes('animal')) {
-      categoryTag = 'Animaux';
-    } else if (titleLower.includes('ville') || titleLower.includes('city') || titleLower.includes('urban')) {
-      categoryTag = 'Urbain';
-    } else if (titleLower.includes('vintage')) {
-      categoryTag = 'Vintage';
-    }
-
-    const productData = {
-      title: product.title || '',
-      brand: brand,
-      image_hd: product.thumbnail || imageUrl,
-      price: price,
-      pieces: pieces,
-      dimensions: dimensions,
-      asin: asin || '',
-      link: asin ? `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0e-21` : product.link || '',
-      category_tag: categoryTag,
-      source: product.source || 'Google Lens',
-      rating: null,
-      ratings_total: 0,
-      description: product.title || ''
-    };
 
     return Response.json({ 
       success: true, 
