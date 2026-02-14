@@ -52,7 +52,15 @@ Deno.serve(async (req) => {
 
     const rainforestData = await apiResponse.json();
     
-    if (!rainforestData.product) {
+    let product = null;
+    
+    // Gérer les deux types de réponses (product ou search results)
+    if (rainforestData.product) {
+      product = rainforestData.product;
+    } else if (rainforestData.search_results && rainforestData.search_results.length > 0) {
+      // Pour les résultats de recherche, prendre le premier résultat
+      product = rainforestData.search_results[0];
+    } else {
       return Response.json({ 
         error: 'Produit non trouvé sur Amazon',
         status: 'not_found'
@@ -60,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // Étape 3: Parser les données Amazon
-    const product = rainforestData.product;
+    // Note: product peut être un search result qui a une structure différente
     const parsedData = await parseAmazonData(product, base44);
 
     // Étape 4: Créer la fiche dans le catalogue
