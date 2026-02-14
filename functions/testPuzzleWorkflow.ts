@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const asin = 'B00HGA89V6';
+    const asin = 'B07B9S8X1Q';
     const rainforestKey = Deno.env.get('RAINFOREST_API_KEY');
 
     if (!rainforestKey) {
