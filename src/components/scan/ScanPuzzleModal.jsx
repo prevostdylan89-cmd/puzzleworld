@@ -32,7 +32,112 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     sku: ''
   });
 
-  const handleManualSubmit = () => {
+  useEffect(() => {
+    if (mode === 'scan' && open && scannerRef.current) {
+      initializeScanner();
+    }
+    return () => {
+      if (scannerRef.current) {
+        try {
+          Html5QrcodeScanner.getCameraCount().then(() => {
+            // Scanner exists, clean it up if needed
+          }).catch(() => {
+            // No camera available
+          });
+        } catch (e) {
+          // Cleanup errors are okay
+        }
+      }
+    };
+  }, [mode, open]);
+
+  const initializeScanner = async () => {
+    if (!scannerRef.current) return;
+    
+    try {
+      const scanner = new Html5QrcodeScanner('qr-scanner', {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        facingMode: 'environment'
+      }, false);
+
+      scanner.render(
+        (decodedText) => {
+          handleCodeDetected(decodedText);
+          scanner.clear();
+        },
+        (error) => {
+          // Ignore errors during scanning
+        }
+      );
+    } catch (error) {
+      toast.error('Erreur caméra: ' + error.message);
+      setMode(null);
+    }
+  };
+
+  const handleCodeDetected = async (code) => {
+    setLoading(true);
+    try {
+      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: code });
+      const puzzleInfo = response.data.puzzle;
+      
+      if (response.data.status === 'existing') {
+        toast.info('Puzzle déjà dans le catalogue');
+      } else {
+        toast.success('Puzzle trouvé!');
+      }
+
+      setPuzzleData({
+        name: puzzleInfo.title || '',
+        brand: puzzleInfo.brand || '',
+        pieces: puzzleInfo.pieceCount || 0,
+        image: puzzleInfo.imageUrl || '',
+        sku: code,
+        asin: code,
+        title: puzzleInfo.title || '',
+        image_hd: puzzleInfo.imageUrl || '',
+        piece_count: puzzleInfo.pieceCount || 0
+      });
+    } catch (error) {
+      toast.error('Code non trouvé: ' + error.message);
+      setMode(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualCodeSubmit = async () => {
+    if (!manualCode.trim()) {
+      toast.error('Veuillez entrer un code ASIN ou EAN');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: manualCode });
+      const puzzleInfo = response.data.puzzle;
+
+      setPuzzleData({
+        name: puzzleInfo.title || '',
+        brand: puzzleInfo.brand || '',
+        pieces: puzzleInfo.pieceCount || 0,
+        image: puzzleInfo.imageUrl || '',
+        sku: manualCode,
+        asin: manualCode,
+        title: puzzleInfo.title || '',
+        image_hd: puzzleInfo.imageUrl || '',
+        piece_count: puzzleInfo.pieceCount || 0
+      });
+      setMode(null);
+    } catch (error) {
+      toast.error('Code non trouvé');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualDataSubmit = () => {
     if (!manualData.name || !manualData.pieces) {
       toast.error('Veuillez remplir au moins le nom et le nombre de pièces');
       return;
