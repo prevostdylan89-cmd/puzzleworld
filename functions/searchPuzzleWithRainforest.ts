@@ -93,8 +93,9 @@ async function parseAmazonData(product, base44) {
   const title = product.title || '';
   const description = product.description || '';
   const featureBullets = product.feature_bullets || [];
-  const mainImage = product.main_image?.link || '';
-  const price = product.pricing?.price || null;
+  // Gérer les deux structures: product direct ou search result
+  const mainImage = product.main_image?.link || product.image || '';
+  const price = product.pricing?.price || product.price || null;
   const rating = product.rating || null;
   const ratingTotal = product.rating_total || 0;
 
