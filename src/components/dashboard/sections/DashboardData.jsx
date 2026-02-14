@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import PuzzleStatsModal from '@/components/dashboard/PuzzleStatsModal';
 import PuzzlePopularityModal from '@/components/dashboard/PuzzlePopularityModal';
 import PuzzleWishlistModal from '@/components/dashboard/PuzzleWishlistModal';
+import BrandManagement from '@/components/dashboard/BrandManagement';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
