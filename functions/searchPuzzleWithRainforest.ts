@@ -166,22 +166,7 @@ function extractPieceCount(title, featureBullets, description) {
   return 0;
 }
 
-async function detectBrand(title, base44) {
-  try {
-    const brands = await base44.entities.Brand.list();
-    
-    // Chercher une marque dont le nom apparaît dans le titre
-    for (const brand of brands) {
-      if (title.includes(brand.name)) {
-        return brand.id;
-      }
-    }
-  } catch (error) {
-    console.log('Error detecting brand:', error);
-  }
 
-  return null;
-}
 
 function sanitizeTitle(title) {
   // Nettoyer le titre en enlevant les répétitions et caractères inutiles
