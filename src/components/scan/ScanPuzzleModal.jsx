@@ -237,7 +237,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               onClick={() => setMode('manual')}
               className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white"
             >
-              <Image as ImageIcon className="w-5 h-5" />
+              <ImageIcon className="w-5 h-5" />
               <span className="font-medium">Saisir manuellement</span>
             </button>
           </div>
