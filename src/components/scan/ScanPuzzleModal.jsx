@@ -300,8 +300,83 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           <DialogTitle className="text-white text-xl">Ajouter un Puzzle</DialogTitle>
         </DialogHeader>
 
-        {!puzzleData && !showSuccess && (
+        {!mode && !puzzleData && !showSuccess && (
+          <div className="space-y-3 mt-4">
+            <button
+              onClick={() => setMode('scan')}
+              className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white"
+            >
+              <Camera className="w-5 h-5" />
+              <span className="font-medium">Scanner le code-barres</span>
+            </button>
+            <button
+              onClick={() => setMode('manual')}
+              className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white"
+            >
+              <Code2 className="w-5 h-5" />
+              <span className="font-medium">Entrer le code manuellement</span>
+            </button>
+          </div>
+        )}
+
+        {mode === 'scan' && (
           <div className="space-y-4 mt-4">
+            <div id="qr-scanner" ref={scannerRef} className="w-full rounded-lg overflow-hidden bg-black/20" />
+            {loading && (
+              <div className="flex items-center justify-center gap-2 text-white/70">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Lecture du code...
+              </div>
+            )}
+            <Button
+              onClick={() => setMode(null)}
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/5"
+            >
+              Annuler
+            </Button>
+          </div>
+        )}
+
+        {mode === 'manual' && (
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-white/70 text-sm mb-2 block">Code ASIN ou EAN</label>
+              <Input
+                placeholder="Ex: B00ABC1234"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            <Button
+              onClick={handleManualCodeSubmit}
+              disabled={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Recherche...
+                </>
+              ) : (
+                'Rechercher'
+              )}
+            </Button>
+            <Button
+              onClick={() => setMode(null)}
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/5"
+            >
+              Retour
+            </Button>
+          </div>
+        )}
+
+        {mode === 'manual' && !puzzleData && (
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <p className="text-white/70 text-sm mb-4">Ou saisir manuellement:</p>
+            <div className="space-y-3">
             <div>
               <label className="text-white/70 text-sm mb-2 block">Nom du Puzzle *</label>
               <Input
