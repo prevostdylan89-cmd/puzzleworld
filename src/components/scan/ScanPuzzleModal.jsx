@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Image as ImageIcon, Loader2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { Html5QrcodeScanner } from 'npm:html5-qrcode@2.3.8';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Camera, Code2 } from 'lucide-react';
 
 export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
