@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Chercher des résultats shopping
+    // Vérification de sécurité : s'assurer que des résultats existent
     let product = null;
     
     // Essayer visual_matches en premier (produits similaires)
@@ -82,10 +82,12 @@ Deno.serve(async (req) => {
       product = {
         title: data.knowledge_graph.title,
         thumbnail: data.knowledge_graph.images?.[0]?.thumbnail,
-        link: data.knowledge_graph.website
+        link: data.knowledge_graph.website,
+        source: 'Knowledge Graph'
       };
     }
 
+    // Vérification finale
     if (!product) {
       return Response.json({ 
         success: false, 
