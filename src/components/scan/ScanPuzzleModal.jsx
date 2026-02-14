@@ -386,15 +386,15 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           image_hd: imageUrl,
           piece_count: pieces,
           pieces: pieces,
-          dimensions: dimensions,
-          category_tag: categoryTag,
+          dimensions: dimensions || product.dimensions || '',
+          category_tag: product.category_tag || categoryTag,
           // Données additionnelles pour PuzzleCatalog
           rainforest_data: {
-            rating: null,
-            ratings_total: 0,
+            rating: product.rating || null,
+            ratings_total: product.ratings_total || 0,
             price: product.price || null,
             currency: 'EUR',
-            description: product.title || '',
+            description: product.description || product.title || '',
             features: []
           }
         };
