@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
       pieces: pieces,
       dimensions: dimensions,
       asin: asin,
-      link: asin ? `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0e-21` : product.link,
+      link: affiliateLink,
       category_tag: categoryTag,
       source: product.source || 'Google Shopping',
       rating: product.rating || null,
