@@ -424,11 +424,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               />
             </div>
             <Button
-              onClick={handleManualSubmit}
+              onClick={handleManualDataSubmit}
               className="w-full bg-orange-500 hover:bg-orange-600"
             >
               Continuer
             </Button>
+            </div>
           </div>
         )}
 
