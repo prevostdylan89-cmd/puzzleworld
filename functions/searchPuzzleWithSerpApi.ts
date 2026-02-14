@@ -24,24 +24,46 @@ Deno.serve(async (req) => {
     }
 
     // ÉTAPE 2 : Recherche externe via SerpApi avec fetch natif
-    const searchUrl = `https://serpapi.com/search.json?engine=amazon&q=${barcode}&api_key=${serpApiKey}`;
+    const searchUrl = new URL('https://serpapi.com/search');
+    searchUrl.searchParams.append('engine', 'amazon');
+    searchUrl.searchParams.append('q', barcode);
+    searchUrl.searchParams.append('amazon_domain', 'amazon.fr');
+    searchUrl.searchParams.append('api_key', serpApiKey);
 
-    const serpResponse = await fetch(searchUrl);
+    console.log('Calling SerpApi with URL:', searchUrl.toString());
+
+    const serpResponse = await fetch(searchUrl.toString());
+
     if (!serpResponse.ok) {
-      console.error('SerpApi HTTP Error:', serpResponse.status, await serpResponse.text());
+      const errorText = await serpResponse.text();
+      console.error('SerpApi HTTP Error:', serpResponse.status);
+      console.error('Response body:', errorText);
       return Response.json({
         status: 'not_found',
-        message: 'Erreur API SerpApi'
+        message: `Erreur API SerpApi: ${serpResponse.status}`
       }, { status: 404 });
     }
 
     const serpData = await serpResponse.json();
 
-    console.log('SerpApi Response:', JSON.stringify(serpData, null, 2));
+    console.log('SerpApi raw data keys:', Object.keys(serpData));
+    console.log('Full response:', JSON.stringify(serpData).substring(0, 500));
 
-    // Vérifier les résultats amazon
-    const results = serpData.amazon_results || serpData.shopping_results || [];
+    // Vérifier les résultats - chercher dans différentes clés possibles
+    let results = [];
+    if (serpData.shopping_results && serpData.shopping_results.length > 0) {
+      results = serpData.shopping_results;
+      console.log('Found shopping_results');
+    } else if (serpData.amazon_results && serpData.amazon_results.length > 0) {
+      results = serpData.amazon_results;
+      console.log('Found amazon_results');
+    } else if (serpData.organic_results && serpData.organic_results.length > 0) {
+      results = serpData.organic_results;
+      console.log('Found organic_results');
+    }
+
     if (!results || results.length === 0) {
+      console.log('No results found in SerpApi response');
       return Response.json({
         status: 'not_found',
         message: 'Produit non trouvé, création manuelle requise'
