@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Recherche via Google Shopping (SerpApi)
+    // Recherche générale sur Google Shopping (tous sites)
     console.log(`Recherche Google Shopping pour EAN: ${barcode}`);
     const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(barcode)}&gl=fr&hl=fr&api_key=${serpApiKey}`;
     const response = await fetch(serpApiUrl);
@@ -48,11 +48,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Prioriser les résultats Amazon
-    const amazonResult = data.shopping_results.find(r => r.link && r.link.includes('amazon'));
-    const product = amazonResult || data.shopping_results[0];
+    // Prendre le premier résultat pertinent (tous sites confondus)
+    const product = data.shopping_results[0];
 
-    // Extraire l'ASIN si disponible
+    // Extraire l'ASIN si c'est un produit Amazon, sinon utiliser le barcode
     const asinMatch = product.link?.match(/\/dp\/([A-Z0-9]{10})/i) || 
                       product.link?.match(/\/gp\/product\/([A-Z0-9]{10})/i);
     const asin = asinMatch ? asinMatch[1] : barcode;
