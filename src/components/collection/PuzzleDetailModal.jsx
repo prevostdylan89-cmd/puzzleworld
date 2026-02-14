@@ -16,6 +16,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [user, setUser] = useState(null);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     if (open && puzzle) {
@@ -184,6 +185,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     }
   };
 
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({ x, y });
+  };
+
   if (!puzzle) return null;
 
   return (
@@ -204,11 +212,17 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         ) : productData ? (
           <>
             {/* Image Section */}
-            <div className="relative w-full bg-white/5 overflow-hidden group cursor-zoom-in">
+            <div 
+              className="relative w-full bg-white/5 overflow-hidden group cursor-zoom-in"
+              onMouseMove={handleMouseMove}
+            >
               <img
                 src={productData.main_image?.link || puzzle.image_hd}
                 alt={productData.title}
-                className="w-full h-80 object-contain transition-transform duration-300 group-hover:scale-150"
+                className="w-full h-80 object-contain transition-transform duration-100 group-hover:scale-[2.5]"
+                style={{
+                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
+                }}
               />
             </div>
 
