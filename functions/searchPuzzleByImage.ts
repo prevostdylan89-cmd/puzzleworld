@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { formatProductData } from './fetchAmazonPuzzle.js';
 
 Deno.serve(async (req) => {
   try {
@@ -10,25 +9,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get the body as blob first
+    // Get the body as blob
     const bodyBlob = await req.blob();
     
-    // Check content type
-    const contentType = req.headers.get('content-type') || '';
-    
-    let imageFile;
-    if (contentType.includes('multipart/form-data')) {
-      const formData = await req.formData();
-      imageFile = formData.get('image');
-    } else {
-      // Direct blob upload
-      imageFile = bodyBlob;
-    }
-
-    if (!imageFile) {
-      return Response.json({ error: 'Image requise' }, { status: 400 });
-    }
-
     const serpApiKey = Deno.env.get('SERPAPI_KEY');
     
     if (!serpApiKey) {
@@ -38,48 +21,29 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Upload l'image sur Base44 pour obtenir une URL publique
-    const uploadResult = await base44.integrations.Core.UploadFile({ file: imageFile });
+    // Upload l'image pour obtenir une URL
+    const uploadResult = await base44.integrations.Core.UploadFile({ file: bodyBlob });
     const imageUrl = uploadResult.file_url;
 
-    console.log('Image uploaded:', imageUrl);
-
-    // Recherche avec Google Lens via Serpapi
+    // Recherche avec Google Lens via SerpApi
     const serpApiUrl = `https://serpapi.com/search.json?engine=google_lens&url=${encodeURIComponent(imageUrl)}&api_key=${serpApiKey}`;
     
     const response = await fetch(serpApiUrl);
     const data = await response.json();
 
-    console.log('Google Lens response:', JSON.stringify(data));
-
-    // Vérifier s'il y a une erreur de l'API
-    if (data.error) {
+    if (data.error || (!data.visual_matches && !data.knowledge_graph)) {
       return Response.json({ 
         success: false, 
-        message: 'Produit non trouvé sur Amazon'
+        message: 'Aucun puzzle trouvé'
       });
     }
 
-    // Vérification de sécurité : s'assurer que des résultats existent
+    // Chercher un résultat pertinent
     let product = null;
     
-    // Essayer visual_matches en premier (produits similaires)
     if (data.visual_matches && data.visual_matches.length > 0) {
-      // Chercher un produit Amazon dans les visual_matches
-      for (const match of data.visual_matches) {
-        if (match.link && match.link.includes('amazon')) {
-          product = match;
-          break;
-        }
-      }
-      // Si pas d'Amazon, prendre le premier
-      if (!product) {
-        product = data.visual_matches[0];
-      }
-    }
-
-    // Essayer knowledge_graph (infos produit)
-    if (!product && data.knowledge_graph) {
+      product = data.visual_matches[0];
+    } else if (data.knowledge_graph) {
       product = {
         title: data.knowledge_graph.title,
         thumbnail: data.knowledge_graph.images?.[0]?.thumbnail,
@@ -87,19 +51,68 @@ Deno.serve(async (req) => {
       };
     }
 
-    // Vérification finale
     if (!product) {
       return Response.json({ 
         success: false, 
-        message: 'Produit non trouvé sur Amazon'
+        message: 'Aucun puzzle trouvé'
       });
     }
 
-    const productData = formatProductData(product, null);
+    // Vérifier si ce produit existe déjà par son titre
+    const title = product.title || '';
+    const existingPuzzles = await base44.entities.PuzzleCatalog.filter({ title: title });
+    
+    if (existingPuzzles && existingPuzzles.length > 0) {
+      return Response.json({ 
+        success: true, 
+        exists: true,
+        product: existingPuzzles[0]
+      });
+    }
+
+    // Récupérer les marques
+    const allBrands = await base44.entities.Brand.list();
+    const brandNames = allBrands.map(b => b.name.toLowerCase());
+
+    // Extraire les infos
+    const titleLower = title.toLowerCase();
+    
+    let brand = 'Marque indisponible';
+    for (const brandName of brandNames) {
+      if (titleLower.includes(brandName)) {
+        const originalBrand = allBrands.find(b => b.name.toLowerCase() === brandName);
+        if (originalBrand) {
+          brand = originalBrand.name;
+        }
+        break;
+      }
+    }
+
+    const piecesMatch = title.match(/(\d+)\s*(pièces?|pieces?|p\s|p-)/i);
+    const pieces = piecesMatch ? parseInt(piecesMatch[1]) : null;
+
+    const productData = {
+      title: title,
+      brand: brand,
+      piece_count: pieces,
+      image_hd: product.thumbnail || '',
+      amazon_price: null,
+      amazon_rating: null,
+      amazon_ratings_total: 0,
+      description: title,
+      category_tag: 'Autre',
+      socialScore: 0,
+      wishlistCount: 0,
+      added_count: 1,
+      total_likes: 0,
+      total_dislikes: 0
+    };
 
     return Response.json({ 
       success: true, 
-      product: productData 
+      exists: false,
+      product: productData,
+      isNewFromApi: true
     });
 
   } catch (error) {
