@@ -182,6 +182,7 @@ export default function Collection() {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState('all');
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
@@ -191,6 +192,15 @@ export default function Collection() {
       return puzzles;
     },
     refetchInterval: 30000 // Auto-refresh every 30 seconds to sync with admin changes
+  });
+
+  // Fetch brands
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const allBrands = await base44.entities.Brand.list();
+      return allBrands.sort((a, b) => a.name.localeCompare(b.name));
+    }
   });
 
   useEffect(() => {
@@ -210,6 +220,7 @@ export default function Collection() {
     setMaxPieces('');
     setSearchQuery('');
     setSelectedCategory('all');
+    setSelectedBrand('all');
   };
 
   // Filter puzzles
@@ -219,8 +230,9 @@ export default function Collection() {
     const matchesMinPieces = !minPieces || (puzzle.piece_count >= parseInt(minPieces));
     const matchesMaxPieces = !maxPieces || (puzzle.piece_count <= parseInt(maxPieces));
     const matchesCategory = selectedCategory === 'all' || puzzle.category_tag === selectedCategory;
+    const matchesBrand = selectedBrand === 'all' || puzzle.brand === selectedBrand;
     
-    return matchesSearch && matchesMinPieces && matchesMaxPieces && matchesCategory;
+    return matchesSearch && matchesMinPieces && matchesMaxPieces && matchesCategory && matchesBrand;
   });
 
   // Sort puzzles
@@ -362,9 +374,24 @@ export default function Collection() {
 
           {/* Sort Options */}
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 text-sm text-white/50">
-              <Puzzle className="w-4 h-4" />
-              <span>Trier par:</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-white/50">
+                <Puzzle className="w-4 h-4" />
+                <span>Trier par:</span>
+              </div>
+              <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white text-sm h-8">
+                  <SelectValue placeholder="Marque" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10 max-h-64">
+                  <SelectItem value="all" className="text-white text-sm">Toutes les marques</SelectItem>
+                  {brands.map(brand => (
+                    <SelectItem key={brand.id} value={brand.name} className="text-white text-sm">
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-2">
