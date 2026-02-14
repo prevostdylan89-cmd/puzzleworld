@@ -36,9 +36,10 @@ Deno.serve(async (req) => {
       const errorText = await serpResponse.text();
       console.error('SerpApi HTTP Error:', serpResponse.status);
       console.error('Response body:', errorText);
+      // Retour fallback pour permettre saisie manuelle
       return Response.json({
         status: 'not_found',
-        message: `Erreur API SerpApi: ${serpResponse.status}`
+        message: 'Produit non trouvé, création manuelle requise'
       }, { status: 404 });
     }
 
