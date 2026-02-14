@@ -104,14 +104,18 @@ async function parseAmazonData(product, base44) {
 
   // Détection de la marque
   let brandName = '';
-  const brandId = await detectBrand(title, base44);
-
-  // Si une marque a été trouvée, récupérer son nom
-  if (brandId) {
-    const brands = await base44.entities.Brand.filter({ id: brandId });
-    if (brands.length > 0) {
-      brandName = brands[0].name;
+  try {
+    const brands = await base44.asServiceRole.entities.Brand.list();
+    
+    // Chercher une marque dont le nom apparaît dans le titre
+    for (const brand of brands) {
+      if (title.toLowerCase().includes(brand.name.toLowerCase())) {
+        brandName = brand.name;
+        break;
+      }
     }
+  } catch (error) {
+    console.log('Error detecting brand:', error);
   }
 
   return {
