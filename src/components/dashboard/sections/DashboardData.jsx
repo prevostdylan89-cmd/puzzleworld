@@ -18,6 +18,7 @@ export default function DashboardData() {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [modalType, setModalType] = useState(null); // 'popularity', 'wishlist', 'added'
   const [updatingDimensions, setUpdatingDimensions] = useState(false);
+  const [updatingBrands, setUpdatingBrands] = useState(false);
 
   useEffect(() => {
     loadPuzzles();
@@ -104,6 +105,29 @@ export default function DashboardData() {
       toast.error('Erreur lors de la mise à jour');
     } finally {
       setUpdatingDimensions(false);
+    }
+  };
+
+  const handleUpdateBrands = async () => {
+    if (!confirm('Mettre à jour les marques de tous les puzzles ? Cette opération peut prendre quelques minutes.')) return;
+    
+    setUpdatingBrands(true);
+    toast.info('Analyse des titres en cours...');
+    
+    try {
+      const response = await base44.functions.invoke('updatePuzzleBrands', {});
+      
+      if (response.data.success) {
+        toast.success(`✅ ${response.data.updated} marques ajoutées • ${response.data.alreadyHasBrand} déjà renseignées • ${response.data.notFound} non trouvées`);
+        await loadPuzzles();
+      } else {
+        toast.error('Erreur lors de la mise à jour');
+      }
+    } catch (error) {
+      console.error('Error updating brands:', error);
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setUpdatingBrands(false);
     }
   };
 
@@ -245,22 +269,40 @@ export default function DashboardData() {
           <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
           <p className="text-white/60">Classements basés sur les interactions sociales</p>
         </div>
-        <Button
-          onClick={handleUpdateDimensions}
-          disabled={updatingDimensions}
-          className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
-        >
-          {updatingDimensions ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Mise à jour...
-            </>
-          ) : (
-            <>
-              📏 Mettre à jour les dimensions
-            </>
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={handleUpdateBrands}
+            disabled={updatingBrands}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+          >
+            {updatingBrands ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Mise à jour...
+              </>
+            ) : (
+              <>
+                🏷️ Mettre à jour les marques
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleUpdateDimensions}
+            disabled={updatingDimensions}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+          >
+            {updatingDimensions ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Mise à jour...
+              </>
+            ) : (
+              <>
+                📏 Mettre à jour les dimensions
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="social" className="space-y-6">
