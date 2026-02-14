@@ -92,15 +92,43 @@ Deno.serve(async (req) => {
       return '';
     };
 
+    // Extraire toutes les données nécessaires
+    const pieces = extractPieces(product.title);
+    const brand = extractBrand(product.title);
+    const dimensions = extractDimensions(product.title);
+    
+    // Deviner la catégorie depuis le titre
+    let categoryTag = 'Autre';
+    const titleLower = product.title.toLowerCase();
+    
+    if (titleLower.includes('nature') || titleLower.includes('paysage') || titleLower.includes('landscape')) {
+      categoryTag = 'Nature';
+    } else if (titleLower.includes('disney')) {
+      categoryTag = 'Disney';
+    } else if (titleLower.includes('art') || titleLower.includes('tableau')) {
+      categoryTag = 'Art';
+    } else if (titleLower.includes('animal')) {
+      categoryTag = 'Animaux';
+    } else if (titleLower.includes('ville') || titleLower.includes('city') || titleLower.includes('urban')) {
+      categoryTag = 'Urbain';
+    } else if (titleLower.includes('vintage')) {
+      categoryTag = 'Vintage';
+    }
+
     const productData = {
       title: product.title || '',
-      brand: extractBrand(product.title),
+      brand: brand,
       image_hd: product.thumbnail || null,
       price: product.extracted_price || product.price?.value || null,
-      pieces: extractPieces(product.title),
-      dimensions: extractDimensions(product.title),
+      pieces: pieces,
+      dimensions: dimensions,
       asin: product.asin || barcode,
-      link: product.asin ? `https://www.amazon.fr/dp/${product.asin}?tag=puzzleworld0e-21` : ''
+      link: product.asin ? `https://www.amazon.fr/dp/${product.asin}?tag=puzzleworld0e-21` : '',
+      category_tag: categoryTag,
+      // Données Amazon pour affichage et stats
+      rating: product.rating || null,
+      ratings_total: product.reviews || 0,
+      description: product.title || ''
     };
 
     return Response.json({ 
