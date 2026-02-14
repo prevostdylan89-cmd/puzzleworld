@@ -24,9 +24,10 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Recherche générale sur Google Shopping (tous sites)
+    // Recherche Google Shopping avec forçage Amazon
     console.log(`Recherche Google Shopping pour EAN: ${barcode}`);
-    const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(barcode)}&gl=fr&hl=fr&api_key=${serpApiKey}`;
+    const searchQuery = `amazon ${barcode}`;
+    const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(searchQuery)}&direct_link=1&hl=fr&gl=fr&api_key=${serpApiKey}`;
     const response = await fetch(serpApiUrl);
     const data = await response.json();
 
@@ -44,17 +45,26 @@ Deno.serve(async (req) => {
     if (!data.shopping_results || data.shopping_results.length === 0) {
       return Response.json({ 
         success: false, 
-        message: 'Produit non trouvé. Essayez la recherche par photo ou saisie manuelle.'
+        message: 'Puzzle non trouvé dans le catalogue marchand'
       });
     }
 
-    // Prendre le premier résultat pertinent (tous sites confondus)
+    // Prendre le premier résultat
     const product = data.shopping_results[0];
 
-    // Extraire l'ASIN si c'est un produit Amazon, sinon utiliser le barcode
-    const asinMatch = product.link?.match(/\/dp\/([A-Z0-9]{10})/i) || 
-                      product.link?.match(/\/gp\/product\/([A-Z0-9]{10})/i);
-    const asin = asinMatch ? asinMatch[1] : barcode;
+    // Extraire l'ASIN et préparer le lien affilié
+    let asin = barcode;
+    let affiliateLink = product.link;
+    
+    if (product.link && product.link.includes('amazon')) {
+      const asinMatch = product.link.match(/\/dp\/([A-Z0-9]{10})/i) || 
+                        product.link.match(/\/gp\/product\/([A-Z0-9]{10})/i);
+      if (asinMatch) {
+        asin = asinMatch[1];
+        // Ajouter le tag affilié Amazon
+        affiliateLink = `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0e-21`;
+      }
+    }
 
     // Extraire le nombre de pièces du titre
     const extractPieces = (title) => {
