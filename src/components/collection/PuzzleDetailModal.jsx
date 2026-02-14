@@ -204,11 +204,11 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         ) : productData ? (
           <>
             {/* Image Section */}
-            <div className="relative w-full bg-white/5">
+            <div className="relative w-full bg-white/5 overflow-hidden group cursor-zoom-in">
               <img
                 src={productData.main_image?.link || puzzle.image_hd}
                 alt={productData.title}
-                className="w-full h-80 object-contain"
+                className="w-full h-80 object-contain transition-transform duration-300 group-hover:scale-150"
               />
             </div>
 
