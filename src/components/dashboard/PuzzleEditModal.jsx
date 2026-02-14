@@ -12,6 +12,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
     title: '',
     brand: '',
     piece_count: '',
+    dimensions: '',
     category_tag: '',
     price: '',
     amazon_link: '',
@@ -25,6 +26,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         title: puzzle.title || '',
         brand: puzzle.brand || '',
         piece_count: puzzle.piece_count || '',
+        dimensions: puzzle.dimensions || '',
         category_tag: puzzle.category_tag || '',
         price: puzzle.price || '',
         amazon_link: puzzle.amazon_link || '',
@@ -42,6 +44,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         title: formData.title,
         brand: formData.brand,
         piece_count: parseInt(formData.piece_count),
+        dimensions: formData.dimensions,
         category_tag: formData.category_tag,
         price: parseFloat(formData.price) || 0,
         amazon_link: formData.amazon_link,
@@ -96,6 +99,16 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
                 className="bg-white/5 border-white/10 text-white"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-white/70 text-sm mb-2 block">Dimensions</label>
+            <Input
+              value={formData.dimensions}
+              onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+              className="bg-white/5 border-white/10 text-white"
+              placeholder="Ex: 70 x 50 cm"
+            />
           </div>
 
           <div>

@@ -173,6 +173,9 @@ export default function DashboardMyCollection() {
                 <p className="text-white/50 text-xs">
                   {puzzle.brand} • {puzzle.piece_count} pièces • {puzzle.category_tag}
                 </p>
+                {puzzle.dimensions && (
+                  <p className="text-white/40 text-xs">📏 {puzzle.dimensions}</p>
+                )}
                 <p className="text-orange-400 text-xs mt-1">
                   ❤️ {puzzle.total_likes + puzzle.total_superlikes} likes
                 </p>

@@ -529,6 +529,11 @@ export default function Collection() {
           <span>{puzzle.brand || 'Unknown'}</span>
           <span>{puzzle.piece_count} pcs</span>
         </div>
+        {puzzle.dimensions && (
+          <div className="text-xs text-white/40 mb-2">
+            📏 {puzzle.dimensions}
+          </div>
+        )}
         <div className="flex items-center gap-3 text-xs">
           {puzzle.socialScore > 0 && (
             <span className="text-green-400">❤️ {puzzle.socialScore}</span>
