@@ -38,11 +38,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
     setLoading(true);
     try {
-      // D'abord vérifier si le puzzle existe dans la base de données locale
-      const existingPuzzles = await base44.entities.PuzzleCatalog.filter({ asin: barcodeCode });
-
-      if (existingPuzzles.length > 0) {
-        const puzzle = existingPuzzles[0];
+      // Appeler la fonction backend qui gère la vérification locale + Rainforest
+      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: barcodeCode });
+      
+      if (response.data.status === 'existing') {
+        // Puzzle déjà dans la base
+        const puzzle = response.data.puzzle;
         setPuzzleData({
           name: puzzle.title || '',
           brand: puzzle.brand || '',
@@ -50,35 +51,30 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           image: puzzle.image_hd || '',
           sku: barcodeCode,
           asin: barcodeCode,
-          title: puzzle.title || '',
-          image_hd: puzzle.image_hd || '',
-          piece_count: puzzle.piece_count || 0,
+          isExisting: true,
           catalog_id: puzzle.id
         });
-        toast.success('Puzzle trouvé dans la base!');
-      } else {
-        // Si pas trouvé localement, chercher avec Rainforest
-        const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: barcodeCode });
+        toast.success('✅ Puzzle trouvé dans la collection communautaire!');
+      } else if (response.data.status === 'found') {
+        // Puzzle trouvé via Rainforest - afficher pour validation
         const puzzleInfo = response.data.puzzle;
-
         setPuzzleData({
           name: puzzleInfo.title || '',
           brand: puzzleInfo.brand || '',
-          pieces: puzzleInfo.piece_count || 0,
-          image: puzzleInfo.image_hd || '',
+          pieces: puzzleInfo.pieceCount || 0,
+          image: puzzleInfo.imageUrl || '',
           sku: barcodeCode,
           asin: barcodeCode,
-          title: puzzleInfo.title || '',
-          image_hd: puzzleInfo.image_hd || '',
-          piece_count: puzzleInfo.piece_count || 0
+          isExisting: false,
+          description: puzzleInfo.description || ''
         });
-        toast.success('Puzzle trouvé via Rainforest!');
+        toast.success('🎉 Puzzle trouvé via Rainforest!');
       }
       
       setMode(null);
     } catch (error) {
-      toast.error('Code non trouvé');
       console.error('Error:', error);
+      toast.error('Code non trouvé - saisie manuelle requise');
     } finally {
       setLoading(false);
     }
