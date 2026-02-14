@@ -131,17 +131,26 @@ Deno.serve(async (req) => {
       categoryTag = 'Vintage';
     }
 
+    // Parser le prix proprement
+    let parsedPrice = null;
+    if (product.price) {
+      const priceStr = product.price.toString().replace(/[^\d,\.]/g, '');
+      const priceMatch = priceStr.match(/(\d+)[,\.](\d+)/);
+      if (priceMatch) {
+        parsedPrice = parseFloat(`${priceMatch[1]}.${priceMatch[2]}`);
+      }
+    }
+
     const productData = {
       title: product.title || '',
       brand: brand,
       image_hd: product.thumbnail || null,
-      price: product.price || null,
+      price: parsedPrice,
       pieces: pieces,
       dimensions: dimensions,
       asin: asin,
       link: affiliateLink,
       category_tag: categoryTag,
-      source: product.source || 'Google Shopping',
       rating: product.rating || null,
       ratings_total: product.reviews || 0,
       description: product.title || ''
