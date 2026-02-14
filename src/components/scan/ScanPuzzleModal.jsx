@@ -428,19 +428,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             console.log('✓ Enrichissement: Ajout des dimensions');
           }
           
-          // Enrichir données Amazon si disponibles
-          if (puzzleData.rainforest_data) {
-            if (!existingInCatalog[0].amazon_rating && puzzleData.rainforest_data.rating) {
-              updateData.amazon_rating = puzzleData.rainforest_data.rating;
+          // Enrichir données SerpApi si disponibles
+          if (puzzleData.serpapi_data) {
+            if (!existingInCatalog[0].amazon_price && puzzleData.serpapi_data.price) {
+              updateData.amazon_price = puzzleData.serpapi_data.price;
             }
-            if (!existingInCatalog[0].amazon_ratings_total && puzzleData.rainforest_data.ratings_total) {
-              updateData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
-            }
-            if (!existingInCatalog[0].amazon_price && puzzleData.rainforest_data.price) {
-              updateData.amazon_price = puzzleData.rainforest_data.price;
-            }
-            if (!existingInCatalog[0].description && puzzleData.rainforest_data.description) {
-              updateData.description = puzzleData.rainforest_data.description;
+            if (!existingInCatalog[0].description && puzzleData.serpapi_data.description) {
+              updateData.description = puzzleData.serpapi_data.description;
             }
           }
           
