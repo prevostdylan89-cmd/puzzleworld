@@ -309,10 +309,40 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (data.product) {
         const product = data.product;
 
+        // Liste des marques de puzzles connues
+        const KNOWN_BRANDS = [
+          'Ravensburger', 'Educa', 'Clementoni', 'Schmidt Spiele', 'Jumbo', 'Wasgij',
+          'Castorland', 'Trefl', 'Falcon', 'Galison', 'Eurographics', 'Heye',
+          'Bluebird', 'Cobble Hill', 'Pomegranate', 'Grafika', 'Buffalo Games',
+          'New York Puzzle', 'Cloudberries', 'Mudpuppy', 'Wentworth', 'Piatnik',
+          'Djeco', 'Melissa & Doug', 'Nathan', 'MB', 'Dujardin', 'Janod'
+        ];
+
         // Extract from structured attributes (specifications, attributes)
         let pieces = null;
         let dimensions = null;
         let brand = product.brand || '';
+        
+        // Fallback 1: Chercher dans attributes.manufacturer
+        if (!brand && product.attributes) {
+          for (const attr of product.attributes) {
+            if (attr.name?.toLowerCase() === 'manufacturer' || attr.name?.toLowerCase() === 'fabricant') {
+              brand = attr.value || '';
+              break;
+            }
+          }
+        }
+        
+        // Fallback 2: Chercher dans le titre avec les marques connues
+        if (!brand && product.title) {
+          const titleLower = product.title.toLowerCase();
+          for (const knownBrand of KNOWN_BRANDS) {
+            if (titleLower.includes(knownBrand.toLowerCase())) {
+              brand = knownBrand;
+              break;
+            }
+          }
+        }
         
         // 1. Extract from specifications/attributes
         const specs = product.specifications || [];
