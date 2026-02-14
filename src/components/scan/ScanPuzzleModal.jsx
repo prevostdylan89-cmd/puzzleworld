@@ -17,9 +17,13 @@ import { CheckCircle2, Camera, Code2 } from 'lucide-react';
 
 export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
+  const scannerRef = useRef(null);
+  const [mode, setMode] = useState(null); // null | 'scan' | 'manual'
   const [puzzleData, setPuzzleData] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [manualCode, setManualCode] = useState('');
   const [manualData, setManualData] = useState({
     name: '',
     brand: '',
