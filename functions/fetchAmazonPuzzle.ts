@@ -2,11 +2,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 // Fonction centralisée pour rechercher sur Amazon via SerpApi
 async function searchAmazon(query, serpApiKey) {
-  // Forcer le préfixe "amazon puzzle" pour garantir des résultats Amazon
-  const searchQuery = `amazon puzzle ${query}`;
-  console.log(`[SerpApi] Recherche: ${searchQuery}`);
+  console.log(`[SerpApi] Recherche EAN/Barcode: ${query}`);
   
-  const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(searchQuery)}&direct_link=true&hl=fr&gl=fr&api_key=${serpApiKey}`;
+  // Première tentative : chercher directement par code-barres
+  const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(query)}&hl=fr&gl=fr&api_key=${serpApiKey}`;
   
   const response = await fetch(serpApiUrl);
   const data = await response.json();
@@ -22,8 +21,23 @@ async function searchAmazon(query, serpApiKey) {
     return null;
   }
   
-  // Prendre le premier résultat (toujours Amazon avec le préfixe forcé)
-  return data.shopping_results[0];
+  // Filtrer pour privilégier les résultats Amazon.fr
+  let product = null;
+  
+  // Chercher d'abord un produit Amazon
+  for (const result of data.shopping_results) {
+    if (result.source && result.source.toLowerCase().includes('amazon')) {
+      product = result;
+      break;
+    }
+  }
+  
+  // Sinon, prendre le premier résultat
+  if (!product) {
+    product = data.shopping_results[0];
+  }
+  
+  return product;
 }
 
 // Fonctions d'extraction de données
