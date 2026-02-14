@@ -32,7 +32,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Clé API non configurée' }, { status: 500 });
     }
 
-    const rainforestUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&asin=${asin}`;
+    // Déterminer si c'est une recherche par ASIN ou par code EAN
+    const isAsin = asin.length === 10 && /^[A-Z0-9]{10}$/.test(asin);
+    const rainforestUrl = isAsin 
+      ? `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&asin=${asin}`
+      : `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${encodeURIComponent(asin)}`;
+    
     const apiResponse = await fetch(rainforestUrl);
     
     if (!apiResponse.ok) {
