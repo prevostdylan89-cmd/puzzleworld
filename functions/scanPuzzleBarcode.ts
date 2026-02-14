@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
 
     // Extraire le nombre de pièces du titre
     const extractPieces = (title) => {
-      const match = title?.match(/(\d+)\s*(pièces?|pieces?)/i);
+      const match = title?.match(/(\d+)\s*(pièces?|pieces?|p\s|p-)/i);
       return match ? parseInt(match[1]) : null;
     };
 
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
       title: product.title || '',
       brand: extractBrand(product.title),
       image_hd: product.thumbnail || null,
-      price: product.price?.value || null,
+      price: product.extracted_price || product.price?.value || null,
       pieces: extractPieces(product.title),
       dimensions: extractDimensions(product.title),
       asin: product.asin || barcode,
