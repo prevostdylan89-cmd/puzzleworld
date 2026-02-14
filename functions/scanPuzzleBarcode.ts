@@ -24,102 +24,38 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Essayer plusieurs méthodes de recherche
-    let data = null;
-    let product = null;
-    let asin = null;
-    
-    // MÉTHODE 1: Google Search pour trouver le produit Amazon
-    console.log(`Tentative 1: Google Search pour EAN ${barcode}`);
-    let serpApiUrl = `https://serpapi.com/search.json?engine=google&q=${barcode}+site:amazon.fr&api_key=${serpApiKey}`;
-    let response = await fetch(serpApiUrl);
-    data = await response.json();
-    
-    // Extraire l'ASIN de l'URL Amazon dans les résultats
-    if (data.organic_results && data.organic_results.length > 0) {
-      for (const result of data.organic_results) {
-        const asinMatch = result.link?.match(/\/dp\/([A-Z0-9]{10})/i) || 
-                         result.link?.match(/\/gp\/product\/([A-Z0-9]{10})/i);
-        if (asinMatch) {
-          asin = asinMatch[1];
-          console.log(`✓ ASIN trouvé: ${asin}`);
-          break;
-        }
-      }
-    }
-    
-    // MÉTHODE 2: Si ASIN trouvé, récupérer les détails du produit Amazon
-    if (asin) {
-      console.log(`Tentative 2: Récupération détails Amazon avec ASIN ${asin}`);
-      serpApiUrl = `https://serpapi.com/search.json?engine=amazon_product&amazon_domain=amazon.fr&asin=${asin}&api_key=${serpApiKey}`;
-      response = await fetch(serpApiUrl);
-      data = await response.json();
-      
-      if (data.product_results) {
-        product = {
-          title: data.product_results.title,
-          thumbnail: data.product_results.images?.[0]?.link || data.product_results.main_image?.link,
-          price: data.product_results.buybox_winner?.price?.value,
-          extracted_price: data.product_results.buybox_winner?.price?.value,
-          rating: data.product_results.rating,
-          reviews: data.product_results.reviews_count,
-          asin: asin,
-          link: `https://www.amazon.fr/dp/${asin}`
-        };
-        console.log("✓ Détails produit récupérés via ASIN");
-      }
-    }
-    
-    // MÉTHODE 3: Google Shopping comme fallback
-    if (!product) {
-      console.log(`Tentative 3: Google Shopping`);
-      serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${barcode}&gl=fr&hl=fr&api_key=${serpApiKey}`;
-      response = await fetch(serpApiUrl);
-      data = await response.json();
-      
-      if (data.shopping_results && data.shopping_results.length > 0) {
-        const amazonResult = data.shopping_results.find(r => r.link && r.link.includes('amazon'));
-        const selectedResult = amazonResult || data.shopping_results[0];
-        
-        product = {
-          title: selectedResult.title,
-          thumbnail: selectedResult.thumbnail,
-          price: selectedResult.extracted_price || selectedResult.price,
-          extracted_price: selectedResult.extracted_price,
-          link: selectedResult.link,
-          asin: selectedResult.product_id || null
-        };
-        console.log("✓ Trouvé avec Google Shopping");
-      }
-    }
-    
-    // MÉTHODE 4: Recherche Amazon directe
-    if (!product) {
-      console.log(`Tentative 4: Recherche Amazon directe`);
-      serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
-      response = await fetch(serpApiUrl);
-      data = await response.json();
-      
-      if (data.organic_results && data.organic_results.length > 0) {
-        product = data.organic_results[0];
-        console.log("✓ Trouvé avec recherche Amazon directe");
-      }
-    }
+    // Recherche via Google Shopping (SerpApi)
+    console.log(`Recherche Google Shopping pour EAN: ${barcode}`);
+    const serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(barcode)}&gl=fr&hl=fr&api_key=${serpApiKey}`;
+    const response = await fetch(serpApiUrl);
+    const data = await response.json();
 
-    // Vérifier s'il y a une erreur de l'API
-    if (data?.error) {
+    console.log('SerpApi Google Shopping response:', JSON.stringify(data));
+
+    // Vérifier erreur API
+    if (data.error) {
       return Response.json({ 
         success: false, 
         message: `Erreur API: ${data.error}` 
       });
     }
 
-    if (!product) {
+    // Vérification de sécurité : s'assurer que des résultats existent
+    if (!data.shopping_results || data.shopping_results.length === 0) {
       return Response.json({ 
         success: false, 
         message: 'Produit non trouvé. Essayez la recherche par photo ou saisie manuelle.'
       });
     }
+
+    // Prioriser les résultats Amazon
+    const amazonResult = data.shopping_results.find(r => r.link && r.link.includes('amazon'));
+    const product = amazonResult || data.shopping_results[0];
+
+    // Extraire l'ASIN si disponible
+    const asinMatch = product.link?.match(/\/dp\/([A-Z0-9]{10})/i) || 
+                      product.link?.match(/\/gp\/product\/([A-Z0-9]{10})/i);
+    const asin = asinMatch ? asinMatch[1] : barcode;
 
     // Extraire le nombre de pièces du titre
     const extractPieces = (title) => {
