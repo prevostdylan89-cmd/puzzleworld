@@ -266,275 +266,82 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       }
     }
 
-    // Check if puzzle already exists in global catalog
-    const existing = await checkExistingPuzzle(code);
-    if (existing) {
-      toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
-      
-      // Use existing catalog data - preserve the original title
-      const data = {
-        name: existing.title,
-        brand: existing.brand,
-        image: existing.image_hd,
-        link: existing.amazon_link,
-        sku: existing.asin,
-        asin: existing.asin,
-        title: existing.title,
-        image_hd: existing.image_hd,
-        piece_count: existing.piece_count,
-        pieces: existing.piece_count,
-        dimensions: '',
-        catalogId: existing.id // Store catalog ID for enrichment
-      };
-      setPuzzleData(data);
-      setLoading(false);
-      
-      // If in post mode, call callback immediately
-      if (skipCollectionAdd && onPuzzleAdded) {
-        onPuzzleAdded(data);
-      }
-      return;
-    }
-    
     toast.info('Recherche du puzzle en cours...');
-    
+
     try {
-      const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
-      );
-      
-      const data = await response.json();
-      console.log("Réponse API complète:", data);
-      
-      if (data.product) {
-        const product = data.product;
+      // Appel à la fonction backend SerpApi
+      const response = await base44.functions.invoke('searchPuzzleWithSerpApi', { barcode: code });
 
-        // Liste des marques de puzzles connues
-        const KNOWN_BRANDS = [
-          'Ravensburger', 'Educa', 'Clementoni', 'Schmidt Spiele', 'Jumbo', 'Wasgij',
-          'Castorland', 'Trefl', 'Falcon', 'Galison', 'Eurographics', 'Heye',
-          'Bluebird', 'Cobble Hill', 'Pomegranate', 'Grafika', 'Buffalo Games',
-          'New York Puzzle', 'Cloudberries', 'Mudpuppy', 'Wentworth', 'Piatnik',
-          'Djeco', 'Melissa & Doug', 'Nathan', 'MB', 'Dujardin', 'Janod'
-        ];
+      if (response.data.status === 'existing') {
+        const existing = response.data.puzzle;
+        toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
 
-        // Extract from structured attributes (specifications, attributes)
-        let pieces = null;
-        let dimensions = null;
-        let brand = product.brand || '';
-        
-        // Fallback 1: Chercher dans attributes.manufacturer
-        if (!brand && product.attributes) {
-          for (const attr of product.attributes) {
-            if (attr.name?.toLowerCase() === 'manufacturer' || attr.name?.toLowerCase() === 'fabricant') {
-              brand = attr.value || '';
-              break;
-            }
-          }
+        const data = {
+          name: existing.title,
+          brand: existing.brand,
+          image: existing.image_hd,
+          link: existing.amazon_link,
+          sku: existing.asin,
+          asin: existing.asin,
+          title: existing.title,
+          image_hd: existing.image_hd,
+          piece_count: existing.piece_count,
+          pieces: existing.piece_count,
+          dimensions: existing.dimensions || '',
+          catalogId: existing.id
+        };
+        setPuzzleData(data);
+        setLoading(false);
+
+        if (skipCollectionAdd && onPuzzleAdded) {
+          onPuzzleAdded(data);
         }
-        
-        // Fallback 2: Chercher dans le titre avec les marques connues
-        if (!brand && product.title) {
-          const titleLower = product.title.toLowerCase();
-          for (const knownBrand of KNOWN_BRANDS) {
-            if (titleLower.includes(knownBrand.toLowerCase())) {
-              brand = knownBrand;
-              break;
-            }
-          }
-        }
-        
-        // 1. Extract from specifications/attributes
-        const specs = product.specifications || [];
-        const attributes = product.attributes || [];
-        const allAttributes = [...specs, ...attributes];
-        
-        for (const attr of allAttributes) {
-          const name = (attr.name || '').toLowerCase();
-          const value = attr.value || '';
-          
-          // Nombre de pièces
-          if (!pieces && (name.includes('piece') || name.includes('pièce') || name.includes('number of pieces'))) {
-            const match = value.match(/(\d+)/);
-            if (match) {
-              pieces = parseInt(match[1]);
-            }
-          }
-          
-          // Dimensions
-          if (!dimensions && (name.includes('dimension') || name.includes('size') || name.includes('taille'))) {
-            const dimMatch = value.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-            if (dimMatch) {
-              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-            }
-          }
-        }
-        
-        // 2. Fallback: Extract from feature bullets if not found in attributes
-        if (!pieces || !dimensions) {
-          const allBullets = (product.feature_bullets || []).join(' ');
-          
-          if (!pieces) {
-            const patterns = [
-              /(\d+)\s*(pièces?|pieces?)/i,
-              /(\d+)\s*p\b/i,
-              /(\d+)\s*teile/i,
-              /puzzle\s*(\d+)/i,
-              /(\d{3,4})\s*(?:pc|pcs)/i
-            ];
-            
-            for (const pattern of patterns) {
-              const match = allBullets.match(pattern);
-              if (match && parseInt(match[1]) >= 100) {
-                pieces = parseInt(match[1]);
-                break;
-              }
-            }
-          }
-          
-          if (!dimensions) {
-            const dimMatch = allBullets.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-            if (dimMatch) {
-              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-            }
-          }
-        }
-        
-        // 3. Last resort: Extract from title
-        if (!pieces) {
-          const match = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
-          if (match && parseInt(match[1]) >= 100) {
-            pieces = parseInt(match[1]);
-          }
-        }
-        
-        if (!dimensions) {
-          const dimMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-          if (dimMatch) {
-            dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-          }
-        }
-        
-        // Sécurité pour l'image avec fallback
-        let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
-        if (!imageUrl) {
-          imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
-        }
-        console.log("Image URL récupérée:", imageUrl);
-        
-        // Clean the title (remove brand, pieces, dimensions)
-        const cleanedName = cleanTitle(product.title || '', brand, pieces);
-        
-        // Extract theme/category from structured data
-        let categoryTag = 'Autre';
-        
-        // Try to find theme in attributes first
-        for (const attr of allAttributes) {
-          const name = (attr.name || '').toLowerCase();
-          const value = (attr.value || '').toLowerCase();
-          
-          if (name.includes('theme') || name.includes('thème') || name.includes('style')) {
-            if (value.includes('nature') || value.includes('paysage') || value.includes('landscape')) {
-              categoryTag = 'Nature';
-              break;
-            } else if (value.includes('disney') || value.includes('cartoon')) {
-              categoryTag = 'Disney';
-              break;
-            } else if (value.includes('art') || value.includes('painting') || value.includes('tableau')) {
-              categoryTag = 'Art';
-              break;
-            } else if (value.includes('animal') || value.includes('animaux')) {
-              categoryTag = 'Animaux';
-              break;
-            } else if (value.includes('city') || value.includes('urban') || value.includes('ville') || value.includes('architecture')) {
-              categoryTag = 'Urbain';
-              break;
-            } else if (value.includes('vintage') || value.includes('retro')) {
-              categoryTag = 'Vintage';
-              break;
-            }
-          }
-        }
-        
-        // Fallback: categories from Amazon
-        if (categoryTag === 'Autre') {
-          const categories = product.categories || [];
-          const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
-          
-          if (categoryString.includes('nature') || categoryString.includes('landscape')) {
-            categoryTag = 'Nature';
-          } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
-            categoryTag = 'Disney';
-          } else if (categoryString.includes('art') || categoryString.includes('painting')) {
-            categoryTag = 'Art';
-          } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
-            categoryTag = 'Animaux';
-          } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
-            categoryTag = 'Urbain';
-          }
-        }
-        
-        // Extraire la description complète
-        const fullDescription = [
-          product.description || '',
-          ...(product.feature_bullets || [])
-        ].filter(Boolean).join('\n\n');
+        return;
+      }
+
+      if (response.data.status === 'found') {
+        const puzzleData = response.data.data;
+        const cleanedName = cleanTitle(puzzleData.title, puzzleData.brand, puzzleData.piece_count);
 
         const puzzleInfo = {
           name: cleanedName,
-          brand: brand,
-          image: imageUrl,
-          link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
-          sku: product.model_number || barcode,
+          brand: puzzleData.brand,
+          image: puzzleData.image_hd,
+          link: puzzleData.amazon_link,
+          sku: code,
           asin: code,
           title: cleanedName,
-          image_hd: imageUrl,
-          piece_count: pieces,
-          pieces: pieces,
-          dimensions: dimensions,
-          category_tag: categoryTag,
-          // Données additionnelles pour PuzzleCatalog
-          rainforest_data: {
-            rating: product.rating || null,
-            ratings_total: product.ratings_total || 0,
-            price: product.buybox_winner?.price?.value || product.price?.value || null,
-            currency: product.buybox_winner?.price?.currency || product.price?.currency || 'EUR',
-            description: fullDescription,
-            features: product.feature_bullets || []
+          image_hd: puzzleData.image_hd,
+          piece_count: puzzleData.piece_count,
+          pieces: puzzleData.piece_count,
+          dimensions: puzzleData.dimensions || '',
+          category_tag: puzzleData.category_tag,
+          serpapi_data: {
+            price: puzzleData.amazon_price,
+            description: puzzleData.description
           }
         };
-        
-        console.log('📦 Données Rainforest récupérées:', {
-          prix: puzzleInfo.rainforest_data.price,
-          pieces: pieces,
-          description: fullDescription.substring(0, 100) + '...',
-          rating: puzzleInfo.rainforest_data.rating
+
+        console.log('📦 Données SerpApi récupérées:', {
+          prix: puzzleData.amazon_price,
+          pieces: puzzleData.piece_count,
+          brand: puzzleData.brand
         });
-        
-        console.log("Données puzzle créées:", puzzleInfo);
+
         setPuzzleData(puzzleInfo);
-        
         toast.success('Puzzle trouvé !');
-        
-        // If in post mode, call callback immediately
+
         if (skipCollectionAdd && onPuzzleAdded) {
           onPuzzleAdded(puzzleInfo);
         }
-      } else {
-        console.error("Aucun produit dans la réponse API");
-        toast.error('Produit non trouvé');
+      } else if (response.data.status === 'not_found') {
+        toast.error('Produit non trouvé, création manuelle requise');
         setLoading(false);
       }
     } catch (error) {
       console.error('API Error:', error);
       toast.error('Erreur lors de la recherche du produit');
       setLoading(false);
-    } finally {
-      // S'assurer que loading est toujours arrêté
-      if (!puzzleData) {
-        setLoading(false);
-      }
     }
   };
 
