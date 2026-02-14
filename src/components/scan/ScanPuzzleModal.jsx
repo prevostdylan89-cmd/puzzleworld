@@ -703,10 +703,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       toast.info('Analyse de la photo en cours...');
 
       try {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        const response = await base44.functions.invoke('searchPuzzleByImage', formData);
+        const response = await base44.functions.invoke('searchPuzzleByImage', { image: file });
         const data = response.data;
 
         console.log("Réponse recherche par image:", data);
