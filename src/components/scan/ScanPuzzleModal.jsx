@@ -306,6 +306,14 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       const data = await response.json();
       console.log("Réponse API complète:", data);
       
+      // Check for API errors
+      if (data.request_info && !data.request_info.success) {
+        console.error("Erreur API Rainforest:", data.request_info.message);
+        toast.error('Erreur API : ' + (data.request_info.message || 'Service temporairement indisponible'));
+        setLoading(false);
+        return;
+      }
+      
       if (data.product) {
         const product = data.product;
 
