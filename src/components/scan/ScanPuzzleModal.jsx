@@ -1,29 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Image as ImageIcon, Loader2, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { Html5QrcodeScanner } from 'npm:html5-qrcode@2.3.8';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CheckCircle2, Camera, Code2 } from 'lucide-react';
+import { CheckCircle2, Code2 } from 'lucide-react';
 
 export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
-  const scannerRef = useRef(null);
-  const [mode, setMode] = useState(null); // null | 'scan' | 'manual'
+  const [mode, setMode] = useState(null); // null | 'barcode' | 'manual'
   const [puzzleData, setPuzzleData] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [manualCode, setManualCode] = useState('');
+  const [barcodeCode, setBarcodeCode] = useState('');
   const [manualData, setManualData] = useState({
     name: '',
     brand: '',
@@ -32,90 +30,15 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     sku: ''
   });
 
-  useEffect(() => {
-    if (mode === 'scan' && open && scannerRef.current) {
-      initializeScanner();
-    }
-    return () => {
-      if (scannerRef.current) {
-        try {
-          Html5QrcodeScanner.getCameraCount().then(() => {
-            // Scanner exists, clean it up if needed
-          }).catch(() => {
-            // No camera available
-          });
-        } catch (e) {
-          // Cleanup errors are okay
-        }
-      }
-    };
-  }, [mode, open]);
-
-  const initializeScanner = async () => {
-    if (!scannerRef.current) return;
-    
-    try {
-      const scanner = new Html5QrcodeScanner('qr-scanner', {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        facingMode: 'environment'
-      }, false);
-
-      scanner.render(
-        (decodedText) => {
-          handleCodeDetected(decodedText);
-          scanner.clear();
-        },
-        (error) => {
-          // Ignore errors during scanning
-        }
-      );
-    } catch (error) {
-      toast.error('Erreur caméra: ' + error.message);
-      setMode(null);
-    }
-  };
-
-  const handleCodeDetected = async (code) => {
-    setLoading(true);
-    try {
-      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: code });
-      const puzzleInfo = response.data.puzzle;
-      
-      if (response.data.status === 'existing') {
-        toast.info('Puzzle déjà dans le catalogue');
-      } else {
-        toast.success('Puzzle trouvé!');
-      }
-
-      setPuzzleData({
-        name: puzzleInfo.title || '',
-        brand: puzzleInfo.brand || '',
-        pieces: puzzleInfo.pieceCount || 0,
-        image: puzzleInfo.imageUrl || '',
-        sku: code,
-        asin: code,
-        title: puzzleInfo.title || '',
-        image_hd: puzzleInfo.imageUrl || '',
-        piece_count: puzzleInfo.pieceCount || 0
-      });
-    } catch (error) {
-      toast.error('Code non trouvé: ' + error.message);
-      setMode(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleManualCodeSubmit = async () => {
-    if (!manualCode.trim()) {
+  const handleBarcodeSubmit = async () => {
+    if (!barcodeCode.trim()) {
       toast.error('Veuillez entrer un code ASIN ou EAN');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: manualCode });
+      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: barcodeCode });
       const puzzleInfo = response.data.puzzle;
 
       setPuzzleData({
@@ -123,13 +46,14 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         brand: puzzleInfo.brand || '',
         pieces: puzzleInfo.pieceCount || 0,
         image: puzzleInfo.imageUrl || '',
-        sku: manualCode,
-        asin: manualCode,
+        sku: barcodeCode,
+        asin: barcodeCode,
         title: puzzleInfo.title || '',
         image_hd: puzzleInfo.imageUrl || '',
         piece_count: puzzleInfo.pieceCount || 0
       });
       setMode(null);
+      toast.success('Puzzle trouvé!');
     } catch (error) {
       toast.error('Code non trouvé');
     } finally {
@@ -279,7 +203,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setShowSuccess(false);
     setSelectedStatus('');
     setMode(null);
-    setManualCode('');
+    setBarcodeCode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -289,7 +213,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setShowSuccess(false);
     setSelectedStatus('');
     setMode(null);
-    setManualCode('');
+    setBarcodeCode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
   };
 
@@ -303,54 +227,35 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         {!mode && !puzzleData && !showSuccess && (
           <div className="space-y-3 mt-4">
             <button
-              onClick={() => setMode('scan')}
+              onClick={() => setMode('barcode')}
               className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white"
             >
-              <Camera className="w-5 h-5" />
-              <span className="font-medium">Scanner le code-barres</span>
+              <Code2 className="w-5 h-5" />
+              <span className="font-medium">Entrer le code-barres (ASIN/EAN)</span>
             </button>
             <button
               onClick={() => setMode('manual')}
               className="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white"
             >
-              <Code2 className="w-5 h-5" />
-              <span className="font-medium">Entrer le code manuellement</span>
+              <Image as ImageIcon className="w-5 h-5" />
+              <span className="font-medium">Saisir manuellement</span>
             </button>
           </div>
         )}
 
-        {mode === 'scan' && (
-          <div className="space-y-4 mt-4">
-            <div id="qr-scanner" ref={scannerRef} className="w-full rounded-lg overflow-hidden bg-black/20" />
-            {loading && (
-              <div className="flex items-center justify-center gap-2 text-white/70">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Lecture du code...
-              </div>
-            )}
-            <Button
-              onClick={() => setMode(null)}
-              variant="outline"
-              className="w-full border-white/20 text-white hover:bg-white/5"
-            >
-              Annuler
-            </Button>
-          </div>
-        )}
-
-        {mode === 'manual' && (
+        {mode === 'barcode' && (
           <div className="space-y-4 mt-4">
             <div>
               <label className="text-white/70 text-sm mb-2 block">Code ASIN ou EAN</label>
               <Input
                 placeholder="Ex: B00ABC1234"
-                value={manualCode}
-                onChange={(e) => setManualCode(e.target.value)}
+                value={barcodeCode}
+                onChange={(e) => setBarcodeCode(e.target.value)}
                 className="bg-white/5 border-white/10 text-white"
               />
             </div>
             <Button
-              onClick={handleManualCodeSubmit}
+              onClick={handleBarcodeSubmit}
               disabled={loading}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
             >
@@ -374,9 +279,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         )}
 
         {mode === 'manual' && !puzzleData && (
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <p className="text-white/70 text-sm mb-4">Ou saisir manuellement:</p>
-            <div className="space-y-3">
+          <div className="space-y-4 mt-4">
             <div>
               <label className="text-white/70 text-sm mb-2 block">Nom du Puzzle *</label>
               <Input
@@ -429,7 +332,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             >
               Continuer
             </Button>
-            </div>
+            <Button
+              onClick={() => setMode(null)}
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/5"
+            >
+              Retour
+            </Button>
           </div>
         )}
 
