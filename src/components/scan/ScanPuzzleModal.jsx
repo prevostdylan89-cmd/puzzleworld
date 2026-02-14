@@ -442,19 +442,17 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           }
           
           // Enrichir données Amazon si disponibles
-          if (puzzleData.rainforest_data) {
-            if (!existingInCatalog[0].amazon_rating && puzzleData.rainforest_data.rating) {
-              updateData.amazon_rating = puzzleData.rainforest_data.rating;
-            }
-            if (!existingInCatalog[0].amazon_ratings_total && puzzleData.rainforest_data.ratings_total) {
-              updateData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
-            }
-            if (!existingInCatalog[0].amazon_price && puzzleData.rainforest_data.price) {
-              updateData.amazon_price = puzzleData.rainforest_data.price;
-            }
-            if (!existingInCatalog[0].description && puzzleData.rainforest_data.description) {
-              updateData.description = puzzleData.rainforest_data.description;
-            }
+          if (!existingInCatalog[0].amazon_rating && puzzleData.amazon_rating) {
+            updateData.amazon_rating = puzzleData.amazon_rating;
+          }
+          if (!existingInCatalog[0].amazon_ratings_total && puzzleData.amazon_ratings_total) {
+            updateData.amazon_ratings_total = puzzleData.amazon_ratings_total;
+          }
+          if (!existingInCatalog[0].amazon_price && puzzleData.amazon_price) {
+            updateData.amazon_price = puzzleData.amazon_price;
+          }
+          if (!existingInCatalog[0].description && puzzleData.description) {
+            updateData.description = puzzleData.description;
           }
           
           await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updateData);
