@@ -16,6 +16,7 @@ export default function DashboardData() {
   const [editForm, setEditForm] = useState({ title: '', brand: '' });
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [modalType, setModalType] = useState(null); // 'popularity', 'wishlist', 'added'
+  const [updatingDimensions, setUpdatingDimensions] = useState(false);
 
   useEffect(() => {
     loadPuzzles();
@@ -79,6 +80,29 @@ export default function DashboardData() {
     } catch (error) {
       console.error('Error deleting puzzle:', error);
       toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleUpdateDimensions = async () => {
+    if (!confirm('Mettre à jour les dimensions de tous les puzzles ? Cette opération peut prendre quelques minutes.')) return;
+    
+    setUpdatingDimensions(true);
+    toast.info('Mise à jour en cours...');
+    
+    try {
+      const response = await base44.functions.invoke('updatePuzzleDimensions', {});
+      
+      if (response.data.success) {
+        toast.success(`✅ ${response.data.updated} puzzles mis à jour (${response.data.notFound} sans dimensions trouvées)`);
+        await loadPuzzles(); // Recharger les données
+      } else {
+        toast.error('Erreur lors de la mise à jour');
+      }
+    } catch (error) {
+      console.error('Error updating dimensions:', error);
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setUpdatingDimensions(false);
     }
   };
 
@@ -215,9 +239,27 @@ export default function DashboardData() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
-        <p className="text-white/60">Classements basés sur les interactions sociales</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
+          <p className="text-white/60">Classements basés sur les interactions sociales</p>
+        </div>
+        <Button
+          onClick={handleUpdateDimensions}
+          disabled={updatingDimensions}
+          className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+        >
+          {updatingDimensions ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Mise à jour...
+            </>
+          ) : (
+            <>
+              📏 Mettre à jour les dimensions
+            </>
+          )}
+        </Button>
       </div>
 
       <Tabs defaultValue="social" className="space-y-6">
