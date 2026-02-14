@@ -9,8 +9,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.formData();
-    const imageFile = formData.get('image');
+    // Get the body as blob first
+    const bodyBlob = await req.blob();
+    
+    // Check content type
+    const contentType = req.headers.get('content-type') || '';
+    
+    let imageFile;
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData();
+      imageFile = formData.get('image');
+    } else {
+      // Direct blob upload
+      imageFile = bodyBlob;
+    }
 
     if (!imageFile) {
       return Response.json({ error: 'Image requise' }, { status: 400 });
