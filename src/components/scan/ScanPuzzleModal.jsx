@@ -906,144 +906,149 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             )}
 
         {puzzleData && !showSuccess && !skipCollectionAdd && (
-          <div className="space-y-4">
-            {/* Image - Animation 1 */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0, duration: 0.4 }}
-              className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative"
-            >
-              {puzzleData.image ? (
-                <img 
-                  src={puzzleData.image} 
-                  alt={puzzleData.name}
-                  className="w-full h-48 object-cover"
-                />
-              ) : (
-                <div className="w-full h-48 flex items-center justify-center bg-white/5">
-                  <ImageIcon className="w-12 h-12 text-white/30" />
-                </div>
-              )}
-            </motion.div>
+          <div className="flex flex-col max-h-[70vh]">
+            {/* Contenu scrollable */}
+            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
+              {/* Image - Animation 1 */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0, duration: 0.4 }}
+                className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative"
+              >
+                {puzzleData.image ? (
+                  <img 
+                    src={puzzleData.image} 
+                    alt={puzzleData.name}
+                    className="w-full h-48 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-48 flex items-center justify-center bg-white/5">
+                    <ImageIcon className="w-12 h-12 text-white/30" />
+                  </div>
+                )}
+              </motion.div>
 
-            {/* Badge communauté si puzzle existant */}
-            {existingPuzzle && (
+              {/* Badge communauté si puzzle existant */}
+              {existingPuzzle && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.4 }}
+                  className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
+                >
+                  <p className="text-orange-400 text-sm">
+                    ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Informations du puzzle (non éditables) */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
-                className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
+                transition={{ delay: 0.15, duration: 0.4 }}
+                className="space-y-3"
               >
-                <p className="text-orange-400 text-sm">
-                  ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
-                </p>
-              </motion.div>
-            )}
-
-            {/* Informations du puzzle (non éditables) */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-              className="space-y-3"
-            >
-              {/* Nom */}
-              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
-                <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
-              </div>
-
-              {/* Marque */}
-              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                <label className="text-white/50 text-xs mb-1 block">Marque</label>
-                <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
-              </div>
-
-              {/* Pièces */}
-              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
-                <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
-              </div>
-
-              {/* Dimensions */}
-              {puzzleData.dimensions && (
+                {/* Nom */}
                 <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                  <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
-                  <p className="text-white text-sm">{puzzleData.dimensions}</p>
+                  <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
+                  <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
                 </div>
-              )}
-            </motion.div>
 
-            {/* Status Selection with Visual Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Bouton J'ai aimé */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('liked')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'liked'
-                        ? 'border-green-500 bg-green-500/20 text-green-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">👍</span>
-                    <span className="text-sm font-medium">J'ai aimé</span>
-                  </button>
-
-                  {/* Bouton Je n'ai pas aimé */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('not_liked')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'not_liked'
-                        ? 'border-red-500 bg-red-500/20 text-red-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">👎</span>
-                    <span className="text-sm font-medium">Pas aimé</span>
-                  </button>
-
-                  {/* Bouton Wishlist */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('wishlist')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'wishlist'
-                        ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">⭐</span>
-                    <span className="text-sm font-medium">Wishlist</span>
-                  </button>
-
-                  {/* Bouton Dans sa boîte */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('inbox')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'inbox'
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">📦</span>
-                    <span className="text-sm font-medium">Dans sa boîte</span>
-                  </button>
+                {/* Marque */}
+                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                  <label className="text-white/50 text-xs mb-1 block">Marque</label>
+                  <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
                 </div>
-              </div>
 
-              {/* Validate Button */}
+                {/* Pièces */}
+                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                  <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
+                  <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
+                </div>
+
+                {/* Dimensions */}
+                {puzzleData.dimensions && (
+                  <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                    <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
+                    <p className="text-white text-sm">{puzzleData.dimensions}</p>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Status Selection with Visual Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="space-y-4 pb-4"
+              >
+                <div>
+                  <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Bouton J'ai aimé */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('liked')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'liked'
+                          ? 'border-green-500 bg-green-500/20 text-green-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">👍</span>
+                      <span className="text-sm font-medium">J'ai aimé</span>
+                    </button>
+
+                    {/* Bouton Je n'ai pas aimé */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('not_liked')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'not_liked'
+                          ? 'border-red-500 bg-red-500/20 text-red-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">👎</span>
+                      <span className="text-sm font-medium">Pas aimé</span>
+                    </button>
+
+                    {/* Bouton Wishlist */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('wishlist')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'wishlist'
+                          ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">⭐</span>
+                      <span className="text-sm font-medium">Wishlist</span>
+                    </button>
+
+                    {/* Bouton Dans sa boîte */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('inbox')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'inbox'
+                          ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">📦</span>
+                      <span className="text-sm font-medium">Dans sa boîte</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Bouton fixe en bas */}
+            <div className="pt-4 border-t border-white/10 mt-4">
               <Button
                 onClick={handleAddPuzzle}
                 disabled={!selectedStatus}
@@ -1052,7 +1057,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Valider l'ajout
               </Button>
-            </motion.div>
+            </div>
           </div>
         )}
 
