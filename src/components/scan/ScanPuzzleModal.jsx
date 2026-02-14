@@ -247,9 +247,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setLoading(true);
     setPuzzleData(null);
 
-    try {
-      // Check user collection first (if not in post mode)
-      if (!skipCollectionAdd) {
+    // Only check user collection if not in "post mode"
+    if (!skipCollectionAdd) {
+      try {
         const user = await base44.auth.me();
         const existingInCollection = await base44.entities.UserPuzzle.filter({
           puzzle_reference: code,
@@ -261,69 +261,280 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           setLoading(false);
           return;
         }
+      } catch (error) {
+        console.error('Error checking user collection:', error);
       }
+    }
 
-      // Check if puzzle exists in catalog
-      const existingCatalog = await base44.entities.PuzzleCatalog.filter({ asin: code });
-      if (existingCatalog && existingCatalog.length > 0) {
-        const existing = existingCatalog[0];
-        toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
-        setPuzzleData({
-          name: existing.title,
-          brand: existing.brand,
-          image: existing.image_hd,
-          link: existing.amazon_link,
-          sku: existing.asin,
-          asin: existing.asin,
-          title: existing.title,
-          image_hd: existing.image_hd,
-          piece_count: existing.piece_count,
-          pieces: existing.piece_count,
-          dimensions: existing.dimensions || '',
-          catalogId: existing.id
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Puzzle n'existe pas, appeler l'API
-      toast.info('Recherche du puzzle en cours...');
-      const response = await base44.functions.invoke('scanPuzzleBarcode', { barcode: code });
-      const data = response.data;
-
-      if (!data.success) {
-        toast.error(data.message || 'Produit non trouvé');
-        setLoading(false);
-        return;
-      }
-
-      // Formater les données
-      const puzzleInfo = {
-        asin: data.product.asin,
-        title: data.product.title,
-        brand: data.product.brand,
-        image: data.product.image_hd,
-        image_hd: data.product.image_hd,
-        pieces: data.product.piece_count,
-        piece_count: data.product.piece_count,
-        amazon_price: data.product.amazon_price,
-        amazon_rating: data.product.amazon_rating,
-        amazon_ratings_total: data.product.amazon_ratings_total,
-        description: data.product.description,
-        category_tag: data.product.category_tag
+    // Check if puzzle already exists in global catalog
+    const existing = await checkExistingPuzzle(code);
+    if (existing) {
+      toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
+      
+      // Use existing catalog data - preserve the original title
+      const data = {
+        name: existing.title,
+        brand: existing.brand,
+        image: existing.image_hd,
+        link: existing.amazon_link,
+        sku: existing.asin,
+        asin: existing.asin,
+        title: existing.title,
+        image_hd: existing.image_hd,
+        piece_count: existing.piece_count,
+        pieces: existing.piece_count,
+        dimensions: '',
+        catalogId: existing.id // Store catalog ID for enrichment
       };
-
-      setPuzzleData(puzzleInfo);
-      toast.success('Puzzle trouvé !');
-
+      setPuzzleData(data);
+      setLoading(false);
+      
+      // If in post mode, call callback immediately
       if (skipCollectionAdd && onPuzzleAdded) {
-        onPuzzleAdded(puzzleInfo);
+        onPuzzleAdded(data);
+      }
+      return;
+    }
+    
+    toast.info('Recherche du puzzle en cours...');
+    
+    try {
+      const response = await fetch(
+        `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
+      );
+      
+      const data = await response.json();
+      console.log("Réponse API complète:", data);
+      
+      if (data.product) {
+        const product = data.product;
+
+        // Liste des marques de puzzles connues
+        const KNOWN_BRANDS = [
+          'Ravensburger', 'Educa', 'Clementoni', 'Schmidt Spiele', 'Jumbo', 'Wasgij',
+          'Castorland', 'Trefl', 'Falcon', 'Galison', 'Eurographics', 'Heye',
+          'Bluebird', 'Cobble Hill', 'Pomegranate', 'Grafika', 'Buffalo Games',
+          'New York Puzzle', 'Cloudberries', 'Mudpuppy', 'Wentworth', 'Piatnik',
+          'Djeco', 'Melissa & Doug', 'Nathan', 'MB', 'Dujardin', 'Janod'
+        ];
+
+        // Extract from structured attributes (specifications, attributes)
+        let pieces = null;
+        let dimensions = null;
+        let brand = product.brand || '';
+        
+        // Fallback 1: Chercher dans attributes.manufacturer
+        if (!brand && product.attributes) {
+          for (const attr of product.attributes) {
+            if (attr.name?.toLowerCase() === 'manufacturer' || attr.name?.toLowerCase() === 'fabricant') {
+              brand = attr.value || '';
+              break;
+            }
+          }
+        }
+        
+        // Fallback 2: Chercher dans le titre avec les marques connues
+        if (!brand && product.title) {
+          const titleLower = product.title.toLowerCase();
+          for (const knownBrand of KNOWN_BRANDS) {
+            if (titleLower.includes(knownBrand.toLowerCase())) {
+              brand = knownBrand;
+              break;
+            }
+          }
+        }
+        
+        // 1. Extract from specifications/attributes
+        const specs = product.specifications || [];
+        const attributes = product.attributes || [];
+        const allAttributes = [...specs, ...attributes];
+        
+        for (const attr of allAttributes) {
+          const name = (attr.name || '').toLowerCase();
+          const value = attr.value || '';
+          
+          // Nombre de pièces
+          if (!pieces && (name.includes('piece') || name.includes('pièce') || name.includes('number of pieces'))) {
+            const match = value.match(/(\d+)/);
+            if (match) {
+              pieces = parseInt(match[1]);
+            }
+          }
+          
+          // Dimensions
+          if (!dimensions && (name.includes('dimension') || name.includes('size') || name.includes('taille'))) {
+            const dimMatch = value.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+            if (dimMatch) {
+              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
+            }
+          }
+        }
+        
+        // 2. Fallback: Extract from feature bullets if not found in attributes
+        if (!pieces || !dimensions) {
+          const allBullets = (product.feature_bullets || []).join(' ');
+          
+          if (!pieces) {
+            const patterns = [
+              /(\d+)\s*(pièces?|pieces?)/i,
+              /(\d+)\s*p\b/i,
+              /(\d+)\s*teile/i,
+              /puzzle\s*(\d+)/i,
+              /(\d{3,4})\s*(?:pc|pcs)/i
+            ];
+            
+            for (const pattern of patterns) {
+              const match = allBullets.match(pattern);
+              if (match && parseInt(match[1]) >= 100) {
+                pieces = parseInt(match[1]);
+                break;
+              }
+            }
+          }
+          
+          if (!dimensions) {
+            const dimMatch = allBullets.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+            if (dimMatch) {
+              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
+            }
+          }
+        }
+        
+        // 3. Last resort: Extract from title
+        if (!pieces) {
+          const match = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
+          if (match && parseInt(match[1]) >= 100) {
+            pieces = parseInt(match[1]);
+          }
+        }
+        
+        if (!dimensions) {
+          const dimMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+          if (dimMatch) {
+            dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
+          }
+        }
+        
+        // Sécurité pour l'image avec fallback
+        let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+        if (!imageUrl) {
+          imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
+          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
+        }
+        console.log("Image URL récupérée:", imageUrl);
+        
+        // Clean the title (remove brand, pieces, dimensions)
+        const cleanedName = cleanTitle(product.title || '', brand, pieces);
+        
+        // Extract theme/category from structured data
+        let categoryTag = 'Autre';
+        
+        // Try to find theme in attributes first
+        for (const attr of allAttributes) {
+          const name = (attr.name || '').toLowerCase();
+          const value = (attr.value || '').toLowerCase();
+          
+          if (name.includes('theme') || name.includes('thème') || name.includes('style')) {
+            if (value.includes('nature') || value.includes('paysage') || value.includes('landscape')) {
+              categoryTag = 'Nature';
+              break;
+            } else if (value.includes('disney') || value.includes('cartoon')) {
+              categoryTag = 'Disney';
+              break;
+            } else if (value.includes('art') || value.includes('painting') || value.includes('tableau')) {
+              categoryTag = 'Art';
+              break;
+            } else if (value.includes('animal') || value.includes('animaux')) {
+              categoryTag = 'Animaux';
+              break;
+            } else if (value.includes('city') || value.includes('urban') || value.includes('ville') || value.includes('architecture')) {
+              categoryTag = 'Urbain';
+              break;
+            } else if (value.includes('vintage') || value.includes('retro')) {
+              categoryTag = 'Vintage';
+              break;
+            }
+          }
+        }
+        
+        // Fallback: categories from Amazon
+        if (categoryTag === 'Autre') {
+          const categories = product.categories || [];
+          const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
+          
+          if (categoryString.includes('nature') || categoryString.includes('landscape')) {
+            categoryTag = 'Nature';
+          } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
+            categoryTag = 'Disney';
+          } else if (categoryString.includes('art') || categoryString.includes('painting')) {
+            categoryTag = 'Art';
+          } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
+            categoryTag = 'Animaux';
+          } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
+            categoryTag = 'Urbain';
+          }
+        }
+        
+        // Extraire la description complète
+        const fullDescription = [
+          product.description || '',
+          ...(product.feature_bullets || [])
+        ].filter(Boolean).join('\n\n');
+
+        const puzzleInfo = {
+          name: cleanedName,
+          brand: brand,
+          image: imageUrl,
+          link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
+          sku: product.model_number || barcode,
+          asin: code,
+          title: cleanedName,
+          image_hd: imageUrl,
+          piece_count: pieces,
+          pieces: pieces,
+          dimensions: dimensions,
+          category_tag: categoryTag,
+          // Données additionnelles pour PuzzleCatalog
+          rainforest_data: {
+            rating: product.rating || null,
+            ratings_total: product.ratings_total || 0,
+            price: product.buybox_winner?.price?.value || product.price?.value || null,
+            currency: product.buybox_winner?.price?.currency || product.price?.currency || 'EUR',
+            description: fullDescription,
+            features: product.feature_bullets || []
+          }
+        };
+        
+        console.log('📦 Données Rainforest récupérées:', {
+          prix: puzzleInfo.rainforest_data.price,
+          pieces: pieces,
+          description: fullDescription.substring(0, 100) + '...',
+          rating: puzzleInfo.rainforest_data.rating
+        });
+        
+        console.log("Données puzzle créées:", puzzleInfo);
+        setPuzzleData(puzzleInfo);
+        
+        toast.success('Puzzle trouvé !');
+        
+        // If in post mode, call callback immediately
+        if (skipCollectionAdd && onPuzzleAdded) {
+          onPuzzleAdded(puzzleInfo);
+        }
+      } else {
+        console.error("Aucun produit dans la réponse API");
+        toast.error('Produit non trouvé');
+        setLoading(false);
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Erreur lors de la recherche');
-    } finally {
+      console.error('API Error:', error);
+      toast.error('Erreur lors de la recherche du produit');
       setLoading(false);
+    } finally {
+      // S'assurer que loading est toujours arrêté
+      if (!puzzleData) {
+        setLoading(false);
+      }
     }
   };
 
@@ -411,17 +622,19 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           }
           
           // Enrichir données Amazon si disponibles
-          if (!existingInCatalog[0].amazon_rating && puzzleData.amazon_rating) {
-            updateData.amazon_rating = puzzleData.amazon_rating;
-          }
-          if (!existingInCatalog[0].amazon_ratings_total && puzzleData.amazon_ratings_total) {
-            updateData.amazon_ratings_total = puzzleData.amazon_ratings_total;
-          }
-          if (!existingInCatalog[0].amazon_price && puzzleData.amazon_price) {
-            updateData.amazon_price = puzzleData.amazon_price;
-          }
-          if (!existingInCatalog[0].description && puzzleData.description) {
-            updateData.description = puzzleData.description;
+          if (puzzleData.rainforest_data) {
+            if (!existingInCatalog[0].amazon_rating && puzzleData.rainforest_data.rating) {
+              updateData.amazon_rating = puzzleData.rainforest_data.rating;
+            }
+            if (!existingInCatalog[0].amazon_ratings_total && puzzleData.rainforest_data.ratings_total) {
+              updateData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
+            }
+            if (!existingInCatalog[0].amazon_price && puzzleData.rainforest_data.price) {
+              updateData.amazon_price = puzzleData.rainforest_data.price;
+            }
+            if (!existingInCatalog[0].description && puzzleData.rainforest_data.description) {
+              updateData.description = puzzleData.rainforest_data.description;
+            }
           }
           
           await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updateData);
@@ -440,12 +653,21 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               wishlistCount: 0,
               added_count: 1,
               total_likes: 0,
-              total_dislikes: 0,
-              amazon_rating: puzzleData.amazon_rating || null,
-              amazon_ratings_total: puzzleData.amazon_ratings_total || 0,
-              amazon_price: puzzleData.amazon_price || null,
-              description: puzzleData.description || ''
+              total_dislikes: 0
             };
+            
+            // Add Rainforest data if available
+            if (puzzleData.rainforest_data) {
+              catalogData.amazon_rating = puzzleData.rainforest_data.rating;
+              catalogData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
+              catalogData.amazon_price = puzzleData.rainforest_data.price;
+              catalogData.description = puzzleData.rainforest_data.description;
+              
+              // Debug log pour vérifier le prix
+              console.log('💰 Prix récupéré:', puzzleData.rainforest_data.price);
+            } else {
+              console.warn('⚠️ Aucune donnée Rainforest disponible');
+            }
             
             const newCatalogEntry = await base44.entities.PuzzleCatalog.create(catalogData);
             catalogPuzzleId = newCatalogEntry.id;
@@ -563,88 +785,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
 
   const handleBarcodeSubmit = async () => {
-      if (barcodeInput.length !== 13) {
-        toast.error('Le code-barres doit contenir 13 chiffres');
-        return;
-      }
-      await fetchPuzzleData(barcodeInput);
-    };
-
-    const handlePhotoSearch = async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      // Reset file input
-      e.target.value = '';
-
-      // Stop camera if active
-      if (cameraReady) {
-        await stopScanner();
-        setCameraReady(false);
-        setScanning(false);
-      }
-
-      setLoading(true);
-      toast.info('Analyse de la photo en cours...');
-
-      try {
-        const response = await base44.functions.invoke('searchPuzzleByImage', { image: file });
-        const data = response.data;
-
-        console.log("Réponse recherche par image:", data);
-
-        if (!data.success) {
-          toast.error(data.message || 'Aucun puzzle trouvé');
-          setLoading(false);
-          return;
-        }
-
-        if (data.product) {
-          const product = data.product;
-
-          // Sécurité pour l'image avec fallback
-          let imageUrl = product.image_hd || '';
-          if (!imageUrl) {
-            imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-          }
-
-          // Clean the title
-          const cleanedName = cleanTitle(product.title || '', product.brand, product.pieces);
-
-          const puzzleInfo = {
-            name: cleanedName,
-            brand: product.brand || '',
-            image: imageUrl,
-            link: product.link || '',
-            sku: product.asin || '',
-            asin: product.asin || '',
-            title: cleanedName,
-            image_hd: imageUrl,
-            piece_count: product.pieces,
-            pieces: product.pieces,
-            dimensions: product.dimensions || '',
-            category_tag: product.category_tag || 'Autre',
-            amazon_rating: product.rating || null,
-            amazon_ratings_total: product.ratings_total || 0,
-            amazon_price: product.price || null,
-            description: product.description || product.title || ''
-          };
-
-          setPuzzleData(puzzleInfo);
-          setLoading(false);
-          toast.success('Puzzle trouvé !');
-
-          if (skipCollectionAdd && onPuzzleAdded) {
-            onPuzzleAdded(puzzleInfo);
-          }
-        }
-      } catch (error) {
-        console.error('Erreur recherche par image:', error);
-        toast.error('Erreur lors de la recherche');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (barcodeInput.length !== 13) {
+      toast.error('Le code-barres doit contenir 13 chiffres');
+      return;
+    }
+    await fetchPuzzleData(barcodeInput);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -680,64 +826,44 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 <div id="file-reader-temp" style={{ display: 'none' }}></div>
 
                 {!cameraReady && !loading && (
-                      <div className="flex flex-col items-center justify-center py-8 space-y-6">
-                        <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
-                          <Barcode className="w-12 h-12 text-orange-400" />
-                        </div>
+                  <div className="flex flex-col items-center justify-center py-8 space-y-6">
+                    <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
+                      <Barcode className="w-12 h-12 text-orange-400" />
+                    </div>
+                    <Button
+                      onClick={handleActivateCamera}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                    >
+                      📸 Activer la Caméra
+                    </Button>
 
-                        <div className="flex flex-col gap-3 w-full max-w-sm">
-                          <Button
-                            onClick={handleActivateCamera}
-                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                          >
-                            📸 Scanner le code-barres
-                          </Button>
-
-                          <div className="text-white/50 text-xs text-center">ou</div>
-
-                          <Button
-                            onClick={() => document.getElementById('photo-search-input')?.click()}
-                            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
-                          >
-                            🖼️ Chercher par photo
-                          </Button>
-                          <input
-                            id="photo-search-input"
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={handlePhotoSearch}
-                            className="hidden"
+                    <div className="w-full max-w-sm">
+                      <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Input
+                            type="text"
+                            placeholder="13 chiffres"
+                            value={barcodeInput}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                              setBarcodeInput(value);
+                            }}
+                            className="bg-white/5 border-white/10 text-white text-center tracking-wider"
+                            maxLength={13}
                           />
                         </div>
-
-                        <div className="w-full max-w-sm">
-                          <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <Input
-                                type="text"
-                                placeholder="13 chiffres"
-                                value={barcodeInput}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 13);
-                                  setBarcodeInput(value);
-                                }}
-                                className="bg-white/5 border-white/10 text-white text-center tracking-wider"
-                                maxLength={13}
-                              />
-                            </div>
-                            <Button
-                              onClick={handleBarcodeSubmit}
-                              disabled={barcodeInput.length !== 13}
-                              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                            >
-                              OK
-                            </Button>
-                          </div>
-                        </div>
+                        <Button
+                          onClick={handleBarcodeSubmit}
+                          disabled={barcodeInput.length !== 13}
+                          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+                        >
+                          OK
+                        </Button>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                )}
                 
                 {cameraReady && (
                   <>
@@ -887,149 +1013,144 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             )}
 
         {puzzleData && !showSuccess && !skipCollectionAdd && (
-          <div className="flex flex-col max-h-[70vh]">
-            {/* Contenu scrollable */}
-            <div className="overflow-y-auto flex-1 space-y-4 pr-2">
-              {/* Image - Animation 1 */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0, duration: 0.4 }}
-                className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative"
-              >
-                {puzzleData.image ? (
-                  <img 
-                    src={puzzleData.image} 
-                    alt={puzzleData.name}
-                    className="w-full h-48 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-48 flex items-center justify-center bg-white/5">
-                    <ImageIcon className="w-12 h-12 text-white/30" />
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Badge communauté si puzzle existant */}
-              {existingPuzzle && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
-                  className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
-                >
-                  <p className="text-orange-400 text-sm">
-                    ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
-                  </p>
-                </motion.div>
+          <div className="space-y-4">
+            {/* Image - Animation 1 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0, duration: 0.4 }}
+              className="rounded-lg overflow-hidden border border-white/10 bg-black/20 relative"
+            >
+              {puzzleData.image ? (
+                <img 
+                  src={puzzleData.image} 
+                  alt={puzzleData.name}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 flex items-center justify-center bg-white/5">
+                  <ImageIcon className="w-12 h-12 text-white/30" />
+                </div>
               )}
+            </motion.div>
 
-              {/* Informations du puzzle (non éditables) */}
+            {/* Badge communauté si puzzle existant */}
+            {existingPuzzle && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.4 }}
-                className="space-y-3"
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
               >
-                {/* Nom */}
-                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                  <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
-                  <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
-                </div>
-
-                {/* Marque */}
-                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                  <label className="text-white/50 text-xs mb-1 block">Marque</label>
-                  <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
-                </div>
-
-                {/* Pièces */}
-                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                  <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
-                  <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
-                </div>
-
-                {/* Dimensions */}
-                {puzzleData.dimensions && (
-                  <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                    <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
-                    <p className="text-white text-sm">{puzzleData.dimensions}</p>
-                  </div>
-                )}
+                <p className="text-orange-400 text-sm">
+                  ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
+                </p>
               </motion.div>
+            )}
 
-              {/* Status Selection with Visual Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-                className="space-y-4 pb-4"
-              >
-                <div>
-                  <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Bouton J'ai aimé */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('liked')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'liked'
-                          ? 'border-green-500 bg-green-500/20 text-green-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">👍</span>
-                      <span className="text-sm font-medium">J'ai aimé</span>
-                    </button>
+            {/* Informations du puzzle (non éditables) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="space-y-3"
+            >
+              {/* Nom */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
+                <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
+              </div>
 
-                    {/* Bouton Je n'ai pas aimé */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('not_liked')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'not_liked'
-                          ? 'border-red-500 bg-red-500/20 text-red-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">👎</span>
-                      <span className="text-sm font-medium">Pas aimé</span>
-                    </button>
+              {/* Marque */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Marque</label>
+                <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
+              </div>
 
-                    {/* Bouton Wishlist */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('wishlist')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'wishlist'
-                          ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">⭐</span>
-                      <span className="text-sm font-medium">Wishlist</span>
-                    </button>
+              {/* Pièces */}
+              <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
+                <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
+              </div>
 
-                    {/* Bouton Dans sa boîte */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('inbox')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'inbox'
-                          ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">📦</span>
-                      <span className="text-sm font-medium">Dans sa boîte</span>
-                    </button>
-                  </div>
+              {/* Dimensions */}
+              {puzzleData.dimensions && (
+                <div className="rounded-lg bg-white/5 border border-white/10 p-3">
+                  <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
+                  <p className="text-white text-sm">{puzzleData.dimensions}</p>
                 </div>
-              </motion.div>
-            </div>
+              )}
+            </motion.div>
 
-            {/* Bouton fixe en bas */}
-            <div className="pt-4 border-t border-white/10 mt-4">
+            {/* Status Selection with Visual Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Bouton J'ai aimé */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('liked')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'liked'
+                        ? 'border-green-500 bg-green-500/20 text-green-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">👍</span>
+                    <span className="text-sm font-medium">J'ai aimé</span>
+                  </button>
+
+                  {/* Bouton Je n'ai pas aimé */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('not_liked')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'not_liked'
+                        ? 'border-red-500 bg-red-500/20 text-red-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">👎</span>
+                    <span className="text-sm font-medium">Pas aimé</span>
+                  </button>
+
+                  {/* Bouton Wishlist */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('wishlist')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'wishlist'
+                        ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">⭐</span>
+                    <span className="text-sm font-medium">Wishlist</span>
+                  </button>
+
+                  {/* Bouton Dans sa boîte */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStatus('inbox')}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      selectedStatus === 'inbox'
+                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                        : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
+                    }`}
+                  >
+                    <span className="text-3xl">📦</span>
+                    <span className="text-sm font-medium">Dans sa boîte</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Validate Button */}
               <Button
                 onClick={handleAddPuzzle}
                 disabled={!selectedStatus}
@@ -1038,7 +1159,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Valider l'ajout
               </Button>
-            </div>
+            </motion.div>
           </div>
         )}
 

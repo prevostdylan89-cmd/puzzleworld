@@ -9,7 +9,6 @@ import PuzzleStatsModal from '@/components/dashboard/PuzzleStatsModal';
 import PuzzlePopularityModal from '@/components/dashboard/PuzzlePopularityModal';
 import PuzzleWishlistModal from '@/components/dashboard/PuzzleWishlistModal';
 import BrandManagement from '@/components/dashboard/BrandManagement';
-import DimensionManagement from '@/components/dashboard/DimensionManagement';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
@@ -324,11 +323,7 @@ export default function DashboardData() {
             <Edit2 className="w-4 h-4 mr-2" />
             Gestion des Marques
           </TabsTrigger>
-          <TabsTrigger value="dimensions" className="data-[state=active]:bg-orange-500">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Gestion des Dimensions
-          </TabsTrigger>
-          </TabsList>
+        </TabsList>
 
         <TabsContent value="social" className="space-y-4">
           <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
@@ -390,11 +385,7 @@ export default function DashboardData() {
         <TabsContent value="brands" className="space-y-4">
           <BrandManagement />
         </TabsContent>
-
-        <TabsContent value="dimensions" className="space-y-4">
-          <DimensionManagement />
-        </TabsContent>
-        </Tabs>
+      </Tabs>
 
       {/* Modals */}
       {selectedPuzzle && modalType === 'popularity' && (
