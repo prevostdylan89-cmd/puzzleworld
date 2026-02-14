@@ -27,52 +27,82 @@ Deno.serve(async (req) => {
     // Essayer plusieurs méthodes de recherche
     let data = null;
     let product = null;
+    let asin = null;
     
-    // MÉTHODE 1: Recherche directe par EAN sur Amazon.fr
-    console.log(`Tentative 1: Recherche Amazon.fr avec EAN ${barcode}`);
-    let serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
+    // MÉTHODE 1: Google Search pour trouver le produit Amazon
+    console.log(`Tentative 1: Google Search pour EAN ${barcode}`);
+    let serpApiUrl = `https://serpapi.com/search.json?engine=google&q=${barcode}+site:amazon.fr&api_key=${serpApiKey}`;
     let response = await fetch(serpApiUrl);
     data = await response.json();
     
+    // Extraire l'ASIN de l'URL Amazon dans les résultats
     if (data.organic_results && data.organic_results.length > 0) {
-      product = data.organic_results[0];
-      console.log("✓ Trouvé avec recherche Amazon directe");
+      for (const result of data.organic_results) {
+        const asinMatch = result.link?.match(/\/dp\/([A-Z0-9]{10})/i) || 
+                         result.link?.match(/\/gp\/product\/([A-Z0-9]{10})/i);
+        if (asinMatch) {
+          asin = asinMatch[1];
+          console.log(`✓ ASIN trouvé: ${asin}`);
+          break;
+        }
+      }
     }
     
-    // MÉTHODE 2: Google Shopping
+    // MÉTHODE 2: Si ASIN trouvé, récupérer les détails du produit Amazon
+    if (asin) {
+      console.log(`Tentative 2: Récupération détails Amazon avec ASIN ${asin}`);
+      serpApiUrl = `https://serpapi.com/search.json?engine=amazon_product&amazon_domain=amazon.fr&asin=${asin}&api_key=${serpApiKey}`;
+      response = await fetch(serpApiUrl);
+      data = await response.json();
+      
+      if (data.product_results) {
+        product = {
+          title: data.product_results.title,
+          thumbnail: data.product_results.images?.[0]?.link || data.product_results.main_image?.link,
+          price: data.product_results.buybox_winner?.price?.value,
+          extracted_price: data.product_results.buybox_winner?.price?.value,
+          rating: data.product_results.rating,
+          reviews: data.product_results.reviews_count,
+          asin: asin,
+          link: `https://www.amazon.fr/dp/${asin}`
+        };
+        console.log("✓ Détails produit récupérés via ASIN");
+      }
+    }
+    
+    // MÉTHODE 3: Google Shopping comme fallback
     if (!product) {
-      console.log(`Tentative 2: Google Shopping`);
+      console.log(`Tentative 3: Google Shopping`);
       serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${barcode}&gl=fr&hl=fr&api_key=${serpApiKey}`;
       response = await fetch(serpApiUrl);
       data = await response.json();
       
       if (data.shopping_results && data.shopping_results.length > 0) {
-        // Prioriser Amazon dans les résultats
         const amazonResult = data.shopping_results.find(r => r.link && r.link.includes('amazon'));
-        product = amazonResult || data.shopping_results[0];
+        const selectedResult = amazonResult || data.shopping_results[0];
         
-        // Normaliser la structure
         product = {
-          title: product.title,
-          thumbnail: product.thumbnail,
-          price: product.extracted_price || product.price,
-          link: product.link,
-          asin: product.product_id || null
+          title: selectedResult.title,
+          thumbnail: selectedResult.thumbnail,
+          price: selectedResult.extracted_price || selectedResult.price,
+          extracted_price: selectedResult.extracted_price,
+          link: selectedResult.link,
+          asin: selectedResult.product_id || null
         };
         console.log("✓ Trouvé avec Google Shopping");
       }
     }
     
-    // MÉTHODE 3: Recherche avec préfixe "puzzle"
+    // MÉTHODE 4: Recherche Amazon directe
     if (!product) {
-      console.log(`Tentative 3: Recherche Amazon avec mot-clé puzzle`);
-      serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=puzzle+${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
+      console.log(`Tentative 4: Recherche Amazon directe`);
+      serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
       response = await fetch(serpApiUrl);
       data = await response.json();
       
       if (data.organic_results && data.organic_results.length > 0) {
         product = data.organic_results[0];
-        console.log("✓ Trouvé avec recherche Amazon + puzzle");
+        console.log("✓ Trouvé avec recherche Amazon directe");
       }
     }
 
