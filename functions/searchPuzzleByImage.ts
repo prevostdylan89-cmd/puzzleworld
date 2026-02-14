@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
       asin: asin || '',
       link: asin ? `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0e-21` : product.link || '',
       category_tag: categoryTag,
-      // Données Amazon pour affichage et stats
+      source: product.source || 'Google Lens',
       rating: null,
       ratings_total: 0,
       description: product.title || ''
