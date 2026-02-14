@@ -114,13 +114,13 @@ Deno.serve(async (req) => {
       title: product.title || '',
       brand: brand,
       image_hd: product.thumbnail || null,
-      price: product.extracted_price || product.price?.value || null,
+      price: product.price || null,
       pieces: pieces,
       dimensions: dimensions,
-      asin: product.asin || barcode,
-      link: product.asin ? `https://www.amazon.fr/dp/${product.asin}?tag=puzzleworld0e-21` : '',
+      asin: asin,
+      link: asin ? `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0e-21` : product.link,
       category_tag: categoryTag,
-      // Données Amazon pour affichage et stats
+      source: product.source || 'Google Shopping',
       rating: product.rating || null,
       ratings_total: product.reviews || 0,
       description: product.title || ''
