@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
     if (!serpApiKey) {
       return Response.json({ error: 'Clé SerpApi non configurée' }, { status: 500 });
     }
+    console.log('SerpApi Key configured:', serpApiKey ? 'YES' : 'NO');
 
     // ÉTAPE 1 : Vérification interne - Le puzzle existe-t-il déjà?
     const existingPuzzles = await base44.entities.PuzzleCatalog.filter({ asin: barcode });
