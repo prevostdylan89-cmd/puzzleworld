@@ -226,13 +226,21 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 )}
               </div>
 
-              {/* Piece Count */}
-              {puzzle.piece_count && (
-                <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
-                  <span className="text-2xl">🧩</span>
-                  <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
-                </div>
-              )}
+              {/* Piece Count & Dimensions */}
+              <div className="flex flex-wrap gap-3">
+                {puzzle.piece_count && (
+                  <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
+                    <span className="text-2xl">🧩</span>
+                    <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
+                  </div>
+                )}
+                {puzzle.dimensions && (
+                  <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
+                    <span className="text-2xl">📏</span>
+                    <span className="text-white font-semibold">{puzzle.dimensions}</span>
+                  </div>
+                )}
+              </div>
 
               {/* Popularity Score */}
               {!loadingScore && popularityScore !== null && popularityScore > 0 && (
