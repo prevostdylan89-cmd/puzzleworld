@@ -16,7 +16,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [user, setUser] = useState(null);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     if (open && puzzle) {
@@ -185,13 +184,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     }
   };
 
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomPosition({ x, y });
-  };
-
   if (!puzzle) return null;
 
   return (
@@ -212,17 +204,11 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         ) : productData ? (
           <>
             {/* Image Section */}
-            <div 
-              className="relative w-full bg-white/5 overflow-hidden group cursor-zoom-in"
-              onMouseMove={handleMouseMove}
-            >
+            <div className="relative w-full bg-white/5">
               <img
                 src={productData.main_image?.link || puzzle.image_hd}
                 alt={productData.title}
-                className="w-full h-80 object-contain transition-transform duration-100 group-hover:scale-[2.5]"
-                style={{
-                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
-                }}
+                className="w-full h-80 object-contain"
               />
             </div>
 
@@ -240,21 +226,13 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 )}
               </div>
 
-              {/* Piece Count & Dimensions */}
-              <div className="flex flex-wrap gap-3">
-                {puzzle.piece_count && (
-                  <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
-                    <span className="text-2xl">🧩</span>
-                    <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
-                  </div>
-                )}
-                {puzzle.dimensions && (
-                  <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
-                    <span className="text-2xl">📏</span>
-                    <span className="text-white font-semibold">{puzzle.dimensions}</span>
-                  </div>
-                )}
-              </div>
+              {/* Piece Count */}
+              {puzzle.piece_count && (
+                <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
+                  <span className="text-2xl">🧩</span>
+                  <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
+                </div>
+              )}
 
               {/* Popularity Score */}
               {!loadingScore && popularityScore !== null && popularityScore > 0 && (

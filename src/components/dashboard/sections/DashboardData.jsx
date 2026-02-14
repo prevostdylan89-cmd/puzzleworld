@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import PuzzleStatsModal from '@/components/dashboard/PuzzleStatsModal';
 import PuzzlePopularityModal from '@/components/dashboard/PuzzlePopularityModal';
 import PuzzleWishlistModal from '@/components/dashboard/PuzzleWishlistModal';
-import BrandManagement from '@/components/dashboard/BrandManagement';
 
 export default function DashboardData() {
   const [loading, setLoading] = useState(true);
@@ -17,8 +16,6 @@ export default function DashboardData() {
   const [editForm, setEditForm] = useState({ title: '', brand: '' });
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [modalType, setModalType] = useState(null); // 'popularity', 'wishlist', 'added'
-  const [updatingDimensions, setUpdatingDimensions] = useState(false);
-  const [updatingBrands, setUpdatingBrands] = useState(false);
 
   useEffect(() => {
     loadPuzzles();
@@ -82,52 +79,6 @@ export default function DashboardData() {
     } catch (error) {
       console.error('Error deleting puzzle:', error);
       toast.error('Erreur lors de la suppression');
-    }
-  };
-
-  const handleUpdateDimensions = async () => {
-    if (!confirm('Mettre à jour les dimensions de tous les puzzles ? Cette opération peut prendre quelques minutes.')) return;
-    
-    setUpdatingDimensions(true);
-    toast.info('Mise à jour en cours...');
-    
-    try {
-      const response = await base44.functions.invoke('updatePuzzleDimensions', {});
-      
-      if (response.data.success) {
-        toast.success(`✅ ${response.data.updated} puzzles mis à jour (${response.data.notFound} sans dimensions trouvées)`);
-        await loadPuzzles(); // Recharger les données
-      } else {
-        toast.error('Erreur lors de la mise à jour');
-      }
-    } catch (error) {
-      console.error('Error updating dimensions:', error);
-      toast.error('Erreur lors de la mise à jour');
-    } finally {
-      setUpdatingDimensions(false);
-    }
-  };
-
-  const handleUpdateBrands = async () => {
-    if (!confirm('Mettre à jour les marques de tous les puzzles ? Cette opération peut prendre quelques minutes.')) return;
-    
-    setUpdatingBrands(true);
-    toast.info('Analyse des titres en cours...');
-    
-    try {
-      const response = await base44.functions.invoke('updatePuzzleBrands', {});
-      
-      if (response.data.success) {
-        toast.success(`✅ ${response.data.updated} marques ajoutées • ${response.data.alreadyHasBrand} déjà renseignées • ${response.data.notFound} non trouvées`);
-        await loadPuzzles();
-      } else {
-        toast.error('Erreur lors de la mise à jour');
-      }
-    } catch (error) {
-      console.error('Error updating brands:', error);
-      toast.error('Erreur lors de la mise à jour');
-    } finally {
-      setUpdatingBrands(false);
     }
   };
 
@@ -264,45 +215,9 @@ export default function DashboardData() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
-          <p className="text-white/60">Classements basés sur les interactions sociales</p>
-        </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={handleUpdateBrands}
-            disabled={updatingBrands}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-          >
-            {updatingBrands ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Mise à jour...
-              </>
-            ) : (
-              <>
-                🏷️ Mettre à jour les marques
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={handleUpdateDimensions}
-            disabled={updatingDimensions}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
-          >
-            {updatingDimensions ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Mise à jour...
-              </>
-            ) : (
-              <>
-                📏 Mettre à jour les dimensions
-              </>
-            )}
-          </Button>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
+        <p className="text-white/60">Classements basés sur les interactions sociales</p>
       </div>
 
       <Tabs defaultValue="social" className="space-y-6">
@@ -318,10 +233,6 @@ export default function DashboardData() {
           <TabsTrigger value="added" className="data-[state=active]:bg-orange-500">
             <Users className="w-4 h-4 mr-2" />
             Classement par Ajouts (Collections)
-          </TabsTrigger>
-          <TabsTrigger value="brands" className="data-[state=active]:bg-orange-500">
-            <Edit2 className="w-4 h-4 mr-2" />
-            Gestion des Marques
           </TabsTrigger>
         </TabsList>
 
@@ -380,10 +291,6 @@ export default function DashboardData() {
               {puzzlesByAddedCount.map((puzzle, index) => renderPuzzleRow(puzzle, index, 'added'))}
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="brands" className="space-y-4">
-          <BrandManagement />
         </TabsContent>
       </Tabs>
 
