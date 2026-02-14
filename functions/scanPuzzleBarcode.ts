@@ -16,7 +16,20 @@ Deno.serve(async (req) => {
     }
 
     // Utiliser l'IA avec recherche web pour trouver les infos du puzzle
-    const prompt = `Recherche le puzzle correspondant au code EAN/GTIN ${barcode} sur Amazon.fr et extraie les informations suivantes en format structuré. Cherche bien le produit puzzle avec ce code-barres exact.`;
+    const prompt = `Va sur Amazon.fr et cherche le produit avec le code-barres EAN-13: ${barcode}
+    
+    Utilise cette URL exacte pour chercher: https://www.amazon.fr/s?k=${barcode}
+    
+    Si tu trouves un puzzle (jigsaw puzzle), extrais:
+    - Le titre complet du produit
+    - La marque (Ravensburger, Educa, Clementoni, etc.)
+    - Le nombre de pièces
+    - L'URL de l'image principale
+    - Le prix
+    - Le code ASIN (10 caractères)
+    - Les dimensions
+    
+    Si aucun résultat ou si ce n'est pas un puzzle, retourne found: false.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: prompt,
