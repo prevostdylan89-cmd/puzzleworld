@@ -526,6 +526,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             console.log('✓ Enrichissement: Ajout du lien Amazon');
           }
           
+          // Enrichir dimensions si manquantes
+          if (!existingInCatalog[0].dimensions && puzzleData.dimensions) {
+            updateData.dimensions = puzzleData.dimensions;
+            console.log('✓ Enrichissement: Ajout des dimensions');
+          }
+          
           // Enrichir données Amazon si disponibles
           if (puzzleData.rainforest_data) {
             if (!existingInCatalog[0].amazon_rating && puzzleData.rainforest_data.rating) {
