@@ -299,23 +299,24 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     toast.info('Recherche du puzzle en cours...');
     
     try {
-      const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=BA1606AA7E7E4793BD680FA4F7998C87&type=product&amazon_domain=amazon.fr&gtin=${barcode}`
-      );
+      // Utiliser notre fonction backend au lieu de Rainforest
+      const response = await base44.functions.invoke('scanPuzzleBarcode', { barcode: code });
+      const data = response.data;
       
-      const data = await response.json();
-      console.log("Réponse API complète:", data);
+      console.log("Réponse scan:", data);
       
-      // Check for API errors
-      if (data.request_info && !data.request_info.success) {
-        console.error("Erreur API Rainforest:", data.request_info.message);
-        toast.error('Erreur API : ' + (data.request_info.message || 'Service temporairement indisponible'));
+      if (!data.success) {
+        toast.error(data.message || 'Produit non trouvé sur Amazon');
         setLoading(false);
         return;
       }
       
       if (data.product) {
         const product = data.product;
+        
+        // Données basiques depuis notre scraper
+        const pieces = extractPieceCount(product.title);
+        const brand = extractBrand(product.title);
 
         // Liste des marques de puzzles connues
         const KNOWN_BRANDS = [
@@ -326,198 +327,81 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           'Djeco', 'Melissa & Doug', 'Nathan', 'MB', 'Dujardin', 'Janod'
         ];
 
-        // Extract from structured attributes (specifications, attributes)
-        let pieces = null;
-        let dimensions = null;
-        let brand = product.brand || '';
+        // Fonction helper pour extraire le nombre de pièces
+        const extractPieceCount = (title) => {
+          const match = title?.match(/(\d+)\s*(pièces?|pieces?)/i);
+          return match ? parseInt(match[1]) : null;
+        };
         
-        // Fallback 1: Chercher dans attributes.manufacturer
-        if (!brand && product.attributes) {
-          for (const attr of product.attributes) {
-            if (attr.name?.toLowerCase() === 'manufacturer' || attr.name?.toLowerCase() === 'fabricant') {
-              brand = attr.value || '';
-              break;
-            }
-          }
-        }
-        
-        // Fallback 2: Chercher dans le titre avec les marques connues
-        if (!brand && product.title) {
-          const titleLower = product.title.toLowerCase();
+        // Fonction helper pour extraire la marque
+        const extractBrand = (title) => {
+          if (!title) return '';
+          const titleLower = title.toLowerCase();
           for (const knownBrand of KNOWN_BRANDS) {
             if (titleLower.includes(knownBrand.toLowerCase())) {
-              brand = knownBrand;
-              break;
+              return knownBrand;
             }
           }
-        }
-        
-        // 1. Extract from specifications/attributes
-        const specs = product.specifications || [];
-        const attributes = product.attributes || [];
-        const allAttributes = [...specs, ...attributes];
-        
-        for (const attr of allAttributes) {
-          const name = (attr.name || '').toLowerCase();
-          const value = attr.value || '';
-          
-          // Nombre de pièces
-          if (!pieces && (name.includes('piece') || name.includes('pièce') || name.includes('number of pieces'))) {
-            const match = value.match(/(\d+)/);
-            if (match) {
-              pieces = parseInt(match[1]);
-            }
-          }
-          
-          // Dimensions
-          if (!dimensions && (name.includes('dimension') || name.includes('size') || name.includes('taille'))) {
-            const dimMatch = value.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-            if (dimMatch) {
-              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-            }
-          }
-        }
-        
-        // 2. Fallback: Extract from feature bullets if not found in attributes
-        if (!pieces || !dimensions) {
-          const allBullets = (product.feature_bullets || []).join(' ');
-          
-          if (!pieces) {
-            const patterns = [
-              /(\d+)\s*(pièces?|pieces?)/i,
-              /(\d+)\s*p\b/i,
-              /(\d+)\s*teile/i,
-              /puzzle\s*(\d+)/i,
-              /(\d{3,4})\s*(?:pc|pcs)/i
-            ];
-            
-            for (const pattern of patterns) {
-              const match = allBullets.match(pattern);
-              if (match && parseInt(match[1]) >= 100) {
-                pieces = parseInt(match[1]);
-                break;
-              }
-            }
-          }
-          
-          if (!dimensions) {
-            const dimMatch = allBullets.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-            if (dimMatch) {
-              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-            }
-          }
-        }
-        
-        // 3. Last resort: Extract from title
-        if (!pieces) {
-          const match = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
-          if (match && parseInt(match[1]) >= 100) {
-            pieces = parseInt(match[1]);
-          }
-        }
-        
-        if (!dimensions) {
-          const dimMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-          if (dimMatch) {
-            dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
-          }
-        }
+          return '';
+        };
         
         // Sécurité pour l'image avec fallback
-        let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+        let imageUrl = product.image_hd || '';
         if (!imageUrl) {
           imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
           console.warn("Aucune image trouvée, utilisation de l'image par défaut");
         }
         console.log("Image URL récupérée:", imageUrl);
         
-        // Clean the title (remove brand, pieces, dimensions)
+        // Clean the title (remove brand, pieces)
         const cleanedName = cleanTitle(product.title || '', brand, pieces);
         
-        // Extract theme/category from structured data
+        // Deviner la catégorie depuis le titre
         let categoryTag = 'Autre';
+        const titleLower = product.title.toLowerCase();
         
-        // Try to find theme in attributes first
-        for (const attr of allAttributes) {
-          const name = (attr.name || '').toLowerCase();
-          const value = (attr.value || '').toLowerCase();
-          
-          if (name.includes('theme') || name.includes('thème') || name.includes('style')) {
-            if (value.includes('nature') || value.includes('paysage') || value.includes('landscape')) {
-              categoryTag = 'Nature';
-              break;
-            } else if (value.includes('disney') || value.includes('cartoon')) {
-              categoryTag = 'Disney';
-              break;
-            } else if (value.includes('art') || value.includes('painting') || value.includes('tableau')) {
-              categoryTag = 'Art';
-              break;
-            } else if (value.includes('animal') || value.includes('animaux')) {
-              categoryTag = 'Animaux';
-              break;
-            } else if (value.includes('city') || value.includes('urban') || value.includes('ville') || value.includes('architecture')) {
-              categoryTag = 'Urbain';
-              break;
-            } else if (value.includes('vintage') || value.includes('retro')) {
-              categoryTag = 'Vintage';
-              break;
-            }
-          }
+        if (titleLower.includes('nature') || titleLower.includes('paysage') || titleLower.includes('landscape')) {
+          categoryTag = 'Nature';
+        } else if (titleLower.includes('disney')) {
+          categoryTag = 'Disney';
+        } else if (titleLower.includes('art') || titleLower.includes('tableau')) {
+          categoryTag = 'Art';
+        } else if (titleLower.includes('animal')) {
+          categoryTag = 'Animaux';
+        } else if (titleLower.includes('ville') || titleLower.includes('city') || titleLower.includes('urban')) {
+          categoryTag = 'Urbain';
+        } else if (titleLower.includes('vintage')) {
+          categoryTag = 'Vintage';
         }
-        
-        // Fallback: categories from Amazon
-        if (categoryTag === 'Autre') {
-          const categories = product.categories || [];
-          const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
-          
-          if (categoryString.includes('nature') || categoryString.includes('landscape')) {
-            categoryTag = 'Nature';
-          } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
-            categoryTag = 'Disney';
-          } else if (categoryString.includes('art') || categoryString.includes('painting')) {
-            categoryTag = 'Art';
-          } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
-            categoryTag = 'Animaux';
-          } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
-            categoryTag = 'Urbain';
-          }
-        }
-        
-        // Extraire la description complète
-        const fullDescription = [
-          product.description || '',
-          ...(product.feature_bullets || [])
-        ].filter(Boolean).join('\n\n');
 
         const puzzleInfo = {
           name: cleanedName,
-          brand: brand,
+          brand: brand || '',
           image: imageUrl,
-          link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
-          sku: product.model_number || barcode,
+          link: product.link || '',
+          sku: code,
           asin: code,
           title: cleanedName,
           image_hd: imageUrl,
           piece_count: pieces,
           pieces: pieces,
-          dimensions: dimensions,
+          dimensions: '',
           category_tag: categoryTag,
           // Données additionnelles pour PuzzleCatalog
           rainforest_data: {
-            rating: product.rating || null,
-            ratings_total: product.ratings_total || 0,
-            price: product.buybox_winner?.price?.value || product.price?.value || null,
-            currency: product.buybox_winner?.price?.currency || product.price?.currency || 'EUR',
-            description: fullDescription,
-            features: product.feature_bullets || []
+            rating: null,
+            ratings_total: 0,
+            price: product.price || null,
+            currency: 'EUR',
+            description: product.title || '',
+            features: []
           }
         };
         
-        console.log('📦 Données Rainforest récupérées:', {
+        console.log('📦 Données récupérées:', {
           prix: puzzleInfo.rainforest_data.price,
           pieces: pieces,
-          description: fullDescription.substring(0, 100) + '...',
-          rating: puzzleInfo.rainforest_data.rating
+          brand: brand
         });
         
         console.log("Données puzzle créées:", puzzleInfo);
