@@ -24,41 +24,70 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Recherche sur Amazon.fr avec Serpapi (utiliser 'k' au lieu de 'q' pour Amazon)
-    const serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
+    // Essayer plusieurs méthodes de recherche
+    let data = null;
+    let product = null;
     
-    const response = await fetch(serpApiUrl);
-    const data = await response.json();
-
-    console.log('Serpapi response:', JSON.stringify(data));
+    // MÉTHODE 1: Recherche directe par EAN sur Amazon.fr
+    console.log(`Tentative 1: Recherche Amazon.fr avec EAN ${barcode}`);
+    let serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
+    let response = await fetch(serpApiUrl);
+    data = await response.json();
+    
+    if (data.organic_results && data.organic_results.length > 0) {
+      product = data.organic_results[0];
+      console.log("✓ Trouvé avec recherche Amazon directe");
+    }
+    
+    // MÉTHODE 2: Google Shopping
+    if (!product) {
+      console.log(`Tentative 2: Google Shopping`);
+      serpApiUrl = `https://serpapi.com/search.json?engine=google_shopping&q=${barcode}&gl=fr&hl=fr&api_key=${serpApiKey}`;
+      response = await fetch(serpApiUrl);
+      data = await response.json();
+      
+      if (data.shopping_results && data.shopping_results.length > 0) {
+        // Prioriser Amazon dans les résultats
+        const amazonResult = data.shopping_results.find(r => r.link && r.link.includes('amazon'));
+        product = amazonResult || data.shopping_results[0];
+        
+        // Normaliser la structure
+        product = {
+          title: product.title,
+          thumbnail: product.thumbnail,
+          price: product.extracted_price || product.price,
+          link: product.link,
+          asin: product.product_id || null
+        };
+        console.log("✓ Trouvé avec Google Shopping");
+      }
+    }
+    
+    // MÉTHODE 3: Recherche avec préfixe "puzzle"
+    if (!product) {
+      console.log(`Tentative 3: Recherche Amazon avec mot-clé puzzle`);
+      serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=puzzle+${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
+      response = await fetch(serpApiUrl);
+      data = await response.json();
+      
+      if (data.organic_results && data.organic_results.length > 0) {
+        product = data.organic_results[0];
+        console.log("✓ Trouvé avec recherche Amazon + puzzle");
+      }
+    }
 
     // Vérifier s'il y a une erreur de l'API
-    if (data.error) {
+    if (data?.error) {
       return Response.json({ 
         success: false, 
         message: `Erreur API: ${data.error}` 
       });
     }
 
-    // Essayer d'abord organic_results
-    let product = null;
-    if (data.organic_results && data.organic_results.length > 0) {
-      product = data.organic_results[0];
-    }
-    // Sinon essayer search_results
-    else if (data.search_results && data.search_results.length > 0) {
-      product = data.search_results[0];
-    }
-    // Sinon essayer shopping_results
-    else if (data.shopping_results && data.shopping_results.length > 0) {
-      product = data.shopping_results[0];
-    }
-
     if (!product) {
       return Response.json({ 
         success: false, 
-        message: 'Produit non trouvé sur Amazon',
-        debug: { hasResults: !!data.organic_results, resultCount: data.organic_results?.length || 0 }
+        message: 'Produit non trouvé. Essayez la recherche par photo ou saisie manuelle.'
       });
     }
 
