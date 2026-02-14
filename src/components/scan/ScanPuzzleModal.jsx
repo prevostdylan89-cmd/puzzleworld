@@ -278,6 +278,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setPuzzleData(null);
     setShowSuccess(false);
     setSelectedStatus('');
+    setMode(null);
+    setManualCode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     onClose();
   };
@@ -286,6 +288,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setPuzzleData(null);
     setShowSuccess(false);
     setSelectedStatus('');
+    setMode(null);
+    setManualCode('');
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
   };
 
