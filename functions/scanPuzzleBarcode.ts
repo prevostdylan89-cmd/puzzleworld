@@ -15,57 +15,70 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Barcode requis' }, { status: 400 });
     }
 
-    // Utiliser l'IA avec recherche web pour trouver les infos du puzzle
-    const prompt = `Va sur Amazon.fr et cherche le produit avec le code-barres EAN-13: ${barcode}
+    const serpApiKey = Deno.env.get('SERPAPI_KEY');
     
-    Utilise cette URL exacte pour chercher: https://www.amazon.fr/s?k=${barcode}
-    
-    Si tu trouves un puzzle (jigsaw puzzle), extrais:
-    - Le titre complet du produit
-    - La marque (Ravensburger, Educa, Clementoni, etc.)
-    - Le nombre de pièces
-    - L'URL de l'image principale
-    - Le prix
-    - Le code ASIN (10 caractères)
-    - Les dimensions
-    
-    Si aucun résultat ou si ce n'est pas un puzzle, retourne found: false.`;
+    if (!serpApiKey) {
+      return Response.json({ 
+        success: false, 
+        message: 'Clé API Serpapi non configurée' 
+      }, { status: 500 });
+    }
 
-    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: prompt,
-      add_context_from_internet: true,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          found: { type: "boolean", description: "Si le produit a été trouvé" },
-          title: { type: "string", description: "Titre complet du puzzle" },
-          brand: { type: "string", description: "Marque du puzzle (Ravensburger, Educa, etc.)" },
-          pieces: { type: "number", description: "Nombre de pièces" },
-          image_url: { type: "string", description: "URL de l'image du produit" },
-          price: { type: "number", description: "Prix en euros" },
-          asin: { type: "string", description: "Code ASIN Amazon" },
-          dimensions: { type: "string", description: "Dimensions du puzzle (ex: 70x50 cm)" }
-        },
-        required: ["found", "title"]
-      }
-    });
+    // Recherche sur Amazon.fr avec Serpapi
+    const serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&q=${barcode}&api_key=${serpApiKey}`;
+    
+    const response = await fetch(serpApiUrl);
+    const data = await response.json();
 
-    if (!result.found) {
+    if (!data.organic_results || data.organic_results.length === 0) {
       return Response.json({ 
         success: false, 
         message: 'Produit non trouvé sur Amazon' 
       });
     }
 
+    // Prendre le premier résultat
+    const product = data.organic_results[0];
+
+    // Extraire le nombre de pièces du titre
+    const extractPieces = (title) => {
+      const match = title?.match(/(\d+)\s*(pièces?|pieces?)/i);
+      return match ? parseInt(match[1]) : null;
+    };
+
+    // Extraire les dimensions
+    const extractDimensions = (title) => {
+      const match = title?.match(/(\d+\s*[xX×]\s*\d+)\s*(cm)?/);
+      return match ? match[1] + ' cm' : '';
+    };
+
+    // Liste des marques connues
+    const KNOWN_BRANDS = [
+      'Ravensburger', 'Educa', 'Clementoni', 'Schmidt Spiele', 'Jumbo', 'Wasgij',
+      'Castorland', 'Trefl', 'Falcon', 'Galison', 'Eurographics', 'Heye',
+      'Bluebird', 'Cobble Hill', 'Pomegranate', 'Grafika', 'Buffalo Games'
+    ];
+
+    const extractBrand = (title) => {
+      if (!title) return '';
+      const titleLower = title.toLowerCase();
+      for (const brand of KNOWN_BRANDS) {
+        if (titleLower.includes(brand.toLowerCase())) {
+          return brand;
+        }
+      }
+      return '';
+    };
+
     const productData = {
-      title: result.title,
-      brand: result.brand || '',
-      image_hd: result.image_url || null,
-      price: result.price || null,
-      pieces: result.pieces || null,
-      dimensions: result.dimensions || '',
-      asin: result.asin || barcode,
-      link: result.asin ? `https://www.amazon.fr/dp/${result.asin}?tag=puzzleworld0e-21` : ''
+      title: product.title || '',
+      brand: extractBrand(product.title),
+      image_hd: product.thumbnail || null,
+      price: product.price?.value || null,
+      pieces: extractPieces(product.title),
+      dimensions: extractDimensions(product.title),
+      asin: product.asin || barcode,
+      link: product.asin ? `https://www.amazon.fr/dp/${product.asin}?tag=puzzleworld0e-21` : ''
     };
 
     return Response.json({ 
