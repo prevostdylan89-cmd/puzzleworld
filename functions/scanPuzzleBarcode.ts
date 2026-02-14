@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // Recherche sur Amazon.fr avec Serpapi
-    const serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&q=${barcode}&api_key=${serpApiKey}`;
+    // Recherche sur Amazon.fr avec Serpapi (utiliser 'k' au lieu de 'q' pour Amazon)
+    const serpApiUrl = `https://serpapi.com/search.json?engine=amazon&amazon_domain=amazon.fr&k=${encodeURIComponent(barcode)}&api_key=${serpApiKey}`;
     
     const response = await fetch(serpApiUrl);
     const data = await response.json();
