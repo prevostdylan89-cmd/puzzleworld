@@ -38,24 +38,47 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
     setLoading(true);
     try {
-      const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: barcodeCode });
-      const puzzleInfo = response.data.puzzle;
+      // D'abord vérifier si le puzzle existe dans la base de données locale
+      const existingPuzzles = await base44.entities.PuzzleCatalog.filter({ asin: barcodeCode });
 
-      setPuzzleData({
-        name: puzzleInfo.title || '',
-        brand: puzzleInfo.brand || '',
-        pieces: puzzleInfo.pieceCount || 0,
-        image: puzzleInfo.imageUrl || '',
-        sku: barcodeCode,
-        asin: barcodeCode,
-        title: puzzleInfo.title || '',
-        image_hd: puzzleInfo.imageUrl || '',
-        piece_count: puzzleInfo.pieceCount || 0
-      });
+      if (existingPuzzles.length > 0) {
+        const puzzle = existingPuzzles[0];
+        setPuzzleData({
+          name: puzzle.title || '',
+          brand: puzzle.brand || '',
+          pieces: puzzle.piece_count || 0,
+          image: puzzle.image_hd || '',
+          sku: barcodeCode,
+          asin: barcodeCode,
+          title: puzzle.title || '',
+          image_hd: puzzle.image_hd || '',
+          piece_count: puzzle.piece_count || 0,
+          catalog_id: puzzle.id
+        });
+        toast.success('Puzzle trouvé dans la base!');
+      } else {
+        // Si pas trouvé localement, chercher avec Rainforest
+        const response = await base44.functions.invoke('searchPuzzleWithRainforest', { asin: barcodeCode });
+        const puzzleInfo = response.data.puzzle;
+
+        setPuzzleData({
+          name: puzzleInfo.title || '',
+          brand: puzzleInfo.brand || '',
+          pieces: puzzleInfo.piece_count || 0,
+          image: puzzleInfo.image_hd || '',
+          sku: barcodeCode,
+          asin: barcodeCode,
+          title: puzzleInfo.title || '',
+          image_hd: puzzleInfo.image_hd || '',
+          piece_count: puzzleInfo.piece_count || 0
+        });
+        toast.success('Puzzle trouvé via Rainforest!');
+      }
+      
       setMode(null);
-      toast.success('Puzzle trouvé!');
     } catch (error) {
       toast.error('Code non trouvé');
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
