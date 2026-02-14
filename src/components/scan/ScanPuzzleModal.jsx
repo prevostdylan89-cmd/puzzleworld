@@ -296,8 +296,11 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     toast.info('Recherche du puzzle en cours...');
     
     try {
-      const response = await base44.functions.invoke('searchPuzzle', { barcode: code });
-      const data = response.data;
+      const response = await fetch(
+        `https://api.rainforestapi.com/request?api_key=${Deno.env.get('RAINFOREST_API_KEY') || '6DA586EEF04D4AFA912388EA8A29547F'}&type=product&amazon_domain=amazon.fr&gtin=${code}`
+      );
+      
+      const data = await response.json();
       console.log("Réponse API complète:", data);
       
       if (data.product) {
