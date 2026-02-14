@@ -95,6 +95,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    const productData = formatProductData(product, null);
+
     return Response.json({ 
       success: true, 
       product: productData 
