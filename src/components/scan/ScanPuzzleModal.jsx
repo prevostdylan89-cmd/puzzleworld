@@ -309,54 +309,81 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (data.product) {
         const product = data.product;
 
-        // Extract pieces count from title AND description
+        // Extract from structured attributes (specifications, attributes)
         let pieces = null;
-
-        // Try different patterns to find piece count
-        const patterns = [
-          /(\d+)\s*(pièces?|pieces?)/i,           // "1000 pièces"
-          /(\d+)\s*p\b/i,                         // "1000 p"
-          /(\d+)\s*teile/i,                       // "1000 Teile" (German)
-          /puzzle\s*(\d+)/i,                      // "Puzzle 1000"
-          /(\d{3,4})\s*(?:pc|pcs)/i,              // "1000pc"
-          /format\s*(\d+)\s*pièces/i              // "format 1000 pièces"
-        ];
-
-        // First try title
-        for (const pattern of patterns) {
-          const match = product.title?.match(pattern);
-          if (match && parseInt(match[1]) >= 100) { // minimum 100 pieces to avoid false positives
-            pieces = parseInt(match[1]);
-            break;
-          }
-        }
-
-        // If not found in title, try description
-        if (!pieces && product.description) {
-          for (const pattern of patterns) {
-            const match = product.description.match(pattern);
-            if (match && parseInt(match[1]) >= 100) {
+        let dimensions = null;
+        let brand = product.brand || '';
+        
+        // 1. Extract from specifications/attributes
+        const specs = product.specifications || [];
+        const attributes = product.attributes || [];
+        const allAttributes = [...specs, ...attributes];
+        
+        for (const attr of allAttributes) {
+          const name = (attr.name || '').toLowerCase();
+          const value = attr.value || '';
+          
+          // Nombre de pièces
+          if (!pieces && (name.includes('piece') || name.includes('pièce') || name.includes('number of pieces'))) {
+            const match = value.match(/(\d+)/);
+            if (match) {
               pieces = parseInt(match[1]);
-              break;
             }
           }
-        }
-
-        // If still not found, try feature bullets
-        if (!pieces && product.feature_bullets) {
-          const allBullets = product.feature_bullets.join(' ');
-          for (const pattern of patterns) {
-            const match = allBullets.match(pattern);
-            if (match && parseInt(match[1]) >= 100) {
-              pieces = parseInt(match[1]);
-              break;
+          
+          // Dimensions
+          if (!dimensions && (name.includes('dimension') || name.includes('size') || name.includes('taille'))) {
+            const dimMatch = value.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+            if (dimMatch) {
+              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
             }
           }
         }
         
-        // Extract dimensions from title (ex: 70x50, 70 x 50 cm)
-        const dimensionsMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-        const dimensions = dimensionsMatch ? `${dimensionsMatch[1]} x ${dimensionsMatch[2]} cm` : '';
+        // 2. Fallback: Extract from feature bullets if not found in attributes
+        if (!pieces || !dimensions) {
+          const allBullets = (product.feature_bullets || []).join(' ');
+          
+          if (!pieces) {
+            const patterns = [
+              /(\d+)\s*(pièces?|pieces?)/i,
+              /(\d+)\s*p\b/i,
+              /(\d+)\s*teile/i,
+              /puzzle\s*(\d+)/i,
+              /(\d{3,4})\s*(?:pc|pcs)/i
+            ];
+            
+            for (const pattern of patterns) {
+              const match = allBullets.match(pattern);
+              if (match && parseInt(match[1]) >= 100) {
+                pieces = parseInt(match[1]);
+                break;
+              }
+            }
+          }
+          
+          if (!dimensions) {
+            const dimMatch = allBullets.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+            if (dimMatch) {
+              dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
+            }
+          }
+        }
+        
+        // 3. Last resort: Extract from title
+        if (!pieces) {
+          const match = product.title?.match(/(\d+)\s*(pièces?|pieces?)/i);
+          if (match && parseInt(match[1]) >= 100) {
+            pieces = parseInt(match[1]);
+          }
+        }
+        
+        if (!dimensions) {
+          const dimMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
+          if (dimMatch) {
+            dimensions = `${dimMatch[1]} x ${dimMatch[2]} cm`;
+          }
+        }
         
         // Sécurité pour l'image avec fallback
         let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
@@ -366,24 +393,56 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         }
         console.log("Image URL récupérée:", imageUrl);
         
-        // Clean the title
-        const cleanedName = cleanTitle(product.title || '', product.brand || '', pieces);
+        // Clean the title (remove brand, pieces, dimensions)
+        const cleanedName = cleanTitle(product.title || '', brand, pieces);
         
-        // Extract category from Rainforest API data
+        // Extract theme/category from structured data
         let categoryTag = 'Autre';
-        const categories = product.categories || [];
-        const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
         
-        if (categoryString.includes('nature') || categoryString.includes('landscape')) {
-          categoryTag = 'Nature';
-        } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
-          categoryTag = 'Disney';
-        } else if (categoryString.includes('art') || categoryString.includes('painting')) {
-          categoryTag = 'Art';
-        } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
-          categoryTag = 'Animaux';
-        } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
-          categoryTag = 'Urbain';
+        // Try to find theme in attributes first
+        for (const attr of allAttributes) {
+          const name = (attr.name || '').toLowerCase();
+          const value = (attr.value || '').toLowerCase();
+          
+          if (name.includes('theme') || name.includes('thème') || name.includes('style')) {
+            if (value.includes('nature') || value.includes('paysage') || value.includes('landscape')) {
+              categoryTag = 'Nature';
+              break;
+            } else if (value.includes('disney') || value.includes('cartoon')) {
+              categoryTag = 'Disney';
+              break;
+            } else if (value.includes('art') || value.includes('painting') || value.includes('tableau')) {
+              categoryTag = 'Art';
+              break;
+            } else if (value.includes('animal') || value.includes('animaux')) {
+              categoryTag = 'Animaux';
+              break;
+            } else if (value.includes('city') || value.includes('urban') || value.includes('ville') || value.includes('architecture')) {
+              categoryTag = 'Urbain';
+              break;
+            } else if (value.includes('vintage') || value.includes('retro')) {
+              categoryTag = 'Vintage';
+              break;
+            }
+          }
+        }
+        
+        // Fallback: categories from Amazon
+        if (categoryTag === 'Autre') {
+          const categories = product.categories || [];
+          const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
+          
+          if (categoryString.includes('nature') || categoryString.includes('landscape')) {
+            categoryTag = 'Nature';
+          } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
+            categoryTag = 'Disney';
+          } else if (categoryString.includes('art') || categoryString.includes('painting')) {
+            categoryTag = 'Art';
+          } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
+            categoryTag = 'Animaux';
+          } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
+            categoryTag = 'Urbain';
+          }
         }
         
         // Extraire la description complète
@@ -394,7 +453,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
         const puzzleInfo = {
           name: cleanedName,
-          brand: product.brand || '',
+          brand: brand,
           image: imageUrl,
           link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
           sku: product.model_number || barcode,
