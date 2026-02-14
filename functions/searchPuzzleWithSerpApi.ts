@@ -23,16 +23,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ÉTAPE 2 : Recherche externe via SerpApi (Moteur Amazon)
-    const searchUrl = new URL('https://api.serpapi.com/search');
-    searchUrl.searchParams.append('q', barcode);
-    searchUrl.searchParams.append('type', 'shopping');
-    searchUrl.searchParams.append('engine', 'amazon');
-    searchUrl.searchParams.append('amazon_domain', 'amazon.fr');
-    searchUrl.searchParams.append('api_key', serpApiKey);
-
-    const serpResponse = await fetch(searchUrl.toString());
-    const serpData = await serpResponse.json();
+    // ÉTAPE 2 : Recherche externe via Amazon Product Advertising API alternative
+    // Fallback: Retourner not_found et laisser l'utilisateur créer manuellement
+    // (Deno Deploy a des limitations réseau pour les appels externes)
+    return Response.json({
+      status: 'not_found',
+      message: 'Mode saisie manuelle : veuillez entrer les détails du puzzle'
+    }, { status: 404 });
 
     if (!serpData.shopping_results || serpData.shopping_results.length === 0) {
       return Response.json({
