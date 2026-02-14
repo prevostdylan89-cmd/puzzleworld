@@ -247,9 +247,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setLoading(true);
     setPuzzleData(null);
 
-    // Only check user collection if not in "post mode"
-    if (!skipCollectionAdd) {
-      try {
+    try {
+      // Check user collection first (if not in post mode)
+      if (!skipCollectionAdd) {
         const user = await base44.auth.me();
         const existingInCollection = await base44.entities.UserPuzzle.filter({
           puzzle_reference: code,
@@ -261,48 +261,35 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           setLoading(false);
           return;
         }
-      } catch (error) {
-        console.error('Error checking user collection:', error);
       }
-    }
 
-    // Check if puzzle already exists in global catalog
-    const existing = await checkExistingPuzzle(code);
-    if (existing) {
-      toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
-      
-      // Use existing catalog data - preserve the original title
-      const data = {
-        name: existing.title,
-        brand: existing.brand,
-        image: existing.image_hd,
-        link: existing.amazon_link,
-        sku: existing.asin,
-        asin: existing.asin,
-        title: existing.title,
-        image_hd: existing.image_hd,
-        piece_count: existing.piece_count,
-        pieces: existing.piece_count,
-        dimensions: '',
-        catalogId: existing.id // Store catalog ID for enrichment
-      };
-      setPuzzleData(data);
-      setLoading(false);
-      
-      // If in post mode, call callback immediately
-      if (skipCollectionAdd && onPuzzleAdded) {
-        onPuzzleAdded(data);
+      // Check if puzzle exists in catalog
+      const existingCatalog = await base44.entities.PuzzleCatalog.filter({ asin: code });
+      if (existingCatalog && existingCatalog.length > 0) {
+        const existing = existingCatalog[0];
+        toast.success('✨ Ce puzzle est déjà dans le catalogue communautaire !');
+        setPuzzleData({
+          name: existing.title,
+          brand: existing.brand,
+          image: existing.image_hd,
+          link: existing.amazon_link,
+          sku: existing.asin,
+          asin: existing.asin,
+          title: existing.title,
+          image_hd: existing.image_hd,
+          piece_count: existing.piece_count,
+          pieces: existing.piece_count,
+          dimensions: existing.dimensions || '',
+          catalogId: existing.id
+        });
+        setLoading(false);
+        return;
       }
-      return;
-    }
-    
-    toast.info('Recherche du puzzle en cours...');
-    
-    try {
+
+      // Puzzle n'existe pas, appeler l'API
+      toast.info('Recherche du puzzle en cours...');
       const response = await base44.functions.invoke('scanPuzzleBarcode', { barcode: code });
       const data = response.data;
-
-      console.log("Réponse scan:", data);
 
       if (!data.success) {
         toast.error(data.message || 'Produit non trouvé');
@@ -310,51 +297,33 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         return;
       }
 
-      if (data.product) {
-        const product = data.product;
+      // Formater les données
+      const puzzleInfo = {
+        asin: data.product.asin,
+        title: data.product.title,
+        brand: data.product.brand,
+        image: data.product.image_hd,
+        image_hd: data.product.image_hd,
+        pieces: data.product.piece_count,
+        piece_count: data.product.piece_count,
+        amazon_price: data.product.amazon_price,
+        amazon_rating: data.product.amazon_rating,
+        amazon_ratings_total: data.product.amazon_ratings_total,
+        description: data.product.description,
+        category_tag: data.product.category_tag
+      };
 
-        // Clean the title
-        const cleanedName = cleanTitle(product.title || '', product.brand, product.pieces);
+      setPuzzleData(puzzleInfo);
+      toast.success('Puzzle trouvé !');
 
-        const puzzleInfo = {
-          name: cleanedName,
-          brand: product.brand || '',
-          image: product.image_hd || '',
-          link: product.link || '',
-          sku: product.asin || code,
-          asin: product.asin || code,
-          title: cleanedName,
-          image_hd: product.image_hd || '',
-          piece_count: product.pieces,
-          pieces: product.pieces,
-          dimensions: product.dimensions || '',
-          category_tag: product.category_tag || 'Autre',
-          // Données pour PuzzleCatalog
-          amazon_rating: product.rating || null,
-          amazon_ratings_total: product.ratings_total || 0,
-          amazon_price: product.price || null,
-          description: product.description || product.title || ''
-        };
-
-        console.log("Données puzzle créées:", puzzleInfo);
-        setPuzzleData(puzzleInfo);
-        toast.success('Puzzle trouvé !');
-
-        if (skipCollectionAdd && onPuzzleAdded) {
-          onPuzzleAdded(puzzleInfo);
-        }
-      } else {
-        toast.error('Produit non trouvé');
-        setLoading(false);
+      if (skipCollectionAdd && onPuzzleAdded) {
+        onPuzzleAdded(puzzleInfo);
       }
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('Error:', error);
       toast.error('Erreur lors de la recherche');
-      setLoading(false);
     } finally {
-      if (!puzzleData) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
