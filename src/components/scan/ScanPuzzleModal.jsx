@@ -678,12 +678,94 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
 
   const handleBarcodeSubmit = async () => {
-    if (barcodeInput.length !== 13) {
-      toast.error('Le code-barres doit contenir 13 chiffres');
-      return;
-    }
-    await fetchPuzzleData(barcodeInput);
-  };
+      if (barcodeInput.length !== 13) {
+        toast.error('Le code-barres doit contenir 13 chiffres');
+        return;
+      }
+      await fetchPuzzleData(barcodeInput);
+    };
+
+    const handlePhotoSearch = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Reset file input
+      e.target.value = '';
+
+      // Stop camera if active
+      if (cameraReady) {
+        await stopScanner();
+        setCameraReady(false);
+        setScanning(false);
+      }
+
+      setLoading(true);
+      toast.info('Analyse de la photo en cours...');
+
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await base44.functions.invoke('searchPuzzleByImage', formData);
+        const data = response.data;
+
+        console.log("Réponse recherche par image:", data);
+
+        if (!data.success) {
+          toast.error(data.message || 'Aucun puzzle trouvé');
+          setLoading(false);
+          return;
+        }
+
+        if (data.product) {
+          const product = data.product;
+
+          // Sécurité pour l'image avec fallback
+          let imageUrl = product.image_hd || '';
+          if (!imageUrl) {
+            imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
+          }
+
+          // Clean the title
+          const cleanedName = cleanTitle(product.title || '', product.brand, product.pieces);
+
+          const puzzleInfo = {
+            name: cleanedName,
+            brand: product.brand || '',
+            image: imageUrl,
+            link: product.link || '',
+            sku: product.asin || '',
+            asin: product.asin || '',
+            title: cleanedName,
+            image_hd: imageUrl,
+            piece_count: product.pieces,
+            pieces: product.pieces,
+            dimensions: product.dimensions || '',
+            category_tag: product.category_tag || 'Autre',
+            rainforest_data: {
+              rating: product.rating || null,
+              ratings_total: product.ratings_total || 0,
+              price: product.price || null,
+              currency: 'EUR',
+              description: product.description || product.title || '',
+              features: []
+            }
+          };
+
+          setPuzzleData(puzzleInfo);
+          toast.success('Puzzle trouvé !');
+
+          if (skipCollectionAdd && onPuzzleAdded) {
+            onPuzzleAdded(puzzleInfo);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur recherche par image:', error);
+        toast.error('Erreur lors de la recherche');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -719,44 +801,64 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 <div id="file-reader-temp" style={{ display: 'none' }}></div>
 
                 {!cameraReady && !loading && (
-                  <div className="flex flex-col items-center justify-center py-8 space-y-6">
-                    <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
-                      <Barcode className="w-12 h-12 text-orange-400" />
-                    </div>
-                    <Button
-                      onClick={handleActivateCamera}
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                    >
-                      📸 Activer la Caméra
-                    </Button>
+                      <div className="flex flex-col items-center justify-center py-8 space-y-6">
+                        <div className="w-24 h-24 rounded-full bg-orange-500/10 border-2 border-orange-500/30 flex items-center justify-center">
+                          <Barcode className="w-12 h-12 text-orange-400" />
+                        </div>
 
-                    <div className="w-full max-w-sm">
-                      <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input
-                            type="text"
-                            placeholder="13 chiffres"
-                            value={barcodeInput}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, '').slice(0, 13);
-                              setBarcodeInput(value);
-                            }}
-                            className="bg-white/5 border-white/10 text-white text-center tracking-wider"
-                            maxLength={13}
+                        <div className="flex flex-col gap-3 w-full max-w-sm">
+                          <Button
+                            onClick={handleActivateCamera}
+                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                          >
+                            📸 Scanner le code-barres
+                          </Button>
+
+                          <div className="text-white/50 text-xs text-center">ou</div>
+
+                          <Button
+                            onClick={() => document.getElementById('photo-search-input')?.click()}
+                            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+                          >
+                            🖼️ Chercher par photo
+                          </Button>
+                          <input
+                            id="photo-search-input"
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handlePhotoSearch}
+                            className="hidden"
                           />
                         </div>
-                        <Button
-                          onClick={handleBarcodeSubmit}
-                          disabled={barcodeInput.length !== 13}
-                          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
-                        >
-                          OK
-                        </Button>
+
+                        <div className="w-full max-w-sm">
+                          <div className="text-white/50 text-sm text-center mb-3">ou saisir le code-barres</div>
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <Input
+                                type="text"
+                                placeholder="13 chiffres"
+                                value={barcodeInput}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+                                  setBarcodeInput(value);
+                                }}
+                                className="bg-white/5 border-white/10 text-white text-center tracking-wider"
+                                maxLength={13}
+                              />
+                            </div>
+                            <Button
+                              onClick={handleBarcodeSubmit}
+                              disabled={barcodeInput.length !== 13}
+                              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
+                            >
+                              OK
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                )}
+                    )}
                 
                 {cameraReady && (
                   <>
