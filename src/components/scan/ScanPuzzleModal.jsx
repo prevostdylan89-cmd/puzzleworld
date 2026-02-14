@@ -457,17 +457,15 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               total_dislikes: 0
             };
             
-            // Add Rainforest data if available
-            if (puzzleData.rainforest_data) {
-              catalogData.amazon_rating = puzzleData.rainforest_data.rating;
-              catalogData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
-              catalogData.amazon_price = puzzleData.rainforest_data.price;
-              catalogData.description = puzzleData.rainforest_data.description;
-              
+            // Add SerpApi data if available
+            if (puzzleData.serpapi_data) {
+              catalogData.amazon_price = puzzleData.serpapi_data.price;
+              catalogData.description = puzzleData.serpapi_data.description;
+
               // Debug log pour vérifier le prix
-              console.log('💰 Prix récupéré:', puzzleData.rainforest_data.price);
+              console.log('💰 Prix récupéré:', puzzleData.serpapi_data.price);
             } else {
-              console.warn('⚠️ Aucune donnée Rainforest disponible');
+              console.warn('⚠️ Aucune donnée SerpApi disponible');
             }
             
             const newCatalogEntry = await base44.entities.PuzzleCatalog.create(catalogData);
