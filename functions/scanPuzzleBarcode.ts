@@ -30,15 +30,37 @@ Deno.serve(async (req) => {
     const response = await fetch(serpApiUrl);
     const data = await response.json();
 
-    if (!data.organic_results || data.organic_results.length === 0) {
+    console.log('Serpapi response:', JSON.stringify(data));
+
+    // Vérifier s'il y a une erreur de l'API
+    if (data.error) {
       return Response.json({ 
         success: false, 
-        message: 'Produit non trouvé sur Amazon' 
+        message: `Erreur API: ${data.error}` 
       });
     }
 
-    // Prendre le premier résultat
-    const product = data.organic_results[0];
+    // Essayer d'abord organic_results
+    let product = null;
+    if (data.organic_results && data.organic_results.length > 0) {
+      product = data.organic_results[0];
+    }
+    // Sinon essayer search_results
+    else if (data.search_results && data.search_results.length > 0) {
+      product = data.search_results[0];
+    }
+    // Sinon essayer shopping_results
+    else if (data.shopping_results && data.shopping_results.length > 0) {
+      product = data.shopping_results[0];
+    }
+
+    if (!product) {
+      return Response.json({ 
+        success: false, 
+        message: 'Produit non trouvé sur Amazon',
+        debug: { hasResults: !!data.organic_results, resultCount: data.organic_results?.length || 0 }
+      });
+    }
 
     // Extraire le nombre de pièces du titre
     const extractPieces = (title) => {
