@@ -71,30 +71,11 @@ Deno.serve(async (req) => {
     // Note: product peut être un search result qui a une structure différente
     const parsedData = await parseAmazonData(product, base44);
 
-    // Étape 4: Créer la fiche dans le catalogue
-    const catalogEntry = await base44.entities.PuzzleCatalog.create({
-      asin: asin,
-      title: parsedData.title,
-      brand: parsedData.brand || '',
-      piece_count: parsedData.pieceCount || 0,
-      image_hd: parsedData.imageUrl || '',
-      description: parsedData.description || '',
-      amazon_price: parsedData.price || null,
-      amazon_rating: parsedData.rating || null,
-      amazon_ratings_total: parsedData.ratings_total || 0,
-      category_tag: 'Autre',
-      socialScore: 0,
-      wishlistCount: 0,
-      added_count: 1,
-      total_likes: 0,
-      total_dislikes: 0
-    });
-
+    // Retourner les données parsées SANS créer automatiquement (pour validation utilisateur)
     return Response.json({
       status: 'found',
       puzzle: {
         ...parsedData,
-        id: catalogEntry.id,
         asin: asin
       }
     });
