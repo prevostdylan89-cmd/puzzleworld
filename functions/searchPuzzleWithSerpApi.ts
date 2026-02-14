@@ -28,10 +28,7 @@ Deno.serve(async (req) => {
     const searchUrl = new URL('https://serpapi.com/search');
     searchUrl.searchParams.append('engine', 'amazon');
     searchUrl.searchParams.append('q', barcode);
-    searchUrl.searchParams.append('amazon_domain', 'amazon.fr');
     searchUrl.searchParams.append('api_key', serpApiKey);
-
-    console.log('Calling SerpApi with URL:', searchUrl.toString());
 
     const serpResponse = await fetch(searchUrl.toString());
 
