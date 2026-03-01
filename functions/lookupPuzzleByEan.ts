@@ -197,13 +197,13 @@ Deno.serve(async (req) => {
       catalog_id: newEntry.id,
       asin: asin || '',
       ean,
-      title: cleanedTitle,
+      title: cleanedTitle || rawTitle,
       brand,
       piece_count: pieces,
       image_hd: imageUrl,
-      dimensions,
+      dimensions: '',
       amazon_price: price,
-      amazon_rating: rating,
+      amazon_rating: null,
       category_tag: categoryTag,
     });
 
