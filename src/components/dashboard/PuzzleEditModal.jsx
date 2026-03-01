@@ -79,7 +79,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">Modifier le puzzle</DialogTitle>
+          <DialogTitle className="text-white">{isCreating ? 'Ajouter un puzzle' : 'Modifier le puzzle'}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
