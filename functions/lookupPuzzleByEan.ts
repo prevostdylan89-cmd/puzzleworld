@@ -116,46 +116,34 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!rfData.product) {
-      return Response.json({ error: 'Produit non trouvé sur Amazon' }, { status: 404 });
+    const searchResults = rfData.search_results;
+    if (!searchResults || searchResults.length === 0) {
+      return Response.json({ error: 'Produit non trouvé sur Amazon pour cet EAN' }, { status: 404 });
     }
 
-    const product = rfData.product;
+    // Prendre le premier résultat
+    const product = searchResults[0];
     const asin = product.asin || null;
 
-    // Extraction pièces
-    const allText = [
-      product.title,
-      product.description,
-      ...(product.feature_bullets || [])
-    ].join(' ');
-    const pieces = extractPieces(allText);
-
-    const brand = product.brand || 'À compléter';
     const rawTitle = product.title || 'À compléter';
+    const brand = product.brand || 'À compléter';
+    const pieces = extractPieces(rawTitle);
     const cleanedTitle = cleanTitle(rawTitle, brand === 'À compléter' ? '' : brand, pieces);
-    const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+    const imageUrl = product.image || '';
 
-    const price = product.buybox_winner?.price?.value || product.price?.value || null;
-    const rating = product.rating || null;
-    const ratingsTotal = product.ratings_total || 0;
+    const price = product.prices?.[0]?.value || null;
+    const rating = null;
+    const ratingsTotal = 0;
+    const dimensions = '';
+    const fullDescription = '';
 
-    const dimensionsMatch = (product.title || '').match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-    const dimensions = dimensionsMatch ? `${dimensionsMatch[1]} x ${dimensionsMatch[2]} cm` : '';
-
-    const fullDescription = [
-      product.description || '',
-      ...(product.feature_bullets || [])
-    ].filter(Boolean).join('\n\n');
-
-    // Catégorie
+    // Catégorie basique depuis le titre
     let categoryTag = 'Autre';
-    const catStr = (product.categories || []).map(c => c.name).join(' ').toLowerCase();
-    if (catStr.includes('nature') || catStr.includes('landscape')) categoryTag = 'Nature';
-    else if (catStr.includes('disney') || catStr.includes('cartoon')) categoryTag = 'Disney';
-    else if (catStr.includes('art') || catStr.includes('painting')) categoryTag = 'Art';
-    else if (catStr.includes('animal') || catStr.includes('pet')) categoryTag = 'Animaux';
-    else if (catStr.includes('city') || catStr.includes('urban') || catStr.includes('architecture')) categoryTag = 'Urbain';
+    const titleLower = rawTitle.toLowerCase();
+    if (titleLower.includes('nature') || titleLower.includes('paysage')) categoryTag = 'Nature';
+    else if (titleLower.includes('disney')) categoryTag = 'Disney';
+    else if (titleLower.includes('art') || titleLower.includes('peinture')) categoryTag = 'Art';
+    else if (titleLower.includes('animal')) categoryTag = 'Animaux';
 
     // ÉTAPE 3 : Si ASIN connu → vérifier si déjà en base par ASIN
     if (asin) {
