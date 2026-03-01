@@ -187,7 +187,7 @@ export default function Collection() {
   const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
     queryKey: ['globalPuzzles'],
     queryFn: async () => {
-      const puzzles = await base44.entities.PuzzleCatalog.list('-created_date', 500);
+      const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-created_date', 500);
       return puzzles;
     },
     refetchInterval: 30000 // Auto-refresh every 30 seconds to sync with admin changes
