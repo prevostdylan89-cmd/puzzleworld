@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
       amazon_price: price || null,
       amazon_rating: rating || null,
       amazon_ratings_total: ratingsTotal || 0,
-      description: fullDescription || '',
+      description: fullDescription,
       socialScore: 0,
       wishlistCount: 0,
       added_count: 0,
