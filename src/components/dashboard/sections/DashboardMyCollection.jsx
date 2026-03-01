@@ -208,6 +208,14 @@ export default function DashboardMyCollection() {
         </div>
       </div>
 
+      {/* Add Modal */}
+      <PuzzleEditModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        puzzle={null}
+        onUpdate={loadPuzzles}
+      />
+
       {/* Edit Modal */}
       {editingPuzzle && (
         <PuzzleEditModal
