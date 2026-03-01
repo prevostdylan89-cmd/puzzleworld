@@ -426,7 +426,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg">
+      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white text-xl">Ajouter un Puzzle</DialogTitle>
         </DialogHeader>
