@@ -228,26 +228,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     return cleanedTitle;
   };
 
-  const checkExistingPuzzle = async (barcode) => {
-    try {
-      const existing = await base44.entities.PuzzleCatalog.filter({ asin: barcode });
-      if (existing && existing.length > 0) {
-        setExistingPuzzle(existing[0]);
-        return existing[0];
-      }
-      return null;
-    } catch (error) {
-      console.error('Error checking existing puzzle:', error);
-      return null;
-    }
-  };
-
   const fetchPuzzleData = async (code) => {
     setBarcode(code);
     setLoading(true);
     setPuzzleData(null);
+    setExistingPuzzle(null);
 
-    // Only check user collection if not in "post mode"
+    // Vérifier si déjà dans la collection personnelle
     if (!skipCollectionAdd) {
       try {
         const user = await base44.auth.me();
@@ -255,194 +242,64 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           puzzle_reference: code,
           created_by: user.email
         });
-
         if (existingInCollection.length > 0) {
-          toast.error('Vous possédez déjà ce puzzle dans votre collection!');
+          toast.error('Vous possédez déjà ce puzzle dans votre collection !');
           setLoading(false);
           return;
         }
-      } catch (error) {
-        console.error('Error checking user collection:', error);
+      } catch (err) {
+        console.error('Error checking user collection:', err);
       }
     }
 
-    // Check if puzzle already exists in global catalog
-    const existing = await checkExistingPuzzle(code);
-    if (existing) {
-      toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-      const data = {
-        name: existing.title,
-        brand: existing.brand,
-        image: existing.image_hd,
-        link: existing.amazon_link,
-        sku: existing.asin,
-        asin: existing.asin,
-        title: existing.title,
-        image_hd: existing.image_hd,
-        piece_count: existing.piece_count,
-        pieces: existing.piece_count,
-        dimensions: ''
-      };
-      setPuzzleData(data);
-      setLoading(false);
-      
-      // If in post mode, call callback immediately
-      if (skipCollectionAdd && onPuzzleAdded) {
-        onPuzzleAdded(data);
-      }
-      return;
-    }
-    
-    toast.info('Recherche du puzzle en cours...');
-    
     try {
-      const response = await fetch(
-        `https://api.rainforestapi.com/request?api_key=${Deno.env.get('RAINFOREST_API_KEY') || '6DA586EEF04D4AFA912388EA8A29547F'}&type=product&amazon_domain=amazon.fr&gtin=${code}`
-      );
-      
-      const data = await response.json();
-      console.log("Réponse API complète:", data);
-      
-      if (data.product) {
-        const product = data.product;
+      // Appel backend unique : EAN → lookup intelligent
+      const response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
+      const result = response.data;
 
-        // Extract pieces count from title AND description
-        let pieces = null;
-
-        // Try different patterns to find piece count
-        const patterns = [
-          /(\d+)\s*(pièces?|pieces?)/i,           // "1000 pièces"
-          /(\d+)\s*p\b/i,                         // "1000 p"
-          /(\d+)\s*teile/i,                       // "1000 Teile" (German)
-          /puzzle\s*(\d+)/i,                      // "Puzzle 1000"
-          /(\d{3,4})\s*(?:pc|pcs)/i,              // "1000pc"
-          /format\s*(\d+)\s*pièces/i              // "format 1000 pièces"
-        ];
-
-        // First try title
-        for (const pattern of patterns) {
-          const match = product.title?.match(pattern);
-          if (match && parseInt(match[1]) >= 100) { // minimum 100 pieces to avoid false positives
-            pieces = parseInt(match[1]);
-            break;
-          }
-        }
-
-        // If not found in title, try description
-        if (!pieces && product.description) {
-          for (const pattern of patterns) {
-            const match = product.description.match(pattern);
-            if (match && parseInt(match[1]) >= 100) {
-              pieces = parseInt(match[1]);
-              break;
-            }
-          }
-        }
-
-        // If still not found, try feature bullets
-        if (!pieces && product.feature_bullets) {
-          const allBullets = product.feature_bullets.join(' ');
-          for (const pattern of patterns) {
-            const match = allBullets.match(pattern);
-            if (match && parseInt(match[1]) >= 100) {
-              pieces = parseInt(match[1]);
-              break;
-            }
-          }
-        }
-        
-        // Extract dimensions from title (ex: 70x50, 70 x 50 cm)
-        const dimensionsMatch = product.title?.match(/(\d+)\s*[xX×]\s*(\d+)\s*(cm|mm)?/);
-        const dimensions = dimensionsMatch ? `${dimensionsMatch[1]} x ${dimensionsMatch[2]} cm` : '';
-        
-        // Sécurité pour l'image avec fallback
-        let imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
-        if (!imageUrl) {
-          imageUrl = 'https://images.unsplash.com/photo-1587731556938-38755b4803a6?w=400&h=400&fit=crop';
-          console.warn("Aucune image trouvée, utilisation de l'image par défaut");
-        }
-        console.log("Image URL récupérée:", imageUrl);
-        
-        // Clean the title
-        const cleanedName = cleanTitle(product.title || '', product.brand || '', pieces);
-        
-        // Extract category from Rainforest API data
-        let categoryTag = 'Autre';
-        const categories = product.categories || [];
-        const categoryString = categories.map(c => c.name).join(' ').toLowerCase();
-        
-        if (categoryString.includes('nature') || categoryString.includes('landscape')) {
-          categoryTag = 'Nature';
-        } else if (categoryString.includes('disney') || categoryString.includes('cartoon')) {
-          categoryTag = 'Disney';
-        } else if (categoryString.includes('art') || categoryString.includes('painting')) {
-          categoryTag = 'Art';
-        } else if (categoryString.includes('animal') || categoryString.includes('pet')) {
-          categoryTag = 'Animaux';
-        } else if (categoryString.includes('city') || categoryString.includes('urban') || categoryString.includes('architecture')) {
-          categoryTag = 'Urbain';
-        }
-        
-        // Extraire la description complète
-        const fullDescription = [
-          product.description || '',
-          ...(product.feature_bullets || [])
-        ].filter(Boolean).join('\n\n');
-
-        const puzzleInfo = {
-          name: cleanedName,
-          brand: product.brand || '',
-          image: imageUrl,
-          link: product.link ? `${product.link}&tag=MON_PUZZLE_ID-21` : '',
-          sku: product.model_number || barcode,
-          asin: code,
-          title: cleanedName,
-          image_hd: imageUrl,
-          piece_count: pieces,
-          pieces: pieces,
-          dimensions: dimensions,
-          category_tag: categoryTag,
-          // Données additionnelles pour PuzzleCatalog
-          rainforest_data: {
-            rating: product.rating || null,
-            ratings_total: product.ratings_total || 0,
-            price: product.buybox_winner?.price?.value || product.price?.value || null,
-            currency: product.buybox_winner?.price?.currency || product.price?.currency || 'EUR',
-            description: fullDescription,
-            features: product.feature_bullets || []
-          }
-        };
-        
-        console.log('📦 Données Rainforest récupérées:', {
-          prix: puzzleInfo.rainforest_data.price,
-          pieces: pieces,
-          description: fullDescription.substring(0, 100) + '...',
-          rating: puzzleInfo.rainforest_data.rating
-        });
-        
-        console.log("Données puzzle créées:", puzzleInfo);
-        setPuzzleData(puzzleInfo);
-        
-        toast.success('Puzzle trouvé !');
-        
-        // If in post mode, call callback immediately
-        if (skipCollectionAdd && onPuzzleAdded) {
-          onPuzzleAdded(puzzleInfo);
-        }
-      } else {
-        console.error("Aucun produit dans la réponse API");
-        toast.error('Produit non trouvé');
+      if (result.error) {
+        toast.error(result.error);
         setLoading(false);
+        return;
+      }
+
+      const isCommunity = result.source === 'catalog_ean' || result.source === 'catalog_asin';
+      if (isCommunity) {
+        toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+        setExistingPuzzle({ id: result.catalog_id, ...result });
+      } else {
+        toast.success('Puzzle trouvé ! (en attente de validation admin)');
+      }
+
+      const puzzleInfo = {
+        catalog_id: result.catalog_id,
+        name: result.title,
+        title: result.title,
+        brand: result.brand,
+        image: result.image_hd,
+        image_hd: result.image_hd,
+        pieces: result.piece_count,
+        piece_count: result.piece_count,
+        asin: result.asin,
+        ean: result.ean || code,
+        sku: result.asin || code,
+        dimensions: result.dimensions || '',
+        category_tag: result.category_tag,
+        amazon_price: result.amazon_price,
+        amazon_rating: result.amazon_rating,
+        link: result.asin ? `https://www.amazon.fr/dp/${result.asin}?tag=puzzleworld-21` : '',
+      };
+
+      setPuzzleData(puzzleInfo);
+      setLoading(false);
+
+      if (skipCollectionAdd && onPuzzleAdded) {
+        onPuzzleAdded(puzzleInfo);
       }
     } catch (error) {
-      console.error('API Error:', error);
-      toast.error('Erreur lors de la recherche du produit');
+      console.error('fetchPuzzleData error:', error);
+      toast.error('Erreur lors de la recherche du puzzle');
       setLoading(false);
-    } finally {
-      // S'assurer que loading est toujours arrêté
-      if (!puzzleData) {
-        setLoading(false);
-      }
     }
   };
 
