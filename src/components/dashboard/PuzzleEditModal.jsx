@@ -17,6 +17,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
     category_tag: '',
     price: '',
     asin: '',
+    ean: '',
     image_hd: ''
   });
   const [saving, setSaving] = useState(false);
