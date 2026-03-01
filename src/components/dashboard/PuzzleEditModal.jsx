@@ -29,12 +29,13 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         brand: puzzle.brand || '',
         piece_count: puzzle.piece_count || '',
         category_tag: puzzle.category_tag || '',
-        price: puzzle.price || '',
+        price: puzzle.amazon_price || puzzle.price || '',
         asin: puzzle.asin || '',
+        ean: puzzle.ean || '',
         image_hd: puzzle.image_hd || ''
       });
     } else {
-      setFormData({ title: '', brand: '', piece_count: '', category_tag: '', price: '', asin: '', image_hd: '' });
+      setFormData({ title: '', brand: '', piece_count: '', category_tag: '', price: '', asin: '', ean: '', image_hd: '' });
     }
   }, [puzzle, open]);
 
