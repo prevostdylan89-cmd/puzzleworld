@@ -335,135 +335,50 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       return;
     }
     try {
-      let catalogPuzzleId = null;
-      
-      // ÉTAPE 1: Vérification Globale - Chercher dans PuzzleCatalog par EAN/ASIN
-      const asinToCheck = puzzleData.sku || puzzleData.asin || barcode;
-      let isExistingInCatalog = false;
+      const catalogPuzzleId = puzzleData.catalog_id || null;
+      const refCode = puzzleData.ean || puzzleData.asin || puzzleData.sku || barcode;
 
-      if (asinToCheck) {
-        const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ asin: asinToCheck });
+      const statusMapping = { liked: 'done', not_liked: 'done', wishlist: 'wishlist', inbox: 'inbox' };
 
-        if (existingInCatalog.length > 0) {
-          // ACTION B: Le puzzle existe déjà dans la collection globale
-          catalogPuzzleId = existingInCatalog[0].id;
-          isExistingInCatalog = true;
-          console.log('✓ Puzzle déjà dans la collection communautaire');
-          toast.success('✨ Ce puzzle est déjà dans la collection communautaire !');
-
-          // Incrémenter added_count
-          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, {
-            added_count: (existingInCatalog[0].added_count || 0) + 1
-          });
-        } else {
-          // ACTION A: Nouveau puzzle - Créer dans la collection globale (Collection Communautaire)
-          try {
-            const catalogData = {
-              asin: asinToCheck,
-              image_hd: puzzleData.image || puzzleData.image_hd || '',
-              title: puzzleData.name || puzzleData.title || '',
-              brand: puzzleData.brand || '',
-              piece_count: puzzleData.pieces || puzzleData.piece_count || 0,
-              amazon_link: puzzleData.link || '',
-              category_tag: puzzleData.category_tag || 'Autre',
-              socialScore: 0,
-              wishlistCount: 0,
-              added_count: 1,
-              total_likes: 0,
-              total_dislikes: 0
-            };
-            
-            // Add Rainforest data if available
-            if (puzzleData.rainforest_data) {
-              catalogData.amazon_rating = puzzleData.rainforest_data.rating;
-              catalogData.amazon_ratings_total = puzzleData.rainforest_data.ratings_total;
-              catalogData.amazon_price = puzzleData.rainforest_data.price;
-              catalogData.description = puzzleData.rainforest_data.description;
-              
-              // Debug log pour vérifier le prix
-              console.log('💰 Prix récupéré:', puzzleData.rainforest_data.price);
-            } else {
-              console.warn('⚠️ Aucune donnée Rainforest disponible');
-            }
-            
-            const newCatalogEntry = await base44.entities.PuzzleCatalog.create(catalogData);
-            catalogPuzzleId = newCatalogEntry.id;
-            console.log('✓ Nouveau puzzle ajouté à la collection communautaire');
-            toast.success('🎉 Nouveau puzzle ajouté à la collection communautaire !');
-          } catch (catalogError) {
-            // Protection contre race condition (2 users simultanés)
-            console.log('Race condition détectée, récupération du puzzle existant...');
-            const retry = await base44.entities.PuzzleCatalog.filter({ asin: asinToCheck });
-            if (retry.length > 0) {
-              catalogPuzzleId = retry[0].id;
-            }
-          }
-        }
-      }
-      
-      // FINALISATION: Ajouter à la collection personnelle (UserPuzzle)
-      const statusMapping = {
-        'liked': 'done',
-        'not_liked': 'done',
-        'wishlist': 'wishlist',
-        'inbox': 'inbox'
-      };
-
-      const puzzleToCreate = {
+      // Ajouter à la collection personnelle
+      await base44.entities.UserPuzzle.create({
         puzzle_name: puzzleData.name || puzzleData.title || '',
         puzzle_brand: puzzleData.brand || '',
         puzzle_pieces: puzzleData.pieces || puzzleData.piece_count || 0,
         image_url: puzzleData.image || puzzleData.image_hd || '',
-        puzzle_reference: asinToCheck || '',
+        puzzle_reference: refCode,
         catalog_puzzle_id: catalogPuzzleId,
         status: statusMapping[selectedStatus] || 'inbox',
-        notes: selectedStatus === 'not_liked' ? 'Non aimé' : ''
-      };
-      
-      await base44.entities.UserPuzzle.create(puzzleToCreate);
-      
-      // Update PuzzleCatalog scores based on status
+        notes: selectedStatus === 'not_liked' ? 'Non aimé' : '',
+      });
+
+      // Mettre à jour les scores dans PuzzleCatalog
       if (catalogPuzzleId) {
-        const catalog = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
-        if (catalog.length > 0) {
-          const puzzle = catalog[0];
-          
+        const catalogEntries = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
+        if (catalogEntries.length > 0) {
+          const cat = catalogEntries[0];
+          const updates = { added_count: (cat.added_count || 0) + 1 };
           if (selectedStatus === 'liked') {
-            // Increment socialScore and total_likes
-            await base44.entities.PuzzleCatalog.update(puzzle.id, {
-              socialScore: (puzzle.socialScore || 0) + 1,
-              total_likes: (puzzle.total_likes || 0) + 1
-            });
+            updates.socialScore = (cat.socialScore || 0) + 1;
+            updates.total_likes = (cat.total_likes || 0) + 1;
           } else if (selectedStatus === 'not_liked') {
-            // Decrement socialScore and increment total_dislikes
-            await base44.entities.PuzzleCatalog.update(puzzle.id, {
-              socialScore: (puzzle.socialScore || 0) - 1,
-              total_dislikes: (puzzle.total_dislikes || 0) + 1
-            });
+            updates.socialScore = (cat.socialScore || 0) - 1;
+            updates.total_dislikes = (cat.total_dislikes || 0) + 1;
           } else if (selectedStatus === 'wishlist') {
-            // Increment wishlistCount
-            await base44.entities.PuzzleCatalog.update(puzzle.id, {
-              wishlistCount: (puzzle.wishlistCount || 0) + 1
-            });
+            updates.wishlistCount = (cat.wishlistCount || 0) + 1;
           }
+          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updates);
         }
       }
-      
-      // Award XP if adding as liked
+
+      // XP bonus pour "aimé"
       if (selectedStatus === 'liked') {
         const user = await base44.auth.me();
-        const currentXP = user.xp || 0;
-        await base44.auth.updateMe({ xp: currentXP + 100 });
+        await base44.auth.updateMe({ xp: (user.xp || 0) + 100 });
       }
-      
+
       setShowSuccess(true);
-
-      // Show appropriate success message
-      if (isExistingInCatalog) {
-        toast.success('✅ Puzzle ajouté à votre collection personnelle !');
-      }
-
-      // Refresh data in background
+      toast.success('✅ Puzzle ajouté à votre collection !');
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['wishlistPuzzles'] });
