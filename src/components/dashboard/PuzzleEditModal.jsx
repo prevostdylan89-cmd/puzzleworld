@@ -42,18 +42,29 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
     setSaving(true);
 
     try {
-      await base44.entities.PuzzleCatalog.update(puzzle.id, {
+      const data = {
         title: formData.title,
         brand: formData.brand,
-        piece_count: parseInt(formData.piece_count),
+        piece_count: parseInt(formData.piece_count) || 0,
         category_tag: formData.category_tag,
         price: parseFloat(formData.price) || 0,
         asin: formData.asin,
         amazon_link: formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=MON_PUZZLE_ID-21` : '',
-        image_hd: formData.image_hd
-      });
+        image_hd: formData.image_hd,
+        socialScore: 0,
+        wishlistCount: 0,
+        added_count: 0,
+        total_likes: 0,
+        total_dislikes: 0
+      };
 
-      toast.success('Puzzle mis à jour');
+      if (isCreating) {
+        await base44.entities.PuzzleCatalog.create(data);
+        toast.success('Puzzle ajouté à la collection !');
+      } else {
+        await base44.entities.PuzzleCatalog.update(puzzle.id, data);
+        toast.success('Puzzle mis à jour');
+      }
       onUpdate();
       onClose();
     } catch (error) {
