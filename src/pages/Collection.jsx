@@ -332,6 +332,36 @@ export default function Collection() {
                       </div>
                     </div>
 
+                    {/* Brand Filter */}
+                    <div>
+                      <label className="text-sm text-white/70 mb-3 block">Marque</label>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setSelectedBrand('all')}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            selectedBrand === 'all'
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-white/5 text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          Toutes
+                        </button>
+                        {brandOptions.map(brand => (
+                          <button
+                            key={brand}
+                            onClick={() => setSelectedBrand(brand)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                              selectedBrand === brand
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                            }`}
+                          >
+                            {brand === '__unknown__' ? '❓ Marque inconnue' : brand}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <Button 
                       onClick={clearFilters}
                       variant="outline" 
