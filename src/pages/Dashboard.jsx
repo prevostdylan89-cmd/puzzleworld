@@ -12,10 +12,12 @@ import DashboardProfile from '@/components/dashboard/sections/DashboardProfile';
 import DashboardSettings from '@/components/dashboard/sections/DashboardSettings';
 import DashboardData from '@/components/dashboard/sections/DashboardData';
 import DashboardOnline from '@/components/dashboard/sections/DashboardOnline';
+import DashboardPendingPuzzles from '@/components/dashboard/sections/DashboardPendingPuzzles';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
   { id: 'mycollection', label: 'Ma Collection', icon: Grid3X3, component: DashboardMyCollection },
+  { id: 'pending', label: 'En attente', icon: Grid3X3, component: DashboardPendingPuzzles },
   { id: 'social', label: 'Social', icon: Users, component: DashboardSocial },
   { id: 'events', label: 'Événements', icon: Calendar, component: DashboardEvents },
   { id: 'online', label: 'En Ligne', icon: Gamepad2, component: DashboardOnline },
