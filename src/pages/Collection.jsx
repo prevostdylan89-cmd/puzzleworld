@@ -206,11 +206,33 @@ export default function Collection() {
     }
   }, [globalPuzzles]);
 
+  // Known brands from the catalog
+  const KNOWN_BRANDS = ['Ravensburger', 'Clementoni', 'Jumbo', 'Trefl', 'Educa', 'Schmidt', 'Castorland', 'Heye', 'Cobble Hill', 'Buffalo Games', 'Ceaco', 'Epoch', 'MB', 'Nathan', 'Dino', 'Wrebbit', 'Helvetiq', 'AveJoys'];
+
+  const brandOptions = React.useMemo(() => {
+    const brandsInCatalog = new Set();
+    let hasUnknown = false;
+    globalPuzzles.forEach(p => {
+      const b = p.brand?.trim();
+      if (!b) {
+        hasUnknown = true;
+      } else {
+        const known = KNOWN_BRANDS.find(kb => b.toLowerCase().includes(kb.toLowerCase()));
+        if (known) brandsInCatalog.add(known);
+        else brandsInCatalog.add(b);
+      }
+    });
+    const sorted = [...brandsInCatalog].sort();
+    if (hasUnknown) sorted.push('__unknown__');
+    return sorted;
+  }, [globalPuzzles]);
+
   const clearFilters = () => {
     setMinPieces('');
     setMaxPieces('');
     setSearchQuery('');
     setSelectedCategory('all');
+    setSelectedBrand('all');
   };
 
   // Filter puzzles
