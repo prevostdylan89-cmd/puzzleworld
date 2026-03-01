@@ -12,6 +12,7 @@ export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     loadEvents();
@@ -19,7 +20,7 @@ export default function Events() {
 
   const loadEvents = async () => {
     try {
-      const allEvents = await base44.entities.Event.list('-event_date');
+      const allEvents = await base44.entities.Event.list('event_date');
       setEvents(allEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -27,6 +28,11 @@ export default function Events() {
       setLoading(false);
     }
   };
+
+  const sortedEvents = [...events].sort((a, b) => {
+    const diff = new Date(a.event_date) - new Date(b.event_date);
+    return sortOrder === 'asc' ? diff : -diff;
+  });
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);

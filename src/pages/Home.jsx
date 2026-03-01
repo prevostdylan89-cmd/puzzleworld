@@ -36,15 +36,12 @@ export default function Home() {
     setLoadingPuzzles(true);
     try {
       const featured = await base44.entities.FeaturedPuzzle.list('position', 4);
-      
-      if (featured.length > 0) {
-        const puzzlePromises = featured.map(fp => 
-          base44.entities.PuzzleCatalog.filter({ id: fp.puzzle_catalog_id })
-        );
-        const puzzleResults = await Promise.all(puzzlePromises);
-        const puzzles = puzzleResults.map(r => r[0]).filter(p => p);
-        setTopPuzzles(puzzles);
-      }
+      if (featured.length === 0) { setTopPuzzles([]); return; }
+
+      const allCatalog = await base44.entities.PuzzleCatalog.list('-created_date', 500);
+      const catalogMap = Object.fromEntries(allCatalog.map(p => [p.id, p]));
+      const puzzles = featured.map(fp => catalogMap[fp.puzzle_catalog_id]).filter(Boolean);
+      setTopPuzzles(puzzles);
     } catch (error) {
       console.error('Error loading puzzles:', error);
       setTopPuzzles([]);
@@ -57,20 +54,12 @@ export default function Home() {
     setLoadingEvents(true);
     try {
       const featured = await base44.entities.FeaturedEvent.list('position', 3);
-      
-      if (featured.length > 0) {
-        const eventPromises = featured
-          .filter(f => f.position <= 3)
-          .map(async (fe) => {
-            const eventList = await base44.entities.Event.filter({ id: fe.event_id });
-            return eventList[0];
-          });
-        
-        const events = (await Promise.all(eventPromises)).filter(e => e);
-        setFeaturedEvents(events);
-      } else {
-        setFeaturedEvents([]);
-      }
+      if (featured.length === 0) { setFeaturedEvents([]); return; }
+
+      const allEvents = await base44.entities.Event.list('-event_date', 100);
+      const eventMap = Object.fromEntries(allEvents.map(e => [e.id, e]));
+      const events = featured.map(fe => eventMap[fe.event_id]).filter(Boolean);
+      setFeaturedEvents(events);
     } catch (error) {
       console.error('Error loading events:', error);
       setFeaturedEvents([]);
