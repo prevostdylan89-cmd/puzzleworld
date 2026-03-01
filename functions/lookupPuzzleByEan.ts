@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
     const price = product.buybox_winner?.price?.value || product.price?.value || null;
     const rating = product.rating || null;
     const ratingsTotal = product.ratings_total || 0;
-    const fullDescription = [product.description || '', ...(product.feature_bullets || [])].filter(Boolean).join('\n\n');
+    const fullDescription = '';
 
     let categoryTag = 'Autre';
     const catStr = (product.categories || []).map(c => c.name).join(' ').toLowerCase();
