@@ -7,7 +7,9 @@ import { Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
+// puzzle=null means "create mode", puzzle=object means "edit mode"
 export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
+  const isCreating = !puzzle;
   const [formData, setFormData] = useState({
     title: '',
     brand: '',
