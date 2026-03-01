@@ -70,22 +70,49 @@ Deno.serve(async (req) => {
     const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&gtin=${ean}`;
 
     let rfData;
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
-      const rfResp = await fetch(rfUrl, { signal: controller.signal });
-      clearTimeout(timeout);
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        const rfResp = await fetch(rfUrl, { signal: controller.signal });
+        clearTimeout(timeout);
 
-      if (!rfResp.ok) {
-        const errText = await rfResp.text();
-        console.error('Rainforest error:', rfResp.status, errText);
-        return Response.json({ error: 'Erreur API Rainforest', details: errText }, { status: 502 });
+        if (!rfResp.ok) {
+          const errText = await rfResp.text();
+          console.error(`Rainforest error (attempt ${attempt}):`, rfResp.status, errText);
+          lastError = errText;
+          if (attempt < 3) {
+            await new Promise(r => setTimeout(r, 2000 * attempt));
+            continue;
+          }
+          return Response.json({ error: 'Erreur API Rainforest après 3 tentatives', details: lastError }, { status: 502 });
+        }
+
+        rfData = await rfResp.json();
+
+        // Rainforest peut retourner un 200 mais avec success:false
+        if (rfData?.request_info?.success === false) {
+          lastError = rfData.request_info.message;
+          console.error(`Rainforest success:false (attempt ${attempt}):`, lastError);
+          if (attempt < 3) {
+            await new Promise(r => setTimeout(r, 2000 * attempt));
+            rfData = null;
+            continue;
+          }
+          return Response.json({ error: 'Rainforest indisponible, réessayez dans quelques instants.' }, { status: 502 });
+        }
+
+        break; // succès
+      } catch (fetchErr) {
+        console.error(`Rainforest fetch error (attempt ${attempt}):`, fetchErr);
+        lastError = fetchErr.message;
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 2000 * attempt));
+          continue;
+        }
+        return Response.json({ error: 'Timeout ou erreur réseau Rainforest' }, { status: 502 });
       }
-
-      rfData = await rfResp.json();
-    } catch (fetchErr) {
-      console.error('Rainforest fetch error:', fetchErr);
-      return Response.json({ error: 'Timeout ou erreur réseau Rainforest' }, { status: 502 });
     }
 
     if (!rfData.product) {
