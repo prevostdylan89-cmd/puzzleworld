@@ -198,9 +198,8 @@ Deno.serve(async (req) => {
       brand,
       piece_count: pieces,
       image_hd: imageUrl,
-      dimensions: '',
       amazon_price: price,
-      amazon_rating: null,
+      amazon_rating: rating,
       category_tag: categoryTag,
     });
 
