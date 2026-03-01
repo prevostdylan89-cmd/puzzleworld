@@ -67,8 +67,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'RAINFOREST_API_KEY non configurée' }, { status: 500 });
     }
 
-    // Recherche par EAN via search Rainforest
-    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${ean}`;
+    // Recherche par EAN via type=product&gtin (le bon endpoint pour les codes-barres)
+    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&gtin=${ean}`;
 
     let rfData;
     let lastError = null;
@@ -92,7 +92,6 @@ Deno.serve(async (req) => {
 
         rfData = await rfResp.json();
 
-        // Rainforest peut retourner un 200 mais avec success:false
         if (rfData?.request_info?.success === false) {
           lastError = rfData.request_info.message;
           console.error(`Rainforest success:false (attempt ${attempt}):`, lastError);
@@ -104,7 +103,7 @@ Deno.serve(async (req) => {
           return Response.json({ error: 'Rainforest indisponible, réessayez dans quelques instants.' }, { status: 502 });
         }
 
-        break; // succès
+        break;
       } catch (fetchErr) {
         console.error(`Rainforest fetch error (attempt ${attempt}):`, fetchErr);
         lastError = fetchErr.message;
@@ -116,34 +115,32 @@ Deno.serve(async (req) => {
       }
     }
 
-    const searchResults = rfData.search_results;
-    if (!searchResults || searchResults.length === 0) {
+    const product = rfData?.product;
+    if (!product) {
       return Response.json({ error: 'Produit non trouvé sur Amazon pour cet EAN' }, { status: 404 });
     }
 
-    // Prendre le premier résultat
-    const product = searchResults[0];
     const asin = product.asin || null;
 
-    const rawTitle = product.title || 'À compléter';
+    const allText = [product.title, product.description, ...(product.feature_bullets || [])].join(' ');
+    const pieces = extractPieces(allText);
     const brand = product.brand || 'À compléter';
-    const pieces = extractPieces(rawTitle);
+    const rawTitle = product.title || 'À compléter';
     const cleanedTitle = cleanTitle(rawTitle, brand === 'À compléter' ? '' : brand, pieces);
-    const imageUrl = product.image || '';
+    const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
 
-    const price = product.prices?.[0]?.value || null;
-    const rating = null;
-    const ratingsTotal = 0;
-    const dimensions = '';
-    const fullDescription = '';
+    const price = product.buybox_winner?.price?.value || product.price?.value || null;
+    const rating = product.rating || null;
+    const ratingsTotal = product.ratings_total || 0;
+    const fullDescription = [product.description || '', ...(product.feature_bullets || [])].filter(Boolean).join('\n\n');
 
-    // Catégorie basique depuis le titre
     let categoryTag = 'Autre';
-    const titleLower = rawTitle.toLowerCase();
-    if (titleLower.includes('nature') || titleLower.includes('paysage')) categoryTag = 'Nature';
-    else if (titleLower.includes('disney')) categoryTag = 'Disney';
-    else if (titleLower.includes('art') || titleLower.includes('peinture')) categoryTag = 'Art';
-    else if (titleLower.includes('animal')) categoryTag = 'Animaux';
+    const catStr = (product.categories || []).map(c => c.name).join(' ').toLowerCase();
+    if (catStr.includes('nature') || catStr.includes('landscape') || catStr.includes('paysage')) categoryTag = 'Nature';
+    else if (catStr.includes('disney') || catStr.includes('cartoon')) categoryTag = 'Disney';
+    else if (catStr.includes('art') || catStr.includes('painting')) categoryTag = 'Art';
+    else if (catStr.includes('animal') || catStr.includes('pet')) categoryTag = 'Animaux';
+    else if (catStr.includes('city') || catStr.includes('urban') || catStr.includes('architecture')) categoryTag = 'Urbain';
 
     // ÉTAPE 3 : Si ASIN connu → vérifier si déjà en base par ASIN
     if (asin) {
