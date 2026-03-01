@@ -49,15 +49,12 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         brand: formData.brand,
         piece_count: parseInt(formData.piece_count) || 0,
         category_tag: formData.category_tag,
-        price: parseFloat(formData.price) || 0,
+        amazon_price: parseFloat(formData.price) || 0,
         asin: formData.asin,
-        amazon_link: formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=MON_PUZZLE_ID-21` : '',
+        ean: formData.ean,
+        amazon_link: formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=puzzleworld-21` : '',
         image_hd: formData.image_hd,
-        socialScore: 0,
-        wishlistCount: 0,
-        added_count: 0,
-        total_likes: 0,
-        total_dislikes: 0
+        ...(isCreating ? { socialScore: 0, wishlistCount: 0, added_count: 0, total_likes: 0, total_dislikes: 0 } : {})
       };
 
       if (isCreating) {
