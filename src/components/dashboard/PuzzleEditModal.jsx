@@ -32,8 +32,10 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         asin: puzzle.asin || '',
         image_hd: puzzle.image_hd || ''
       });
+    } else {
+      setFormData({ title: '', brand: '', piece_count: '', category_tag: '', price: '', asin: '', image_hd: '' });
     }
-  }, [puzzle]);
+  }, [puzzle, open]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
