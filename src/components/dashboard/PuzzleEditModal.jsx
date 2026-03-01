@@ -44,7 +44,8 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         piece_count: parseInt(formData.piece_count),
         category_tag: formData.category_tag,
         price: parseFloat(formData.price) || 0,
-        amazon_link: formData.amazon_link,
+        asin: formData.asin,
+        amazon_link: formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=MON_PUZZLE_ID-21` : '',
         image_hd: formData.image_hd
       });
 
@@ -132,13 +133,18 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
           </div>
 
           <div>
-            <label className="text-white/70 text-sm mb-2 block">Lien Amazon</label>
+            <label className="text-white/70 text-sm mb-2 block">ASIN Amazon</label>
             <Input
-              value={formData.amazon_link}
-              onChange={(e) => setFormData({ ...formData, amazon_link: e.target.value })}
+              value={formData.asin}
+              onChange={(e) => setFormData({ ...formData, asin: e.target.value })}
               className="bg-white/5 border-white/10 text-white"
-              placeholder="https://amazon.fr/..."
+              placeholder="Ex: B07B9S8X1Q"
             />
+            {formData.asin && (
+              <p className="text-white/40 text-xs mt-1">
+                → https://www.amazon.fr/dp/{formData.asin}
+              </p>
+            )}
           </div>
 
           <div>
