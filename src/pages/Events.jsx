@@ -65,9 +65,19 @@ export default function Events() {
       {/* Header */}
       <div className="px-4 lg:px-8 py-8 border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <Calendar className="w-8 h-8 text-orange-400" />
-            <h1 className="text-3xl font-bold text-white">Événements</h1>
+          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap gap-y-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-8 h-8 text-orange-400" />
+              <h1 className="text-3xl font-bold text-white">Événements</h1>
+            </div>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:outline-none"
+            >
+              <option value="asc">📅 Du plus tôt au plus tard</option>
+              <option value="desc">📅 Du plus tard au plus tôt</option>
+            </select>
           </div>
           <p className="text-white/60">
             Rejoignez notre communauté lors d'événements exclusifs
@@ -96,7 +106,7 @@ export default function Events() {
               animate="show"
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {events.map((event) => (
+              {sortedEvents.map((event) => (
                 <motion.div key={event.id} variants={item}>
                   <EventCard event={event} onClick={() => handleEventClick(event)} />
                 </motion.div>

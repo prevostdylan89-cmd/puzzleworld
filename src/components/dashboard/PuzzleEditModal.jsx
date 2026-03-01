@@ -27,7 +27,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         piece_count: puzzle.piece_count || '',
         category_tag: puzzle.category_tag || '',
         price: puzzle.price || '',
-        amazon_link: puzzle.amazon_link || '',
+        asin: puzzle.asin || '',
         image_hd: puzzle.image_hd || ''
       });
     }
