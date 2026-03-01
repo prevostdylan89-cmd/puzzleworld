@@ -103,8 +103,9 @@ Deno.serve(async (req) => {
     ].join(' ');
     const pieces = extractPieces(allText);
 
-    const brand = product.brand || '';
-    const cleanedTitle = cleanTitle(product.title, brand, pieces);
+    const brand = product.brand || 'À compléter';
+    const rawTitle = product.title || 'À compléter';
+    const cleanedTitle = cleanTitle(rawTitle, brand === 'À compléter' ? '' : brand, pieces);
     const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
 
     const price = product.buybox_winner?.price?.value || product.price?.value || null;
