@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     // Recherche par EAN via search Rainforest
-    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${ean}&sort_by=relevance&include_fields=search_results.asin,search_results.title,search_results.image,search_results.brand,search_results.prices`;
+    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${ean}`;
 
     let rfData;
     let lastError = null;
