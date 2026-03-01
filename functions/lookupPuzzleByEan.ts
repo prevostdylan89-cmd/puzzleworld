@@ -67,7 +67,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'RAINFOREST_API_KEY non configurée' }, { status: 500 });
     }
 
-    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&gtin=${ean}`;
+    // Recherche par EAN via search Rainforest
+    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${ean}&sort_by=relevance&include_fields=search_results.asin,search_results.title,search_results.image,search_results.brand,search_results.prices`;
 
     let rfData;
     let lastError = null;
