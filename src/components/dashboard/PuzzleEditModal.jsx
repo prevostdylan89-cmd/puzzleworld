@@ -203,7 +203,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
                   Enregistrement...
                 </>
               ) : (
-                'Enregistrer'
+                isCreating ? 'Ajouter le puzzle' : 'Enregistrer'
               )}
             </Button>
           </div>
