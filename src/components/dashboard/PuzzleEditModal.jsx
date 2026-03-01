@@ -146,19 +146,31 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
             />
           </div>
 
-          <div>
-            <label className="text-white/70 text-sm mb-2 block">ASIN Amazon</label>
-            <Input
-              value={formData.asin}
-              onChange={(e) => setFormData({ ...formData, asin: e.target.value })}
-              className="bg-white/5 border-white/10 text-white"
-              placeholder="Ex: B07B9S8X1Q"
-            />
-            {formData.asin && (
-              <p className="text-white/40 text-xs mt-1">
-                → https://www.amazon.fr/dp/{formData.asin}
-              </p>
-            )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-white/70 text-sm mb-2 block">ASIN Amazon</label>
+              <Input
+                value={formData.asin}
+                onChange={(e) => setFormData({ ...formData, asin: e.target.value.trim() })}
+                className="bg-white/5 border-white/10 text-white"
+                placeholder="Ex: B07B9S8X1Q"
+              />
+              {formData.asin && (
+                <p className="text-white/40 text-xs mt-1 truncate">
+                  → amazon.fr/dp/{formData.asin}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="text-white/70 text-sm mb-2 block">EAN-13 (code-barres)</label>
+              <Input
+                value={formData.ean}
+                onChange={(e) => setFormData({ ...formData, ean: e.target.value.replace(/\D/g, '').slice(0, 13) })}
+                className="bg-white/5 border-white/10 text-white"
+                placeholder="Ex: 4005556173297"
+                maxLength={13}
+              />
+            </div>
           </div>
 
           <div>
