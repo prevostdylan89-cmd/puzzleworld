@@ -182,6 +182,7 @@ export default function Collection() {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState('all');
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
