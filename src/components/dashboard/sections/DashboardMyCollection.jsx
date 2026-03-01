@@ -39,6 +39,7 @@ export default function DashboardMyCollection() {
   const [loading, setLoading] = useState(true);
   const [deletingPuzzle, setDeletingPuzzle] = useState(null);
   const [editingPuzzle, setEditingPuzzle] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadPuzzles();
