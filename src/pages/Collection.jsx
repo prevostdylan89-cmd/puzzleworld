@@ -242,8 +242,12 @@ export default function Collection() {
     const matchesMinPieces = !minPieces || (puzzle.piece_count >= parseInt(minPieces));
     const matchesMaxPieces = !maxPieces || (puzzle.piece_count <= parseInt(maxPieces));
     const matchesCategory = selectedCategory === 'all' || puzzle.category_tag === selectedCategory;
+    const puzzleBrand = puzzle.brand?.trim() || '';
+    const matchesBrand = selectedBrand === 'all'
+      || (selectedBrand === '__unknown__' && !puzzleBrand)
+      || (selectedBrand !== '__unknown__' && puzzleBrand.toLowerCase().includes(selectedBrand.toLowerCase()));
     
-    return matchesSearch && matchesMinPieces && matchesMaxPieces && matchesCategory;
+    return matchesSearch && matchesMinPieces && matchesMaxPieces && matchesCategory && matchesBrand;
   });
 
   // Sort puzzles
