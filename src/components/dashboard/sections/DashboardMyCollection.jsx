@@ -106,6 +106,13 @@ export default function DashboardMyCollection() {
           <h2 className="text-3xl font-bold text-white mb-2">Collection Communautaire</h2>
           <p className="text-white/60">Gérez tous les puzzles de la plateforme</p>
         </div>
+        <Button
+          onClick={() => setEditingPuzzle(null) || setShowAddModal(true)}
+          className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Ajouter un puzzle
+        </Button>
       </div>
 
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
