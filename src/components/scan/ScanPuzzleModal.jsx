@@ -293,16 +293,36 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
     // ÉTAPE 3 : Puzzle inconnu → appel Rainforest via backend
     try {
-      const response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
+      let response;
+      try {
+        response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
+      } catch (axiosError) {
+        // Erreur réseau ou 502 de Rainforest
+        const errData = axiosError?.response?.data;
+        if (errData?.error) {
+          if (errData.error.includes('non trouvé') || errData.error.includes('introuvable') || axiosError?.response?.status === 404) {
+            toast.error('❌ Produit introuvable sur Amazon. Vous pouvez l\'ajouter manuellement.');
+            setActiveTab('manual');
+          } else {
+            toast.error(`⚠️ ${errData.error}`);
+          }
+        } else {
+          toast.error('⚠️ L\'API Amazon est temporairement indisponible. Réessayez dans quelques secondes ou ajoutez manuellement.');
+          setActiveTab('manual');
+        }
+        setLoading(false);
+        return;
+      }
+
       const result = response.data;
 
       if (result.error) {
         // Produit introuvable sur Amazon
-        if (response.status === 404 || result.error.includes('trouvé')) {
-          toast.error('❌ Produit introuvable sur Amazon. Ajout manuel requis.');
+        if (result.error.includes('trouvé') || result.error.includes('introuvable')) {
+          toast.error('❌ Produit introuvable sur Amazon. Vous pouvez l\'ajouter manuellement.');
           setActiveTab('manual');
         } else {
-          toast.error(result.error);
+          toast.error(`⚠️ ${result.error}`);
         }
         setLoading(false);
         return;
