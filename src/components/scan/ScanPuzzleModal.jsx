@@ -739,28 +739,18 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             </motion.div>
 
             {/* Badge statut puzzle */}
-            {existingPuzzle && (
+            {scanMessage && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
-                className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
+                className={`rounded-xl p-4 text-center text-sm font-medium border ${
+                  scanMessage.type === 'community'
+                    ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                    : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
+                }`}
               >
-                <p className="text-orange-400 text-sm">
-                  ✨ Ce puzzle est déjà référencé par la communauté
-                </p>
-              </motion.div>
-            )}
-            {puzzleData?.isPending && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
-                className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center"
-              >
-                <p className="text-yellow-400 text-sm">
-                  🕐 Nouveau puzzle — en attente de validation par l'admin avant d'être visible dans le catalogue
-                </p>
+                {scanMessage.text}
               </motion.div>
             )}
 
