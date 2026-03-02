@@ -454,6 +454,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setExistingPuzzle(null);
+    setScanMessage(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
   };
@@ -466,6 +467,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setManualData({ name: '', brand: '', pieces: '', image: '', sku: '' });
     setBarcodeInput('');
     setExistingPuzzle(null);
+    setScanMessage(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
