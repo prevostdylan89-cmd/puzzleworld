@@ -299,17 +299,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       try {
         response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
       } catch (axiosError) {
-        // Erreur réseau ou 502 de Rainforest
         const errData = axiosError?.response?.data;
-        if (errData?.error) {
-          if (errData.error.includes('non trouvé') || errData.error.includes('introuvable') || axiosError?.response?.status === 404) {
-            toast.error('❌ Produit introuvable sur Amazon. Vous pouvez l\'ajouter manuellement.');
-            setActiveTab('manual');
-          } else {
-            toast.error(`⚠️ ${errData.error}`);
-          }
+        if (errData?.error && (errData.error.includes('non trouvé') || errData.error.includes('introuvable') || axiosError?.response?.status === 404)) {
+          setScanMessage({ type: 'error', text: '😕 Désolé, ce puzzle n\'est pas encore dans notre base. Ajoutez-le manuellement !' });
+          setActiveTab('manual');
         } else {
-          toast.error('⚠️ L\'API Amazon est temporairement indisponible. Réessayez dans quelques secondes ou ajoutez manuellement.');
+          setScanMessage({ type: 'error', text: '😴 Désolé, notre scanner est fatigué ! Réessayez dans quelques secondes ou ajoutez manuellement.' });
           setActiveTab('manual');
         }
         setLoading(false);
@@ -319,19 +314,18 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       const result = response.data;
 
       if (result.error) {
-        // Produit introuvable sur Amazon
         if (result.error.includes('trouvé') || result.error.includes('introuvable')) {
-          toast.error('❌ Produit introuvable sur Amazon. Vous pouvez l\'ajouter manuellement.');
+          setScanMessage({ type: 'error', text: '😕 Désolé, ce puzzle n\'est pas encore dans notre base. Ajoutez-le manuellement !' });
           setActiveTab('manual');
         } else {
-          toast.error(`⚠️ ${result.error}`);
+          setScanMessage({ type: 'error', text: '😴 Désolé, notre scanner est fatigué ! Réessayez dans quelques secondes.' });
         }
         setLoading(false);
         return;
       }
 
       // ÉTAPE 4 : Puzzle trouvé → en attente de validation
-      toast.success('✅ Puzzle trouvé et envoyé en attente de validation admin !');
+      setScanMessage({ type: 'new', text: '🎉 Merci d\'avoir ajouté ce puzzle ! Il est en attente de validation par notre équipe avant d\'apparaître dans le catalogue.' });
 
       const puzzleInfo = {
         catalog_id: result.catalog_id,
