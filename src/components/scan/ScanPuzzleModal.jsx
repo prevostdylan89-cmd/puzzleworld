@@ -234,6 +234,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setLoading(true);
     setPuzzleData(null);
     setExistingPuzzle(null);
+    setScanMessage(null);
 
     // ÉTAPE 1 : Vérifier si déjà dans la collection personnelle de l'utilisateur
     if (!skipCollectionAdd) {
@@ -244,7 +245,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           created_by: user.email
         });
         if (existingInCollection.length > 0) {
-          toast.error('⚠️ Vous possédez déjà ce puzzle dans votre collection !');
+          setScanMessage({ type: 'error', text: '⚠️ Vous possédez déjà ce puzzle dans votre collection !' });
           setLoading(false);
           return;
         }
@@ -258,13 +259,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ ean: code });
       if (existingInCatalog.length > 0) {
         const catalogPuzzle = existingInCatalog[0];
-        // Puzzle déjà connu → on ne rappelle PAS Rainforest, on utilise directement les données locales
         const isCommunity = catalogPuzzle.status === 'active';
-        if (isCommunity) {
-          toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-        } else {
-          toast.info('🕐 Ce puzzle est déjà en attente de validation admin.');
-        }
+        setScanMessage({
+          type: 'community',
+          text: isCommunity
+            ? '✨ Super ! Ce puzzle fait déjà partie de la collection communautaire.'
+            : '🕐 Ce puzzle est déjà connu mais en attente de validation par notre équipe.'
+        });
         setExistingPuzzle(catalogPuzzle);
         const puzzleInfo = {
           catalog_id: catalogPuzzle.id,
