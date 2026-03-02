@@ -115,7 +115,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const product = rfData?.product;
+    // Support both product endpoint (product) and search endpoint (search_results)
+    const product = rfData?.product || rfData?.search_results?.[0] || null;
     if (!product) {
       return Response.json({ error: 'Produit non trouvé sur Amazon pour cet EAN' }, { status: 404 });
     }
@@ -127,15 +128,15 @@ Deno.serve(async (req) => {
     const brand = product.brand || 'À compléter';
     const rawTitle = product.title || 'À compléter';
     const cleanedTitle = cleanTitle(rawTitle, brand === 'À compléter' ? '' : brand, pieces);
-    const imageUrl = product.main_image?.link || product.images?.[0]?.link || '';
+    const imageUrl = product.image || product.main_image?.link || product.images?.[0]?.link || '';
 
-    const price = product.buybox_winner?.price?.value || product.price?.value || null;
+    const price = product.price?.value || product.buybox_winner?.price?.value || null;
     const rating = product.rating || null;
     const ratingsTotal = product.ratings_total || 0;
     const fullDescription = '';
 
     let categoryTag = 'Autre';
-    const catStr = (product.categories || []).map(c => c.name).join(' ').toLowerCase();
+    const catStr = (product.categories || []).map(c => c.name || c).join(' ').toLowerCase();
     if (catStr.includes('nature') || catStr.includes('landscape') || catStr.includes('paysage')) categoryTag = 'Nature';
     else if (catStr.includes('disney') || catStr.includes('cartoon')) categoryTag = 'Disney';
     else if (catStr.includes('art') || catStr.includes('painting')) categoryTag = 'Art';
