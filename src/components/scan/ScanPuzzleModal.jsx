@@ -234,7 +234,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setPuzzleData(null);
     setExistingPuzzle(null);
 
-    // Vérifier si déjà dans la collection personnelle
+    // ÉTAPE 1 : Vérifier si déjà dans la collection personnelle de l'utilisateur
     if (!skipCollectionAdd) {
       try {
         const user = await base44.auth.me();
@@ -243,7 +243,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           created_by: user.email
         });
         if (existingInCollection.length > 0) {
-          toast.error('Vous possédez déjà ce puzzle dans votre collection !');
+          toast.error('⚠️ Vous possédez déjà ce puzzle dans votre collection !');
           setLoading(false);
           return;
         }
@@ -252,24 +252,64 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       }
     }
 
+    // ÉTAPE 2 : Vérification dans la base catalogue (avant d'appeler Rainforest)
     try {
-      // Appel backend unique : EAN → lookup intelligent
+      const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ ean: code });
+      if (existingInCatalog.length > 0) {
+        const catalogPuzzle = existingInCatalog[0];
+        // Puzzle déjà connu → on ne rappelle PAS Rainforest, on utilise directement les données locales
+        const isCommunity = catalogPuzzle.status === 'active';
+        if (isCommunity) {
+          toast.success('✨ Ce puzzle est déjà connu par la communauté !');
+        } else {
+          toast.info('🕐 Ce puzzle est déjà en attente de validation admin.');
+        }
+        setExistingPuzzle(catalogPuzzle);
+        const puzzleInfo = {
+          catalog_id: catalogPuzzle.id,
+          name: catalogPuzzle.title,
+          title: catalogPuzzle.title,
+          brand: catalogPuzzle.brand,
+          image: catalogPuzzle.image_hd,
+          image_hd: catalogPuzzle.image_hd,
+          pieces: catalogPuzzle.piece_count,
+          piece_count: catalogPuzzle.piece_count,
+          asin: catalogPuzzle.asin,
+          ean: catalogPuzzle.ean || code,
+          sku: catalogPuzzle.asin || code,
+          category_tag: catalogPuzzle.category_tag,
+          amazon_price: catalogPuzzle.amazon_price,
+          amazon_rating: catalogPuzzle.amazon_rating,
+          link: catalogPuzzle.asin ? `https://www.amazon.fr/dp/${catalogPuzzle.asin}?tag=puzzleworld-21` : '',
+        };
+        setPuzzleData(puzzleInfo);
+        setLoading(false);
+        if (skipCollectionAdd && onPuzzleAdded) onPuzzleAdded(puzzleInfo);
+        return;
+      }
+    } catch (err) {
+      console.error('Error checking catalog:', err);
+    }
+
+    // ÉTAPE 3 : Puzzle inconnu → appel Rainforest via backend
+    try {
       const response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
       const result = response.data;
 
       if (result.error) {
-        toast.error(result.error);
+        // Produit introuvable sur Amazon
+        if (response.status === 404 || result.error.includes('trouvé')) {
+          toast.error('❌ Produit introuvable sur Amazon. Ajout manuel requis.');
+          setActiveTab('manual');
+        } else {
+          toast.error(result.error);
+        }
         setLoading(false);
         return;
       }
 
-      const isCommunity = result.source === 'catalog_ean' || result.source === 'catalog_asin';
-      if (isCommunity) {
-        toast.success('✨ Ce puzzle est déjà connu par la communauté !');
-        setExistingPuzzle({ id: result.catalog_id, ...result });
-      } else {
-        toast.success('Puzzle trouvé ! (en attente de validation admin)');
-      }
+      // ÉTAPE 4 : Puzzle trouvé → en attente de validation
+      toast.success('✅ Puzzle trouvé et envoyé en attente de validation admin !');
 
       const puzzleInfo = {
         catalog_id: result.catalog_id,
@@ -288,14 +328,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         amazon_price: result.amazon_price,
         amazon_rating: result.amazon_rating,
         link: result.asin ? `https://www.amazon.fr/dp/${result.asin}?tag=puzzleworld-21` : '',
+        isPending: result.source === 'rainforest_new',
       };
 
       setPuzzleData(puzzleInfo);
       setLoading(false);
 
-      if (skipCollectionAdd && onPuzzleAdded) {
-        onPuzzleAdded(puzzleInfo);
-      }
+      if (skipCollectionAdd && onPuzzleAdded) onPuzzleAdded(puzzleInfo);
     } catch (error) {
       console.error('fetchPuzzleData error:', error);
       toast.error('Erreur lors de la recherche du puzzle');
