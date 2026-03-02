@@ -67,8 +67,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'RAINFOREST_API_KEY non configurée' }, { status: 500 });
     }
 
-    // Recherche par EAN via type=product&gtin (le bon endpoint pour les codes-barres)
-    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=product&amazon_domain=amazon.fr&gtin=${ean}`;
+    // Recherche par EAN via type=search (plus fiable que gtin pour les EAN européens)
+    const rfUrl = `https://api.rainforestapi.com/request?api_key=${apiKey}&type=search&amazon_domain=amazon.fr&search_term=${ean}`;
 
     let rfData;
     let lastError = null;
