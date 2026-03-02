@@ -486,6 +486,23 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           <DialogTitle className="text-white text-xl">Ajouter un Puzzle</DialogTitle>
         </DialogHeader>
 
+        {/* Message d'état (erreur, communauté, nouveau) — affiché quand pas de puzzleData visible */}
+        {!puzzleData && !showSuccess && scanMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-xl p-4 text-center text-sm font-medium border ${
+              scanMessage.type === 'error'
+                ? 'bg-red-500/10 border-red-500/30 text-red-300'
+                : scanMessage.type === 'community'
+                ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
+            }`}
+          >
+            {scanMessage.text}
+          </motion.div>
+        )}
+
         {!puzzleData && !showSuccess && (
           <>
             {isMobile ? (
