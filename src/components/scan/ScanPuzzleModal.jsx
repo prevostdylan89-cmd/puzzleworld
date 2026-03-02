@@ -353,7 +353,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (skipCollectionAdd && onPuzzleAdded) onPuzzleAdded(puzzleInfo);
     } catch (error) {
       console.error('fetchPuzzleData error:', error);
-      toast.error('Erreur lors de la recherche du puzzle');
+      setScanMessage({ type: 'error', text: '😴 Désolé, notre scanner est fatigué ! Réessayez dans quelques secondes.' });
       setLoading(false);
     }
   };
