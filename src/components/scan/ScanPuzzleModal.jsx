@@ -705,7 +705,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               )}
             </motion.div>
 
-            {/* Badge communauté si puzzle existant */}
+            {/* Badge statut puzzle */}
             {existingPuzzle && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -714,7 +714,19 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center"
               >
                 <p className="text-orange-400 text-sm">
-                  ✨ Ce puzzle est déjà référencé par {existingPuzzle.total_likes + existingPuzzle.total_superlikes || 0} membres de la communauté
+                  ✨ Ce puzzle est déjà référencé par la communauté
+                </p>
+              </motion.div>
+            )}
+            {puzzleData?.isPending && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center"
+              >
+                <p className="text-yellow-400 text-sm">
+                  🕐 Nouveau puzzle — en attente de validation par l'admin avant d'être visible dans le catalogue
                 </p>
               </motion.div>
             )}
