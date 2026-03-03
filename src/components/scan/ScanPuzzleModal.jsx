@@ -874,43 +874,70 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         {showSuccess && (
           <div className="space-y-6 py-8">
             {/* Animation de pièces de puzzle */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex justify-center items-center mb-6 relative h-24"
-            >
-              {/* Pièce gauche */}
+            <div className="flex justify-center items-center mb-6 relative h-28">
+              {/* Pièce gauche — connecteur droit sortant */}
               <motion.div
-                initial={{ x: -100, rotate: -15 }}
-                animate={{ x: 0, rotate: 0 }}
-                transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
-                className="text-6xl absolute"
-                style={{ left: 'calc(50% - 48px)' }}
+                initial={{ x: -90 }}
+                animate={{ x: 0 }}
+                transition={{ delay: 0.2, duration: 0.55, type: "spring", stiffness: 180, damping: 14 }}
+                className="absolute"
+                style={{ left: 'calc(50% - 88px)' }}
               >
-                🧩
+                <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+                  <path
+                    d="M4 4 H40
+                       Q40 4 40 20
+                       Q52 20 52 30
+                       Q52 40 40 40
+                       Q40 56 40 84
+                       H4 V4 Z"
+                    fill="url(#g1)" stroke="white" strokeWidth="1.5"
+                  />
+                  <defs>
+                    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#f97316"/>
+                      <stop offset="100%" stopColor="#ea580c"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
               </motion.div>
 
-              {/* Pièce droite */}
+              {/* Pièce droite — encoche gauche entrante */}
               <motion.div
-                initial={{ x: 100, rotate: 15 }}
-                animate={{ x: 0, rotate: 0 }}
-                transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
-                className="text-6xl absolute"
-                style={{ right: 'calc(50% - 48px)' }}
+                initial={{ x: 90 }}
+                animate={{ x: 0 }}
+                transition={{ delay: 0.2, duration: 0.55, type: "spring", stiffness: 180, damping: 14 }}
+                className="absolute"
+                style={{ left: 'calc(50%)' }}
               >
-                🧩
+                <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+                  <path
+                    d="M48 4 H84 V84
+                       H48
+                       Q48 56 48 40
+                       Q36 40 36 30
+                       Q36 20 48 20
+                       Q48 4 48 4 Z"
+                    fill="url(#g2)" stroke="white" strokeWidth="1.5"
+                  />
+                  <defs>
+                    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#fb923c"/>
+                      <stop offset="100%" stopColor="#f97316"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
               </motion.div>
 
-              {/* Effet de brillance au centre */}
+              {/* Flash d'emboîtement */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [0, 1.5, 0], opacity: [0, 1, 0] }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="absolute w-16 h-16 rounded-full bg-gradient-to-r from-orange-400 to-yellow-400"
-                style={{ filter: 'blur(20px)' }}
+                animate={{ scale: [0, 1.2, 0], opacity: [0, 0.7, 0] }}
+                transition={{ delay: 0.75, duration: 0.4 }}
+                className="absolute w-10 h-10 rounded-full bg-yellow-300"
+                style={{ filter: 'blur(12px)', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
               />
-            </motion.div>
+            </div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
