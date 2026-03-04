@@ -542,7 +542,13 @@ function LayoutContent({ children, currentPageName }) {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {children}
+            {(() => {
+              const pageSetting = pageSettings.find(s => s.page_name === currentPageName);
+              if (pageSetting && pageSetting.is_active === false) {
+                return <MaintenancePage message={pageSetting.maintenance_message} />;
+              }
+              return children;
+            })()}
           </motion.div>
         </AnimatePresence>
       </main>
