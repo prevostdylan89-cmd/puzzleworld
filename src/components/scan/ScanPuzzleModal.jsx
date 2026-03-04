@@ -730,7 +730,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
 
         {puzzleData && !showSuccess && !skipCollectionAdd && (
           <div className="space-y-4">
-            {/* Image - Animation 1 */}
+            {/* Image */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -766,32 +766,25 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               </motion.div>
             )}
 
-            {/* Informations du puzzle (non éditables) */}
+            {/* Informations du puzzle */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.4 }}
               className="space-y-3"
             >
-              {/* Nom */}
               <div className="rounded-lg bg-white/5 border border-white/10 p-3">
                 <label className="text-white/50 text-xs mb-1 block">Nom du puzzle</label>
                 <p className="text-white text-sm leading-relaxed break-words">{puzzleData.name || 'Non renseigné'}</p>
               </div>
-
-              {/* Marque */}
               <div className="rounded-lg bg-white/5 border border-white/10 p-3">
                 <label className="text-white/50 text-xs mb-1 block">Marque</label>
                 <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
               </div>
-
-              {/* Pièces */}
               <div className="rounded-lg bg-white/5 border border-white/10 p-3">
                 <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
                 <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
               </div>
-
-              {/* Dimensions */}
               {puzzleData.dimensions && (
                 <div className="rounded-lg bg-white/5 border border-white/10 p-3">
                   <label className="text-white/50 text-xs mb-1 block">Dimensions</label>
@@ -800,84 +793,102 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               )}
             </motion.div>
 
-            {/* Status Selection with Visual Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Bouton J'ai aimé */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('liked')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'liked'
-                        ? 'border-green-500 bg-green-500/20 text-green-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">👍</span>
-                    <span className="text-sm font-medium">J'ai aimé</span>
-                  </button>
-
-                  {/* Bouton Je n'ai pas aimé */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('not_liked')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'not_liked'
-                        ? 'border-red-500 bg-red-500/20 text-red-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">👎</span>
-                    <span className="text-sm font-medium">Pas aimé</span>
-                  </button>
-
-                  {/* Bouton Wishlist */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('wishlist')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'wishlist'
-                        ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">⭐</span>
-                    <span className="text-sm font-medium">Wishlist</span>
-                  </button>
-
-                  {/* Bouton Dans sa boîte */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStatus('inbox')}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      selectedStatus === 'inbox'
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                        : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
-                    }`}
-                  >
-                    <span className="text-3xl">📦</span>
-                    <span className="text-sm font-medium">Dans sa boîte</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Validate Button */}
-              <Button
-                onClick={handleAddPuzzle}
-                disabled={!selectedStatus}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* Étape de confirmation */}
+            {!puzzleConfirmed ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.4 }}
+                className="space-y-3"
               >
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Valider l'ajout
-              </Button>
-            </motion.div>
+                <p className="text-white/70 text-sm text-center font-medium">C'est bien votre puzzle ?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setPuzzleConfirmed(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    ✅ Oui, c'est lui !
+                  </Button>
+                  <Button
+                    onClick={handleNotMyPuzzle}
+                    variant="outline"
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-500"
+                  >
+                    ❌ Non, ce n'est pas lui
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              /* Status Selection */
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('liked')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'liked'
+                          ? 'border-green-500 bg-green-500/20 text-green-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">👍</span>
+                      <span className="text-sm font-medium">J'ai aimé</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('not_liked')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'not_liked'
+                          ? 'border-red-500 bg-red-500/20 text-red-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">👎</span>
+                      <span className="text-sm font-medium">Pas aimé</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('wishlist')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'wishlist'
+                          ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-yellow-500/50 hover:bg-yellow-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">⭐</span>
+                      <span className="text-sm font-medium">Wishlist</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('inbox')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'inbox'
+                          ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-blue-500/50 hover:bg-blue-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">📦</span>
+                      <span className="text-sm font-medium">Dans sa boîte</span>
+                    </button>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleAddPuzzle}
+                  disabled={!selectedStatus}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Valider l'ajout
+                </Button>
+              </motion.div>
+            )}
           </div>
         )}
 
