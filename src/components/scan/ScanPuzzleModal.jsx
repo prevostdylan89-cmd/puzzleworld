@@ -482,11 +482,18 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   };
 
   const handleGoManual = () => {
-    setPuzzleData(null);
-    setPuzzleConfirmed(false);
-    setScanMessage(null);
+    setShowManualModal(true);
     setShowNotMyPuzzle(false);
-    setActiveTab('manual');
+  };
+
+  const handleManualModalSubmit = (puzzleData) => {
+    setShowManualModal(false);
+    setShowNotMyPuzzle(false);
+    setPuzzleData(null);
+    setScanMessage({ type: 'new', text: '🎉 Puzzle ajouté et en attente de validation par notre équipe !' });
+    // Directly show the status selection by setting the data and confirming
+    setPuzzleData(puzzleData);
+    setPuzzleConfirmed(true);
   };
 
 
