@@ -328,9 +328,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         return;
       }
 
-      // ÉTAPE 4 : Puzzle trouvé → en attente de validation
-      setScanMessage({ type: 'new', text: '🎉 Merci d\'avoir ajouté ce puzzle ! Il est en attente de validation par notre équipe avant d\'apparaître dans le catalogue.' });
-
+      // ÉTAPE 4 : Puzzle trouvé → pas de message ici, il sera affiché après validation
       const puzzleInfo = {
         catalog_id: result.catalog_id,
         name: result.title,
