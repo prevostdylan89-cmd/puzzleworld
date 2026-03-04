@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Loader2, Barcode, Edit, Star, Image as ImageIcon, Check, Edit2 } from 'lucide-react';
+import ManualAddPuzzleModal from './ManualAddPuzzleModal';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
