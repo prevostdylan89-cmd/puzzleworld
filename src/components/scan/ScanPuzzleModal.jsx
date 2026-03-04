@@ -489,13 +489,11 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setShowNotMyPuzzle(false);
   };
 
-  const handleManualModalSubmit = (puzzleData) => {
+  const handleManualModalSubmit = (newPuzzleData) => {
     setShowManualModal(false);
     setShowNotMyPuzzle(false);
-    setPuzzleData(null);
-    setScanMessage({ type: 'new', text: '🎉 Puzzle ajouté et en attente de validation par notre équipe !' });
-    // Directly show the status selection by setting the data and confirming
-    setPuzzleData(puzzleData);
+    setScanMessage(null);
+    setPuzzleData(newPuzzleData);
     setPuzzleConfirmed(true);
   };
 
