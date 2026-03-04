@@ -471,14 +471,19 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setExistingPuzzle(null);
     setScanMessage(null);
     setPuzzleConfirmed(false);
+    setShowNotMyPuzzle(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
   const handleNotMyPuzzle = () => {
-    // Redirect to manual entry with pre-filled pieces if available
+    setShowNotMyPuzzle(true);
+  };
+
+  const handleGoManual = () => {
     setPuzzleData(null);
     setPuzzleConfirmed(false);
     setScanMessage(null);
+    setShowNotMyPuzzle(false);
     setActiveTab('manual');
   };
 
