@@ -392,10 +392,21 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       return;
     }
     try {
-      // Si nouveau puzzle (depuis Rainforest), créer l'entrée catalogue maintenant (après confirmation)
+      // Si nouveau puzzle (pas encore dans le catalogue), créer l'entrée avec status pending
       let catalogPuzzleId = puzzleData.catalog_id || null;
-      if (!catalogPuzzleId && puzzleData._pendingCatalogData) {
-        const newEntry = await base44.entities.PuzzleCatalog.create(puzzleData._pendingCatalogData);
+      if (!catalogPuzzleId && puzzleData.isPending) {
+        const newEntry = await base44.entities.PuzzleCatalog.create({
+          title: puzzleData.title || puzzleData.name,
+          brand: puzzleData.brand || '',
+          piece_count: puzzleData.piece_count || puzzleData.pieces || 0,
+          image_hd: puzzleData.image_hd || puzzleData.image || '',
+          ean: puzzleData.ean || '',
+          asin: puzzleData.asin || '',
+          category_tag: puzzleData.category_tag || 'Autre',
+          amazon_price: puzzleData.amazon_price || null,
+          amazon_rating: puzzleData.amazon_rating || null,
+          status: 'pending',
+        });
         catalogPuzzleId = newEntry.id;
       }
       const refCode = puzzleData.ean || puzzleData.asin || puzzleData.sku || barcode;
