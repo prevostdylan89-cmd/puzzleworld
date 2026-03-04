@@ -958,7 +958,11 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
               className="text-center"
             >
               <h3 className="text-2xl font-bold text-white mb-2">Puzzle ajouté !</h3>
-              <p className="text-white/60 mb-6">Votre collection a été mise à jour</p>
+              <p className="text-white/60 mb-2">Votre collection a été mise à jour</p>
+              {puzzleData?.isPending && (
+                <p className="text-yellow-400 text-sm mb-6">🎉 Merci d'avoir ajouté ce puzzle ! Il est en attente de validation par notre équipe avant d'apparaître dans le catalogue.</p>
+              )}
+              {!puzzleData?.isPending && <div className="mb-6" />}
 
               <div className="flex flex-col gap-3">
                 <Button
