@@ -31,8 +31,8 @@ export default function Contact() {
         subject: formData.subject,
         message: formData.message,
       });
-      toast.success('Message envoyé avec succès !');
       setFormData({ name: '', email: '', subject: '', message: '' });
+      setShowSuccess(true);
     } catch (error) {
       toast.error('Erreur lors de l\'envoi du message');
     } finally {
