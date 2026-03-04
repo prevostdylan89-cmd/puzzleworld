@@ -980,11 +980,13 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       </DialogContent>
     </Dialog>
 
-    <ManualAddPuzzleModal
-      open={showManualModal}
-      onClose={() => setShowManualModal(false)}
-      onSubmit={handleManualModalSubmit}
-      prefillBarcode={barcode}
-    />
+    {showManualModal && (
+      <ManualAddPuzzleModal
+        open={showManualModal}
+        onClose={() => setShowManualModal(false)}
+        onSubmit={handleManualModalSubmit}
+        prefillBarcode={barcode}
+      />
+    )}
   );
 }
