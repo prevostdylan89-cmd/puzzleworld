@@ -989,5 +989,6 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         prefillBarcode={barcode}
       />
     )}
+    </>
   );
 }
