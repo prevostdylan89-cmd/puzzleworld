@@ -41,6 +41,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [scanMessage, setScanMessage] = useState(null); // { type: 'error'|'community'|'pending'|'new', text: '' }
   const [puzzleConfirmed, setPuzzleConfirmed] = useState(false);
   const [showNotMyPuzzle, setShowNotMyPuzzle] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
