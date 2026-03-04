@@ -383,56 +383,26 @@ export default function PostCard({ post, user }) {
           }
         }
       } else {
-        // Check if user already liked this puzzle (to avoid duplicates)
-        const existingLikes = await base44.entities.UserPuzzleLike.filter({
-          puzzle_asin: post.puzzle_reference,
-          created_by: user.email
-        });
-        
-        if (existingLikes.length > 0) {
-          toast.info('Vous avez déjà liké ce puzzle!');
-          setIsPuzzleLiked(true);
-          return;
-        }
-        
-        // Try to fetch complete puzzle data if ASIN exists
-        let puzzleImage = post.image_url || '';
-        let puzzleBrand = post.puzzle_brand || '';
-        
-        if (post.puzzle_reference && post.puzzle_reference.length === 13) {
-          try {
-            toast.info('Récupération des infos du puzzle...');
-            const response = await fetch(
-              `https://api.rainforestapi.com/request?api_key=6DA586EEF04D4AFA912388EA8A29547F&type=product&amazon_domain=amazon.fr&gtin=${post.puzzle_reference}`
-            );
-            const data = await response.json();
-            
-            if (data.product) {
-              puzzleImage = data.product.main_image?.link || data.product.images?.[0]?.link || puzzleImage;
-              puzzleBrand = data.product.brand || puzzleBrand;
-            }
-          } catch (apiError) {
-            console.error('Error fetching puzzle data from API:', apiError);
-          }
-        }
-        
-        await base44.entities.UserPuzzleLike.create({
-          puzzle_asin: post.puzzle_reference || '',
+        // Add to wishlist instead of likes
+        await base44.entities.UserPuzzle.create({
           puzzle_name: post.puzzle_name,
-          puzzle_brand: puzzleBrand,
+          puzzle_brand: post.puzzle_brand || '',
           puzzle_pieces: post.puzzle_pieces || 0,
-          puzzle_image: puzzleImage
+          puzzle_reference: post.puzzle_reference || '',
+          image_url: post.image_url || '',
+          status: 'wishlist'
         });
         
-        toast.success('✨ Puzzle ajouté à vos likes !');
+        toast.success('✨ Puzzle ajouté à votre wishlist !');
+        setIsInWishlist(true);
         
-        // Update total_likes in PuzzleCatalog
+        // Update wishlistCount in PuzzleCatalog
         if (post.puzzle_reference) {
           const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
           if (puzzles.length > 0) {
             const puzzle = puzzles[0];
             await base44.entities.PuzzleCatalog.update(puzzle.id, {
-              total_likes: (puzzle.total_likes || 0) + 1
+              wishlistCount: (puzzle.wishlistCount || 0) + 1
             });
           }
         }
