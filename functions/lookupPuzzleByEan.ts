@@ -206,31 +206,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ÉTAPE 4 : Nouveau puzzle → créer avec status "pending"
-    const newEntry = await base44.entities.PuzzleCatalog.create({
-      asin: asin || '',
-      ean,
-      title: cleanedTitle || 'À compléter',
-      brand: brand || 'À compléter',
-      piece_count: pieces || 0,
-      image_hd: imageUrl || '',
-      category_tag: categoryTag,
-      amazon_link: asin ? `https://www.amazon.fr/dp/${asin}?tag=${AFFILIATE_TAG}` : '',
-      amazon_price: price || null,
-      amazon_rating: rating || null,
-      amazon_ratings_total: ratingsTotal || 0,
-      description: fullDescription,
-      socialScore: 0,
-      wishlistCount: 0,
-      added_count: 0,
-      total_likes: 0,
-      total_dislikes: 0,
-      status: 'pending',
-    });
-
+    // ÉTAPE 4 : Nouveau puzzle → retourner les données sans créer en base
+    // La création en catalogue (status: pending) se fait côté client après confirmation de l'utilisateur
     return Response.json({
       source: 'rainforest_new',
-      catalog_id: newEntry.id,
+      catalog_id: null,
       asin: asin || '',
       ean,
       title: cleanedTitle || rawTitle,
@@ -240,6 +220,26 @@ Deno.serve(async (req) => {
       amazon_price: price,
       amazon_rating: rating,
       category_tag: categoryTag,
+      // Données complètes pour création ultérieure
+      _pendingCatalogData: {
+        asin: asin || '',
+        ean,
+        title: cleanedTitle || 'À compléter',
+        brand: brand || 'À compléter',
+        piece_count: pieces || 0,
+        image_hd: imageUrl || '',
+        category_tag: categoryTag,
+        amazon_link: asin ? `https://www.amazon.fr/dp/${asin}?tag=${AFFILIATE_TAG}` : '',
+        amazon_price: price || null,
+        amazon_rating: rating || null,
+        amazon_ratings_total: ratingsTotal || 0,
+        socialScore: 0,
+        wishlistCount: 0,
+        added_count: 0,
+        total_likes: 0,
+        total_dislikes: 0,
+        status: 'pending',
+      }
     });
 
   } catch (error) {
