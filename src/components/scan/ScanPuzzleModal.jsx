@@ -469,7 +469,16 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setBarcodeInput('');
     setExistingPuzzle(null);
     setScanMessage(null);
+    setPuzzleConfirmed(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
+  };
+
+  const handleNotMyPuzzle = () => {
+    // Redirect to manual entry with pre-filled pieces if available
+    setPuzzleData(null);
+    setPuzzleConfirmed(false);
+    setScanMessage(null);
+    setActiveTab('manual');
   };
 
 
