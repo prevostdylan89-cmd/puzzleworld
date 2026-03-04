@@ -110,12 +110,13 @@ export default function PostCard({ post, user }) {
   };
 
   const checkIfPuzzleLiked = async () => {
-    if (!user || !post.puzzle_reference) return;
-    const likes = await base44.entities.UserPuzzleLike.filter({
-      puzzle_asin: post.puzzle_reference,
-      created_by: user.email
+    if (!user || !post.puzzle_name) return;
+    const existing = await base44.entities.UserPuzzle.filter({
+      puzzle_name: post.puzzle_name,
+      created_by: user.email,
+      status: 'wishlist'
     });
-    setIsPuzzleLiked(likes.length > 0);
+    setIsPuzzleLiked(existing.length > 0);
   };
 
   const checkIfPuzzleDisliked = async () => {
