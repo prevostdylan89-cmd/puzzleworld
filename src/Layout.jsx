@@ -555,15 +555,15 @@ function LayoutContent({ children, currentPageName }) {
               </div>
               <p className="text-white/50 text-sm">Votre communauté puzzle ultime</p>
               <div className="flex gap-3">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
                   <span className="text-white/70">📷</span>
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
                   <span className="text-white/70">👍</span>
-                </a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
                   <span className="text-white/70">🎵</span>
-                </a>
+                </div>
               </div>
             </div>
 
