@@ -22,8 +22,11 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate email sending
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await base44.integrations.Core.SendEmail({
+        to: 'questionpuzzleworld@outlook.fr',
+        subject: `[Contact PuzzleWorld] ${formData.subject}`,
+        body: `Nom : ${formData.name}\nEmail : ${formData.email}\n\nMessage :\n${formData.message}`,
+      });
       toast.success('Message envoyé avec succès !');
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
