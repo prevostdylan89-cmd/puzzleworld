@@ -221,14 +221,22 @@ export default function Home() {
               <p className="text-white/40 text-xs">Ne manquez rien de la communauté</p>
             </div>
           </div>
-          <Link to={createPageUrl('Events')}>
-            <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 gap-1">
-              Voir tout <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          {!eventsInMaintenance && (
+            <Link to={createPageUrl('Events')}>
+              <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 gap-1">
+                Voir tout <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
         </div>
 
-        {loading ? (
+        {eventsInMaintenance ? (
+          <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+            <span className="text-4xl mb-4 block">🔧</span>
+            <p className="text-white/60 font-medium">Les événements sont temporairement en maintenance.</p>
+            <p className="text-white/40 text-sm mt-1">Revenez bientôt !</p>
+          </div>
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-56 rounded-2xl bg-white/5 animate-pulse" />
