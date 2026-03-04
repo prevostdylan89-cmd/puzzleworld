@@ -17,6 +17,31 @@ function extractPieces(text) {
   return null;
 }
 
+// Liste de marques connues (fallback si non trouvées en base)
+const KNOWN_BRANDS = [
+  'Ravensburger', 'Clementoni', 'Nathan', 'Jumbo', 'Jan Van Haasteren',
+  'Schmidt', 'Educa', 'Trefl', 'Heye', 'Cobble Hill', 'Bluebird Puzzle',
+  'Piece and Love', 'Castorland', 'Vilac', 'Helvetiq', 'AveJoys',
+  'Ricordi', 'Piatnik', 'Buffalo Games', 'White Mountain', 'Galison',
+  'Djeco', 'Larsen', 'Step Puzzle', 'SunsOut', 'MasterPieces',
+  'Art & Fable', 'Springbok', 'Anatolian', 'Grafika', 'King',
+  'Magnolia', 'D-Toys', 'EuroGraphics', 'Pomegranate', 'Liberty Puzzles',
+  'Gibsons', 'Wentworth', 'Falcon', 'Wasgij', 'Bboldin', 'Appleone',
+];
+
+function detectBrandFromTitle(title, catalogBrands = []) {
+  if (!title) return null;
+  const titleLower = title.toLowerCase();
+  // Combiner marques catalogue + liste connue
+  const allBrands = [...new Set([...catalogBrands, ...KNOWN_BRANDS])];
+  for (const brand of allBrands) {
+    if (titleLower.includes(brand.toLowerCase())) {
+      return brand;
+    }
+  }
+  return null;
+}
+
 function cleanTitle(title, brand, pieces) {
   let t = title || '';
   if (brand) t = t.replace(new RegExp(brand, 'gi'), '').trim();
