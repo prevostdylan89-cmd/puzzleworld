@@ -150,10 +150,10 @@ export default function Contact() {
           <p className="text-white/40 text-sm">
             Vous pouvez aussi nous écrire directement à{' '}
             <a 
-              href="mailto:contact@puzzleworld.app" 
+              href="mailto:questionpuzzleworld@outlook.fr" 
               className="text-orange-400 hover:text-orange-300 transition-colors"
             >
-              contact@puzzleworld.app
+              questionpuzzleworld@outlook.fr
             </a>
           </p>
         </motion.div>

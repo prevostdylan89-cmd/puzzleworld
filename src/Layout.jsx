@@ -604,7 +604,7 @@ function LayoutContent({ children, currentPageName }) {
                 CGU
               </Link>
               <span>•</span>
-              <a href="mailto:contact@puzzleworld.app" className="hover:text-orange-400 transition-colors">
+              <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-400 transition-colors">
                 Contact
               </a>
             </div>
