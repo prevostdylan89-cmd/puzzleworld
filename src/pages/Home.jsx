@@ -28,10 +28,22 @@ export default function Home() {
   const [topPuzzles, setTopPuzzles] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [eventsInMaintenance, setEventsInMaintenance] = useState(false);
 
   useEffect(() => {
-    Promise.all([loadTopPuzzles(), loadEvents()]).finally(() => setLoading(false));
+    Promise.all([loadTopPuzzles(), loadEvents(), loadPageSettings()]).finally(() => setLoading(false));
   }, []);
+
+  const loadPageSettings = async () => {
+    try {
+      const settings = await base44.entities.PageSettings.filter({ page_name: 'Events' });
+      if (settings.length > 0 && settings[0].is_active === false) {
+        setEventsInMaintenance(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const loadTopPuzzles = async () => {
     try {
