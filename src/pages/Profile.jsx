@@ -371,13 +371,6 @@ export default function Profile() {
               Wishlist
             </TabsTrigger>
             <TabsTrigger 
-              value="liked" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
-            >
-              <Heart className="w-4 h-4 mr-2 fill-current" />
-              Puzzles Likés
-            </TabsTrigger>
-            <TabsTrigger 
               value="exchange"
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
             >
