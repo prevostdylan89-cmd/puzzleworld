@@ -150,8 +150,21 @@ Deno.serve(async (req) => {
 
     const allText = [product.title, product.description, ...(product.feature_bullets || [])].join(' ');
     const pieces = extractPieces(allText);
-    const brand = product.brand || 'À compléter';
     const rawTitle = product.title || 'À compléter';
+
+    // Récupérer les marques distinctes du catalogue pour enrichir la détection
+    let catalogBrands = [];
+    try {
+      const allCatalog = await base44.entities.PuzzleCatalog.list();
+      catalogBrands = [...new Set(allCatalog.map(p => p.brand).filter(Boolean).map(b => b.trim()))];
+    } catch (_) {}
+
+    // Détection de marque : API Rainforest d'abord, sinon cherche dans le titre
+    let brand = (product.brand && product.brand !== '') ? product.brand : null;
+    if (!brand) {
+      brand = detectBrandFromTitle(rawTitle, catalogBrands) || 'À compléter';
+    }
+
     const cleanedTitle = cleanTitle(rawTitle, brand === 'À compléter' ? '' : brand, pieces);
     const imageUrl = product.image || product.main_image?.link || product.images?.[0]?.link || '';
 
