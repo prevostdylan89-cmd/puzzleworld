@@ -377,13 +377,6 @@ export default function Profile() {
               <Grid3X3 className="w-4 h-4 mr-2" />
               À Vendre / Échanger
             </TabsTrigger>
-            <TabsTrigger 
-              value="achievements"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
-            >
-              <Trophy className="w-4 h-4 mr-2" />
-              {t('achievements')}
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="collection" className="mt-6">
@@ -394,43 +387,8 @@ export default function Profile() {
             <WishlistSection user={user} />
           </TabsContent>
 
-          <TabsContent value="liked" className="mt-6">
-            <LikedPuzzlesSection userEmail={user.email} />
-          </TabsContent>
-
           <TabsContent value="exchange" className="mt-6">
             <ExchangeSection user={user} />
-          </TabsContent>
-
-          <TabsContent value="achievements" className="mt-6">
-            {achievements.length === 0 ? (
-              <div className="text-center py-12">
-                <Trophy className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                <p className="text-white/50">{t('noAchievements')}</p>
-                <p className="text-white/30 text-sm mt-2">{t('completeToUnlock')}</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">
-                {achievements.map((achievement, index) => (
-                  <motion.div
-                    key={achievement.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <AchievementBadge 
-                      achievement={{
-                        title: achievement.title,
-                        icon: achievement.icon,
-                        color: achievement.color,
-                        unlocked: true,
-                        description: achievement.description
-                      }} 
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
           </TabsContent>
 
 
