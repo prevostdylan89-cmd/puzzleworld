@@ -394,7 +394,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       return;
     }
     try {
-      const catalogPuzzleId = puzzleData.catalog_id || null;
+      // Si nouveau puzzle (depuis Rainforest), créer l'entrée catalogue maintenant (après confirmation)
+      let catalogPuzzleId = puzzleData.catalog_id || null;
+      if (!catalogPuzzleId && puzzleData._pendingCatalogData) {
+        const newEntry = await base44.entities.PuzzleCatalog.create(puzzleData._pendingCatalogData);
+        catalogPuzzleId = newEntry.id;
+      }
       const refCode = puzzleData.ean || puzzleData.asin || puzzleData.sku || barcode;
 
       const statusMapping = { liked: 'done', not_liked: 'done', wishlist: 'wishlist', inbox: 'inbox' };
