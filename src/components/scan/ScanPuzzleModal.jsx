@@ -800,7 +800,35 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             </motion.div>
 
             {/* Étape de confirmation */}
-            {!puzzleConfirmed ? (
+            {showNotMyPuzzle ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4 bg-orange-500/5 border border-orange-500/20 rounded-xl p-5"
+              >
+                <div className="text-center">
+                  <span className="text-3xl mb-3 block">🤔</span>
+                  <p className="text-white font-semibold mb-1">Ce puzzle ne correspond pas ?</p>
+                  <p className="text-white/50 text-sm">Vous pouvez l'ajouter manuellement avec les bonnes informations. Il sera mis en attente de validation.</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleGoManual}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                  >
+                    ✏️ Ajouter manuellement
+                  </Button>
+                  <Button
+                    onClick={() => setShowNotMyPuzzle(false)}
+                    variant="ghost"
+                    className="w-full text-white/50 hover:text-white hover:bg-white/5 text-sm"
+                  >
+                    ← Retour
+                  </Button>
+                </div>
+              </motion.div>
+            ) : !puzzleConfirmed ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
