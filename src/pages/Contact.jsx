@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { CheckCircle2 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ export default function Contact() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
