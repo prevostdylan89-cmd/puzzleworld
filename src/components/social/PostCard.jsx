@@ -363,21 +363,23 @@ export default function PostCard({ post, user }) {
 
     try {
       if (previousLiked) {
-        const likes = await base44.entities.UserPuzzleLike.filter({
-          puzzle_asin: post.puzzle_reference,
-          created_by: user.email
+        const existing = await base44.entities.UserPuzzle.filter({
+          puzzle_name: post.puzzle_name,
+          created_by: user.email,
+          status: 'wishlist'
         });
-        if (likes.length > 0) {
-          await base44.entities.UserPuzzleLike.delete(likes[0].id);
-          toast.success('Puzzle retiré de vos likes');
+        if (existing.length > 0) {
+          await base44.entities.UserPuzzle.delete(existing[0].id);
+          toast.success('Puzzle retiré de votre wishlist');
+          setIsInWishlist(false);
           
-          // Update total_likes in PuzzleCatalog
+          // Update wishlistCount in PuzzleCatalog
           if (post.puzzle_reference) {
             const puzzles = await base44.entities.PuzzleCatalog.filter({ asin: post.puzzle_reference });
             if (puzzles.length > 0) {
               const puzzle = puzzles[0];
               await base44.entities.PuzzleCatalog.update(puzzle.id, {
-                total_likes: Math.max(0, (puzzle.total_likes || 0) - 1)
+                wishlistCount: Math.max(0, (puzzle.wishlistCount || 0) - 1)
               });
             }
           }
