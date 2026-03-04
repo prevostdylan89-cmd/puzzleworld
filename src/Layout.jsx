@@ -40,6 +40,11 @@ function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
   const [showScanModal, setShowScanModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [pageSettings, setPageSettings] = useState([]);
+
+  useEffect(() => {
+    base44.entities.PageSettings.list().then(setPageSettings).catch(() => {});
+  }, []);
   const [tabHistory, setTabHistory] = useState({
     Home: ['Home'],
     Social: ['Social'],
