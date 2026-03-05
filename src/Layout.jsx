@@ -537,7 +537,7 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="min-h-screen lg:pb-6" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))', paddingBottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}>
+      <main className="min-h-screen lg:pb-6" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentPageName}
