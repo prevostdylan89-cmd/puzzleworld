@@ -58,15 +58,15 @@ export default function DashboardHome() {
         <p className="text-white/60">Gérez le contenu de la page d'accueil</p>
       </div>
 
-      {/* Top 4 Puzzles Section */}
+      {/* Top 10 Puzzles Section */}
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6 mb-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Top 4 Puzzles en Vedette</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">Top 10 Puzzles en Vedette</h3>
         <p className="text-white/60 text-sm mb-6">
-          Sélectionnez les 4 puzzles à afficher sur la page d'accueil
+          Sélectionnez les 10 puzzles à afficher sur la page d'accueil (dans l'ordre)
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((position) => {
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((position) => {
             const puzzle = featuredPuzzles.find(p => p.position === position);
             
             return (
