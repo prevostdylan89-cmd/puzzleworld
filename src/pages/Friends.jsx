@@ -29,9 +29,10 @@ export default function Friends() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [friendshipsData, usersData] = await Promise.all([
+      const [friendshipsData, usersData, allRegisteredUsers] = await Promise.all([
         base44.entities.Friendship.filter({}),
-        base44.entities.UserProfile.filter({})
+        base44.entities.UserProfile.filter({}),
+        base44.entities.User.list()
       ]);
 
       // Amis acceptés
@@ -57,7 +58,14 @@ export default function Friends() {
       setFriends(acceptedFriends);
       setPendingRequests(pending);
       setSentRequests(sent);
-      setAllUsers(usersData.filter(u => u.email !== currentUser.email));
+
+      // Fusionner UserProfile + User pour avoir tous les utilisateurs
+      const profileMap = {};
+      usersData.forEach(u => { profileMap[u.email] = u; });
+      const mergedUsers = allRegisteredUsers
+        .filter(u => u.email !== currentUser.email)
+        .map(u => profileMap[u.email] || { email: u.email, full_name: u.full_name });
+      setAllUsers(mergedUsers);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
