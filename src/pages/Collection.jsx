@@ -540,7 +540,6 @@ export default function Collection() {
             </Button>
           </div>
         </div>
-      </PullToRefresh>
 
       {/* Puzzle Detail Modal */}
       <PuzzleDetailModal
