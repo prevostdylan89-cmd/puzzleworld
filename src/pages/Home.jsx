@@ -47,23 +47,25 @@ export default function Home() {
 
   const loadTopPuzzles = async () => {
     try {
-      // Load featured puzzles set by admin (positions 1-10)
       const featured = await base44.entities.FeaturedPuzzle.list('position', 10);
       if (featured.length > 0) {
-        // For each featured entry, use the stored image/title OR fetch from catalog
         const sorted = featured.sort((a, b) => a.position - b.position);
-        // Build puzzle objects directly from FeaturedPuzzle data (has puzzle_catalog_id, title, image)
-        const puzzlesFromFeatured = sorted.map(f => ({
-          id: f.puzzle_catalog_id || f.id,
+        const catalogIds = sorted.map(f => f.puzzle_catalog_id).filter(Boolean);
+        // Fetch full catalog data for all featured puzzles
+        const allCatalog = await base44.entities.PuzzleCatalog.list('-socialScore', 500);
+        const catalogMap = {};
+        allCatalog.forEach(p => { catalogMap[p.id] = p; });
+        const ordered = sorted
+          .map(f => catalogMap[f.puzzle_catalog_id])
+          .filter(Boolean);
+        // If some weren't found in catalog, fill with featured cache data
+        const result = sorted.map(f => catalogMap[f.puzzle_catalog_id] || {
+          id: f.puzzle_catalog_id,
           title: f.puzzle_title,
           image_hd: f.puzzle_image,
-          piece_count: f.puzzle_pieces,
-          amazon_rating: f.puzzle_rating,
           asin: f.puzzle_asin,
-          brand: f.puzzle_brand,
-          _featured_id: f.id,
-        }));
-        setTopPuzzles(puzzlesFromFeatured);
+        });
+        setTopPuzzles(result.filter(Boolean));
       } else {
         // Fallback: top 10 puzzles by socialScore
         const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-socialScore', 10);
