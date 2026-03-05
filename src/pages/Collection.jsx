@@ -487,7 +487,6 @@ export default function Collection() {
       </div>
 
       {/* Puzzle Grid */}
-      <PullToRefresh onRefresh={() => refetch()}>
         <div className="px-4 lg:px-8 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
