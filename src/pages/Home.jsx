@@ -47,8 +47,22 @@ export default function Home() {
 
   const loadTopPuzzles = async () => {
     try {
-      const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-socialScore', 10);
-      setTopPuzzles(puzzles);
+      // Load featured puzzles set by admin
+      const featured = await base44.entities.FeaturedPuzzle.list('position', 10);
+      if (featured.length > 0) {
+        // Fetch full catalog data for each featured puzzle
+        const catalogIds = featured.map(f => f.puzzle_catalog_id).filter(Boolean);
+        const allPuzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-socialScore', 200);
+        const ordered = featured
+          .sort((a, b) => a.position - b.position)
+          .map(f => allPuzzles.find(p => p.id === f.puzzle_catalog_id))
+          .filter(Boolean);
+        setTopPuzzles(ordered);
+      } else {
+        // Fallback: top puzzles by socialScore
+        const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-socialScore', 10);
+        setTopPuzzles(puzzles);
+      }
     } catch (e) {
       console.error(e);
     }
