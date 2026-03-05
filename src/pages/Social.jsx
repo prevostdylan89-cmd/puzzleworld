@@ -168,65 +168,63 @@ export default function Social() {
       </div>
 
       <div className="px-4 lg:px-8 py-6">
-        <PullToRefresh onRefresh={handleRefresh}>
-          <div className="max-w-4xl mx-auto">
-            {/* Create Post */}
-            {user && (
-              <CreatePostForm user={user} onPostCreated={handlePostCreated} />
-            )}
+        <div className="max-w-4xl mx-auto">
+          {/* Create Post */}
+          {user && (
+            <CreatePostForm user={user} onPostCreated={handlePostCreated} />
+          )}
 
-            {!user && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
+          {!user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
+            >
+              <p className="text-white/80 mb-3">{t('logInToPost')}</p>
+              <Button 
+                onClick={() => base44.auth.redirectToLogin()}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
               >
-                <p className="text-white/80 mb-3">{t('logInToPost')}</p>
-                <Button 
-                  onClick={() => base44.auth.redirectToLogin()}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
-                >
-                  {t('logIn')}
-                </Button>
-              </motion.div>
-            )}
+                {t('logIn')}
+              </Button>
+            </motion.div>
+          )}
 
-            {/* Posts Feed */}
-            <div className="space-y-4">
-              {isLoading && posts.length === 0 ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          {/* Posts Feed */}
+          <div className="space-y-4">
+            {isLoading && posts.length === 0 ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-white/50">{t('noPosts')}</p>
+              </div>
+            ) : (
+              <>
+                {posts.map((post) => (
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    user={user}
+                  />
+                ))}
+                
+                {/* Infinite Scroll Trigger */}
+                <div ref={observerTarget} className="py-4">
+                  {isLoading && (
+                    <div className="flex justify-center">
+                      <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
+                    </div>
+                  )}
+                  {!hasMore && posts.length > 0 && (
+                    <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
+                  )}
                 </div>
-              ) : posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-white/50">{t('noPosts')}</p>
-                </div>
-              ) : (
-                <>
-                  {posts.map((post) => (
-                    <PostCard 
-                      key={post.id} 
-                      post={post} 
-                      user={user}
-                    />
-                  ))}
-                  
-                  {/* Infinite Scroll Trigger */}
-                  <div ref={observerTarget} className="py-4">
-                    {isLoading && (
-                      <div className="flex justify-center">
-                        <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
-                      </div>
-                    )}
-                    {!hasMore && posts.length > 0 && (
-                      <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+              </>
+            )}
           </div>
-        </PullToRefresh>
+        </div>
       </div>
     </div>
   );
