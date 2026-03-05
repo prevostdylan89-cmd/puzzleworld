@@ -395,61 +395,83 @@ export default function Collection() {
             </div>
           </div>
 
-          {/* Category Filters */}
-          <div className="mt-4 mb-4 relative">
-            <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
-            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {CATEGORY_FILTERS.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                    selectedCategory === category.id
-                      ? 'bg-orange-500 text-white shadow-lg'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  <span className="text-lg">{category.icon}</span>
-                  <span className="text-sm font-medium">{category.label}</span>
-                </button>
-              ))}
+          {/* Category Filters — desktop: scroll horizontal / mobile: select dropdown */}
+          <div className="mt-3 mb-1">
+            {/* Mobile: dropdown select */}
+            <div className="flex gap-2 lg:hidden">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                  <SelectValue>
+                    {(() => {
+                      const cat = CATEGORY_FILTERS.find(c => c.id === selectedCategory);
+                      return cat ? `${cat.icon} ${cat.label}` : 'Catégorie';
+                    })()}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  {CATEGORY_FILTERS.map(c => (
+                    <SelectItem key={c.id} value={c.id} className="text-white text-sm">
+                      {c.icon} {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                  <SelectValue placeholder="Trier..." />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  <SelectItem value="newest" className="text-white text-sm">Nouveautés</SelectItem>
+                  <SelectItem value="popular" className="text-white text-sm">Populaires</SelectItem>
+                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces ↑</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces ↓</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Desktop: scroll horizontal */}
+            <div className="hidden lg:block relative mt-2">
+              <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
+              <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {CATEGORY_FILTERS.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                      selectedCategory === category.id
+                        ? 'bg-orange-500 text-white shadow-lg'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="text-lg">{category.icon}</span>
+                    <span className="text-sm font-medium">{category.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Sort Options */}
-          <div className="flex items-center justify-between mt-4">
+          {/* Sort Options — desktop only */}
+          <div className="hidden lg:flex items-center justify-between mt-4">
             <div className="flex items-center gap-2 text-sm text-white/50">
               <Puzzle className="w-4 h-4" />
               <span>Trier par:</span>
             </div>
-
             <div className="flex items-center gap-2">
               <ReclassifyButton onComplete={() => refetch()} />
               <Button
                 variant={sortBy === 'newest' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('newest')}
-                className={`rounded-full ${
-                  sortBy === 'newest'
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Nouveautés
-              </Button>
+                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+              >Nouveautés</Button>
               <Button
                 variant={sortBy === 'popular' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('popular')}
-                className={`rounded-full ${
-                  sortBy === 'popular'
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                Populaires
-              </Button>
+                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+              >Populaires</Button>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
                   <SelectValue placeholder="Plus..." />
