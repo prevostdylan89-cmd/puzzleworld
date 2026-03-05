@@ -638,7 +638,7 @@ function LayoutContent({ children, currentPageName }) {
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       <FloatingChat />
-      <UsernameGuard>{null}</UsernameGuard>
+      <UsernameGuard />
       </div>
       );
       }
