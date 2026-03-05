@@ -558,9 +558,9 @@ export default function Collection() {
         <motion.div
         variants={item}
         onClick={onClick}
-        className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer"
+        className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95"
         >
-      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-square'} overflow-hidden bg-white/5`}>
+      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
         {puzzle.image_hd ? (
           <img
             src={puzzle.image_hd}
@@ -569,26 +569,24 @@ export default function Collection() {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className="w-12 h-12 text-white/20" />
+            <Puzzle className="w-8 h-8 text-white/20" />
           </div>
         )}
       </div>
-      <div className="p-3">
-        <h3 className="text-white text-sm font-semibold line-clamp-2 mb-1">
+      <div className="p-2 lg:p-3">
+        <h3 className="text-white text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight">
           {puzzle.title}
         </h3>
-        <div className="flex items-center justify-between text-xs text-white/50 mb-2">
-          <span>{puzzle.brand || 'Unknown'}</span>
+        <div className="flex items-center justify-between text-[10px] lg:text-xs text-white/40">
+          <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
           <span>{puzzle.piece_count} pcs</span>
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          {puzzle.socialScore > 0 && (
-            <span className="text-green-400">❤️ {puzzle.socialScore}</span>
-          )}
-          {puzzle.wishlistCount > 0 && (
-            <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>
-          )}
-        </div>
+        {(puzzle.socialScore > 0 || puzzle.wishlistCount > 0) && (
+          <div className="flex items-center gap-2 mt-1 text-[10px]">
+            {puzzle.socialScore > 0 && <span className="text-green-400">❤️ {puzzle.socialScore}</span>}
+            {puzzle.wishlistCount > 0 && <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>}
+          </div>
+        )}
       </div>
     </motion.div>
     );
