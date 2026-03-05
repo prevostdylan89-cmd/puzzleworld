@@ -33,6 +33,7 @@ import {
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import FloatingChat from '@/components/messages/FloatingChat';
 import MaintenancePage from '@/components/shared/MaintenancePage';
+import UsernameGuard from '@/components/onboarding/UsernameGuard';
 
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
