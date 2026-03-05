@@ -355,27 +355,29 @@ export default function Profile() {
       {/* Content Tabs */}
       <div className="px-4 lg:px-8 mt-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white/5 border border-white/10 w-full lg:w-auto">
+          <TabsList className="bg-white/5 border border-white/10 w-full">
             <TabsTrigger 
               value="collection" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
-              <Puzzle className="w-4 h-4 mr-2" />
-              Ma Collection
+              <Puzzle className="w-4 h-4 shrink-0" />
+              <span className="ml-1.5 hidden sm:inline">Ma Collection</span>
+              <span className="ml-1.5 sm:hidden">Collection</span>
             </TabsTrigger>
             <TabsTrigger 
               value="wishlist" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
-              <Heart className="w-4 h-4 mr-2" />
-              Wishlist
+              <Heart className="w-4 h-4 shrink-0" />
+              <span className="ml-1.5">Wishlist</span>
             </TabsTrigger>
             <TabsTrigger 
               value="exchange"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 lg:flex-none"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
-              <Grid3X3 className="w-4 h-4 mr-2" />
-              À Vendre / Échanger
+              <Grid3X3 className="w-4 h-4 shrink-0" />
+              <span className="ml-1.5 hidden sm:inline">À Vendre / Échanger</span>
+              <span className="ml-1.5 sm:hidden">Échange</span>
             </TabsTrigger>
           </TabsList>
 
