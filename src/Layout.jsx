@@ -327,8 +327,11 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="flex items-center justify-between px-4" style={{ height: '3.5rem' }}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
+        {/* Safe area spacer */}
+        <div style={{ height: 'env(safe-area-inset-top)' }} />
+        {/* Actual header bar */}
+        <div className="flex items-center justify-between px-4 h-14">
           {/* Bouton menu hamburger — zone tactile large */}
           <button 
             onClick={() => setShowMobileMenu(true)}
@@ -348,15 +351,17 @@ function LayoutContent({ children, currentPageName }) {
           <div className="flex items-center gap-2">
             {user ? (
               <Link to={createPageUrl('Profile')}>
-                <Avatar className="h-9 w-9 ring-2 ring-orange-500/20 cursor-pointer">
-                  {user.profile_photo ? (
-                    <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
-                  ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                      {userInitials}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                <div className="w-11 h-11 flex items-center justify-center">
+                  <Avatar className="h-9 w-9 ring-2 ring-orange-500/20 cursor-pointer">
+                    {user.profile_photo ? (
+                      <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                        {userInitials}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
               </Link>
             ) : (
               <Button 
