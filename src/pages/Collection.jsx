@@ -7,7 +7,6 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 import ReclassifyButton from '@/components/collection/ReclassifyButton';
-import PullToRefresh from '@/components/shared/PullToRefresh';
 import { 
   Search, 
   SlidersHorizontal, 
