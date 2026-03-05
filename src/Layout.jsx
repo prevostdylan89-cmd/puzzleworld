@@ -328,12 +328,14 @@ function LayoutContent({ children, currentPageName }) {
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
-        <div className="flex items-center justify-between h-full px-4">
+        <div className="flex items-center justify-between h-14 px-4">
+          {/* Bouton menu hamburger — zone tactile large */}
           <button 
             onClick={() => setShowMobileMenu(true)}
-            className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+            className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
+            style={{ touchAction: 'manipulation' }}
           >
-            <Menu className="w-5 h-5 text-white" />
+            <Menu className="w-6 h-6 text-white" />
           </button>
 
           <div className="flex items-center gap-2">
@@ -345,15 +347,17 @@ function LayoutContent({ children, currentPageName }) {
 
           <div className="flex items-center gap-2">
             {user ? (
-              <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-                {user.profile_photo ? (
-                  <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
-                ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                    {userInitials}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+              <Link to={createPageUrl('Profile')}>
+                <Avatar className="h-9 w-9 ring-2 ring-orange-500/20 cursor-pointer">
+                  {user.profile_photo ? (
+                    <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
+                  ) : (
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                      {userInitials}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </Link>
             ) : (
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
