@@ -327,8 +327,8 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
-        <div className="flex items-center justify-between h-14 px-4">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <div className="flex items-center justify-between px-4" style={{ height: '3.5rem' }}>
           {/* Bouton menu hamburger — zone tactile large */}
           <button 
             onClick={() => setShowMobileMenu(true)}
