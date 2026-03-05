@@ -271,9 +271,9 @@ export default function Collection() {
     <div className="min-h-screen">
       {/* Header */}
       <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
-        <div className="px-4 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
+        <div className="px-4 lg:px-8 py-3 lg:py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
+            <div className="hidden lg:block">
               <h1 className="text-2xl font-bold text-white">Collection Communautaire</h1>
               <p className="text-white/50 text-sm mt-1">
                 {isLoading ? 'Chargement...' : `${sortedPuzzles.length} puzzles partagés par la communauté`}
@@ -281,7 +281,7 @@ export default function Collection() {
             </div>
 
             {/* Search & Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="relative flex-1 lg:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                 <Input
