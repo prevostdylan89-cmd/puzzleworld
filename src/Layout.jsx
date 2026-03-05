@@ -328,9 +328,6 @@ function LayoutContent({ children, currentPageName }) {
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
-        {/* Safe area spacer */}
-        <div style={{ height: 'env(safe-area-inset-top)' }} />
-        {/* Actual header bar */}
         <div className="flex items-center justify-between px-4 h-14">
           {/* Bouton menu hamburger — zone tactile large */}
           <button 
