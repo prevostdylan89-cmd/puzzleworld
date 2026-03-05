@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import UsernameSetupModal from './UsernameSetupModal';
 
-export default function UsernameGuard({ children }) {
+export default function UsernameGuard() {
+  const children = null;
   const [user, setUser] = useState(null);
   const [needsUsername, setNeedsUsername] = useState(false);
   const [checked, setChecked] = useState(false);
