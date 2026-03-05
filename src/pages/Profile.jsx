@@ -263,7 +263,7 @@ export default function Profile() {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.full_name || user.email}</h1>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.display_name || user.full_name || user.email}</h1>
                     {currentBadge && (
                       <button
                         onClick={() => setShowBadgesModal(true)}
@@ -280,7 +280,9 @@ export default function Profile() {
                       </button>
                     )}
                   </div>
-                  <p className="text-white/50">@{user.email.split('@')[0]}</p>
+                  {user.friend_code && (
+                    <p className="text-orange-400/70 text-sm font-mono">@{user.friend_code}</p>
+                  )}
                 </div>
                 <Button 
                   onClick={() => base44.auth.logout()}
