@@ -42,6 +42,7 @@ import UsernameGuard from '@/components/onboarding/UsernameGuard';
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const { language, setLanguage, t } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showScanModal, setShowScanModal] = useState(false);
