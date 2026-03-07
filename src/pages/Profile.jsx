@@ -289,7 +289,7 @@ export default function Profile() {
                 <Button 
                   onClick={() => base44.auth.logout()}
                   variant="outline" 
-                  className={`w-fit ${isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                  className={`w-fit ${isDark ? 'bg-transparent border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
                 >
                   {t('logOut')}
                 </Button>
