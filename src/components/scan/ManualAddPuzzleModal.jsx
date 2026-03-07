@@ -174,16 +174,24 @@ export default function ManualAddPuzzleModal({ open, onClose, onSubmit, prefillB
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-white/70 text-sm mb-1.5 block">Catégorie</label>
-              <Select value={form.category} onValueChange={(v) => update('category', v)}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Choisir..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  {CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat} className="text-white hover:bg-white/10">{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MobileSelect
+                value={form.category}
+                onValueChange={(v) => update('category', v)}
+                placeholder="Choisir..."
+                title="Catégorie"
+                trigger={
+                  <button type="button" className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-sm">
+                    <span className={form.category ? 'text-white' : 'text-white/40'}>
+                      {form.category || 'Choisir...'}
+                    </span>
+                    <span className="text-white/40">▾</span>
+                  </button>
+                }
+              >
+                {CATEGORIES.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </MobileSelect>
             </div>
             <div>
               <label className="text-white/70 text-sm mb-1.5 block">Prix (€)</label>

@@ -39,6 +39,7 @@ function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showScanModal, setShowScanModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [pageSettings, setPageSettings] = useState([]);

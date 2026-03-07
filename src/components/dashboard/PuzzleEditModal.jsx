@@ -116,24 +116,29 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
 
           <div>
             <label className="text-white/70 text-sm mb-2 block">Catégorie</label>
-            <Select
+            <MobileSelect
               value={formData.category_tag}
               onValueChange={(value) => setFormData({ ...formData, category_tag: value })}
+              placeholder="Sélectionner une catégorie"
+              title="Catégorie"
+              trigger={
+                <button type="button" className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-sm">
+                  <span className={formData.category_tag ? 'text-white' : 'text-white/40'}>
+                    {formData.category_tag || 'Sélectionner une catégorie'}
+                  </span>
+                  <span className="text-white/40">▾</span>
+                </button>
+              }
             >
-              <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                <SelectValue placeholder="Sélectionner une catégorie" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#0a0a2e] border-white/10">
-                <SelectItem value="Nature" className="text-white">Nature</SelectItem>
-                <SelectItem value="Abstract" className="text-white">Abstrait</SelectItem>
-                <SelectItem value="Urban" className="text-white">Urbain</SelectItem>
-                <SelectItem value="Space" className="text-white">Espace</SelectItem>
-                <SelectItem value="Architecture" className="text-white">Architecture</SelectItem>
-                <SelectItem value="Vintage" className="text-white">Vintage</SelectItem>
-                <SelectItem value="Animals" className="text-white">Animaux</SelectItem>
-                <SelectItem value="Art" className="text-white">Art</SelectItem>
-              </SelectContent>
-            </Select>
+              <SelectItem value="Nature">Nature</SelectItem>
+              <SelectItem value="Abstract">Abstrait</SelectItem>
+              <SelectItem value="Urban">Urbain</SelectItem>
+              <SelectItem value="Space">Espace</SelectItem>
+              <SelectItem value="Architecture">Architecture</SelectItem>
+              <SelectItem value="Vintage">Vintage</SelectItem>
+              <SelectItem value="Animals">Animaux</SelectItem>
+              <SelectItem value="Art">Art</SelectItem>
+            </MobileSelect>
           </div>
 
           <div>
