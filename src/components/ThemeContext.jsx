@@ -5,8 +5,21 @@ const ThemeContext = createContext();
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('puzzleworld-theme');
-    return saved !== null ? saved === 'dark' : true; // dark by default
+    if (saved !== null) return saved === 'dark';
+    // Follow system preference if no saved preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  useEffect(() => {
+    // Listen for system theme changes (only if no user override)
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e) => {
+      const saved = localStorage.getItem('puzzleworld-theme');
+      if (!saved) setIsDark(e.matches);
+    };
+    mediaQuery.addEventListener('change', handleSystemChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemChange);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('puzzleworld-theme', isDark ? 'dark' : 'light');

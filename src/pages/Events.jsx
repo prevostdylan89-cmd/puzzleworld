@@ -6,6 +6,8 @@ import { useLanguage } from '@/components/LanguageContext';
 import EventCard from '@/components/events/EventCard';
 import EventModal from '@/components/events/EventModal';
 import PullToRefresh from '@/components/shared/PullToRefresh';
+import { MobileSelect } from '@/components/ui/mobile-select';
+import { SelectItem } from '@/components/ui/select';
 
 export default function Events() {
   const { t } = useLanguage();

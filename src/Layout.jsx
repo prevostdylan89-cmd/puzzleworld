@@ -511,11 +511,12 @@ function LayoutContent({ children, currentPageName }) {
                   key={item.name}
                   onClick={() => setShowScanModal(true)}
                   className="flex flex-col items-center gap-1 -mt-4"
+                  style={{ minWidth: 44, minHeight: 44 }}
                 >
                   <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
                     <Scan className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-[10px] font-medium text-orange-400">Scan</span>
+                  <span className="text-[12px] font-medium text-orange-400">Scan</span>
                 </button>
               );
             }
@@ -525,12 +526,11 @@ function LayoutContent({ children, currentPageName }) {
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
-                className={`flex flex-col items-center gap-1 px-4 py-2 transition-all ${
-                  isActive ? 'text-orange-500' : isDark ? 'text-white/50 active:text-white/70' : 'text-gray-400 active:text-gray-700'
-                }`}
+                className={`flex flex-col items-center gap-1 px-4 py-2 transition-all`}
+                style={{ minWidth: 44, minHeight: 44 }}
               >
-                <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
-                <span className="text-[10px] font-semibold">{item.name}</span>
+                <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110 text-orange-500' : isDark ? 'text-white/50' : 'text-gray-400'}`} />
+                <span className={`text-[12px] font-semibold ${isActive ? 'text-orange-500' : isDark ? 'text-white/50' : 'text-gray-400'}`}>{item.name}</span>
                 {isActive && (
                   <motion.div
                     layoutId="activeTabMobile"
