@@ -614,25 +614,25 @@ function LayoutContent({ children, currentPageName }) {
             <div></div>
           </div>
 
-          <div className="pt-8 border-t border-white/[0.06]">
+          <div className={`pt-8 border-t ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
             <div className="text-center mb-4">
-              <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
+              <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>© 2026 PuzzleWorld. Tous droits réservés.</p>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/30">
-              <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-400 transition-colors">
+            <div className={`flex flex-wrap items-center justify-center gap-4 text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+              <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-500 transition-colors">
                 Politique de confidentialité
               </Link>
               <span>•</span>
-              <Link to={createPageUrl('Terms')} className="hover:text-orange-400 transition-colors">
+              <Link to={createPageUrl('Terms')} className="hover:text-orange-500 transition-colors">
                 CGU
               </Link>
               <span>•</span>
-              <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-400 transition-colors">
+              <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-500 transition-colors">
                 Contact
               </a>
             </div>
             <div className="text-center mt-4">
-              <p className="text-xs text-white/30 italic">
+              <p className={`text-xs italic ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
                 En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.
               </p>
             </div>
