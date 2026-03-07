@@ -565,7 +565,7 @@ function LayoutContent({ children, currentPageName }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#0a0a2e] border-t border-white/[0.06] mt-12">
+      <footer className={`border-t mt-12 ${isDark ? 'bg-[#0a0a2e] border-white/[0.06]' : 'bg-[#ede9e2] border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
