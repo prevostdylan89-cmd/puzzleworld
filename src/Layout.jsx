@@ -18,7 +18,8 @@ import {
   MessageCircle,
   Menu,
   X as XIcon,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
