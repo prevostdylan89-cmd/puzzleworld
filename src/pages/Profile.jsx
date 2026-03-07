@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
+import { useTheme } from '@/components/ThemeContext';
 import { 
   MapPin, 
   Calendar, 

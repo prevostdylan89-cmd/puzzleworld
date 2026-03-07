@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { useTheme } from '@/components/ThemeContext';
 import {
   Dialog,
   DialogContent,

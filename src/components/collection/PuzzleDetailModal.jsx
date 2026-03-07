@@ -5,6 +5,7 @@ import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'luci
 import { toast } from 'sonner';
 import PopularityScore from '@/components/shared/PopularityScore';
 import { base44 } from '@/api/base44Client';
+import { useTheme } from '@/components/ThemeContext';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
