@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
+import { ThemeProvider, useTheme } from '@/components/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
