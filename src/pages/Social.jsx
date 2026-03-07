@@ -200,7 +200,7 @@ export default function Social() {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/50">{t('noPosts')}</p>
+                <p className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('noPosts')}</p>
               </div>
             ) : (
               <>
