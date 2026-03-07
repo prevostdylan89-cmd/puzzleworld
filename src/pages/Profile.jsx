@@ -176,10 +176,10 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
+          className={`backdrop-blur-xl rounded-2xl p-8 text-center max-w-md border ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}
         >
-          <h2 className="text-2xl font-bold text-white mb-4">Bienvenue sur PuzzleWorld</h2>
-          <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
+          <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Bienvenue sur PuzzleWorld</h2>
+          <p className={`mb-6 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('logInToViewProfile')}</p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}
             className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
@@ -234,7 +234,7 @@ export default function Profile() {
             alt="Cover"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#000019] via-[#000019]/50 to-transparent" />
+          <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#000019] via-[#000019]/50' : 'from-[#f4f1ec] via-[#f4f1ec]/40'} to-transparent`} />
           <div className="absolute top-4 right-4">
             <EditProfileDialog user={user} onUpdate={loadUserData} />
           </div>
@@ -249,7 +249,7 @@ export default function Profile() {
               animate={{ scale: 1, opacity: 1 }}
               className="relative"
             >
-              <Avatar className="h-32 w-32 lg:h-40 lg:w-40 ring-4 ring-[#000019] border-4 border-orange-500/30">
+              <Avatar className={`h-32 w-32 lg:h-40 lg:w-40 ring-4 ${isDark ? 'ring-[#000019]' : 'ring-[#f4f1ec]'} border-4 border-orange-500/30`}>
                 {user.profile_photo ? (
                   <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
                 ) : (
@@ -265,7 +265,7 @@ export default function Profile() {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.display_name || user.full_name || user.email}</h1>
+                    <h1 className={`text-2xl lg:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.display_name || user.full_name || user.email}</h1>
                     {currentBadge && (
                       <button
                         onClick={() => setShowBadgesModal(true)}
@@ -289,26 +289,26 @@ export default function Profile() {
                 <Button 
                   onClick={() => base44.auth.logout()}
                   variant="outline" 
-                  className="border-white/20 text-white hover:bg-white/5 w-fit"
+                  className={`w-fit ${isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
                 >
                   {t('logOut')}
                 </Button>
               </div>
               
-              <p className="text-white/70 mt-3 max-w-xl">
+              <p className={`mt-3 max-w-xl ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
                 {t('welcomeToDashboard')}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
-                <span className="flex items-center gap-1.5 text-white/50">
+                <span className={`flex items-center gap-1.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
                   <Calendar className="w-4 h-4 text-orange-400" />
                   {t('joined')} {joinedDate}
                 </span>
-                <span className="text-white/70">
-                  <span className="font-semibold text-white">{stats.followers}</span> Followers
+                <span className={isDark ? 'text-white/70' : 'text-gray-600'}>
+                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.followers}</span> Followers
                 </span>
-                <span className="text-white/70">
-                  <span className="font-semibold text-white">{stats.following}</span> Abonnements
+                <span className={isDark ? 'text-white/70' : 'text-gray-600'}>
+                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.following}</span> Abonnements
                 </span>
               </div>
             </div>
@@ -323,11 +323,11 @@ export default function Profile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={stat.onClick}
-                className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center hover:border-orange-500/30 hover:bg-white/5 transition-all cursor-pointer"
+                className={`backdrop-blur-xl border rounded-2xl p-4 text-center hover:border-orange-500/30 transition-all cursor-pointer ${isDark ? 'bg-white/[0.03] border-white/[0.06] hover:bg-white/5' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
               >
                 <stat.icon className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{stat.value}</div>
-                <div className="text-sm text-white/50">{stat.label}</div>
+                <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stat.value}</div>
+                <div className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{stat.label}</div>
               </motion.button>
             ))}
           </div>
@@ -337,20 +337,20 @@ export default function Profile() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
+            className={`bg-gradient-to-r from-orange-500/10 to-purple-500/10 border rounded-2xl p-5 mt-6 ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}
           >
             <div className="flex items-center justify-between mb-3">
               <div>
                 <span className="text-orange-400 font-bold text-lg">{t('level')} {levelProgress.current}</span>
-                <span className="text-white/50 ml-2">{levelProgress.title}</span>
+                <span className={`ml-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{levelProgress.title}</span>
               </div>
-              <span className="text-white/50 text-sm">
+              <span className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
                 {levelProgress.xp.toLocaleString()} / {levelProgress.nextLevelXp.toLocaleString()} XP
               </span>
             </div>
             <Progress 
               value={(levelProgress.xp / levelProgress.nextLevelXp) * 100} 
-              className="h-2 bg-white/10"
+              className={`h-2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}
             />
           </motion.div>
         </div>
@@ -359,10 +359,10 @@ export default function Profile() {
       {/* Content Tabs */}
       <div className="px-4 lg:px-8 mt-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white/5 border border-white/10 w-full">
+          <TabsList className={`border w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
             <TabsTrigger 
               value="collection" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
+              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
             >
               <Puzzle className="w-4 h-4 shrink-0" />
               <span className="ml-1.5 hidden sm:inline">Ma Collection</span>
@@ -370,14 +370,14 @@ export default function Profile() {
             </TabsTrigger>
             <TabsTrigger 
               value="wishlist" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
+              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
             >
               <Heart className="w-4 h-4 shrink-0" />
               <span className="ml-1.5">Wishlist</span>
             </TabsTrigger>
             <TabsTrigger 
               value="exchange"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
+              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
             >
               <Grid3X3 className="w-4 h-4 shrink-0" />
               <span className="ml-1.5 hidden sm:inline">À Vendre / Échanger</span>
@@ -402,7 +402,7 @@ export default function Profile() {
 
         {/* My Events Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             <Calendar className="w-6 h-6 text-orange-400" />
             {t('myEvents')}
           </h2>
@@ -411,7 +411,7 @@ export default function Profile() {
 
         {/* Delete Account Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-6">Paramètres du compte</h2>
+          <h2 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Paramètres du compte</h2>
           <DeleteAccountSection />
         </div>
       </div>
