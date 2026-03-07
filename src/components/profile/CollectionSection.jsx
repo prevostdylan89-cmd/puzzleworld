@@ -63,6 +63,22 @@ export default function CollectionSection({ user }) {
     );
   }
 
+  const handleOptimisticMove = (puzzleId, newStatus) => {
+    if (newStatus === 'done') {
+      const puzzle = inboxPuzzles.find(p => p.id === puzzleId);
+      if (puzzle) {
+        setInboxPuzzles(prev => prev.filter(p => p.id !== puzzleId));
+        setCompletedPuzzles(prev => [...prev, { ...puzzle, status: 'done' }]);
+      }
+    } else {
+      const puzzle = completedPuzzles.find(p => p.id === puzzleId);
+      if (puzzle) {
+        setCompletedPuzzles(prev => prev.filter(p => p.id !== puzzleId));
+        setInboxPuzzles(prev => [...prev, { ...puzzle, status: 'inbox' }]);
+      }
+    }
+  };
+
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
   const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
 
