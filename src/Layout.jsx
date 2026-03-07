@@ -187,7 +187,7 @@ function LayoutContent({ children, currentPageName }) {
       `}</style>
 
       {/* Desktop Header */}
-      <header className="hidden lg:block fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className={`hidden lg:block fixed top-0 left-0 right-0 h-16 backdrop-blur-xl border-b z-50 ${isDark ? 'bg-[#000019]/90 border-white/[0.06]' : 'bg-[#f4f1ec]/90 border-gray-200'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-full px-6">
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
