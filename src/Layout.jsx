@@ -220,7 +220,7 @@ function LayoutContent({ children, currentPageName }) {
                       : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'group-hover:text-orange-400'}`} />
+                  <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-500' : 'group-hover:text-orange-500'}`} />
                   <span className="font-medium text-sm">{item.name}</span>
                   {isActive && (
                     <motion.div
