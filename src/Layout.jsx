@@ -235,7 +235,7 @@ function LayoutContent({ children, currentPageName }) {
                     if (item.hasHistory) {
                       e.preventDefault();
                       handleNavClick(item);
-                      window.location.href = createPageUrl(item.page);
+                      navigate(createPageUrl(item.page));
                     }
                   }}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 group relative ${
@@ -332,14 +332,24 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
         <div className="flex items-center justify-between px-4 h-14">
-          {/* Bouton menu hamburger — zone tactile large */}
-          <button 
-            onClick={() => setShowMobileMenu(true)}
-            className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
-            style={{ touchAction: 'manipulation' }}
-          >
-            <Menu className="w-6 h-6 text-white" />
-          </button>
+          {/* Hamburger ou Back arrow selon la page */}
+          {['Home', 'Social', 'Collection'].includes(currentPageName) ? (
+            <button 
+              onClick={() => setShowMobileMenu(true)}
+              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <Menu className="w-6 h-6 text-white" />
+            </button>
+          ) : (
+            <button 
+              onClick={() => navigate(-1)}
+              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <ArrowLeft className="w-6 h-6 text-white" />
+            </button>
+          )}
 
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">

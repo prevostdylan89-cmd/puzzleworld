@@ -157,33 +157,35 @@ export default function CollectionSection({ user }) {
   );
 }
 
-function PuzzleCard({ puzzle, index, onUpdate }) {
+function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleMove = async () => {
     if (isUpdating) return;
     
+    const newStatus = puzzle.status === 'inbox' ? 'done' : 'inbox';
+    
+    // Optimistic update — move instantly in UI
+    onOptimisticMove(puzzle.id, newStatus);
     setIsUpdating(true);
     try {
-      const newStatus = puzzle.status === 'inbox' ? 'done' : 'inbox';
-      
-      // Update puzzle status
       await base44.entities.UserPuzzle.update(puzzle.id, { status: newStatus });
       
-      // Award XP if moving to done
       if (newStatus === 'done') {
         const user = await base44.auth.me();
         const currentXP = user.xp || 0;
         await base44.auth.updateMe({ xp: currentXP + 100 });
         toast.success('🎉 +100 XP ! Puzzle terminé !');
+      } else {
+        toast.success('Puzzle remis dans sa boîte !');
       }
-      
-      toast.success(newStatus === 'done' ? 'Puzzle marqué comme terminé !' : 'Puzzle remis dans sa boîte !');
       
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating puzzle:', error);
       toast.error('Erreur lors de la mise à jour');
+      // Revert optimistic update on error
+      onOptimisticMove(puzzle.id, puzzle.status);
     } finally {
       setIsUpdating(false);
     }
