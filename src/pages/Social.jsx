@@ -139,11 +139,11 @@ export default function Social() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className={`sticky top-0 lg:top-0 z-30 backdrop-blur-xl border-b ${isDark ? 'bg-[#000019]/80 border-white/[0.06]' : 'bg-[#f4f1ec]/80 border-gray-200'}`}>
         <div className="px-4 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-white mb-4">{t('community')}</h1>
+          <h1 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('community')}</h1>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white/5 border border-white/10">
+            <TabsList className={`border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
               <TabsTrigger 
                 value="trending" 
                 className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
