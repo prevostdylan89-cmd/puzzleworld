@@ -235,23 +235,33 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className={isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'}
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+                <Button variant="ghost" size="icon" className={isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'}>
                   <Languages className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+              <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
                 <DropdownMenuItem 
                   onClick={() => setLanguage('fr')}
-                  className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                  className={`cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
                 >
                   🇫🇷 Français
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setLanguage('en')}
-                  className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                  className={`cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
                 >
                   🇬🇧 English
                 </DropdownMenuItem>
