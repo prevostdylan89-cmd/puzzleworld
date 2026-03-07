@@ -553,13 +553,14 @@ export default function Collection() {
 }
 
         function CommunityPuzzleCard({ puzzle, index, variant, onClick }) {
+        const { isDark } = useTheme();
         return (
         <motion.div
         variants={item}
         onClick={onClick}
-        className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95"
+        className={`border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95 ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}
         >
-      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
+      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
         {puzzle.image_hd ? (
           <img
             src={puzzle.image_hd}
@@ -568,15 +569,15 @@ export default function Collection() {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className="w-8 h-8 text-white/20" />
+            <Puzzle className={`w-8 h-8 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
           </div>
         )}
       </div>
       <div className="p-2 lg:p-3">
-        <h3 className="text-white text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight">
+        <h3 className={`text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {puzzle.title}
         </h3>
-        <div className="flex items-center justify-between text-[10px] lg:text-xs text-white/40">
+        <div className={`flex items-center justify-between text-[10px] lg:text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
           <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
           <span>{puzzle.piece_count} pcs</span>
         </div>
