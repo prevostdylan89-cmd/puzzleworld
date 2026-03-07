@@ -316,7 +316,7 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
+      <header className={`lg:hidden fixed top-0 left-0 right-0 backdrop-blur-xl border-b z-50 ${isDark ? 'bg-[#000019]/95 border-white/[0.06]' : 'bg-[#f4f1ec]/95 border-gray-200'}`}>
         <div className="flex items-center justify-between px-4 h-14">
           {/* Hamburger ou Back arrow selon la page */}
           {['Home', 'Social', 'Collection'].includes(currentPageName) ? (
