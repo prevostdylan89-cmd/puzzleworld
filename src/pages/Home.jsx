@@ -332,14 +332,14 @@ export default function Home() {
               </motion.button>
 
               <Link to={createPageUrl('Collection')}>
-                <button className="group w-full relative overflow-hidden rounded-[2rem] bg-white/5 border-2 border-white/10 hover:border-orange-500/30 hover:bg-white/10 p-8 text-left transition-all hover:scale-[1.02]">
+                <button className={`group w-full relative overflow-hidden rounded-[2rem] border-2 p-8 text-left transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 hover:border-orange-500/30 hover:bg-white/10' : 'bg-white border-gray-200 hover:border-orange-500/30 hover:bg-orange-50'}`}>
                   <div className="relative z-10 flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                       <ChevronRight className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="text-white font-bold text-xl mb-2">Explorer la collection</h3>
-                      <p className="text-white/60 text-sm">Découvrez des milliers de puzzles</p>
+                      <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Explorer la collection</h3>
+                      <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Découvrez des milliers de puzzles</p>
                     </div>
                   </div>
                 </button>
