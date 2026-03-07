@@ -103,12 +103,12 @@ export default function Home() {
               <Sparkles className="w-3 h-3" />
               <span>Nouveaux puzzles chaque jour</span>
             </div>
-            <h1 className="text-2xl font-bold text-white leading-tight mb-1">
+            <h1 className="text-2xl font-bold leading-tight mb-1">
               <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
                 {t('heroTitle')}
               </span>
             </h1>
-            <p className="text-white/50 text-sm mb-4">{t('heroSubtitle')}</p>
+            <p className={`text-sm mb-4 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('heroSubtitle')}</p>
 
             {/* CTA Buttons - side by side, compact */}
             <div className="grid grid-cols-2 gap-3">
@@ -133,14 +133,14 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="flex items-center gap-2.5 bg-white/[0.07] border border-white/10 rounded-2xl px-4 py-3.5 text-left w-full active:scale-95 transition-transform"
+                  className={`flex items-center gap-2.5 border rounded-2xl px-4 py-3.5 text-left w-full active:scale-95 transition-transform ${isDark ? 'bg-white/[0.07] border-white/10' : 'bg-gray-100 border-gray-200'}`}
                 >
                   <div className="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
                   </div>
                   <div>
-                    <p className="text-white font-bold text-sm leading-tight">Explorer</p>
-                    <p className="text-white/50 text-[11px]">Collection</p>
+                    <p className={`font-bold text-sm leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>Explorer</p>
+                    <p className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Collection</p>
                   </div>
                 </motion.div>
               </Link>
