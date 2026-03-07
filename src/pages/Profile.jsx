@@ -38,6 +38,7 @@ import { Crown, Camera } from 'lucide-react';
 
 export default function Profile() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('collection');

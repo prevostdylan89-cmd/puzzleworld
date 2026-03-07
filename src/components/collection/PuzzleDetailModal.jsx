@@ -10,6 +10,7 @@ import { useTheme } from '@/components/ThemeContext';
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
+  const { isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
   const [popularityScore, setPopularityScore] = useState(null);

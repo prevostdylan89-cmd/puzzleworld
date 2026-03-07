@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function EditProfileDialog({ user, onUpdate }) {
+  const { isDark } = useTheme();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);

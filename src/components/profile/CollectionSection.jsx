@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner';
 
 export default function CollectionSection({ user }) {
+  const { isDark } = useTheme();
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
