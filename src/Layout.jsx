@@ -289,15 +289,15 @@ function LayoutContent({ children, currentPageName }) {
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+                <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Profile')} className="cursor-pointer text-white hover:bg-white/10">
+                    <Link to={createPageUrl('Profile')} className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}>
                       <User className="w-4 h-4 mr-2" />
                       {t('profile')}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:bg-white/10 hover:text-red-300">
+                  <DropdownMenuSeparator className={isDark ? 'bg-white/10' : 'bg-gray-200'} />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 hover:bg-red-50 hover:text-red-600">
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('logOut')}
                   </DropdownMenuItem>
