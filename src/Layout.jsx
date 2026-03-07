@@ -459,24 +459,24 @@ function LayoutContent({ children, currentPageName }) {
               </div>
 
               {/* Menu Footer */}
-              <div className="p-4 border-t border-white/10 space-y-2">
+              <div className={`p-4 border-t space-y-2 ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white">
+                    <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isDark ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-700'}`}>
                       <Languages className="w-5 h-5" />
                       <span className="text-sm font-medium">{language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}</span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
+                  <DropdownMenuContent align="start" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
                     <DropdownMenuItem 
                       onClick={() => setLanguage('fr')}
-                      className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                      className={`cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
                     >
                       🇫🇷 Français
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setLanguage('en')}
-                      className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
+                      className={`cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
                     >
                       🇬🇧 English
                     </DropdownMenuItem>
@@ -489,7 +489,7 @@ function LayoutContent({ children, currentPageName }) {
                       handleLogout();
                       setShowMobileMenu(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-500"
                   >
                     <LogOut className="w-5 h-5" />
                     <span className="text-sm font-medium">{t('logOut')}</span>
