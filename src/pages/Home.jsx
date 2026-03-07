@@ -356,8 +356,8 @@ export default function Home() {
                 <TrendingUp className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Top 10 Puzzles</h2>
-                <p className="text-white/40 text-xs">Les plus appréciés de la communauté</p>
+                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Top 10 Puzzles</h2>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Les plus appréciés de la communauté</p>
               </div>
             </div>
             <Link to={createPageUrl('Collection')}>
