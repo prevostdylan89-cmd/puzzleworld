@@ -399,36 +399,19 @@ export default function Collection() {
 
           {/* Category Filters — desktop: scroll horizontal / mobile: select dropdown */}
           <div className="mt-3 mb-1">
-            {/* Mobile: dropdown select */}
+            {/* Mobile: MobileSelect drawer */}
             <div className="flex gap-2 lg:hidden">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className={`flex-1 text-xs h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
-                  <SelectValue>
-                    {(() => {
-                      const cat = CATEGORY_FILTERS.find(c => c.id === selectedCategory);
-                      return cat ? `${cat.icon} ${cat.label}` : 'Catégorie';
-                    })()}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
-                  {CATEGORY_FILTERS.map(c => (
-                    <SelectItem key={c.id} value={c.id} className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                      {c.icon} {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className={`flex-1 text-xs h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
-                  <SelectValue placeholder="Trier..." />
-                </SelectTrigger>
-                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
-                  <SelectItem value="newest" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Nouveautés</SelectItem>
-                  <SelectItem value="popular" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Populaires</SelectItem>
-                  <SelectItem value="pieces-asc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces ↑</SelectItem>
-                  <SelectItem value="pieces-desc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces ↓</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSelect value={selectedCategory} onValueChange={setSelectedCategory} placeholder="Catégorie" title="Catégorie">
+                {CATEGORY_FILTERS.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.icon} {c.label}</SelectItem>
+                ))}
+              </MobileSelect>
+              <MobileSelect value={sortBy} onValueChange={setSortBy} placeholder="Trier..." title="Trier par">
+                <SelectItem value="newest">Nouveautés</SelectItem>
+                <SelectItem value="popular">Populaires</SelectItem>
+                <SelectItem value="pieces-asc">Pièces ↑</SelectItem>
+                <SelectItem value="pieces-desc">Pièces ↓</SelectItem>
+              </MobileSelect>
             </div>
 
             {/* Desktop: scroll horizontal */}
