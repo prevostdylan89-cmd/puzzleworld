@@ -282,7 +282,7 @@ function LayoutContent({ children, currentPageName }) {
                       )}
                     </Avatar>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white">{user.full_name || user.email}</span>
+                      <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.full_name || user.email}</span>
                       {user.current_badge_icon && (
                         <span className="text-lg">{user.current_badge_icon}</span>
                       )}
