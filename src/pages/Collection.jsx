@@ -271,12 +271,12 @@ export default function Collection() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <div className={`sticky top-0 lg:top-0 z-30 backdrop-blur-xl border-b ${isDark ? 'bg-[#000019]/80 border-white/[0.06]' : 'bg-[#f4f1ec]/80 border-gray-200'}`}>
         <div className="px-4 lg:px-8 py-3 lg:py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
             <div className="hidden lg:block">
-              <h1 className="text-2xl font-bold text-white">Collection Communautaire</h1>
-              <p className="text-white/50 text-sm mt-1">
+              <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Collection Communautaire</h1>
+              <p className={`text-sm mt-1 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
                 {isLoading ? 'Chargement...' : `${sortedPuzzles.length} puzzles partagés par la communauté`}
               </p>
             </div>
@@ -284,49 +284,49 @@ export default function Collection() {
             {/* Search & Actions */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1 lg:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('searchPuzzles')}
-                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+                  className={`pl-10 rounded-xl ${isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800 placeholder:text-gray-400'}`}
                 />
               </div>
 
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="border-white/10 text-white hover:bg-white/5">
+                  <Button variant="outline" size="icon" className={`${isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
                     <SlidersHorizontal className="w-4 h-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="bg-[#000019] border-white/[0.06]">
+                <SheetContent className={`${isDark ? 'bg-[#000019] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
                   <SheetHeader>
-                    <SheetTitle className="text-white">{t('filters')}</SheetTitle>
+                    <SheetTitle className={isDark ? 'text-white' : 'text-gray-800'}>{t('filters')}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     {/* Piece Count Min/Max */}
                     <div>
-                      <label className="text-sm text-white/70 mb-3 block">{t('pieceCount')}</label>
+                      <label className={`text-sm mb-3 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('pieceCount')}</label>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-white/50 mb-1.5 block">Minimum</label>
+                          <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Minimum</label>
                           <Input
                             type="number"
                             value={minPieces}
                             onChange={(e) => setMinPieces(e.target.value)}
                             placeholder="Ex: 500"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            className={isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800'}
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-white/50 mb-1.5 block">Maximum</label>
+                          <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Maximum</label>
                           <Input
                             type="number"
                             value={maxPieces}
                             onChange={(e) => setMaxPieces(e.target.value)}
                             placeholder="Ex: 2000"
-                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                            className={isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800'}
                             min="0"
                           />
                         </div>
@@ -335,14 +335,14 @@ export default function Collection() {
 
                     {/* Brand Filter */}
                     <div>
-                      <label className="text-sm text-white/70 mb-3 block">Marque</label>
+                      <label className={`text-sm mb-3 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Marque</label>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setSelectedBrand('all')}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                             selectedBrand === 'all'
                               ? 'bg-orange-500 text-white'
-                              : 'bg-white/5 text-white/70 hover:bg-white/10'
+                              : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
                           Toutes
@@ -354,7 +354,7 @@ export default function Collection() {
                             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                               selectedBrand === brand
                                 ? 'bg-orange-500 text-white'
-                                : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                           >
                             {brand === '__unknown__' ? '❓ Marque inconnue' : brand}
@@ -366,7 +366,7 @@ export default function Collection() {
                     <Button 
                       onClick={clearFilters}
                       variant="outline" 
-                      className="w-full border-white/20 text-white hover:bg-white/5"
+                      className={isDark ? 'w-full border-white/20 text-white hover:bg-white/5' : 'w-full border-gray-200 text-gray-700 hover:bg-gray-100'}
                     >
                       {t('clearAllFilters')}
                     </Button>
@@ -375,11 +375,11 @@ export default function Collection() {
               </Sheet>
 
               {/* View Mode Toggle */}
-              <div className="hidden lg:flex bg-white/5 border border-white/10 rounded-lg p-1">
+              <div className={`hidden lg:flex border rounded-lg p-1 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="icon"
-                  className={viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-white/50 hover:text-white'}
+                  className={viewMode === 'grid' ? 'bg-orange-500 text-white' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}
                   onClick={() => setViewMode('grid')}
                 >
                   <Grid3X3 className="w-4 h-4" />
@@ -387,7 +387,7 @@ export default function Collection() {
                 <Button
                   variant={viewMode === 'large' ? 'default' : 'ghost'}
                   size="icon"
-                  className={viewMode === 'large' ? 'bg-orange-500 text-white' : 'text-white/50 hover:text-white'}
+                  className={viewMode === 'large' ? 'bg-orange-500 text-white' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}
                   onClick={() => setViewMode('large')}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -401,7 +401,7 @@ export default function Collection() {
             {/* Mobile: dropdown select */}
             <div className="flex gap-2 lg:hidden">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                <SelectTrigger className={`flex-1 text-xs h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
                   <SelectValue>
                     {(() => {
                       const cat = CATEGORY_FILTERS.find(c => c.id === selectedCategory);
@@ -409,31 +409,31 @@ export default function Collection() {
                     })()}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
                   {CATEGORY_FILTERS.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-white text-sm">
+                    <SelectItem key={c.id} value={c.id} className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
                       {c.icon} {c.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                <SelectTrigger className={`flex-1 text-xs h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
                   <SelectValue placeholder="Trier..." />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  <SelectItem value="newest" className="text-white text-sm">Nouveautés</SelectItem>
-                  <SelectItem value="popular" className="text-white text-sm">Populaires</SelectItem>
-                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces ↑</SelectItem>
-                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces ↓</SelectItem>
+                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
+                  <SelectItem value="newest" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Nouveautés</SelectItem>
+                  <SelectItem value="popular" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Populaires</SelectItem>
+                  <SelectItem value="pieces-asc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces ↑</SelectItem>
+                  <SelectItem value="pieces-desc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces ↓</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Desktop: scroll horizontal */}
             <div className="hidden lg:block relative mt-2">
-              <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
-              <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
+              <div className={`absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r pointer-events-none z-10 ${isDark ? 'from-[#000019]' : 'from-[#f4f1ec]'} to-transparent`}></div>
+              <div className={`absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l pointer-events-none z-10 ${isDark ? 'from-[#000019]' : 'from-[#f4f1ec]'} to-transparent`}></div>
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {CATEGORY_FILTERS.map((category) => (
                   <button
@@ -442,7 +442,7 @@ export default function Collection() {
                     className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
                       selectedCategory === category.id
                         ? 'bg-orange-500 text-white shadow-lg'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
+                        : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     <span className="text-lg">{category.icon}</span>
@@ -455,7 +455,7 @@ export default function Collection() {
 
           {/* Sort Options — desktop only */}
           <div className="hidden lg:flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 text-sm text-white/50">
+            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
               <Puzzle className="w-4 h-4" />
               <span>Trier par:</span>
             </div>
@@ -465,21 +465,21 @@ export default function Collection() {
                 variant={sortBy === 'newest' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('newest')}
-                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
               >Nouveautés</Button>
               <Button
                 variant={sortBy === 'popular' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('popular')}
-                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
               >Populaires</Button>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
+                <SelectTrigger className={`w-32 text-sm h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
                   <SelectValue placeholder="Plus..." />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
-                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
+                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
+                  <SelectItem value="pieces-asc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces (croissant)</SelectItem>
+                  <SelectItem value="pieces-desc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces (décroissant)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
