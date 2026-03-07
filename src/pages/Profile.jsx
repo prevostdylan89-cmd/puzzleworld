@@ -427,6 +427,7 @@ export default function Profile() {
 
 function MyEventsSection({ user }) {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -473,10 +474,10 @@ function MyEventsSection({ user }) {
 
   if (registeredEvents.length === 0) {
     return (
-      <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
-        <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
-        <p className="text-white/50">{t('noEvents')}</p>
-        <p className="text-white/30 text-sm mt-2">Inscrivez-vous à des événements pour les voir ici</p>
+      <div className={`text-center py-12 backdrop-blur-xl border rounded-2xl ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
+        <Calendar className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+        <p className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('noEvents')}</p>
+        <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Inscrivez-vous à des événements pour les voir ici</p>
       </div>
     );
   }
@@ -501,7 +502,7 @@ function MyEventsSection({ user }) {
       {/* Upcoming Events */}
       {upcomingEvents.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4">{t('upcomingEvents')}</h3>
+          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('upcomingEvents')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} onUnregister={loadUserEvents} />
@@ -513,7 +514,7 @@ function MyEventsSection({ user }) {
       {/* Past Events */}
       {pastEvents.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-white/70 mb-4">Événements passés</h3>
+          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white/70' : 'text-gray-500'}`}>Événements passés</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
             {pastEvents.map((event) => (
               <EventCard key={event.id} event={event} />
@@ -568,7 +569,14 @@ function EventCard({ event, onUnregister }) {
   };
 
   return (
-    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all">
+    <EventCardInner event={event} onUnregister={onUnregister} isPast={isPast} eventDate={eventDate} loading={loading} handleUnregister={handleUnregister} />
+  );
+}
+
+function EventCardInner({ event, isPast, eventDate, loading, handleUnregister }) {
+  const { isDark } = useTheme();
+  return (
+    <div className={`backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
       <div className="aspect-[16/9] overflow-hidden">
         <img
           src={event.image}
@@ -577,9 +585,9 @@ function EventCard({ event, onUnregister }) {
         />
       </div>
       <div className="p-4">
-        <h4 className="text-white font-semibold mb-2 line-clamp-1">{event.title}</h4>
+        <h4 className={`font-semibold mb-2 line-clamp-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{event.title}</h4>
         {eventDate && (
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-3">
+          <div className={`flex items-center gap-2 text-sm mb-3 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
             <Calendar className="w-4 h-4 text-orange-400" />
             <span>
               {format(eventDate, 'dd MMM yyyy', { locale: fr })}
@@ -588,7 +596,7 @@ function EventCard({ event, onUnregister }) {
           </div>
         )}
         {isPast ? (
-          <span className="inline-block text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
+          <span className={`inline-block text-xs px-2 py-1 rounded ${isDark ? 'text-white/40 bg-white/5' : 'text-gray-400 bg-gray-100'}`}>
             Terminé
           </span>
         ) : (
