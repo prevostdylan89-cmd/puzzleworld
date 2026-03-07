@@ -1,35 +1,29 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('pw_theme') || 'dark';
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('puzzleworld-theme');
+    return saved !== null ? saved === 'dark' : true; // dark by default
   });
 
   useEffect(() => {
-    localStorage.setItem('pw_theme', theme);
-    if (theme === 'light') {
-      document.documentElement.classList.add('pw-light');
-      document.documentElement.classList.remove('pw-dark');
-    } else {
-      document.documentElement.classList.add('pw-dark');
-      document.documentElement.classList.remove('pw-light');
-    }
-  }, [theme]);
+    localStorage.setItem('puzzleworld-theme', isDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
-  const isDark = theme === 'dark';
+  const toggleTheme = () => setIsDark(prev => !prev);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, isDark }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within a ThemeProvider');
-  return context;
+  const ctx = useContext(ThemeContext);
+  if (!ctx) return { isDark: true, toggleTheme: () => {} };
+  return ctx;
 }
