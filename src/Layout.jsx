@@ -394,7 +394,7 @@ function LayoutContent({ children, currentPageName }) {
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-[#000019] border-r border-white/10 z-[70] flex flex-col"
+              className={`lg:hidden fixed top-0 left-0 bottom-0 w-72 border-r z-[70] flex flex-col ${isDark ? 'bg-[#000019] border-white/10' : 'bg-[#faf8f4] border-gray-200'}`}
               style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
               {/* Menu Header */}
