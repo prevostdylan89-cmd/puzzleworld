@@ -443,19 +443,19 @@ export default function Home() {
           </div>
 
           {eventsInMaintenance ? (
-            <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+            <div className={`text-center py-12 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
               <span className="text-4xl mb-4 block">🔧</span>
-              <p className="text-white/60 font-medium">Les événements sont temporairement en maintenance.</p>
-              <p className="text-white/40 text-sm mt-1">Revenez bientôt !</p>
+              <p className={`font-medium ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Les événements sont temporairement en maintenance.</p>
+              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Revenez bientôt !</p>
             </div>
           ) : loading ? (
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-56 rounded-2xl bg-white/5 animate-pulse" />
+                <div key={i} className={`h-56 rounded-2xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
               ))}
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-12 text-white/40">
+            <div className={`text-center py-12 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
               <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Aucun événement disponible</p>
             </div>
