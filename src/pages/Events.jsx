@@ -72,14 +72,10 @@ export default function Events() {
               <Calendar className="w-8 h-8 text-orange-400" />
               <h1 className="text-3xl font-bold text-white">Événements</h1>
             </div>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:outline-none"
-            >
-              <option value="asc">📅 Du plus tôt au plus tard</option>
-              <option value="desc">📅 Du plus tard au plus tôt</option>
-            </select>
+            <MobileSelect value={sortOrder} onValueChange={setSortOrder} placeholder="Trier" title="Ordre des événements">
+              <SelectItem value="asc">📅 Du plus tôt au plus tard</SelectItem>
+              <SelectItem value="desc">📅 Du plus tard au plus tôt</SelectItem>
+            </MobileSelect>
           </div>
           <p className="text-white/60">
             Rejoignez notre communauté lors d'événements exclusifs

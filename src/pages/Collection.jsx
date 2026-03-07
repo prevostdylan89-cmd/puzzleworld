@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MobileSelect } from '@/components/ui/mobile-select';
 import {
   Sheet,
   SheetContent,
