@@ -143,36 +143,8 @@ function LayoutContent({ children, currentPageName }) {
     : user?.email?.slice(0, 2).toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-[#000019] text-white">
+    <div className={`min-h-screen ${isDark ? 'bg-[#000019] text-white' : 'bg-[#f4f1ec] text-gray-900'}`}>
       <style>{`
-        :root {
-          --background: 0 0% 5%;
-          --foreground: 0 0% 100%;
-          --card: 0 0% 8%;
-          --card-foreground: 0 0% 100%;
-          --primary: 24 100% 50%;
-          --primary-foreground: 0 0% 100%;
-          --muted: 240 10% 15%;
-          --muted-foreground: 240 5% 65%;
-          --accent: 240 30% 20%;
-          --accent-foreground: 0 0% 100%;
-          --border: 240 10% 15%;
-        }
-
-        @media (prefers-color-scheme: light) {
-          :root {
-            --background: 0 0% 100%;
-            --foreground: 0 0% 5%;
-            --card: 0 0% 98%;
-            --card-foreground: 0 0% 5%;
-            --muted: 240 10% 95%;
-            --muted-foreground: 240 5% 45%;
-            --accent: 240 10% 90%;
-            --accent-foreground: 0 0% 5%;
-            --border: 240 10% 90%;
-          }
-        }
-
         html, body {
           overscroll-behavior: none;
           -webkit-tap-highlight-color: transparent;
