@@ -54,9 +54,9 @@ function LayoutContent({ children, currentPageName }) {
 
   // Bottom nav items (mobile only)
   const bottomNavItems = [
-    { name: t('social'), icon: Users, page: 'Social' },
+    { name: t('collection'), icon: Grid3X3, page: 'Collection' },
     { name: 'Scan', icon: Scan, page: 'scan', isScan: true },
-    { name: 'Events', icon: Calendar, page: 'Events' },
+    { name: t('social'), icon: Users, page: 'Social' },
   ];
 
   // Sidebar menu items (mobile drawer)
