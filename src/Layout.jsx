@@ -345,6 +345,12 @@ function LayoutContent({ children, currentPageName }) {
           </Link>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 text-white/60' : 'bg-black/5 text-gray-500'}`}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             {user ? (
               <Link to={createPageUrl('Profile')}>
                 <div className="w-11 h-11 flex items-center justify-center">
