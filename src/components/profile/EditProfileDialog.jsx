@@ -103,26 +103,26 @@ export default function EditProfileDialog({ user, onUpdate }) {
         <Button
           size="sm"
           variant="outline"
-          className="border-white/20 text-white hover:bg-white/5"
+          className={isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}
         >
           <Camera className="w-4 h-4 mr-2" />
           Modifier le profil
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white">
+      <DialogContent className={isDark ? 'bg-[#0a0a2e] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}>
         <DialogHeader>
-          <DialogTitle className="text-white">Modifier le profil</DialogTitle>
+          <DialogTitle className={isDark ? 'text-white' : 'text-gray-900'}>Modifier le profil</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {/* Profile Photo */}
           <div>
-            <label className="text-white/70 text-sm mb-2 block">Photo de profil</label>
+            <label className={`text-sm mb-2 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Photo de profil</label>
             <div className="flex items-center gap-3">
               {profilePhoto && (
                 <img
                   src={profilePhoto}
                   alt="Preview"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-white/10"
+                  className={`w-20 h-20 rounded-full object-cover border-2 ${isDark ? 'border-white/10' : 'border-gray-200'}`}
                 />
               )}
               <div className="flex-1 space-y-2">
@@ -138,7 +138,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
                   onClick={() => document.getElementById('profile-upload').click()}
                   disabled={uploadingProfile}
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/5"
+                  className={isDark ? 'w-full border-white/20 text-white hover:bg-white/5' : 'w-full border-gray-300 text-gray-700 hover:bg-gray-100'}
                 >
                   {uploadingProfile ? (
                     <>
@@ -152,20 +152,20 @@ export default function EditProfileDialog({ user, onUpdate }) {
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-white/40">JPG, PNG - Max 5MB</p>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>JPG, PNG - Max 5MB</p>
               </div>
             </div>
           </div>
 
           {/* Cover Photo */}
           <div>
-            <label className="text-white/70 text-sm mb-2 block">Photo de couverture</label>
+            <label className={`text-sm mb-2 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Photo de couverture</label>
             <div className="space-y-2">
               {coverPhoto && (
                 <img
                   src={coverPhoto}
                   alt="Preview"
-                  className="w-full h-32 rounded-lg object-cover border-2 border-white/10"
+                  className={`w-full h-32 rounded-lg object-cover border-2 ${isDark ? 'border-white/10' : 'border-gray-200'}`}
                 />
               )}
               <input
@@ -180,7 +180,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
                 onClick={() => document.getElementById('cover-upload').click()}
                 disabled={uploadingCover}
                 variant="outline"
-                className="w-full border-white/20 text-white hover:bg-white/5"
+                className={isDark ? 'w-full border-white/20 text-white hover:bg-white/5' : 'w-full border-gray-300 text-gray-700 hover:bg-gray-100'}
               >
                 {uploadingCover ? (
                   <>
@@ -194,7 +194,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
                   </>
                 )}
               </Button>
-              <p className="text-xs text-white/40">JPG, PNG - Max 5MB - Recommandé: 1200x400px</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>JPG, PNG - Max 5MB - Recommandé: 1200x400px</p>
             </div>
           </div>
           <Button
