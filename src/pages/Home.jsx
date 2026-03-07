@@ -370,11 +370,11 @@ export default function Home() {
           {loading ? (
             <div className="grid grid-cols-5 gap-4">
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="aspect-square rounded-xl bg-white/5 animate-pulse" />
+                <div key={i} className={`aspect-square rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
               ))}
             </div>
           ) : topPuzzles.length === 0 ? (
-            <div className="text-center py-12 text-white/40">
+            <div className={`text-center py-12 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
               <Puzzle className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Aucun puzzle disponible</p>
             </div>
