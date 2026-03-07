@@ -220,7 +220,7 @@ export default function Social() {
                     </div>
                   )}
                   {!hasMore && posts.length > 0 && (
-                    <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
+                    <p className={`text-sm text-center ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('youveReachedEnd')}</p>
                   )}
                 </div>
               </>
