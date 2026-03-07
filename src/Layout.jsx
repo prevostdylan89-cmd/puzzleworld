@@ -592,11 +592,11 @@ function LayoutContent({ children, currentPageName }) {
 
             {/* Explore */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Explore</h3>
+              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Explore</h3>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('Collection')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Collection</Link></li>
-                <li><Link to={createPageUrl('Social')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Social</Link></li>
-                <li><Link to={createPageUrl('Events')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Events</Link></li>
+                <li><Link to={createPageUrl('Collection')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Collection</Link></li>
+                <li><Link to={createPageUrl('Social')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Social</Link></li>
+                <li><Link to={createPageUrl('Events')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Events</Link></li>
               </ul>
             </div>
 
