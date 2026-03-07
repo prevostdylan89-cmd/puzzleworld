@@ -526,7 +526,7 @@ function LayoutContent({ children, currentPageName }) {
                 key={item.name}
                 to={createPageUrl(item.page)}
                 className={`flex flex-col items-center gap-1 px-4 py-2 transition-all ${
-                  isActive ? 'text-orange-400' : 'text-white/50 active:text-white/70'
+                  isActive ? 'text-orange-500' : isDark ? 'text-white/50 active:text-white/70' : 'text-gray-400 active:text-gray-700'
                 }`}
               >
                 <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
