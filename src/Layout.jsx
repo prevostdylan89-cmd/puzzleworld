@@ -216,8 +216,8 @@ function LayoutContent({ children, currentPageName }) {
                   }}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 group relative ${
                     isActive 
-                      ? 'bg-orange-500/10 text-orange-400' 
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                      ? 'bg-orange-500/10 text-orange-500' 
+                      : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'
                   }`}
                 >
                   <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'group-hover:text-orange-400'}`} />
