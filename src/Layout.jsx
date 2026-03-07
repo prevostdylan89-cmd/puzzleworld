@@ -502,7 +502,7 @@ function LayoutContent({ children, currentPageName }) {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-t border-white/[0.06] z-40 safe-area-bottom">
+      <nav className={`lg:hidden fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t z-40 safe-area-bottom ${isDark ? 'bg-[#000019]/95 border-white/[0.06]' : 'bg-[#f4f1ec]/95 border-gray-200'}`}>
         <div className="flex items-center justify-around h-16" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {bottomNavItems.map((item) => {
             if (item.isScan) {
