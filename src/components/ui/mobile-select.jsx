@@ -33,7 +33,7 @@ export function MobileSelect({ value, onValueChange, placeholder, children, trig
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           {trigger || (
-            <Button variant="outline" className="w-full justify-between">
+            <Button variant="outline" className="w-full justify-between bg-transparent">
               {value ? items.find(item => item.props.value === value)?.props.children : placeholder}
             </Button>
           )}
