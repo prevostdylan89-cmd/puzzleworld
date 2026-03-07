@@ -506,9 +506,9 @@ export default function Collection() {
             >
               {sortedPuzzles.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/50">Aucun puzzle trouvé</p>
-                  <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
+                  <Puzzle className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+                  <p className={isDark ? 'text-white/50' : 'text-gray-500'}>Aucun puzzle trouvé</p>
+                  <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Soyez le premier à ajouter un puzzle à la communauté !</p>
                 </div>
               ) : (
                 sortedPuzzles.map((puzzle, index) => (
