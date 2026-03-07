@@ -472,7 +472,7 @@ export default function Home() {
                   key={event.id}
                   variants={item}
                   onClick={() => setSelectedEvent(event)}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border border-white/[0.06] hover:border-purple-500/30"
+                  className={`group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border hover:border-purple-500/30 ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}
                 >
                   <div className="aspect-[4/3] overflow-hidden">
                     {event.image ? (
