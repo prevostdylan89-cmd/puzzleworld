@@ -534,7 +534,7 @@ export default function Collection() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               variant="outline" 
-              className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
+              className={`rounded-full px-8 ${isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
             >
               {t('backToTop')}
               <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
