@@ -20,6 +20,7 @@ import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function Social() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState('trending');
