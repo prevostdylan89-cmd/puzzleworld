@@ -87,17 +87,17 @@ export default function CollectionSection({ user }) {
   return (
     <Tabs defaultValue="inbox" className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-        <TabsList className="bg-white/5 border border-white/10">
+        <TabsList className={`border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
           <TabsTrigger 
             value="inbox" 
-            className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white ${isDark ? 'text-white/70' : 'text-gray-600'}`}
           >
             <Package className="w-4 h-4 mr-2" />
             Dans sa boîte ({inboxPuzzles.length})
           </TabsTrigger>
           <TabsTrigger 
             value="completed"
-            className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white ${isDark ? 'text-white/70' : 'text-gray-600'}`}
           >
             <CheckCircle className="w-4 h-4 mr-2" />
             Terminés ({completedPuzzles.length})
@@ -106,33 +106,33 @@ export default function CollectionSection({ user }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+            <Button variant="outline" className={isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}>
               <ArrowUpDown className="w-4 h-4 mr-2" />
               Trier par
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+          <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
             <DropdownMenuItem 
               onClick={() => setSortBy('date-desc')}
-              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
+              className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'} ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
             >
               Date (Plus récent)
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => setSortBy('date-asc')}
-              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
+              className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'} ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
             >
               Date (Plus ancien)
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => setSortBy('pieces-asc')}
-              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
+              className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'} ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
             >
               Pièces (Croissant)
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => setSortBy('pieces-desc')}
-              className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
+              className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'} ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
             >
               Pièces (Décroissant)
             </DropdownMenuItem>
@@ -142,10 +142,10 @@ export default function CollectionSection({ user }) {
 
       <TabsContent value="inbox">
         {inboxPuzzles.length === 0 ? (
-          <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
-            <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/50">Aucun puzzle dans sa boîte</p>
-            <p className="text-white/30 text-sm mt-2">Scannez vos puzzles pour les ajouter ici</p>
+          <div className={`text-center py-12 backdrop-blur-xl border rounded-2xl ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
+            <Package className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+            <p className={isDark ? 'text-white/50' : 'text-gray-500'}>Aucun puzzle dans sa boîte</p>
+            <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Scannez vos puzzles pour les ajouter ici</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -158,10 +158,10 @@ export default function CollectionSection({ user }) {
 
       <TabsContent value="completed">
         {completedPuzzles.length === 0 ? (
-          <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
-            <CheckCircle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/50">Aucun puzzle terminé</p>
-            <p className="text-white/30 text-sm mt-2">Complétez vos premiers puzzles pour les voir ici</p>
+          <div className={`text-center py-12 backdrop-blur-xl border rounded-2xl ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
+            <CheckCircle className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+            <p className={isDark ? 'text-white/50' : 'text-gray-500'}>Aucun puzzle terminé</p>
+            <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Complétez vos premiers puzzles pour les voir ici</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
