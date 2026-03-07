@@ -206,6 +206,18 @@ Deno.serve(async (req) => {
       }
     }
 
+    // VALIDATION : Vérifier que le produit est bien un puzzle
+    const titleLower = (rawTitle || '').toLowerCase();
+    const categoriesStr = (product.categories || []).map(c => c.name || c).join(' ').toLowerCase();
+    const isPuzzle = titleLower.includes('puzzle') || categoriesStr.includes('puzzle');
+
+    if (!isPuzzle) {
+      return Response.json({
+        error: 'not_a_puzzle',
+        message: 'Scan refusé : Le produit détecté n\'est pas un puzzle. Seuls les puzzles peuvent être ajoutés à la collection.'
+      }, { status: 422 });
+    }
+
     // ÉTAPE 4 : Nouveau puzzle → retourner les données sans créer en base
     // La création en catalogue (status: pending) se fait côté client après confirmation de l'utilisateur
     return Response.json({
