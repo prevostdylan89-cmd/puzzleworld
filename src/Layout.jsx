@@ -322,18 +322,18 @@ function LayoutContent({ children, currentPageName }) {
           {['Home', 'Social', 'Collection'].includes(currentPageName) ? (
             <button 
               onClick={() => setShowMobileMenu(true)}
-              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
+              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 active:bg-white/15' : 'bg-black/5 active:bg-black/10'}`}
               style={{ touchAction: 'manipulation' }}
             >
-              <Menu className="w-6 h-6 text-white" />
+              <Menu className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-700'}`} />
             </button>
           ) : (
             <button 
               onClick={() => navigate(-1)}
-              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
+              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 active:bg-white/15' : 'bg-black/5 active:bg-black/10'}`}
               style={{ touchAction: 'manipulation' }}
             >
-              <ArrowLeft className="w-6 h-6 text-white" />
+              <ArrowLeft className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-700'}`} />
             </button>
           )}
 
