@@ -304,6 +304,11 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         response = await base44.functions.invoke('lookupPuzzleByEan', { ean: code });
       } catch (axiosError) {
         const errData = axiosError?.response?.data;
+        if (errData?.error === 'not_a_puzzle') {
+          setScanMessage({ type: 'error', text: '🚫 ' + errData.message });
+          setLoading(false);
+          return;
+        }
         if (errData?.error && (errData.error.includes('non trouvé') || errData.error.includes('introuvable') || axiosError?.response?.status === 404)) {
           setScanMessage({ type: 'error', text: '😕 Désolé, ce puzzle n\'est pas encore dans notre base. Ajoutez-le manuellement !' });
           setActiveTab('manual');
