@@ -240,18 +240,18 @@ export default function Home() {
           </div>
 
           {eventsInMaintenance ? (
-            <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/10">
+            <div className={`text-center py-8 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
               <span className="text-3xl mb-2 block">🔧</span>
-              <p className="text-white/50 text-sm">Événements en maintenance</p>
+              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Événements en maintenance</p>
             </div>
           ) : loading ? (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />
+                <div key={i} className={`h-24 rounded-2xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
               ))}
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">Aucun événement disponible</div>
+            <div className={`text-center py-8 text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Aucun événement disponible</div>
           ) : (
             <div className="space-y-3">
               {events.slice(0, 3).map((event) => (
@@ -261,20 +261,20 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   onClick={() => setSelectedEvent(event)}
-                  className="flex gap-3 rounded-2xl overflow-hidden bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform cursor-pointer"
+                  className={`flex gap-3 rounded-2xl overflow-hidden border active:scale-[0.98] transition-transform cursor-pointer ${isDark ? 'bg-white/[0.04] border-white/[0.07]' : 'bg-white border-gray-200'}`}
                 >
                   <div className="w-24 flex-shrink-0 relative">
                     {event.image ? (
                       <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full bg-white/5 flex items-center justify-center min-h-[80px]">
-                        <Calendar className="w-8 h-8 text-white/20" />
+                      <div className={`w-full h-full flex items-center justify-center min-h-[80px] ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+                        <Calendar className={`w-8 h-8 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 py-3 pr-3 flex flex-col justify-center">
-                    <p className="text-white font-semibold text-sm line-clamp-2 mb-1.5 leading-tight">{event.title}</p>
-                    <div className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit">
+                    <p className={`font-semibold text-sm line-clamp-2 mb-1.5 leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>{event.title}</p>
+                    <div className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-600 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit">
                       <Calendar className="w-2.5 h-2.5" />
                       {new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
                     </div>
