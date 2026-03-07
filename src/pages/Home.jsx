@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
+import { useTheme } from '@/components/ThemeContext';
 import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan, Star, Puzzle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
