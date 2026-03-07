@@ -170,11 +170,11 @@ export default function Home() {
           {loading ? (
             <div className="flex gap-3 px-4 overflow-x-auto pb-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-32 h-40 rounded-xl bg-white/5 animate-pulse" />
+                <div key={i} className={`flex-shrink-0 w-32 h-40 rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
               ))}
             </div>
           ) : topPuzzles.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">Aucun puzzle disponible</div>
+            <div className={`text-center py-8 text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Aucun puzzle disponible</div>
           ) : (
             <div className="flex gap-3 px-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
               {topPuzzles.map((puzzle, index) => (
