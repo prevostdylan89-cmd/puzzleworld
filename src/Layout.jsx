@@ -339,12 +339,12 @@ function LayoutContent({ children, currentPageName }) {
             <Menu className="w-6 h-6 text-white" />
           </button>
 
-          <div className="flex items-center gap-2">
+          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <Puzzle className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="font-bold text-base">PuzzleWorld</span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2">
             {user ? (
