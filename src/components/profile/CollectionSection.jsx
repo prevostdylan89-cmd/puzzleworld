@@ -176,6 +176,7 @@ export default function CollectionSection({ user }) {
 }
 
 function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
+  const { isDark } = useTheme();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleMove = async () => {
@@ -235,7 +236,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative"
+      className={`backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}
     >
       {/* Menu d'actions */}
       <div className="absolute top-2 right-2 z-10">
@@ -250,17 +251,17 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+          <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
             <DropdownMenuItem 
               onClick={handleMove}
-              className="text-white cursor-pointer hover:bg-white/10"
+              className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
             >
               <ArrowRight className="w-4 h-4 mr-2" />
               {puzzle.status === 'inbox' ? 'Marquer comme terminé' : 'Remettre dans sa boîte'}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={handleDelete}
-              className="text-red-400 cursor-pointer hover:bg-white/10"
+              className={`cursor-pointer text-red-400 ${isDark ? 'hover:bg-white/10' : 'hover:bg-red-50'}`}
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Retirer de ma collection
@@ -269,7 +270,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
         </DropdownMenu>
       </div>
 
-      <div className="aspect-square overflow-hidden bg-white/5">
+      <div className={`aspect-square overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
         {puzzle.image_url ? (
           <img
             src={puzzle.image_url}
@@ -278,15 +279,15 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className="w-12 h-12 text-white/20" />
+            <Puzzle className={`w-12 h-12 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
           </div>
         )}
       </div>
       <div className="p-3">
-        <h3 className="text-white text-sm font-semibold line-clamp-2 mb-1">
+        <h3 className={`text-sm font-semibold line-clamp-2 mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {puzzle.puzzle_name}
         </h3>
-        <div className="flex items-center justify-between text-xs text-white/50">
+        <div className={`flex items-center justify-between text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>
           <span>{puzzle.puzzle_brand}</span>
           <span>{puzzle.puzzle_pieces} pcs</span>
         </div>
