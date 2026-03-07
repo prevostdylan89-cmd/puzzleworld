@@ -271,7 +271,7 @@ function LayoutContent({ children, currentPageName }) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 transition-colors">
+                  <button className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}>
                     <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
                       {user.profile_photo ? (
                         <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
