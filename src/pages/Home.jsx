@@ -301,12 +301,12 @@ export default function Home() {
                 <Sparkles className="w-4 h-4" />
                 <span>Nouveaux puzzles ajoutés chaque jour</span>
               </div>
-              <h1 className="text-6xl font-bold text-white leading-tight mb-4">
+              <h1 className="text-6xl font-bold leading-tight mb-4">
                 <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
                   {t('heroTitle')}
                 </span>
               </h1>
-              <p className="text-white/60 text-lg mb-8 max-w-2xl mx-auto">
+              <p className={`text-lg mb-8 max-w-2xl mx-auto ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
                 {t('heroSubtitle')}
               </p>
             </motion.div>
