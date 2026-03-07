@@ -429,8 +429,8 @@ export default function Home() {
                 <Calendar className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Événements à Venir</h2>
-                <p className="text-white/40 text-xs">Ne manquez rien de la communauté</p>
+                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Événements à Venir</h2>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Ne manquez rien de la communauté</p>
               </div>
             </div>
             {!eventsInMaintenance && (
