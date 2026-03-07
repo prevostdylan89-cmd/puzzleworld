@@ -23,6 +23,7 @@ const item = {
 
 export default function Home() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
