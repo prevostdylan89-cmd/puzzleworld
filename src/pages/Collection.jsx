@@ -295,7 +295,7 @@ export default function Collection() {
 
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className={`${isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
+                  <Button variant="outline" size="icon" className={`${isDark ? 'bg-transparent border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
                     <SlidersHorizontal className="w-4 h-4" />
                   </Button>
                 </SheetTrigger>
