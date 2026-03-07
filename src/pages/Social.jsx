@@ -182,7 +182,7 @@ export default function Social() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
             >
-              <p className="text-white/80 mb-3">{t('logInToPost')}</p>
+              <p className={`mb-3 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{t('logInToPost')}</p>
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
