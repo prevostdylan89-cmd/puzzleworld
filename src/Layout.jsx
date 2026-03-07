@@ -602,11 +602,11 @@ function LayoutContent({ children, currentPageName }) {
 
             {/* Support */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Support</h3>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('FAQ')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">FAQ</Link></li>
-                <li><Link to={createPageUrl('Contact')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Contact</Link></li>
-                <li><Link to={createPageUrl('Aide')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Aide</Link></li>
+                <li><Link to={createPageUrl('FAQ')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>FAQ</Link></li>
+                <li><Link to={createPageUrl('Contact')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Contact</Link></li>
+                <li><Link to={createPageUrl('Aide')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Aide</Link></li>
               </ul>
             </div>
 
