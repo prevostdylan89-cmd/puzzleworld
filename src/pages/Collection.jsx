@@ -174,6 +174,7 @@ const CATEGORY_FILTERS = [
 
 export default function Collection() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
