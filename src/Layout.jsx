@@ -398,23 +398,23 @@ function LayoutContent({ children, currentPageName }) {
               style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
               {/* Menu Header */}
-              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                     <Puzzle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="font-bold text-white">PuzzleWorld</h2>
+                    <h2 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>PuzzleWorld</h2>
                     {user && (
-                      <p className="text-xs text-white/50">{user.full_name || user.email}</p>
+                      <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>{user.full_name || user.email}</p>
                     )}
                   </div>
                 </div>
                 <button
                   onClick={() => setShowMobileMenu(false)}
-                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10'}`}
                 >
-                  <XIcon className="w-4 h-4 text-white" />
+                  <XIcon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
                 </button>
               </div>
 
@@ -429,8 +429,8 @@ function LayoutContent({ children, currentPageName }) {
                       onClick={() => setShowMobileMenu(false)}
                       className={`flex items-center gap-3 px-4 py-3 transition-colors ${
                         isActive 
-                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
-                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                          ? 'bg-orange-500/10 text-orange-500 border-r-2 border-orange-500' 
+                          : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-black/5'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
