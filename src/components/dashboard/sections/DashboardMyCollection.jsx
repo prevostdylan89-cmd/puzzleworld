@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Grid3X3, Search, Edit2, Trash2, Loader2, Plus } from 'lucide-react';
-import { MobileSelect } from '@/components/ui/mobile-select';
-import { SelectItem } from '@/components/ui/select';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -151,12 +149,16 @@ export default function DashboardMyCollection() {
           {/* Sort Options */}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-white/50 text-sm">Trier par:</span>
-            <MobileSelect value={sortBy} onValueChange={setSortBy} placeholder="Trier" title="Trier par">
-              <SelectItem value="date">Date d'ajout</SelectItem>
-              <SelectItem value="pieces_asc">Pièces (croissant)</SelectItem>
-              <SelectItem value="pieces_desc">Pièces (décroissant)</SelectItem>
-              <SelectItem value="missing_pieces">❌ Pièces manquantes</SelectItem>
-            </MobileSelect>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:outline-none"
+            >
+              <option value="date">Date d'ajout</option>
+              <option value="pieces_asc">Pièces (croissant)</option>
+              <option value="pieces_desc">Pièces (décroissant)</option>
+              <option value="missing_pieces">❌ Pièces manquantes</option>
+            </select>
           </div>
 
           <p className="text-white/50 text-sm">

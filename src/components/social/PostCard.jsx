@@ -588,7 +588,6 @@ export default function PostCard({ post, user }) {
           onClick={handleLike}
           disabled={isProcessing}
           className="flex items-center gap-2 text-white/50 hover:text-pink-400 transition-colors group disabled:opacity-50"
-          style={{ minHeight: 44 }}
         >
           <Heart className={`w-5 h-5 group-hover:scale-110 transition-transform ${isLiked ? 'fill-pink-400 text-pink-400' : ''}`} />
           <span className="text-sm">{likesCount}</span>
@@ -596,7 +595,6 @@ export default function PostCard({ post, user }) {
         <button 
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-2 text-white/50 hover:text-blue-400 transition-colors group"
-          style={{ minHeight: 44 }}
         >
           <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span className="text-sm">{commentsCount}</span>

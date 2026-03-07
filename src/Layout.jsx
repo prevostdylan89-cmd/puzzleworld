@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
-import { ThemeProvider, useTheme } from '@/components/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
@@ -20,9 +19,7 @@ import {
   Menu,
   X as XIcon,
   Calendar,
-  ArrowLeft,
-  Sun,
-  Moon
+  ArrowLeft
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -42,7 +39,6 @@ import UsernameGuard from '@/components/onboarding/UsernameGuard';
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const { language, setLanguage, t } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showScanModal, setShowScanModal] = useState(false);
@@ -143,8 +139,36 @@ function LayoutContent({ children, currentPageName }) {
     : user?.email?.slice(0, 2).toUpperCase() || 'U';
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-[#000019] text-white' : 'bg-[#f4f1ec] text-gray-900'}`}>
+    <div className="min-h-screen bg-[#000019] text-white">
       <style>{`
+        :root {
+          --background: 0 0% 5%;
+          --foreground: 0 0% 100%;
+          --card: 0 0% 8%;
+          --card-foreground: 0 0% 100%;
+          --primary: 24 100% 50%;
+          --primary-foreground: 0 0% 100%;
+          --muted: 240 10% 15%;
+          --muted-foreground: 240 5% 65%;
+          --accent: 240 30% 20%;
+          --accent-foreground: 0 0% 100%;
+          --border: 240 10% 15%;
+        }
+
+        @media (prefers-color-scheme: light) {
+          :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 5%;
+            --card: 0 0% 98%;
+            --card-foreground: 0 0% 5%;
+            --muted: 240 10% 95%;
+            --muted-foreground: 240 5% 45%;
+            --accent: 240 10% 90%;
+            --accent-foreground: 0 0% 5%;
+            --border: 240 10% 90%;
+          }
+        }
+
         html, body {
           overscroll-behavior: none;
           -webkit-tap-highlight-color: transparent;
@@ -187,7 +211,7 @@ function LayoutContent({ children, currentPageName }) {
       `}</style>
 
       {/* Desktop Header */}
-      <header className={`hidden lg:block fixed top-0 left-0 right-0 h-16 backdrop-blur-xl border-b z-50 ${isDark ? 'bg-[#000019]/90 border-white/[0.06]' : 'bg-[#f4f1ec]/90 border-gray-200'}`} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <header className="hidden lg:block fixed top-0 left-0 right-0 h-16 bg-[#000019]/90 backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between h-full px-6">
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
@@ -216,11 +240,11 @@ function LayoutContent({ children, currentPageName }) {
                   }}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 group relative ${
                     isActive 
-                      ? 'bg-orange-500/10 text-orange-500' 
-                      : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'
+                      ? 'bg-orange-500/10 text-orange-400' 
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-500' : 'group-hover:text-orange-500'}`} />
+                  <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'group-hover:text-orange-400'}`} />
                   <span className="font-medium text-sm">{item.name}</span>
                   {isActive && (
                     <motion.div
@@ -235,33 +259,23 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className={isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'}
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className={isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-black/5'}>
+                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
                   <Languages className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
+              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
                 <DropdownMenuItem 
                   onClick={() => setLanguage('fr')}
-                  className={`cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
+                  className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                 >
                   🇫🇷 Français
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setLanguage('en')}
-                  className={`cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
+                  className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                 >
                   🇬🇧 English
                 </DropdownMenuItem>
@@ -271,7 +285,7 @@ function LayoutContent({ children, currentPageName }) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className={`flex items-center gap-2 p-2 rounded-xl transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}>
+                  <button className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 transition-colors">
                     <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
                       {user.profile_photo ? (
                         <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
@@ -282,22 +296,22 @@ function LayoutContent({ children, currentPageName }) {
                       )}
                     </Avatar>
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.full_name || user.email}</span>
+                      <span className="text-sm font-medium text-white">{user.full_name || user.email}</span>
                       {user.current_badge_icon && (
                         <span className="text-lg">{user.current_badge_icon}</span>
                       )}
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
+                <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
                   <DropdownMenuItem asChild>
-                    <Link to={createPageUrl('Profile')} className={`cursor-pointer ${isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}>
+                    <Link to={createPageUrl('Profile')} className="cursor-pointer text-white hover:bg-white/10">
                       <User className="w-4 h-4 mr-2" />
                       {t('profile')}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className={isDark ? 'bg-white/10' : 'bg-gray-200'} />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 hover:bg-red-50 hover:text-red-600">
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:bg-white/10 hover:text-red-300">
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('logOut')}
                   </DropdownMenuItem>
@@ -316,24 +330,24 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className={`lg:hidden fixed top-0 left-0 right-0 backdrop-blur-xl border-b z-50 ${isDark ? 'bg-[#000019]/95 border-white/[0.06]' : 'bg-[#f4f1ec]/95 border-gray-200'}`}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
         <div className="flex items-center justify-between px-4 h-14">
           {/* Hamburger ou Back arrow selon la page */}
           {['Home', 'Social', 'Collection'].includes(currentPageName) ? (
             <button 
               onClick={() => setShowMobileMenu(true)}
-              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 active:bg-white/15' : 'bg-black/5 active:bg-black/10'}`}
+              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
               style={{ touchAction: 'manipulation' }}
             >
-              <Menu className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+              <Menu className="w-6 h-6 text-white" />
             </button>
           ) : (
             <button 
               onClick={() => navigate(-1)}
-              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 active:bg-white/15' : 'bg-black/5 active:bg-black/10'}`}
+              className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center active:bg-white/15 transition-colors"
               style={{ touchAction: 'manipulation' }}
             >
-              <ArrowLeft className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+              <ArrowLeft className="w-6 h-6 text-white" />
             </button>
           )}
 
@@ -345,12 +359,6 @@ function LayoutContent({ children, currentPageName }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 text-white/60' : 'bg-black/5 text-gray-500'}`}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
             {user ? (
               <Link to={createPageUrl('Profile')}>
                 <div className="w-11 h-11 flex items-center justify-center">
@@ -394,27 +402,27 @@ function LayoutContent({ children, currentPageName }) {
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className={`lg:hidden fixed top-0 left-0 bottom-0 w-72 border-r z-[70] flex flex-col ${isDark ? 'bg-[#000019] border-white/10' : 'bg-[#faf8f4] border-gray-200'}`}
+              className="lg:hidden fixed top-0 left-0 bottom-0 w-72 bg-[#000019] border-r border-white/10 z-[70] flex flex-col"
               style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
               {/* Menu Header */}
-              <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                     <Puzzle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>PuzzleWorld</h2>
+                    <h2 className="font-bold text-white">PuzzleWorld</h2>
                     {user && (
-                      <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>{user.full_name || user.email}</p>
+                      <p className="text-xs text-white/50">{user.full_name || user.email}</p>
                     )}
                   </div>
                 </div>
                 <button
                   onClick={() => setShowMobileMenu(false)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10'}`}
+                  className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
                 >
-                  <XIcon className={`w-4 h-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
+                  <XIcon className="w-4 h-4 text-white" />
                 </button>
               </div>
 
@@ -429,8 +437,8 @@ function LayoutContent({ children, currentPageName }) {
                       onClick={() => setShowMobileMenu(false)}
                       className={`flex items-center gap-3 px-4 py-3 transition-colors ${
                         isActive 
-                          ? 'bg-orange-500/10 text-orange-500 border-r-2 border-orange-500' 
-                          : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-black/5'
+                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
@@ -441,14 +449,14 @@ function LayoutContent({ children, currentPageName }) {
 
                 {user?.role === 'admin' && (
                   <>
-                    <div className={`h-px my-2 mx-4 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+                    <div className="h-px bg-white/10 my-2 mx-4" />
                     <Link
                       to={createPageUrl('Dashboard')}
                       onClick={() => setShowMobileMenu(false)}
                       className={`flex items-center gap-3 px-4 py-3 transition-colors ${
                         currentPageName === 'Dashboard'
-                          ? 'bg-orange-500/10 text-orange-500 border-r-2 border-orange-500' 
-                          : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-black/5'
+                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <Settings className="w-5 h-5" />
@@ -459,24 +467,24 @@ function LayoutContent({ children, currentPageName }) {
               </div>
 
               {/* Menu Footer */}
-              <div className={`p-4 border-t space-y-2 ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+              <div className="p-4 border-t border-white/10 space-y-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isDark ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-700'}`}>
+                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white">
                       <Languages className="w-5 h-5" />
                       <span className="text-sm font-medium">{language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}</span>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
+                  <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
                     <DropdownMenuItem 
                       onClick={() => setLanguage('fr')}
-                      className={`cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
+                      className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                     >
                       🇫🇷 Français
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => setLanguage('en')}
-                      className={`cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-500' : isDark ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'}`}
+                      className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
                     >
                       🇬🇧 English
                     </DropdownMenuItem>
@@ -489,7 +497,7 @@ function LayoutContent({ children, currentPageName }) {
                       handleLogout();
                       setShowMobileMenu(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-500"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
                   >
                     <LogOut className="w-5 h-5" />
                     <span className="text-sm font-medium">{t('logOut')}</span>
@@ -502,7 +510,7 @@ function LayoutContent({ children, currentPageName }) {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <nav className={`lg:hidden fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t z-40 safe-area-bottom ${isDark ? 'bg-[#000019]/95 border-white/[0.06]' : 'bg-[#f4f1ec]/95 border-gray-200'}`}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-t border-white/[0.06] z-40 safe-area-bottom">
         <div className="flex items-center justify-around h-16" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {bottomNavItems.map((item) => {
             if (item.isScan) {
@@ -511,12 +519,11 @@ function LayoutContent({ children, currentPageName }) {
                   key={item.name}
                   onClick={() => setShowScanModal(true)}
                   className="flex flex-col items-center gap-1 -mt-4"
-                  style={{ minWidth: 44, minHeight: 44 }}
                 >
                   <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
                     <Scan className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-[12px] font-medium text-orange-400">Scan</span>
+                  <span className="text-[10px] font-medium text-orange-400">Scan</span>
                 </button>
               );
             }
@@ -526,11 +533,12 @@ function LayoutContent({ children, currentPageName }) {
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
-                className={`flex flex-col items-center gap-1 px-4 py-2 transition-all`}
-                style={{ minWidth: 44, minHeight: 44 }}
+                className={`flex flex-col items-center gap-1 px-4 py-2 transition-all ${
+                  isActive ? 'text-orange-400' : 'text-white/50 active:text-white/70'
+                }`}
               >
-                <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110 text-orange-500' : isDark ? 'text-white/50' : 'text-gray-400'}`} />
-                <span className={`text-[12px] font-semibold ${isActive ? 'text-orange-500' : isDark ? 'text-white/50' : 'text-gray-400'}`}>{item.name}</span>
+                <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
+                <span className="text-[10px] font-semibold">{item.name}</span>
                 {isActive && (
                   <motion.div
                     layoutId="activeTabMobile"
@@ -565,7 +573,7 @@ function LayoutContent({ children, currentPageName }) {
       </main>
 
       {/* Footer */}
-      <footer className={`border-t mt-12 ${isDark ? 'bg-[#0a0a2e] border-white/[0.06]' : 'bg-[#ede9e2] border-gray-200'}`}>
+      <footer className="bg-[#0a0a2e] border-t border-white/[0.06] mt-12">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
@@ -576,7 +584,7 @@ function LayoutContent({ children, currentPageName }) {
                 </div>
                 <span className="font-bold text-lg text-white">PuzzleWorld</span>
               </div>
-              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Votre communauté puzzle ultime</p>
+              <p className="text-white/50 text-sm">Votre communauté puzzle ultime</p>
               <div className="flex gap-3">
                 <a href="https://www.instagram.com/puzzle__world__?igsh=NGI5cHJoOXpuZHQ5" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">📷</span>
@@ -592,21 +600,21 @@ function LayoutContent({ children, currentPageName }) {
 
             {/* Explore */}
             <div>
-              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Explore</h3>
+              <h3 className="text-white font-semibold mb-4">Explore</h3>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('Collection')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Collection</Link></li>
-                <li><Link to={createPageUrl('Social')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Social</Link></li>
-                <li><Link to={createPageUrl('Events')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Events</Link></li>
+                <li><Link to={createPageUrl('Collection')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Collection</Link></li>
+                <li><Link to={createPageUrl('Social')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Social</Link></li>
+                <li><Link to={createPageUrl('Events')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Events</Link></li>
               </ul>
             </div>
 
             {/* Support */}
             <div>
-              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Support</h3>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><Link to={createPageUrl('FAQ')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>FAQ</Link></li>
-                <li><Link to={createPageUrl('Contact')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Contact</Link></li>
-                <li><Link to={createPageUrl('Aide')} className={`text-sm transition-colors hover:text-orange-500 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Aide</Link></li>
+                <li><Link to={createPageUrl('FAQ')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">FAQ</Link></li>
+                <li><Link to={createPageUrl('Contact')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Contact</Link></li>
+                <li><Link to={createPageUrl('Aide')} className="text-white/50 hover:text-orange-400 text-sm transition-colors">Aide</Link></li>
               </ul>
             </div>
 
@@ -614,25 +622,25 @@ function LayoutContent({ children, currentPageName }) {
             <div></div>
           </div>
 
-          <div className={`pt-8 border-t ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}>
+          <div className="pt-8 border-t border-white/[0.06]">
             <div className="text-center mb-4">
-              <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>© 2026 PuzzleWorld. Tous droits réservés.</p>
+              <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
             </div>
-            <div className={`flex flex-wrap items-center justify-center gap-4 text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-              <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-500 transition-colors">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/30">
+              <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-400 transition-colors">
                 Politique de confidentialité
               </Link>
               <span>•</span>
-              <Link to={createPageUrl('Terms')} className="hover:text-orange-500 transition-colors">
+              <Link to={createPageUrl('Terms')} className="hover:text-orange-400 transition-colors">
                 CGU
               </Link>
               <span>•</span>
-              <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-500 transition-colors">
+              <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-400 transition-colors">
                 Contact
               </a>
             </div>
             <div className="text-center mt-4">
-              <p className={`text-xs italic ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+              <p className="text-xs text-white/30 italic">
                 En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.
               </p>
             </div>
@@ -649,10 +657,8 @@ function LayoutContent({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <LayoutContent children={children} currentPageName={currentPageName} />
-      </LanguageProvider>
-    </ThemeProvider>
+    <LanguageProvider>
+      <LayoutContent children={children} currentPageName={currentPageName} />
+    </LanguageProvider>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { useTheme } from '@/components/ThemeContext';
 import { 
   TrendingUp,
   Flame,
@@ -20,7 +19,6 @@ import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function Social() {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState('trending');
@@ -139,11 +137,11 @@ export default function Social() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className={`sticky top-0 lg:top-0 z-30 backdrop-blur-xl border-b ${isDark ? 'bg-[#000019]/80 border-white/[0.06]' : 'bg-[#f4f1ec]/80 border-gray-200'}`}>
+      <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="px-4 lg:px-8 py-4">
-          <h1 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('community')}</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">{t('community')}</h1>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+            <TabsList className="bg-white/5 border border-white/10">
               <TabsTrigger 
                 value="trending" 
                 className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
@@ -182,7 +180,7 @@ export default function Social() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
             >
-              <p className={`mb-3 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{t('logInToPost')}</p>
+              <p className="text-white/80 mb-3">{t('logInToPost')}</p>
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
@@ -200,7 +198,7 @@ export default function Social() {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <p className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('noPosts')}</p>
+                <p className="text-white/50">{t('noPosts')}</p>
               </div>
             ) : (
               <>
@@ -220,7 +218,7 @@ export default function Social() {
                     </div>
                   )}
                   {!hasMore && posts.length > 0 && (
-                    <p className={`text-sm text-center ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('youveReachedEnd')}</p>
+                    <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
                   )}
                 </div>
               </>

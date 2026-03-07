@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
-import { useTheme } from '@/components/ThemeContext';
 import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan, Star, Puzzle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
@@ -23,7 +22,6 @@ const item = {
 
 export default function Home() {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
@@ -103,12 +101,12 @@ export default function Home() {
               <Sparkles className="w-3 h-3" />
               <span>Nouveaux puzzles chaque jour</span>
             </div>
-            <h1 className="text-2xl font-bold leading-tight mb-1">
+            <h1 className="text-2xl font-bold text-white leading-tight mb-1">
               <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
                 {t('heroTitle')}
               </span>
             </h1>
-            <p className={`text-sm mb-4 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('heroSubtitle')}</p>
+            <p className="text-white/50 text-sm mb-4">{t('heroSubtitle')}</p>
 
             {/* CTA Buttons - side by side, compact */}
             <div className="grid grid-cols-2 gap-3">
@@ -133,14 +131,14 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className={`flex items-center gap-2.5 border rounded-2xl px-4 py-3.5 text-left w-full active:scale-95 transition-transform ${isDark ? 'bg-white/[0.07] border-white/10' : 'bg-gray-100 border-gray-200'}`}
+                  className="flex items-center gap-2.5 bg-white/[0.07] border border-white/10 rounded-2xl px-4 py-3.5 text-left w-full active:scale-95 transition-transform"
                 >
                   <div className="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
                   </div>
                   <div>
-                    <p className={`font-bold text-sm leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>Explorer</p>
-                    <p className={`text-[11px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Collection</p>
+                    <p className="text-white font-bold text-sm leading-tight">Explorer</p>
+                    <p className="text-white/50 text-[11px]">Collection</p>
                   </div>
                 </motion.div>
               </Link>
@@ -156,8 +154,8 @@ export default function Home() {
                 <TrendingUp className="w-4 h-4 text-orange-400" />
               </div>
               <div>
-                <h2 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Top 10 Puzzles</h2>
-                <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Les plus appréciés</p>
+                <h2 className="text-base font-bold text-white">Top 10 Puzzles</h2>
+                <p className="text-white/40 text-[10px]">Les plus appréciés</p>
               </div>
             </div>
             <Link to={createPageUrl('Collection')}>
@@ -170,11 +168,11 @@ export default function Home() {
           {loading ? (
             <div className="flex gap-3 px-4 overflow-x-auto pb-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className={`flex-shrink-0 w-32 h-40 rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+                <div key={i} className="flex-shrink-0 w-32 h-40 rounded-xl bg-white/5 animate-pulse" />
               ))}
             </div>
           ) : topPuzzles.length === 0 ? (
-            <div className={`text-center py-8 text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Aucun puzzle disponible</div>
+            <div className="text-center py-8 text-white/30 text-sm">Aucun puzzle disponible</div>
           ) : (
             <div className="flex gap-3 px-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
               {topPuzzles.map((puzzle, index) => (
@@ -226,8 +224,8 @@ export default function Home() {
                 <Calendar className="w-4 h-4 text-purple-400" />
               </div>
               <div>
-                <h2 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Événements</h2>
-                <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-400'}`}>À venir</p>
+                <h2 className="text-base font-bold text-white">Événements</h2>
+                <p className="text-white/40 text-[10px]">À venir</p>
               </div>
             </div>
             {!eventsInMaintenance && (
@@ -240,18 +238,18 @@ export default function Home() {
           </div>
 
           {eventsInMaintenance ? (
-            <div className={`text-center py-8 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+            <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/10">
               <span className="text-3xl mb-2 block">🔧</span>
-              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Événements en maintenance</p>
+              <p className="text-white/50 text-sm">Événements en maintenance</p>
             </div>
           ) : loading ? (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className={`h-24 rounded-2xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+                <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />
               ))}
             </div>
           ) : events.length === 0 ? (
-            <div className={`text-center py-8 text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Aucun événement disponible</div>
+            <div className="text-center py-8 text-white/30 text-sm">Aucun événement disponible</div>
           ) : (
             <div className="space-y-3">
               {events.slice(0, 3).map((event) => (
@@ -261,20 +259,20 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   onClick={() => setSelectedEvent(event)}
-                  className={`flex gap-3 rounded-2xl overflow-hidden border active:scale-[0.98] transition-transform cursor-pointer ${isDark ? 'bg-white/[0.04] border-white/[0.07]' : 'bg-white border-gray-200'}`}
+                  className="flex gap-3 rounded-2xl overflow-hidden bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform cursor-pointer"
                 >
                   <div className="w-24 flex-shrink-0 relative">
                     {event.image ? (
                       <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className={`w-full h-full flex items-center justify-center min-h-[80px] ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
-                        <Calendar className={`w-8 h-8 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+                      <div className="w-full h-full bg-white/5 flex items-center justify-center min-h-[80px]">
+                        <Calendar className="w-8 h-8 text-white/20" />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 py-3 pr-3 flex flex-col justify-center">
-                    <p className={`font-semibold text-sm line-clamp-2 mb-1.5 leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>{event.title}</p>
-                    <div className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-600 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit">
+                    <p className="text-white font-semibold text-sm line-clamp-2 mb-1.5 leading-tight">{event.title}</p>
+                    <div className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit">
                       <Calendar className="w-2.5 h-2.5" />
                       {new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
                     </div>
@@ -301,12 +299,12 @@ export default function Home() {
                 <Sparkles className="w-4 h-4" />
                 <span>Nouveaux puzzles ajoutés chaque jour</span>
               </div>
-              <h1 className="text-6xl font-bold leading-tight mb-4">
+              <h1 className="text-6xl font-bold text-white leading-tight mb-4">
                 <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
                   {t('heroTitle')}
                 </span>
               </h1>
-              <p className={`text-lg mb-8 max-w-2xl mx-auto ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
+              <p className="text-white/60 text-lg mb-8 max-w-2xl mx-auto">
                 {t('heroSubtitle')}
               </p>
             </motion.div>
@@ -332,14 +330,14 @@ export default function Home() {
               </motion.button>
 
               <Link to={createPageUrl('Collection')}>
-                <button className={`group w-full relative overflow-hidden rounded-[2rem] border-2 p-8 text-left transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 hover:border-orange-500/30 hover:bg-white/10' : 'bg-white border-gray-200 hover:border-orange-500/30 hover:bg-orange-50'}`}>
+                <button className="group w-full relative overflow-hidden rounded-[2rem] bg-white/5 border-2 border-white/10 hover:border-orange-500/30 hover:bg-white/10 p-8 text-left transition-all hover:scale-[1.02]">
                   <div className="relative z-10 flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
                       <ChevronRight className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Explorer la collection</h3>
-                      <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Découvrez des milliers de puzzles</p>
+                      <h3 className="text-white font-bold text-xl mb-2">Explorer la collection</h3>
+                      <p className="text-white/60 text-sm">Découvrez des milliers de puzzles</p>
                     </div>
                   </div>
                 </button>
@@ -356,8 +354,8 @@ export default function Home() {
                 <TrendingUp className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Top 10 Puzzles</h2>
-                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Les plus appréciés de la communauté</p>
+                <h2 className="text-xl font-bold text-white">Top 10 Puzzles</h2>
+                <p className="text-white/40 text-xs">Les plus appréciés de la communauté</p>
               </div>
             </div>
             <Link to={createPageUrl('Collection')}>
@@ -370,11 +368,11 @@ export default function Home() {
           {loading ? (
             <div className="grid grid-cols-5 gap-4">
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className={`aspect-square rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+                <div key={i} className="aspect-square rounded-xl bg-white/5 animate-pulse" />
               ))}
             </div>
           ) : topPuzzles.length === 0 ? (
-            <div className={`text-center py-12 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+            <div className="text-center py-12 text-white/40">
               <Puzzle className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Aucun puzzle disponible</p>
             </div>
@@ -429,8 +427,8 @@ export default function Home() {
                 <Calendar className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Événements à Venir</h2>
-                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Ne manquez rien de la communauté</p>
+                <h2 className="text-xl font-bold text-white">Événements à Venir</h2>
+                <p className="text-white/40 text-xs">Ne manquez rien de la communauté</p>
               </div>
             </div>
             {!eventsInMaintenance && (
@@ -443,19 +441,19 @@ export default function Home() {
           </div>
 
           {eventsInMaintenance ? (
-            <div className={`text-center py-12 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+            <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
               <span className="text-4xl mb-4 block">🔧</span>
-              <p className={`font-medium ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Les événements sont temporairement en maintenance.</p>
-              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Revenez bientôt !</p>
+              <p className="text-white/60 font-medium">Les événements sont temporairement en maintenance.</p>
+              <p className="text-white/40 text-sm mt-1">Revenez bientôt !</p>
             </div>
           ) : loading ? (
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className={`h-56 rounded-2xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-200'}`} />
+                <div key={i} className="h-56 rounded-2xl bg-white/5 animate-pulse" />
               ))}
             </div>
           ) : events.length === 0 ? (
-            <div className={`text-center py-12 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+            <div className="text-center py-12 text-white/40">
               <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Aucun événement disponible</p>
             </div>
@@ -472,7 +470,7 @@ export default function Home() {
                   key={event.id}
                   variants={item}
                   onClick={() => setSelectedEvent(event)}
-                  className={`group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border hover:border-purple-500/30 ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}
+                  className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border border-white/[0.06] hover:border-purple-500/30"
                 >
                   <div className="aspect-[4/3] overflow-hidden">
                     {event.image ? (

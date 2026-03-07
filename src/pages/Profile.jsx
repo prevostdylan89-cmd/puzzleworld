@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { useTheme } from '@/components/ThemeContext';
 import { 
   MapPin, 
   Calendar, 
@@ -38,7 +37,6 @@ import { Crown, Camera } from 'lucide-react';
 
 export default function Profile() {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('collection');
@@ -176,10 +174,10 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`backdrop-blur-xl rounded-2xl p-8 text-center max-w-md border ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}
+          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
         >
-          <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Bienvenue sur PuzzleWorld</h2>
-          <p className={`mb-6 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('logInToViewProfile')}</p>
+          <h2 className="text-2xl font-bold text-white mb-4">Bienvenue sur PuzzleWorld</h2>
+          <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}
             className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
@@ -234,7 +232,7 @@ export default function Profile() {
             alt="Cover"
             className="w-full h-full object-cover"
           />
-          <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#000019] via-[#000019]/50' : 'from-[#f4f1ec] via-[#f4f1ec]/40'} to-transparent`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#000019] via-[#000019]/50 to-transparent" />
           <div className="absolute top-4 right-4">
             <EditProfileDialog user={user} onUpdate={loadUserData} />
           </div>
@@ -249,7 +247,7 @@ export default function Profile() {
               animate={{ scale: 1, opacity: 1 }}
               className="relative"
             >
-              <Avatar className={`h-32 w-32 lg:h-40 lg:w-40 ring-4 ${isDark ? 'ring-[#000019]' : 'ring-[#f4f1ec]'} border-4 border-orange-500/30`}>
+              <Avatar className="h-32 w-32 lg:h-40 lg:w-40 ring-4 ring-[#000019] border-4 border-orange-500/30">
                 {user.profile_photo ? (
                   <img src={user.profile_photo} alt={user.full_name || user.email} className="w-full h-full object-cover" />
                 ) : (
@@ -265,7 +263,7 @@ export default function Profile() {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className={`text-2xl lg:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.display_name || user.full_name || user.email}</h1>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.display_name || user.full_name || user.email}</h1>
                     {currentBadge && (
                       <button
                         onClick={() => setShowBadgesModal(true)}
@@ -289,26 +287,26 @@ export default function Profile() {
                 <Button 
                   onClick={() => base44.auth.logout()}
                   variant="outline" 
-                  className={`w-fit ${isDark ? 'bg-transparent border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                  className="border-white/20 text-white hover:bg-white/5 w-fit"
                 >
                   {t('logOut')}
                 </Button>
               </div>
               
-              <p className={`mt-3 max-w-xl ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+              <p className="text-white/70 mt-3 max-w-xl">
                 {t('welcomeToDashboard')}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
-                <span className={`flex items-center gap-1.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+                <span className="flex items-center gap-1.5 text-white/50">
                   <Calendar className="w-4 h-4 text-orange-400" />
                   {t('joined')} {joinedDate}
                 </span>
-                <span className={isDark ? 'text-white/70' : 'text-gray-600'}>
-                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.followers}</span> Followers
+                <span className="text-white/70">
+                  <span className="font-semibold text-white">{stats.followers}</span> Followers
                 </span>
-                <span className={isDark ? 'text-white/70' : 'text-gray-600'}>
-                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.following}</span> Abonnements
+                <span className="text-white/70">
+                  <span className="font-semibold text-white">{stats.following}</span> Abonnements
                 </span>
               </div>
             </div>
@@ -323,11 +321,11 @@ export default function Profile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={stat.onClick}
-                className={`backdrop-blur-xl border rounded-2xl p-4 text-center hover:border-orange-500/30 transition-all cursor-pointer ${isDark ? 'bg-white/[0.03] border-white/[0.06] hover:bg-white/5' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
+                className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 text-center hover:border-orange-500/30 hover:bg-white/5 transition-all cursor-pointer"
               >
                 <stat.icon className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-                <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{stat.value}</div>
-                <div className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{stat.label}</div>
+                <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div className="text-sm text-white/50">{stat.label}</div>
               </motion.button>
             ))}
           </div>
@@ -337,20 +335,20 @@ export default function Profile() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className={`bg-gradient-to-r from-orange-500/10 to-purple-500/10 border rounded-2xl p-5 mt-6 ${isDark ? 'border-white/[0.06]' : 'border-gray-200'}`}
+            className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
           >
             <div className="flex items-center justify-between mb-3">
               <div>
                 <span className="text-orange-400 font-bold text-lg">{t('level')} {levelProgress.current}</span>
-                <span className={`ml-2 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{levelProgress.title}</span>
+                <span className="text-white/50 ml-2">{levelProgress.title}</span>
               </div>
-              <span className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+              <span className="text-white/50 text-sm">
                 {levelProgress.xp.toLocaleString()} / {levelProgress.nextLevelXp.toLocaleString()} XP
               </span>
             </div>
             <Progress 
               value={(levelProgress.xp / levelProgress.nextLevelXp) * 100} 
-              className={`h-2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}
+              className="h-2 bg-white/10"
             />
           </motion.div>
         </div>
@@ -359,10 +357,10 @@ export default function Profile() {
       {/* Content Tabs */}
       <div className="px-4 lg:px-8 mt-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`border w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+          <TabsList className="bg-white/5 border border-white/10 w-full">
             <TabsTrigger 
               value="collection" 
-              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
               <Puzzle className="w-4 h-4 shrink-0" />
               <span className="ml-1.5 hidden sm:inline">Ma Collection</span>
@@ -370,14 +368,14 @@ export default function Profile() {
             </TabsTrigger>
             <TabsTrigger 
               value="wishlist" 
-              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
               <Heart className="w-4 h-4 shrink-0" />
               <span className="ml-1.5">Wishlist</span>
             </TabsTrigger>
             <TabsTrigger 
               value="exchange"
-              className={`data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
               <Grid3X3 className="w-4 h-4 shrink-0" />
               <span className="ml-1.5 hidden sm:inline">À Vendre / Échanger</span>
@@ -402,7 +400,7 @@ export default function Profile() {
 
         {/* My Events Section */}
         <div className="mt-12">
-          <h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <Calendar className="w-6 h-6 text-orange-400" />
             {t('myEvents')}
           </h2>
@@ -411,7 +409,7 @@ export default function Profile() {
 
         {/* Delete Account Section */}
         <div className="mt-12">
-          <h2 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Paramètres du compte</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Paramètres du compte</h2>
           <DeleteAccountSection />
         </div>
       </div>
@@ -427,7 +425,6 @@ export default function Profile() {
 
 function MyEventsSection({ user }) {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -474,10 +471,10 @@ function MyEventsSection({ user }) {
 
   if (registeredEvents.length === 0) {
     return (
-      <div className={`text-center py-12 backdrop-blur-xl border rounded-2xl ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
-        <Calendar className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
-        <p className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('noEvents')}</p>
-        <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Inscrivez-vous à des événements pour les voir ici</p>
+      <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
+        <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
+        <p className="text-white/50">{t('noEvents')}</p>
+        <p className="text-white/30 text-sm mt-2">Inscrivez-vous à des événements pour les voir ici</p>
       </div>
     );
   }
@@ -502,7 +499,7 @@ function MyEventsSection({ user }) {
       {/* Upcoming Events */}
       {upcomingEvents.length > 0 && (
         <div>
-          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('upcomingEvents')}</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">{t('upcomingEvents')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} onUnregister={loadUserEvents} />
@@ -514,7 +511,7 @@ function MyEventsSection({ user }) {
       {/* Past Events */}
       {pastEvents.length > 0 && (
         <div>
-          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white/70' : 'text-gray-500'}`}>Événements passés</h3>
+          <h3 className="text-lg font-semibold text-white/70 mb-4">Événements passés</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
             {pastEvents.map((event) => (
               <EventCard key={event.id} event={event} />
@@ -569,14 +566,7 @@ function EventCard({ event, onUnregister }) {
   };
 
   return (
-    <EventCardInner event={event} onUnregister={onUnregister} isPast={isPast} eventDate={eventDate} loading={loading} handleUnregister={handleUnregister} />
-  );
-}
-
-function EventCardInner({ event, isPast, eventDate, loading, handleUnregister }) {
-  const { isDark } = useTheme();
-  return (
-    <div className={`backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
+    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all">
       <div className="aspect-[16/9] overflow-hidden">
         <img
           src={event.image}
@@ -585,9 +575,9 @@ function EventCardInner({ event, isPast, eventDate, loading, handleUnregister })
         />
       </div>
       <div className="p-4">
-        <h4 className={`font-semibold mb-2 line-clamp-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{event.title}</h4>
+        <h4 className="text-white font-semibold mb-2 line-clamp-1">{event.title}</h4>
         {eventDate && (
-          <div className={`flex items-center gap-2 text-sm mb-3 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
+          <div className="flex items-center gap-2 text-white/60 text-sm mb-3">
             <Calendar className="w-4 h-4 text-orange-400" />
             <span>
               {format(eventDate, 'dd MMM yyyy', { locale: fr })}
@@ -596,7 +586,7 @@ function EventCardInner({ event, isPast, eventDate, loading, handleUnregister })
           </div>
         )}
         {isPast ? (
-          <span className={`inline-block text-xs px-2 py-1 rounded ${isDark ? 'text-white/40 bg-white/5' : 'text-gray-400 bg-gray-100'}`}>
+          <span className="inline-block text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
             Terminé
           </span>
         ) : (

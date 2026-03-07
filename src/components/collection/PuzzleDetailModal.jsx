@@ -5,12 +5,10 @@ import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'luci
 import { toast } from 'sonner';
 import PopularityScore from '@/components/shared/PopularityScore';
 import { base44 } from '@/api/base44Client';
-import { useTheme } from '@/components/ThemeContext';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
-  const { isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
   const [popularityScore, setPopularityScore] = useState(null);
@@ -190,7 +188,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto p-0 ${isDark ? 'bg-[#0a0a2e] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
+      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -206,7 +204,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         ) : productData ? (
           <>
             {/* Image Section */}
-            <div className={`relative w-full ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+            <div className="relative w-full bg-white/5">
               <img
                 src={productData.main_image?.link || puzzle.image_hd}
                 alt={productData.title}
@@ -218,7 +216,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
             <div className="p-6 space-y-6">
               {/* Title & Brand */}
               <div>
-                <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h2 className="text-2xl font-bold text-white mb-2">
                   {productData.title || puzzle.title}
                 </h2>
                 {productData.brand && (
@@ -230,15 +228,15 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
 
               {/* Piece Count */}
               {puzzle.piece_count && (
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}>
+                <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
                   <span className="text-2xl">🧩</span>
-                  <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>{puzzle.piece_count} pièces</span>
+                  <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
                 </div>
               )}
 
               {/* Popularity Score */}
               {!loadingScore && popularityScore !== null && popularityScore > 0 && (
-                <div className={`rounded-xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                   <PopularityScore score={popularityScore} size="default" />
                 </div>
               )}
@@ -246,10 +244,10 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
               {/* Key Features */}
               {productData.feature_bullets && productData.feature_bullets.length > 0 && (
                 <div>
-                  <h3 className={`font-semibold mb-3 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Caractéristiques :</h3>
+                  <h3 className="text-white/70 font-semibold mb-3">Caractéristiques :</h3>
                   <ul className="space-y-2">
                     {productData.feature_bullets.slice(0, 5).map((bullet, index) => (
-                      <li key={index} className={`flex items-start gap-2 text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>
+                      <li key={index} className="flex items-start gap-2 text-white/80 text-sm">
                         <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
                         <span>{bullet}</span>
                       </li>
@@ -268,7 +266,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                   className={`flex-1 h-12 border-2 transition-all ${
                     isLiked 
                       ? 'bg-red-500/20 border-red-500 text-red-400 hover:bg-red-500/30' 
-                      : isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                      : 'border-white/20 text-white hover:bg-white/5'
                   }`}
                 >
                   <Heart className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
@@ -281,7 +279,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                   className={`flex-1 h-12 border-2 transition-all ${
                     isWishlisted 
                       ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 hover:bg-yellow-500/30' 
-                      : isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                      : 'border-white/20 text-white hover:bg-white/5'
                   }`}
                 >
                   ⭐ {isWishlisted ? 'En wishlist' : 'Wishlist'}
@@ -297,18 +295,18 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 Voir le produit sur Amazon
               </Button>
 
-              <p className={`text-xs text-center ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+              <p className="text-white/40 text-xs text-center">
                 En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats qualifiés
               </p>
             </div>
           </>
         ) : (
           <div className="p-12 text-center">
-            <p className={isDark ? 'text-white/60' : 'text-gray-500'}>Impossible de charger les détails</p>
+            <p className="text-white/60">Impossible de charger les détails</p>
             <Button
               onClick={onClose}
               variant="outline"
-              className={`mt-4 ${isDark ? 'border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+              className="mt-4 border-white/20 text-white hover:bg-white/5"
             >
               Fermer
             </Button>

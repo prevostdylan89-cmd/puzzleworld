@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
-import { useTheme } from '@/components/ThemeContext';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
@@ -28,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MobileSelect } from '@/components/ui/mobile-select';
 import {
   Sheet,
   SheetContent,
@@ -175,7 +173,6 @@ const CATEGORY_FILTERS = [
 
 export default function Collection() {
   const { t } = useLanguage();
-  const { isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
@@ -272,12 +269,12 @@ export default function Collection() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className={`sticky top-0 lg:top-0 z-30 backdrop-blur-xl border-b ${isDark ? 'bg-[#000019]/80 border-white/[0.06]' : 'bg-[#f4f1ec]/80 border-gray-200'}`}>
+      <div className="sticky top-0 lg:top-0 z-30 bg-[#000019]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="px-4 lg:px-8 py-3 lg:py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
             <div className="hidden lg:block">
-              <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Collection Communautaire</h1>
-              <p className={`text-sm mt-1 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+              <h1 className="text-2xl font-bold text-white">Collection Communautaire</h1>
+              <p className="text-white/50 text-sm mt-1">
                 {isLoading ? 'Chargement...' : `${sortedPuzzles.length} puzzles partagés par la communauté`}
               </p>
             </div>
@@ -285,49 +282,49 @@ export default function Collection() {
             {/* Search & Actions */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1 lg:w-64">
-                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('searchPuzzles')}
-                  className={`pl-10 rounded-xl ${isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800 placeholder:text-gray-400'}`}
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
                 />
               </div>
 
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className={`${isDark ? 'bg-transparent border-white/10 text-white hover:bg-white/5' : 'border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
+                  <Button variant="outline" size="icon" className="border-white/10 text-white hover:bg-white/5">
                     <SlidersHorizontal className="w-4 h-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent className={`${isDark ? 'bg-[#000019] border-white/[0.06]' : 'bg-white border-gray-200'}`}>
+                <SheetContent className="bg-[#000019] border-white/[0.06]">
                   <SheetHeader>
-                    <SheetTitle className={isDark ? 'text-white' : 'text-gray-800'}>{t('filters')}</SheetTitle>
+                    <SheetTitle className="text-white">{t('filters')}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     {/* Piece Count Min/Max */}
                     <div>
-                      <label className={`text-sm mb-3 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('pieceCount')}</label>
+                      <label className="text-sm text-white/70 mb-3 block">{t('pieceCount')}</label>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Minimum</label>
+                          <label className="text-xs text-white/50 mb-1.5 block">Minimum</label>
                           <Input
                             type="number"
                             value={minPieces}
                             onChange={(e) => setMinPieces(e.target.value)}
                             placeholder="Ex: 500"
-                            className={isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800'}
+                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Maximum</label>
+                          <label className="text-xs text-white/50 mb-1.5 block">Maximum</label>
                           <Input
                             type="number"
                             value={maxPieces}
                             onChange={(e) => setMaxPieces(e.target.value)}
                             placeholder="Ex: 2000"
-                            className={isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/40' : 'bg-white border-gray-200 text-gray-800'}
+                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                             min="0"
                           />
                         </div>
@@ -336,14 +333,14 @@ export default function Collection() {
 
                     {/* Brand Filter */}
                     <div>
-                      <label className={`text-sm mb-3 block ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Marque</label>
+                      <label className="text-sm text-white/70 mb-3 block">Marque</label>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setSelectedBrand('all')}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                             selectedBrand === 'all'
                               ? 'bg-orange-500 text-white'
-                              : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              : 'bg-white/5 text-white/70 hover:bg-white/10'
                           }`}
                         >
                           Toutes
@@ -355,7 +352,7 @@ export default function Collection() {
                             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                               selectedBrand === brand
                                 ? 'bg-orange-500 text-white'
-                                : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
                             }`}
                           >
                             {brand === '__unknown__' ? '❓ Marque inconnue' : brand}
@@ -367,7 +364,7 @@ export default function Collection() {
                     <Button 
                       onClick={clearFilters}
                       variant="outline" 
-                      className={isDark ? 'w-full border-white/20 text-white hover:bg-white/5' : 'w-full border-gray-200 text-gray-700 hover:bg-gray-100'}
+                      className="w-full border-white/20 text-white hover:bg-white/5"
                     >
                       {t('clearAllFilters')}
                     </Button>
@@ -376,11 +373,11 @@ export default function Collection() {
               </Sheet>
 
               {/* View Mode Toggle */}
-              <div className={`hidden lg:flex border rounded-lg p-1 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+              <div className="hidden lg:flex bg-white/5 border border-white/10 rounded-lg p-1">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="icon"
-                  className={viewMode === 'grid' ? 'bg-orange-500 text-white' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}
+                  className={viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-white/50 hover:text-white'}
                   onClick={() => setViewMode('grid')}
                 >
                   <Grid3X3 className="w-4 h-4" />
@@ -388,7 +385,7 @@ export default function Collection() {
                 <Button
                   variant={viewMode === 'large' ? 'default' : 'ghost'}
                   size="icon"
-                  className={viewMode === 'large' ? 'bg-orange-500 text-white' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}
+                  className={viewMode === 'large' ? 'bg-orange-500 text-white' : 'text-white/50 hover:text-white'}
                   onClick={() => setViewMode('large')}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -399,25 +396,42 @@ export default function Collection() {
 
           {/* Category Filters — desktop: scroll horizontal / mobile: select dropdown */}
           <div className="mt-3 mb-1">
-            {/* Mobile: MobileSelect drawer */}
+            {/* Mobile: dropdown select */}
             <div className="flex gap-2 lg:hidden">
-              <MobileSelect value={selectedCategory} onValueChange={setSelectedCategory} placeholder="Catégorie" title="Catégorie">
-                {CATEGORY_FILTERS.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.icon} {c.label}</SelectItem>
-                ))}
-              </MobileSelect>
-              <MobileSelect value={sortBy} onValueChange={setSortBy} placeholder="Trier..." title="Trier par">
-                <SelectItem value="newest">Nouveautés</SelectItem>
-                <SelectItem value="popular">Populaires</SelectItem>
-                <SelectItem value="pieces-asc">Pièces ↑</SelectItem>
-                <SelectItem value="pieces-desc">Pièces ↓</SelectItem>
-              </MobileSelect>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                  <SelectValue>
+                    {(() => {
+                      const cat = CATEGORY_FILTERS.find(c => c.id === selectedCategory);
+                      return cat ? `${cat.icon} ${cat.label}` : 'Catégorie';
+                    })()}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  {CATEGORY_FILTERS.map(c => (
+                    <SelectItem key={c.id} value={c.id} className="text-white text-sm">
+                      {c.icon} {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
+                  <SelectValue placeholder="Trier..." />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  <SelectItem value="newest" className="text-white text-sm">Nouveautés</SelectItem>
+                  <SelectItem value="popular" className="text-white text-sm">Populaires</SelectItem>
+                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces ↑</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces ↓</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Desktop: scroll horizontal */}
             <div className="hidden lg:block relative mt-2">
-              <div className={`absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r pointer-events-none z-10 ${isDark ? 'from-[#000019]' : 'from-[#f4f1ec]'} to-transparent`}></div>
-              <div className={`absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l pointer-events-none z-10 ${isDark ? 'from-[#000019]' : 'from-[#f4f1ec]'} to-transparent`}></div>
+              <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
+              <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {CATEGORY_FILTERS.map((category) => (
                   <button
@@ -426,7 +440,7 @@ export default function Collection() {
                     className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
                       selectedCategory === category.id
                         ? 'bg-orange-500 text-white shadow-lg'
-                        : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10'
                     }`}
                   >
                     <span className="text-lg">{category.icon}</span>
@@ -439,7 +453,7 @@ export default function Collection() {
 
           {/* Sort Options — desktop only */}
           <div className="hidden lg:flex items-center justify-between mt-4">
-            <div className={`flex items-center gap-2 text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+            <div className="flex items-center gap-2 text-sm text-white/50">
               <Puzzle className="w-4 h-4" />
               <span>Trier par:</span>
             </div>
@@ -449,21 +463,21 @@ export default function Collection() {
                 variant={sortBy === 'newest' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('newest')}
-                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
+                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
               >Nouveautés</Button>
               <Button
                 variant={sortBy === 'popular' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSortBy('popular')}
-                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`}
+                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
               >Populaires</Button>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className={`w-32 text-sm h-8 ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-200 text-gray-800'}`}>
+                <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
                   <SelectValue placeholder="Plus..." />
                 </SelectTrigger>
-                <SelectContent className={isDark ? 'bg-[#0a0a2e] border-white/10' : 'bg-white border-gray-200'}>
-                  <SelectItem value="pieces-asc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces (croissant)</SelectItem>
-                  <SelectItem value="pieces-desc" className={`text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Pièces (décroissant)</SelectItem>
+                <SelectContent className="bg-[#0a0a2e] border-white/10">
+                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -490,9 +504,9 @@ export default function Collection() {
             >
               {sortedPuzzles.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <Puzzle className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
-                  <p className={isDark ? 'text-white/50' : 'text-gray-500'}>Aucun puzzle trouvé</p>
-                  <p className={`text-sm mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Soyez le premier à ajouter un puzzle à la communauté !</p>
+                  <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/50">Aucun puzzle trouvé</p>
+                  <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
                 </div>
               ) : (
                 sortedPuzzles.map((puzzle, index) => (
@@ -518,7 +532,7 @@ export default function Collection() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               variant="outline" 
-              className={`rounded-full px-8 ${isDark ? 'bg-transparent border-white/20 text-white hover:bg-white/5' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+              className="border-white/20 text-white hover:bg-white/5 rounded-full px-8"
             >
               {t('backToTop')}
               <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
@@ -537,14 +551,13 @@ export default function Collection() {
 }
 
         function CommunityPuzzleCard({ puzzle, index, variant, onClick }) {
-        const { isDark } = useTheme();
         return (
         <motion.div
         variants={item}
         onClick={onClick}
-        className={`border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95 ${isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-200'}`}
+        className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95"
         >
-      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
         {puzzle.image_hd ? (
           <img
             src={puzzle.image_hd}
@@ -553,15 +566,15 @@ export default function Collection() {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className={`w-8 h-8 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+            <Puzzle className="w-8 h-8 text-white/20" />
           </div>
         )}
       </div>
       <div className="p-2 lg:p-3">
-        <h3 className={`text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <h3 className="text-white text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight">
           {puzzle.title}
         </h3>
-        <div className={`flex items-center justify-between text-[10px] lg:text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+        <div className="flex items-center justify-between text-[10px] lg:text-xs text-white/40">
           <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
           <span>{puzzle.piece_count} pcs</span>
         </div>
