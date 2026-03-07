@@ -576,7 +576,7 @@ function LayoutContent({ children, currentPageName }) {
                 </div>
                 <span className="font-bold text-lg text-white">PuzzleWorld</span>
               </div>
-              <p className="text-white/50 text-sm">Votre communauté puzzle ultime</p>
+              <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Votre communauté puzzle ultime</p>
               <div className="flex gap-3">
                 <a href="https://www.instagram.com/puzzle__world__?igsh=NGI5cHJoOXpuZHQ5" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">📷</span>
