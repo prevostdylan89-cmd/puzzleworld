@@ -318,6 +318,11 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       const result = response.data;
 
       if (result.error) {
+        if (result.error === 'not_a_puzzle') {
+          setScanMessage({ type: 'error', text: '🚫 ' + result.message });
+          setLoading(false);
+          return;
+        }
         if (result.error.includes('trouvé') || result.error.includes('introuvable')) {
           setScanMessage({ type: 'error', text: '😕 Désolé, ce puzzle n\'est pas encore dans notre base. Ajoutez-le manuellement !' });
           setActiveTab('manual');
