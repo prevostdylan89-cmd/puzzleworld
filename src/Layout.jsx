@@ -649,8 +649,10 @@ function LayoutContent({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <LanguageProvider>
-      <LayoutContent children={children} currentPageName={currentPageName} />
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <LayoutContent children={children} currentPageName={currentPageName} />
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
