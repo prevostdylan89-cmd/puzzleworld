@@ -441,14 +441,14 @@ function LayoutContent({ children, currentPageName }) {
 
                 {user?.role === 'admin' && (
                   <>
-                    <div className="h-px bg-white/10 my-2 mx-4" />
+                    <div className={`h-px my-2 mx-4 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
                     <Link
                       to={createPageUrl('Dashboard')}
                       onClick={() => setShowMobileMenu(false)}
                       className={`flex items-center gap-3 px-4 py-3 transition-colors ${
                         currentPageName === 'Dashboard'
-                          ? 'bg-orange-500/10 text-orange-400 border-r-2 border-orange-400' 
-                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                          ? 'bg-orange-500/10 text-orange-500 border-r-2 border-orange-500' 
+                          : isDark ? 'text-white/70 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-black/5'
                       }`}
                     >
                       <Settings className="w-5 h-5" />
