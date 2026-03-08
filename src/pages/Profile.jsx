@@ -59,6 +59,18 @@ export default function Profile() {
     loadUserData();
   }, []);
 
+  // Abonnement temps réel aux changements de UserPuzzle
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = base44.entities.UserPuzzle.subscribe(async () => {
+      // Recalcule seulement le total des pièces en temps réel
+      const completedPuzzles = await base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' });
+      const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
+      setStats(prev => ({ ...prev, completed: completedPuzzles.length, totalPieces }));
+    });
+    return unsubscribe;
+  }, [user]);
+
   const loadUserData = async () => {
     try {
       const currentUser = await base44.auth.me();
