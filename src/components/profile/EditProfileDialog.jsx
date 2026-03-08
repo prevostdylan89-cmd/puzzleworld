@@ -136,7 +136,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
                   onClick={() => document.getElementById('profile-upload').click()}
                   disabled={uploadingProfile}
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/5"
+                  className="w-full border-white/20 text-white bg-transparent hover:bg-white/5"
                 >
                   {uploadingProfile ? (
                     <>
