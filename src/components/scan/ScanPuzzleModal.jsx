@@ -436,18 +436,12 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       if (catalogPuzzleId) {
         const catalogEntries = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
         if (catalogEntries.length > 0) {
-          const cat = catalogEntries[0];
-          const updates = { added_count: (cat.added_count || 0) + 1 };
-          if (selectedStatus === 'liked') {
-            updates.socialScore = (cat.socialScore || 0) + 1;
-            updates.total_likes = (cat.total_likes || 0) + 1;
-          } else if (selectedStatus === 'not_liked') {
-            updates.socialScore = (cat.socialScore || 0) - 1;
-            updates.total_dislikes = (cat.total_dislikes || 0) + 1;
-          } else if (selectedStatus === 'wishlist') {
-            updates.wishlistCount = (cat.wishlistCount || 0) + 1;
-          }
-          await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updates);
+        const cat = catalogEntries[0];
+        const updates = { added_count: (cat.added_count || 0) + 1 };
+        if (selectedStatus === 'wishlist') {
+          updates.wishlistCount = (cat.wishlistCount || 0) + 1;
+        }
+        await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updates);
         }
       }
 
