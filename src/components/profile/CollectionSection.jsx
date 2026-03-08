@@ -267,13 +267,15 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
-            <DropdownMenuItem 
-              onClick={handleMove}
-              className="text-white cursor-pointer hover:bg-white/10"
-            >
-              <ArrowRight className="w-4 h-4 mr-2" />
-              {puzzle.status === 'inbox' ? 'Marquer comme terminé' : 'Remettre dans sa boîte'}
-            </DropdownMenuItem>
+            {moveOptions.map(({ status, label }) => (
+              <DropdownMenuItem
+                key={status}
+                onClick={() => handleMove(status)}
+                className="text-white cursor-pointer hover:bg-white/10"
+              >
+                {label}
+              </DropdownMenuItem>
+            ))}
             <DropdownMenuItem 
               onClick={handleDelete}
               className="text-red-400 cursor-pointer hover:bg-white/10"
