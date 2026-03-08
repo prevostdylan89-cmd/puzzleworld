@@ -237,6 +237,8 @@ export default function Profile() {
     { label: t('wishlist'), value: stats.wishlist, icon: Heart, onClick: () => setShowWishlistModal(true) }
   ];
 
+  const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n.toString();
+
   return (
     <div className="min-h-screen pb-8">
       {/* Profile Header */}
