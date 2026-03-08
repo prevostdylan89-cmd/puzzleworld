@@ -199,7 +199,7 @@ export default function Collection() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [addingToCollection, setAddingToCollection] = useState(false);
 
-  const addToMyCollection = useCallback(async (puzzles) => {
+  const addToMyCollection = useCallback(async (puzzles, status = 'inbox') => {
     try {
       const user = await base44.auth.me();
       if (!user) { toast.error('Connectez-vous pour ajouter à votre collection'); return; }
@@ -213,12 +213,13 @@ export default function Collection() {
             puzzle_pieces: puzzle.piece_count || 0,
             puzzle_reference: puzzle.asin || puzzle.id,
             image_url: puzzle.image_hd || '',
-            status: 'inbox'
+            status
           });
           added++;
         }
       }
-      if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} à votre collection !`);
+      const statusLabels = { wishlist: 'wishlist', inbox: 'collection', done: 'terminés' };
+      if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} en ${statusLabels[status] || 'collection'} !`);
       else toast.info('Ces puzzles sont déjà dans votre collection');
     } catch (e) {
       toast.error("Erreur lors de l'ajout");
