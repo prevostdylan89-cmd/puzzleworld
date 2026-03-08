@@ -141,6 +141,22 @@ export default function CollectionSection({ user }) {
         </DropdownMenu>
       </div>
 
+      <TabsContent value="wishlist">
+        {wishlistPuzzles.length === 0 ? (
+          <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
+            <Star className="w-12 h-12 text-white/20 mx-auto mb-4" />
+            <p className="text-white/50">Aucun puzzle en wishlist</p>
+            <p className="text-white/30 text-sm mt-2">Ajoutez des puzzles depuis la collection communautaire</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {sortedWishlistPuzzles.map((puzzle, index) => (
+              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
       <TabsContent value="inbox">
         {inboxPuzzles.length === 0 ? (
           <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
