@@ -688,17 +688,31 @@ export default function Collection() {
                 <MoreVertical className="w-3.5 h-3.5 text-white" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50">
+            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50 min-w-[190px]">
               <DropdownMenuItem
-                onClick={(e) => { e.stopPropagation(); onAddToCollection(); }}
+                onClick={(e) => { e.stopPropagation(); onAddToCollection('wishlist'); }}
                 className="text-white hover:bg-white/10 cursor-pointer gap-2"
               >
-                <Plus className="w-4 h-4 text-orange-400" />
-                Ajouter à ma collection
+                <Star className="w-4 h-4 text-yellow-400" />
+                Wishlist
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onAddToCollection('inbox'); }}
+                className="text-white hover:bg-white/10 cursor-pointer gap-2"
+              >
+                <Archive className="w-4 h-4 text-blue-400" />
+                Dans sa boîte
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onAddToCollection('done'); }}
+                className="text-white hover:bg-white/10 cursor-pointer gap-2"
+              >
+                <Trophy className="w-4 h-4 text-green-400" />
+                Terminé
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => { e.stopPropagation(); onStartSelection(); }}
-                className="text-white hover:bg-white/10 cursor-pointer gap-2"
+                className="text-white/50 hover:bg-white/10 cursor-pointer gap-2 border-t border-white/10 mt-1 pt-1"
               >
                 <CheckSquare className="w-4 h-4 text-orange-400" />
                 Sélection multiple
