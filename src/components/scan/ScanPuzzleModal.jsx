@@ -445,12 +445,6 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         }
       }
 
-      // XP bonus pour "aimé"
-      if (selectedStatus === 'liked') {
-        const user = await base44.auth.me();
-        await base44.auth.updateMe({ xp: (user.xp || 0) + 100 });
-      }
-
       setShowSuccess(true);
       toast.success('✅ Puzzle ajouté à votre collection !');
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
