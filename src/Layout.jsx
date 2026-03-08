@@ -58,12 +58,13 @@ function LayoutContent({ children, currentPageName }) {
   const bottomNavItems = [
     { name: t('collection'), icon: Grid3X3, page: 'Collection' },
     { name: 'Scan', icon: Scan, page: 'scan', isScan: true },
-    { name: t('social'), icon: Users, page: 'Social' },
+    { name: t('profile'), icon: User, page: 'Profile' },
   ];
 
   // Sidebar menu items (mobile drawer)
   const sidebarMenuItems = [
     { name: t('home'), icon: Home, page: 'Home' },
+    { name: t('social'), icon: Users, page: 'Social' },
     { name: 'Events', icon: Calendar, page: 'Events' },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: t('profile'), icon: User, page: 'Profile' },

@@ -673,7 +673,7 @@ export default function Collection() {
 
       {/* 3-dots menu (only when not in selection mode) */}
       {!selectionMode && (
-        <div className="absolute top-1.5 right-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-1.5 right-1.5 z-10 opacity-100">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
