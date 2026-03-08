@@ -101,7 +101,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
         <Button
           size="sm"
           variant="outline"
-          className="border-white/20 text-white hover:bg-white/5"
+          className="border-white/20 text-white bg-transparent hover:bg-white/5"
         >
           <Camera className="w-4 h-4 mr-2" />
           Modifier le profil
