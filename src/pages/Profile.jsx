@@ -348,6 +348,31 @@ export default function Profile() {
             ))}
           </div>
 
+          {/* Total Pièces */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-4 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+              <span className="text-2xl">🧩</span>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-white">{formatPieces(stats.totalPieces)}</span>
+                {stats.totalPieces >= 1000 && (
+                  <span className="text-white/40 text-sm">{stats.totalPieces.toLocaleString()}</span>
+                )}
+              </div>
+              <p className="text-white/50 text-sm">pièces assemblées au total</p>
+            </div>
+            <div className="text-right">
+              <div className="text-orange-400 font-semibold text-sm">{stats.completed} puzzle{stats.completed > 1 ? 's' : ''}</div>
+              <div className="text-white/30 text-xs">terminés</div>
+            </div>
+          </motion.div>
+
           {/* Level Progress */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
