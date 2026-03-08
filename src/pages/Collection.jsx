@@ -15,8 +15,21 @@ import {
   ChevronDown,
   X,
   Puzzle,
-  Loader2
+  Loader2,
+  MoreVertical,
+  Plus,
+  CheckSquare,
+  Square,
+  Check,
+  ShoppingBag
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
