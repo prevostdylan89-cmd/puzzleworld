@@ -195,6 +195,35 @@ export default function Collection() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [addingToCollection, setAddingToCollection] = useState(false);
+
+  const addToMyCollection = useCallback(async (puzzles) => {
+    try {
+      const user = await base44.auth.me();
+      if (!user) { toast.error('Connectez-vous pour ajouter à votre collection'); return; }
+      let added = 0;
+      for (const puzzle of puzzles) {
+        const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: puzzle.asin || puzzle.id });
+        if (existing.length === 0) {
+          await base44.entities.UserPuzzle.create({
+            puzzle_name: puzzle.title,
+            puzzle_brand: puzzle.brand || '',
+            puzzle_pieces: puzzle.piece_count || 0,
+            puzzle_reference: puzzle.asin || puzzle.id,
+            image_url: puzzle.image_hd || '',
+            status: 'inbox'
+          });
+          added++;
+        }
+      }
+      if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} à votre collection !`);
+      else toast.info('Ces puzzles sont déjà dans votre collection');
+    } catch (e) {
+      toast.error("Erreur lors de l'ajout");
+    }
+  }, []);
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
