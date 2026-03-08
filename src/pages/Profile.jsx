@@ -45,7 +45,8 @@ export default function Profile() {
     achievements: 0,
     wishlist: 0,
     followers: 0,
-    following: 0
+    following: 0,
+    totalPieces: 0
   });
   const [achievements, setAchievements] = useState([]);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
@@ -75,12 +76,15 @@ export default function Profile() {
         base44.entities.Follow.filter({ follower_email: currentUser.email })
       ]);
 
+      const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
+
       setStats({
         completed: completedPuzzles.length,
         achievements: userAchievements.length,
         wishlist: wishlistItems.length,
         followers: followers.length,
-        following: following.length
+        following: following.length,
+        totalPieces
       });
 
       setAchievements(userAchievements);
