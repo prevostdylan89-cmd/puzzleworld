@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 export default function CollectionSection({ user }) {
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
+  const [wishlistPuzzles, setWishlistPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('date-desc'); // 'date-desc', 'date-asc', 'pieces-asc', 'pieces-desc'
 
