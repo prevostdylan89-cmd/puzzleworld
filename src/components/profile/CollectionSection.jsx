@@ -85,6 +85,7 @@ export default function CollectionSection({ user }) {
 
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
   const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
+  const sortedWishlistPuzzles = getSortedPuzzles(wishlistPuzzles);
 
   return (
     <Tabs defaultValue="inbox" className="w-full">
