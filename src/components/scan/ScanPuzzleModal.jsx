@@ -421,8 +421,6 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       }
       const refCode = puzzleData.ean || puzzleData.asin || puzzleData.sku || barcode;
 
-      const statusMapping = { liked: 'done', not_liked: 'done', wishlist: 'wishlist', inbox: 'inbox' };
-
       // Ajouter à la collection personnelle
       await base44.entities.UserPuzzle.create({
         puzzle_name: puzzleData.name || puzzleData.title || '',
@@ -431,8 +429,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         image_url: puzzleData.image || puzzleData.image_hd || '',
         puzzle_reference: refCode,
         catalog_puzzle_id: catalogPuzzleId,
-        status: statusMapping[selectedStatus] || 'inbox',
-        notes: selectedStatus === 'not_liked' ? 'Non aimé' : '',
+        status: selectedStatus,
       });
 
       // Mettre à jour les scores dans PuzzleCatalog
