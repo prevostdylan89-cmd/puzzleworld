@@ -893,32 +893,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 className="space-y-4"
               >
                 <div>
-                  <label className="text-sm text-white/70 mb-3 block">Que pensez-vous de ce puzzle?</label>
+                  <label className="text-sm text-white/70 mb-3 block">Où voulez-vous ajouter ce puzzle ?</label>
                   <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('liked')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'liked'
-                          ? 'border-green-500 bg-green-500/20 text-green-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">👍</span>
-                      <span className="text-sm font-medium">J'ai aimé</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStatus('not_liked')}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        selectedStatus === 'not_liked'
-                          ? 'border-red-500 bg-red-500/20 text-red-400'
-                          : 'border-white/10 bg-white/5 text-white/70 hover:border-red-500/50 hover:bg-red-500/10'
-                      }`}
-                    >
-                      <span className="text-3xl">👎</span>
-                      <span className="text-sm font-medium">Pas aimé</span>
-                    </button>
                     <button
                       type="button"
                       onClick={() => setSelectedStatus('wishlist')}
@@ -941,7 +917,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                       }`}
                     >
                       <span className="text-3xl">📦</span>
-                      <span className="text-sm font-medium">Dans sa boîte</span>
+                      <span className="text-sm font-medium">Je l'ai chez moi</span>
                     </button>
                   </div>
                 </div>
