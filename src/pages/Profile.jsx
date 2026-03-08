@@ -638,7 +638,7 @@ function EventCard({ event, onUnregister }) {
             disabled={loading}
             size="sm"
             variant="outline"
-            className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            className="w-full border-red-500/30 text-red-400 bg-transparent hover:bg-red-500/10 hover:text-red-300"
           >
             {loading ? 'Désinscription...' : 'Se désinscrire'}
           </Button>
