@@ -107,7 +107,7 @@ export default function CollectionSection({ user }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+            <Button variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/5">
               <ArrowUpDown className="w-4 h-4 mr-2" />
               Trier par
             </Button>
