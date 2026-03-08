@@ -547,21 +547,40 @@ export default function Collection() {
             >
               {selectedIds.size === sortedPuzzles.length ? 'Désélectionner tout' : 'Tout sélectionner'}
             </button>
-            <button
-              disabled={selectedIds.size === 0 || addingToCollection}
-              onClick={async () => {
-                setAddingToCollection(true);
-                const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
-                await addToMyCollection(puzzles);
-                setAddingToCollection(false);
-                setSelectionMode(false);
-                setSelectedIds(new Set());
-              }}
-              className="flex items-center gap-1.5 bg-white text-orange-500 font-semibold px-4 py-1.5 rounded-full text-sm disabled:opacity-50"
-            >
-              {addingToCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-              Ajouter
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  disabled={selectedIds.size === 0 || addingToCollection}
+                  className="flex items-center gap-1.5 bg-white text-orange-500 font-semibold px-4 py-1.5 rounded-full text-sm disabled:opacity-50"
+                >
+                  {addingToCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  Ajouter
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
+                {[
+                  { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
+                  { status: 'inbox', label: 'Dans sa boîte', emoji: '📦' },
+                  { status: 'done', label: 'Terminé', emoji: '🏆' },
+                ].map(({ status, label, emoji }) => (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={async () => {
+                      setAddingToCollection(true);
+                      const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
+                      await addToMyCollection(puzzles, status);
+                      setAddingToCollection(false);
+                      setSelectionMode(false);
+                      setSelectedIds(new Set());
+                    }}
+                    className="text-white hover:bg-white/10 cursor-pointer gap-2"
+                  >
+                    {emoji} {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       )}
