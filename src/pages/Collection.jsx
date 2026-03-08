@@ -651,13 +651,58 @@ export default function Collection() {
   );
 }
 
-        function CommunityPuzzleCard({ puzzle, index, variant, onClick }) {
+        function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection }) {
         return (
         <motion.div
         variants={item}
         onClick={onClick}
-        className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group cursor-pointer active:scale-95"
+        className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer active:scale-95 ${
+          isSelected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-white/[0.06] hover:border-orange-500/30'
+        }`}
         >
+      {/* Selection checkbox overlay */}
+      {selectionMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+            isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
+          }`}>
+            {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+          </div>
+        </div>
+      )}
+
+      {/* 3-dots menu (only when not in selection mode) */}
+      {!selectionMode && (
+        <div className="absolute top-1.5 right-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+              >
+                <MoreVertical className="w-3.5 h-3.5 text-white" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50">
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onAddToCollection(); }}
+                className="text-white hover:bg-white/10 cursor-pointer gap-2"
+              >
+                <Plus className="w-4 h-4 text-orange-400" />
+                Ajouter à ma collection
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => { e.stopPropagation(); onStartSelection(); }}
+                className="text-white hover:bg-white/10 cursor-pointer gap-2"
+              >
+                <CheckSquare className="w-4 h-4 text-orange-400" />
+                Sélection multiple
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
         {puzzle.image_hd ? (
           <img
