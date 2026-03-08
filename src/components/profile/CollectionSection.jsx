@@ -67,19 +67,20 @@ export default function CollectionSection({ user }) {
   }
 
   const handleOptimisticMove = (puzzleId, newStatus) => {
-    if (newStatus === 'done') {
-      const puzzle = inboxPuzzles.find(p => p.id === puzzleId);
-      if (puzzle) {
-        setInboxPuzzles(prev => prev.filter(p => p.id !== puzzleId));
-        setCompletedPuzzles(prev => [...prev, { ...puzzle, status: 'done' }]);
-      }
-    } else {
-      const puzzle = completedPuzzles.find(p => p.id === puzzleId);
-      if (puzzle) {
-        setCompletedPuzzles(prev => prev.filter(p => p.id !== puzzleId));
-        setInboxPuzzles(prev => [...prev, { ...puzzle, status: 'inbox' }]);
-      }
-    }
+    const allPuzzles = [...inboxPuzzles, ...completedPuzzles, ...wishlistPuzzles];
+    const puzzle = allPuzzles.find(p => p.id === puzzleId);
+    if (!puzzle) return;
+
+    // Remove from current list
+    setInboxPuzzles(prev => prev.filter(p => p.id !== puzzleId));
+    setCompletedPuzzles(prev => prev.filter(p => p.id !== puzzleId));
+    setWishlistPuzzles(prev => prev.filter(p => p.id !== puzzleId));
+
+    // Add to target list
+    const updated = { ...puzzle, status: newStatus };
+    if (newStatus === 'done') setCompletedPuzzles(prev => [...prev, updated]);
+    else if (newStatus === 'inbox') setInboxPuzzles(prev => [...prev, updated]);
+    else if (newStatus === 'wishlist') setWishlistPuzzles(prev => [...prev, updated]);
   };
 
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
