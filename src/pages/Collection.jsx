@@ -595,9 +595,30 @@ export default function Collection() {
                     puzzle={puzzle} 
                     index={index} 
                     variant={viewMode === 'large' ? 'large' : 'default'}
+                    selectionMode={selectionMode}
+                    isSelected={selectedIds.has(puzzle.id)}
+                    onToggleSelect={() => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(puzzle.id)) next.delete(puzzle.id);
+                        else next.add(puzzle.id);
+                        return next;
+                      });
+                    }}
+                    onAddToCollection={() => addToMyCollection([puzzle])}
+                    onStartSelection={() => { setSelectionMode(true); setSelectedIds(new Set([puzzle.id])); }}
                     onClick={() => {
-                      setSelectedPuzzle(puzzle);
-                      setShowDetailModal(true);
+                      if (selectionMode) {
+                        setSelectedIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(puzzle.id)) next.delete(puzzle.id);
+                          else next.add(puzzle.id);
+                          return next;
+                        });
+                      } else {
+                        setSelectedPuzzle(puzzle);
+                        setShowDetailModal(true);
+                      }
                     }}
                   />
                 ))
