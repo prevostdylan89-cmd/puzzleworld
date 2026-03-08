@@ -527,6 +527,44 @@ export default function Collection() {
         </div>
       </div>
 
+      {/* Selection Mode Bar */}
+      {selectionMode && (
+        <div className="sticky top-[var(--header-h,0px)] z-20 bg-orange-500 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white">
+              <X className="w-5 h-5" />
+            </button>
+            <span className="text-white font-semibold">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (selectedIds.size === sortedPuzzles.length) setSelectedIds(new Set());
+                else setSelectedIds(new Set(sortedPuzzles.map(p => p.id)));
+              }}
+              className="text-white text-sm underline"
+            >
+              {selectedIds.size === sortedPuzzles.length ? 'Désélectionner tout' : 'Tout sélectionner'}
+            </button>
+            <button
+              disabled={selectedIds.size === 0 || addingToCollection}
+              onClick={async () => {
+                setAddingToCollection(true);
+                const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
+                await addToMyCollection(puzzles);
+                setAddingToCollection(false);
+                setSelectionMode(false);
+                setSelectedIds(new Set());
+              }}
+              className="flex items-center gap-1.5 bg-white text-orange-500 font-semibold px-4 py-1.5 rounded-full text-sm disabled:opacity-50"
+            >
+              {addingToCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              Ajouter
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Puzzle Grid */}
       <div className="px-4 lg:px-8 py-6">
           {isLoading ? (
