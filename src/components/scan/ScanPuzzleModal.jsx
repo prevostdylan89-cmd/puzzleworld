@@ -42,6 +42,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [puzzleConfirmed, setPuzzleConfirmed] = useState(false);
   const [showNotMyPuzzle, setShowNotMyPuzzle] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [pendingBatch, setPendingBatch] = useState([]);
+  const [showAddAnother, setShowAddAnother] = useState(false);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
