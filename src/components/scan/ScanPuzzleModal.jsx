@@ -927,14 +927,25 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                     </button>
                   </div>
                 </div>
-                <Button
-                  onClick={handleAddPuzzle}
-                  disabled={!selectedStatus}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Valider l'ajout
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => handleAddPuzzle(false)}
+                    disabled={!selectedStatus}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Barcode className="w-4 h-4 mr-2" />
+                    Ajouter + Scanner un autre
+                  </Button>
+                  <Button
+                    onClick={() => handleAddPuzzle(true)}
+                    disabled={!selectedStatus}
+                    variant="outline"
+                    className="w-full border-white/20 text-white hover:bg-white/5 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Valider {pendingBatch.length > 0 ? `(${pendingBatch.length + 1} puzzle${pendingBatch.length + 1 > 1 ? 's' : ''})` : ''}
+                  </Button>
+                </div>
               </motion.div>
             )}
           </div>
