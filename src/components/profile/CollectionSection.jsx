@@ -23,6 +23,16 @@ export default function CollectionSection({ user }) {
     loadPuzzles();
   }, [user]);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadPuzzles();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [user]);
+
   const loadPuzzles = async () => {
     try {
       const [inbox, completed, wishlist] = await Promise.all([
