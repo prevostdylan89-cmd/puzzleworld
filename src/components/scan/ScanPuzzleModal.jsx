@@ -486,6 +486,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setBarcodeInput('');
     setExistingPuzzle(null);
     setScanMessage(null);
+    setPendingBatch([]);
+    setShowAddAnother(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
   };
@@ -501,6 +503,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setScanMessage(null);
     setPuzzleConfirmed(false);
     setShowNotMyPuzzle(false);
+    setShowAddAnother(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
