@@ -398,63 +398,79 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     }
   };
 
-  const handleAddPuzzle = async () => {
+  const handleAddPuzzle = async (finalize = false) => {
     if (!puzzleData || !selectedStatus) {
       toast.error('Veuillez sélectionner un statut');
       return;
     }
+
+    // Ajouter au lot en attente
+    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus }];
+    setPendingBatch(newBatch);
+
+    if (finalize) {
+      // Sauvegarder tout le lot
+      await saveBatch(newBatch);
+    } else {
+      // Proposer de scanner un autre
+      setShowAddAnother(true);
+    }
+  };
+
+  const saveBatch = async (batch) => {
     try {
-      // Si nouveau puzzle (pas encore dans le catalogue), créer l'entrée avec status pending
-      let catalogPuzzleId = puzzleData.catalog_id || null;
-      if (!catalogPuzzleId && puzzleData.isPending) {
-        const newEntry = await base44.entities.PuzzleCatalog.create({
-          title: puzzleData.title || puzzleData.name,
-          brand: puzzleData.brand || '',
-          piece_count: puzzleData.piece_count || puzzleData.pieces || 0,
-          image_hd: puzzleData.image_hd || puzzleData.image || '',
-          ean: puzzleData.ean || '',
-          asin: puzzleData.asin || '',
-          category_tag: puzzleData.category_tag || 'Autre',
-          amazon_price: puzzleData.amazon_price || null,
-          amazon_rating: puzzleData.amazon_rating || null,
-          status: 'pending',
+      setLoading(true);
+      for (const { puzzleData: pd, selectedStatus: status } of batch) {
+        let catalogPuzzleId = pd.catalog_id || null;
+        if (!catalogPuzzleId && pd.isPending) {
+          const newEntry = await base44.entities.PuzzleCatalog.create({
+            title: pd.title || pd.name,
+            brand: pd.brand || '',
+            piece_count: pd.piece_count || pd.pieces || 0,
+            image_hd: pd.image_hd || pd.image || '',
+            ean: pd.ean || '',
+            asin: pd.asin || '',
+            category_tag: pd.category_tag || 'Autre',
+            amazon_price: pd.amazon_price || null,
+            amazon_rating: pd.amazon_rating || null,
+            status: 'pending',
+          });
+          catalogPuzzleId = newEntry.id;
+        }
+        const refCode = pd.ean || pd.asin || pd.sku || barcode;
+
+        await base44.entities.UserPuzzle.create({
+          puzzle_name: pd.name || pd.title || '',
+          puzzle_brand: pd.brand || '',
+          puzzle_pieces: pd.pieces || pd.piece_count || 0,
+          image_url: pd.image || pd.image_hd || '',
+          puzzle_reference: refCode,
+          catalog_puzzle_id: catalogPuzzleId,
+          status,
         });
-        catalogPuzzleId = newEntry.id;
-      }
-      const refCode = puzzleData.ean || puzzleData.asin || puzzleData.sku || barcode;
 
-      // Ajouter à la collection personnelle
-      await base44.entities.UserPuzzle.create({
-        puzzle_name: puzzleData.name || puzzleData.title || '',
-        puzzle_brand: puzzleData.brand || '',
-        puzzle_pieces: puzzleData.pieces || puzzleData.piece_count || 0,
-        image_url: puzzleData.image || puzzleData.image_hd || '',
-        puzzle_reference: refCode,
-        catalog_puzzle_id: catalogPuzzleId,
-        status: selectedStatus,
-      });
-
-      // Mettre à jour les scores dans PuzzleCatalog
-      if (catalogPuzzleId) {
-        const catalogEntries = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
-        if (catalogEntries.length > 0) {
-        const cat = catalogEntries[0];
-        const updates = { added_count: (cat.added_count || 0) + 1 };
-        if (selectedStatus === 'wishlist') {
-          updates.wishlistCount = (cat.wishlistCount || 0) + 1;
-        }
-        await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updates);
+        if (catalogPuzzleId) {
+          const catalogEntries = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
+          if (catalogEntries.length > 0) {
+            const cat = catalogEntries[0];
+            const updates = { added_count: (cat.added_count || 0) + 1 };
+            if (status === 'wishlist') updates.wishlistCount = (cat.wishlistCount || 0) + 1;
+            await base44.entities.PuzzleCatalog.update(catalogPuzzleId, updates);
+          }
         }
       }
 
+      setLoading(false);
+      setShowAddAnother(false);
       setShowSuccess(true);
-      toast.success('✅ Puzzle ajouté à votre collection !');
+      toast.success(`✅ ${batch.length} puzzle${batch.length > 1 ? 's' : ''} ajouté${batch.length > 1 ? 's' : ''} à votre collection !`);
       queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['completedPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['wishlistPuzzles'] });
       queryClient.invalidateQueries({ queryKey: ['globalPuzzles'] });
     } catch (error) {
-      console.error('Error adding puzzle:', error);
+      setLoading(false);
+      console.error('Error saving batch:', error);
       toast.error('Erreur lors de l\'ajout');
     }
   };
