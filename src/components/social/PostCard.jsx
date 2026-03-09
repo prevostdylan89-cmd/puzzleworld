@@ -52,7 +52,7 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
   );
 }
 
-export default function PostCard({ post, user }) {
+export default function PostCard({ post, user, isFeatured = false }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
@@ -434,8 +434,18 @@ export default function PostCard({ post, user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden"
+      className={`backdrop-blur-xl rounded-2xl overflow-hidden transition-all ${
+        isFeatured
+          ? 'bg-gradient-to-br from-orange-500/10 to-white/[0.03] border border-orange-500/30 shadow-lg shadow-orange-500/5'
+          : 'bg-white/[0.03] border border-white/[0.06]'
+      }`}
     >
+      {isFeatured && (
+        <div className="px-4 pt-3 flex items-center gap-1.5">
+          <Flame className="w-3.5 h-3.5 text-orange-400" />
+          <span className="text-orange-400 text-xs font-semibold">Tendance</span>
+        </div>
+      )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
         <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => setShowUserProfile(true)} />
@@ -578,8 +588,30 @@ export default function PostCard({ post, user }) {
           <img
             src={post.image_url}
             alt="Post"
-            className="w-full rounded-xl object-cover max-h-96"
+            onClick={() => setLightboxOpen(true)}
+            className="w-full rounded-xl object-cover max-h-96 cursor-pointer hover:opacity-90 transition-opacity"
           />
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxOpen && post.image_url && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <img
+            src={post.image_url}
+            alt="Post"
+            className="max-w-full max-h-full object-contain rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition-colors"
+          >
+            ✕
+          </button>
         </div>
       )}
 
