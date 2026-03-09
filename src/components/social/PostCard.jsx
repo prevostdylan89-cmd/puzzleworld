@@ -64,6 +64,7 @@ export default function PostCard({ post, user }) {
   const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
   const [isPuzzleDisliked, setIsPuzzleDisliked] = useState(false);
   const [showPuzzleDetail, setShowPuzzleDetail] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;

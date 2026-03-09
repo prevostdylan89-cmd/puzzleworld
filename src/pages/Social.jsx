@@ -202,11 +202,12 @@ export default function Social() {
               </div>
             ) : (
               <>
-                {posts.map((post) => (
+                {posts.map((post, index) => (
                   <PostCard 
                     key={post.id} 
                     post={post} 
                     user={user}
+                    isFeatured={activeTab === 'trending' && index < 3}
                   />
                 ))}
                 
