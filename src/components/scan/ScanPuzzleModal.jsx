@@ -951,6 +951,61 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           </div>
         )}
 
+        {showAddAnother && !showSuccess && (
+          <div className="space-y-6 py-6">
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 12 }}
+                className="w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500/40 flex items-center justify-center mx-auto mb-4"
+              >
+                <CheckCircle2 className="w-8 h-8 text-green-400" />
+              </motion.div>
+              <h3 className="text-white font-bold text-lg mb-1">Puzzle ajouté au lot !</h3>
+              <p className="text-white/50 text-sm">{pendingBatch.length} puzzle{pendingBatch.length > 1 ? 's' : ''} en attente de sauvegarde</p>
+            </div>
+
+            {/* Résumé du lot */}
+            <div className="bg-white/5 rounded-xl border border-white/10 divide-y divide-white/10 max-h-40 overflow-y-auto">
+              {pendingBatch.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-3">
+                  {item.puzzleData.image ? (
+                    <img src={item.puzzleData.image} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg">🧩</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium truncate">{item.puzzleData.name || item.puzzleData.title}</p>
+                    <p className="text-white/40 text-xs">{item.selectedStatus === 'wishlist' ? '⭐ Wishlist' : item.selectedStatus === 'inbox' ? '📦 Collection' : '🏆 Terminé'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleReset}
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+              >
+                <Barcode className="w-4 h-4 mr-2" />
+                Scanner un autre puzzle
+              </Button>
+              <Button
+                onClick={() => saveBatch(pendingBatch)}
+                disabled={loading}
+                variant="outline"
+                className="w-full border-white/20 text-white hover:bg-white/5"
+              >
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                Terminer & Sauvegarder ({pendingBatch.length} puzzle{pendingBatch.length > 1 ? 's' : ''})
+              </Button>
+            </div>
+          </div>
+        )}
+
         {showSuccess && (
           <div className="space-y-6 py-8">
             {/* Icône puzzle avec rebond */}
