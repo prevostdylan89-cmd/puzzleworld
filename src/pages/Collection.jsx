@@ -181,6 +181,20 @@ export default function Collection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
+  const [categoryFilters, setCategoryFilters] = useState(DEFAULT_CATEGORY_FILTERS);
+
+  // Load categories from DB
+  useEffect(() => {
+    base44.entities.PuzzleCategory.list('order', 100).then(data => {
+      if (data.length > 0) {
+        const sorted = data.sort((a, b) => (a.order || 0) - (b.order || 0));
+        setCategoryFilters([
+          { id: 'all', label: 'Tous', icon: '🌍' },
+          ...sorted.map(c => ({ id: c.name, label: c.name, icon: c.icon }))
+        ]);
+      }
+    }).catch(() => {});
+  }, []);
   const [minPieces, setMinPieces] = useState('');
   const [maxPieces, setMaxPieces] = useState('');
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
