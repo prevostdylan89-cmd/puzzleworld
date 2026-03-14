@@ -83,6 +83,10 @@ export default function DashboardMyCollection() {
         const aMissing = !a.piece_count || a.piece_count === 0 ? 1 : 0;
         const bMissing = !b.piece_count || b.piece_count === 0 ? 1 : 0;
         return bMissing - aMissing;
+      } else if (sortBy === 'no_category') {
+        const aNo = !a.category_tag ? 1 : 0;
+        const bNo = !b.category_tag ? 1 : 0;
+        return bNo - aNo;
       }
       return 0; // date order (default from API)
     });
