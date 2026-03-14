@@ -127,26 +127,16 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
 
           <div>
             <label className="text-white/70 text-sm mb-2 block">Catégorie</label>
-            <MobileSelect
+            <select
               value={formData.category_tag}
-              onValueChange={(value) => setFormData({ ...formData, category_tag: value })}
-              placeholder="Sélectionner une catégorie"
-              title="Catégorie"
-              trigger={
-                <button type="button" className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-sm">
-                  <span className={formData.category_tag ? 'text-white' : 'text-white/40'}>
-                    {dynamicCategories.find(c => c.name === formData.category_tag)
-                      ? `${dynamicCategories.find(c => c.name === formData.category_tag).icon} ${formData.category_tag}`
-                      : formData.category_tag || 'Sélectionner une catégorie'}
-                  </span>
-                  <span className="text-white/40">▾</span>
-                </button>
-              }
+              onChange={(e) => setFormData({ ...formData, category_tag: e.target.value })}
+              className="w-full px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-sm focus:border-orange-500 focus:outline-none"
             >
+              <option value="">Sélectionner une catégorie</option>
               {dynamicCategories.map(cat => (
-                <SelectItem key={cat.id} value={cat.name}>{cat.icon} {cat.name}</SelectItem>
+                <option key={cat.id} value={cat.name}>{cat.icon} {cat.name}</option>
               ))}
-            </MobileSelect>
+            </select>
           </div>
 
           <div>
