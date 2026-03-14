@@ -59,16 +59,22 @@ export default function Profile() {
     loadUserData();
   }, []);
 
-  // Abonnement temps réel aux changements de UserPuzzle
+  // Abonnement temps réel aux changements de UserPuzzle et Wishlist
   useEffect(() => {
     if (!user) return;
-    const unsubscribe = base44.entities.UserPuzzle.subscribe(async () => {
-      // Recalcule seulement le total des pièces en temps réel
+    const unsubscribeUserPuzzle = base44.entities.UserPuzzle.subscribe(async () => {
       const completedPuzzles = await base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' });
       const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
       setStats(prev => ({ ...prev, completed: completedPuzzles.length, totalPieces }));
     });
-    return unsubscribe;
+    const unsubscribeWishlist = base44.entities.Wishlist.subscribe(async () => {
+      const wishlistItems = await base44.entities.Wishlist.filter({ created_by: user.email });
+      setStats(prev => ({ ...prev, wishlist: wishlistItems.length }));
+    });
+    return () => {
+      unsubscribeUserPuzzle();
+      unsubscribeWishlist();
+    };
   }, [user]);
 
   const loadUserData = async () => {
