@@ -131,7 +131,6 @@ export default function DashboardPageVisibility() {
         </Button>
       </div>
 
-      <div>
       <div className="mb-6">
 
       <div className="space-y-3">
