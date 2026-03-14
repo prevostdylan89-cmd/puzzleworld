@@ -115,7 +115,13 @@ export default function DashboardPageVisibility() {
   }
 
   return (
-    <div>
+    <div className="space-y-10">
+      {/* Collection Categories */}
+      <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+        <DashboardCollectionCategories />
+      </div>
+
+      <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white mb-1">Visibilité des Pages</h2>
         <p className="text-white/50 text-sm">Activez ou désactivez les pages du site. Les pages désactivées affichent un message de maintenance.</p>
@@ -184,6 +190,7 @@ export default function DashboardPageVisibility() {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
