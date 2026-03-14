@@ -74,25 +74,20 @@ export default function CollectionSection({ user }) {
   }
 
   const handleOptimisticMove = (puzzleId, newStatus) => {
-    const allPuzzles = [...inboxPuzzles, ...completedPuzzles, ...wishlistPuzzles];
+    const allPuzzles = [...inboxPuzzles, ...completedPuzzles];
     const puzzle = allPuzzles.find(p => p.id === puzzleId);
     if (!puzzle) return;
 
-    // Remove from current list
     setInboxPuzzles(prev => prev.filter(p => p.id !== puzzleId));
     setCompletedPuzzles(prev => prev.filter(p => p.id !== puzzleId));
-    setWishlistPuzzles(prev => prev.filter(p => p.id !== puzzleId));
 
-    // Add to target list
     const updated = { ...puzzle, status: newStatus };
     if (newStatus === 'done') setCompletedPuzzles(prev => [...prev, updated]);
     else if (newStatus === 'inbox') setInboxPuzzles(prev => [...prev, updated]);
-    else if (newStatus === 'wishlist') setWishlistPuzzles(prev => [...prev, updated]);
   };
 
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
   const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
-  const sortedWishlistPuzzles = getSortedPuzzles(wishlistPuzzles);
 
   return (
     <Tabs defaultValue="inbox" className="w-full">
