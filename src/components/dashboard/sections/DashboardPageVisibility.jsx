@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Tag } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import DashboardCollectionCategories from './DashboardCollectionCategories';
 
 const MANAGEABLE_PAGES = [
   { page_name: 'Home', label: 'Accueil' },

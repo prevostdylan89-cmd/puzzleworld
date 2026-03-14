@@ -172,16 +172,8 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-const CATEGORY_FILTERS = [
+const DEFAULT_CATEGORY_FILTERS = [
   { id: 'all', label: 'Tous', icon: '🌍' },
-  { id: 'Nature', label: 'Nature', icon: '🌳' },
-  { id: 'Urbain', label: 'Urbain', icon: '🏙️' },
-  { id: 'Disney', label: 'Disney', icon: '🏰' },
-  { id: 'Art', label: 'Art', icon: '🎨' },
-  { id: 'Animaux', label: 'Animaux', icon: '🦁' },
-  { id: 'Monochrome', label: 'Monochrome', icon: '⚫' },
-  { id: 'Vintage', label: 'Vintage', icon: '📜' },
-  { id: 'Autre', label: 'Autre', icon: '🧩' }
 ];
 
 export default function Collection() {
