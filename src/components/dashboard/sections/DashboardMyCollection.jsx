@@ -157,6 +157,7 @@ export default function DashboardMyCollection() {
               <option value="pieces_asc">Pièces (croissant)</option>
               <option value="pieces_desc">Pièces (décroissant)</option>
               <option value="missing_pieces">❌ Pièces manquantes</option>
+              <option value="no_category">🏷️ Sans catégorie</option>
             </select>
           </div>
 
