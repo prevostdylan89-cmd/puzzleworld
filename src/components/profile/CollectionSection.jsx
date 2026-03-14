@@ -202,7 +202,6 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
   };
 
   const moveOptions = [
-    { status: 'wishlist', label: '⭐ Wishlist', hidden: puzzle.status === 'wishlist' },
     { status: 'inbox', label: '📦 Dans sa boîte', hidden: puzzle.status === 'inbox' },
     { status: 'done', label: '🏆 Terminé', hidden: puzzle.status === 'done' },
   ].filter(o => !o.hidden);
