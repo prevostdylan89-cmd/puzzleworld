@@ -540,12 +540,7 @@ function LayoutContent({ children, currentPageName }) {
               >
                 <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
                 <span className="text-[10px] font-semibold">{item.name}</span>
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTabMobile"
-                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-12 h-1 bg-orange-400 rounded-full"
-                  />
-                )}
+
               </Link>
             );
           })}
