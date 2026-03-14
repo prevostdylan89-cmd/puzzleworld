@@ -71,7 +71,7 @@ export default function DashboardMyCollection() {
     .filter(p => {
       const matchesSearch = p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            p.brand?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || p.category_tag === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || p.category_tag === selectedCategory || (sortBy === 'no_category' && !p.category_tag);
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
