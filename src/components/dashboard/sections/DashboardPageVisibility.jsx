@@ -197,6 +197,7 @@ export default function DashboardPageVisibility() {
           );
         })}
       </div>
+      </div>
     </div>
   );
 }
