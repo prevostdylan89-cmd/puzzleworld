@@ -207,9 +207,8 @@ export function WishlistModal({ open, onClose, user }) {
 
   const loadWishlist = async () => {
     try {
-      const items = await base44.entities.UserPuzzle.filter({
-        created_by: user.email,
-        status: 'wishlist'
+      const items = await base44.entities.Wishlist.filter({
+        created_by: user.email
       });
       setWishlist(items);
     } catch (error) {
