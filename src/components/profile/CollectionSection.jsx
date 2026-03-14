@@ -34,15 +34,13 @@ export default function CollectionSection({ user }) {
 
   const loadPuzzles = async () => {
     try {
-      const [inbox, completed, wishlist] = await Promise.all([
+      const [inbox, completed] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'inbox' }),
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' }),
-        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' })
       ]);
 
       setInboxPuzzles(inbox);
       setCompletedPuzzles(completed);
-      setWishlistPuzzles(wishlist);
     } catch (error) {
       console.error('Error loading puzzles:', error);
     } finally {
