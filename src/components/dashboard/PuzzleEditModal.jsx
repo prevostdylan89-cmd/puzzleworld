@@ -135,20 +135,17 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
               trigger={
                 <button type="button" className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-sm">
                   <span className={formData.category_tag ? 'text-white' : 'text-white/40'}>
-                    {formData.category_tag || 'Sélectionner une catégorie'}
+                    {dynamicCategories.find(c => c.name === formData.category_tag)
+                      ? `${dynamicCategories.find(c => c.name === formData.category_tag).icon} ${formData.category_tag}`
+                      : formData.category_tag || 'Sélectionner une catégorie'}
                   </span>
                   <span className="text-white/40">▾</span>
                 </button>
               }
             >
-              <SelectItem value="Nature">Nature</SelectItem>
-              <SelectItem value="Abstract">Abstrait</SelectItem>
-              <SelectItem value="Urban">Urbain</SelectItem>
-              <SelectItem value="Space">Espace</SelectItem>
-              <SelectItem value="Architecture">Architecture</SelectItem>
-              <SelectItem value="Vintage">Vintage</SelectItem>
-              <SelectItem value="Animals">Animaux</SelectItem>
-              <SelectItem value="Art">Art</SelectItem>
+              {dynamicCategories.map(cat => (
+                <SelectItem key={cat.id} value={cat.name}>{cat.icon} {cat.name}</SelectItem>
+              ))}
             </MobileSelect>
           </div>
 

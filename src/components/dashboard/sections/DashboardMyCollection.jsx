@@ -125,18 +125,22 @@ export default function DashboardMyCollection() {
 
           {/* Category Filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
-            {CATEGORY_FILTERS.map((category) => (
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full whitespace-nowrap transition-all text-sm ${selectedCategory === 'all' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+            >
+              <span>🌍</span><span className="font-medium">Tous</span>
+            </button>
+            {dynamicCategories.map((cat) => (
               <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.name)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full whitespace-nowrap transition-all text-sm ${
-                  selectedCategory === category.id
-                    ? 'bg-orange-500 text-white shadow-lg'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  selectedCategory === cat.name ? 'bg-orange-500 text-white shadow-lg' : 'bg-white/5 text-white/70 hover:bg-white/10'
                 }`}
               >
-                <span>{category.icon}</span>
-                <span className="font-medium">{category.label}</span>
+                <span>{cat.icon}</span>
+                <span className="font-medium">{cat.name}</span>
               </button>
             ))}
           </div>
