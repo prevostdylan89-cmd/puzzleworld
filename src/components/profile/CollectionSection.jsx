@@ -93,10 +93,6 @@ export default function CollectionSection({ user }) {
     <Tabs defaultValue="inbox" className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <TabsList className="bg-white/5 border border-white/10">
-          <TabsTrigger value="wishlist" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-            <Star className="w-4 h-4 mr-2" />
-            Wishlist ({wishlistPuzzles.length})
-          </TabsTrigger>
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <Package className="w-4 h-4 mr-2" />
             Boîte ({inboxPuzzles.length})
