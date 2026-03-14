@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 import { Loader2, Eye, EyeOff, Tag } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import DashboardCollectionCategories from './DashboardCollectionCategories';
+import { Button } from '@/components/ui/button';
+import CategoryManagerModal from '@/components/dashboard/CategoryManagerModal';
 
 const MANAGEABLE_PAGES = [
   { page_name: 'Home', label: 'Accueil' },

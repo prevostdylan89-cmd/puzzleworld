@@ -8,6 +8,16 @@ import { Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
+function useDynamicCategories() {
+  const [cats, setCats] = useState([]);
+  useEffect(() => {
+    base44.entities.PuzzleCategory.list('order', 100).then(data => {
+      setCats(data.sort((a, b) => (a.order || 0) - (b.order || 0)));
+    }).catch(() => {});
+  }, []);
+  return cats;
+}
+
 // puzzle=null means "create mode", puzzle=object means "edit mode"
 export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
   const isCreating = !puzzle;

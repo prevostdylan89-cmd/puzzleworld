@@ -17,19 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const CATEGORY_FILTERS = [
-  { id: 'all', label: 'Tous', icon: '🌍' },
-  { id: 'Nature', label: 'Nature', icon: '🌳' },
-  { id: 'Urban', label: 'Urbain', icon: '🏙️' },
-  { id: 'Disney', label: 'Disney', icon: '🏰' },
-  { id: 'Art', label: 'Art', icon: '🎨' },
-  { id: 'Animals', label: 'Animaux', icon: '🦁' },
-  { id: 'Abstract', label: 'Abstrait', icon: '🎨' },
-  { id: 'Space', label: 'Espace', icon: '🌌' },
-  { id: 'Architecture', label: 'Architecture', icon: '🏛️' },
-  { id: 'Vintage', label: 'Vintage', icon: '📜' },
-  { id: 'Autre', label: 'Autre', icon: '🧩' }
-];
+
 
 export default function DashboardMyCollection() {
   const [puzzles, setPuzzles] = useState([]);
