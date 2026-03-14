@@ -117,17 +117,22 @@ export default function DashboardPageVisibility() {
   }
 
   return (
-    <div className="space-y-10">
-      {/* Collection Categories */}
-      <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
-        <DashboardCollectionCategories />
+    <div>
+      <CategoryManagerModal open={showCategoryModal} onClose={() => setShowCategoryModal(false)} />
+
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-1">Visibilité des Pages</h2>
+          <p className="text-white/50 text-sm">Activez ou désactivez les pages du site. Les pages désactivées affichent un message de maintenance.</p>
+        </div>
+        <Button onClick={() => setShowCategoryModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white gap-2" size="sm">
+          <Tag className="w-4 h-4" />
+          Catégories Collection
+        </Button>
       </div>
 
       <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-1">Visibilité des Pages</h2>
-        <p className="text-white/50 text-sm">Activez ou désactivez les pages du site. Les pages désactivées affichent un message de maintenance.</p>
-      </div>
 
       <div className="space-y-3">
         {settings.map((setting) => {
