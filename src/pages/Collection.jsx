@@ -172,7 +172,7 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-const DEFAULT_CATEGORY_FILTERS = [
+const DEFAULT_categoryFilters = [
   { id: 'all', label: 'Tous', icon: '🌍' },
 ];
 
@@ -181,7 +181,7 @@ export default function Collection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
-  const [categoryFilters, setCategoryFilters] = useState(DEFAULT_CATEGORY_FILTERS);
+  const [categoryFilters, setCategoryFilters] = useState(DEFAULT_categoryFilters);
 
   // Load categories from DB
   useEffect(() => {
@@ -451,13 +451,13 @@ export default function Collection() {
                 <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
                   <SelectValue>
                     {(() => {
-                      const cat = CATEGORY_FILTERS.find(c => c.id === selectedCategory);
+                      const cat = categoryFilters.find(c => c.id === selectedCategory);
                       return cat ? `${cat.icon} ${cat.label}` : 'Catégorie';
                     })()}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  {CATEGORY_FILTERS.map(c => (
+                  {categoryFilters.map(c => (
                     <SelectItem key={c.id} value={c.id} className="text-white text-sm">
                       {c.icon} {c.label}
                     </SelectItem>
@@ -482,7 +482,7 @@ export default function Collection() {
               <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#000019] to-transparent pointer-events-none z-10"></div>
               <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#000019] to-transparent pointer-events-none z-10"></div>
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {CATEGORY_FILTERS.map((category) => (
+                {categoryFilters.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
