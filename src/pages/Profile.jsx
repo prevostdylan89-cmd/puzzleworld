@@ -83,7 +83,7 @@ export default function Profile() {
       const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
-        base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
+        base44.entities.Wishlist.filter({ created_by: currentUser.email }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
         base44.entities.Follow.filter({ follower_email: currentUser.email })
       ]);
