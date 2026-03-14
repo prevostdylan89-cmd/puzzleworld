@@ -528,60 +528,57 @@ export default function Collection() {
         </div>
       </div>
 
-      {/* Selection Mode Bar */}
+      {/* Selection Mode Bar — fixed floating bottom bar */}
       {selectionMode && (
-        <div className="sticky top-[var(--header-h,0px)] z-20 bg-orange-500 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white">
-              <X className="w-5 h-5" />
-            </button>
-            <span className="text-white font-semibold">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (selectedIds.size === sortedPuzzles.length) setSelectedIds(new Set());
-                else setSelectedIds(new Set(sortedPuzzles.map(p => p.id)));
-              }}
-              className="text-white text-sm underline"
-            >
-              {selectedIds.size === sortedPuzzles.length ? 'Désélectionner tout' : 'Tout sélectionner'}
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  disabled={selectedIds.size === 0 || addingToCollection}
-                  className="flex items-center gap-1.5 bg-white text-orange-500 font-semibold px-4 py-1.5 rounded-full text-sm disabled:opacity-50"
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-orange-500 shadow-xl shadow-orange-500/30 rounded-full px-3 py-2">
+          <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white/80 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+          <span className="text-white font-semibold text-sm">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
+          <div className="w-px h-4 bg-white/30" />
+          <button
+            onClick={() => {
+              if (selectedIds.size === sortedPuzzles.length) setSelectedIds(new Set());
+              else setSelectedIds(new Set(sortedPuzzles.map(p => p.id)));
+            }}
+            className="text-white/80 hover:text-white text-xs transition-colors"
+          >
+            {selectedIds.size === sortedPuzzles.length ? 'Désélect.' : 'Tout'}
+          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                disabled={selectedIds.size === 0 || addingToCollection}
+                className="flex items-center gap-1 bg-white text-orange-500 font-semibold px-3 py-1 rounded-full text-sm disabled:opacity-50"
+              >
+                {addingToCollection ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                Ajouter
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
+              {[
+                { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
+                { status: 'inbox', label: 'Dans sa boîte', emoji: '📦' },
+                { status: 'done', label: 'Terminé', emoji: '🏆' },
+              ].map(({ status, label, emoji }) => (
+                <DropdownMenuItem
+                  key={status}
+                  onClick={async () => {
+                    setAddingToCollection(true);
+                    const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
+                    await addToMyCollection(puzzles, status);
+                    setAddingToCollection(false);
+                    setSelectionMode(false);
+                    setSelectedIds(new Set());
+                  }}
+                  className="text-white hover:bg-white/10 cursor-pointer gap-2"
                 >
-                  {addingToCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  Ajouter
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
-                {[
-                  { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
-                  { status: 'inbox', label: 'Dans sa boîte', emoji: '📦' },
-                  { status: 'done', label: 'Terminé', emoji: '🏆' },
-                ].map(({ status, label, emoji }) => (
-                  <DropdownMenuItem
-                    key={status}
-                    onClick={async () => {
-                      setAddingToCollection(true);
-                      const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
-                      await addToMyCollection(puzzles, status);
-                      setAddingToCollection(false);
-                      setSelectionMode(false);
-                      setSelectedIds(new Set());
-                    }}
-                    className="text-white hover:bg-white/10 cursor-pointer gap-2"
-                  >
-                    {emoji} {label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  {emoji} {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
 
