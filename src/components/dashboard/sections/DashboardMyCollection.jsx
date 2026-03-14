@@ -23,6 +23,13 @@ export default function DashboardMyCollection() {
   const [puzzles, setPuzzles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [dynamicCategories, setDynamicCategories] = useState([]);
+
+  useEffect(() => {
+    base44.entities.PuzzleCategory.list('order', 100).then(data => {
+      setDynamicCategories(data.sort((a, b) => (a.order || 0) - (b.order || 0)));
+    }).catch(() => {});
+  }, []);
   const [sortBy, setSortBy] = useState('date');
   const [loading, setLoading] = useState(true);
   const [deletingPuzzle, setDeletingPuzzle] = useState(null);

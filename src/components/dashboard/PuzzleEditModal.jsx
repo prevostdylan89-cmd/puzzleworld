@@ -21,6 +21,7 @@ function useDynamicCategories() {
 // puzzle=null means "create mode", puzzle=object means "edit mode"
 export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
   const isCreating = !puzzle;
+  const dynamicCategories = useDynamicCategories();
   const [formData, setFormData] = useState({
     title: '',
     brand: '',
