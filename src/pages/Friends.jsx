@@ -28,7 +28,7 @@ export default function Friends() {
   useEffect(() => {
     // Check URL params
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'messages') setDefaultTab('messages');
+    if (urlParams.get('tab') === 'messages') setActiveTab('messages');
     loadData();
   }, []);
 
