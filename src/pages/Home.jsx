@@ -232,7 +232,7 @@ export default function Home() {
                   <BookOpen className="w-4 h-4 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-white">Articles du Blog</h2>
+                  <h2 className="text-base font-bold text-white">Derniers articles</h2>
                   <p className="text-white/40 text-[10px]">À lire absolument</p>
                 </div>
               </div>
@@ -487,7 +487,7 @@ export default function Home() {
                   <BookOpen className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Articles du Blog</h2>
+                  <h2 className="text-xl font-bold text-white">Derniers articles</h2>
                   <p className="text-white/40 text-xs">À lire absolument</p>
                 </div>
               </div>
