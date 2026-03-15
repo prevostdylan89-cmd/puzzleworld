@@ -123,6 +123,18 @@ function LayoutContent({ children, currentPageName }) {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+      const unreadMsgs = await base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false });
+      const uniqueConvos = new Set(unreadMsgs.map(m => m.conversation_id));
+      setUnreadMessagesCount(uniqueConvos.size);
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   const loadUser = async () => {
     try {
       const currentUser = await base44.auth.me();
