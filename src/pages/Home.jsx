@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
+import ArticleModal from '@/components/home/ArticleModal';
 import { base44 } from '@/api/base44Client';
 
 const container = {
@@ -25,6 +26,7 @@ export default function Home() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState(null);
   const [topPuzzles, setTopPuzzles] = useState([]);
   const [events, setEvents] = useState([]);
   const [featuredArticles, setFeaturedArticles] = useState([]);
@@ -250,7 +252,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => { window.location.href = createPageUrl('Blog'); }}
+                  onClick={() => setSelectedArticle(article)}
                   className="flex-shrink-0 w-40 relative rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform border border-white/[0.06]"
                   style={{ scrollSnapAlign: 'start' }}
                 >
@@ -514,7 +516,7 @@ export default function Home() {
                 <motion.div
                   key={article.id}
                   variants={item}
-                  onClick={() => { window.location.href = createPageUrl('Blog'); }}
+                  onClick={() => setSelectedArticle(article)}
                   className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border border-white/[0.06] hover:border-blue-500/30"
                 >
                   <div className="aspect-[4/3] overflow-hidden">
@@ -631,6 +633,12 @@ export default function Home() {
           onClose={() => setSelectedEvent(null)}
         />
       )}
+
+      <ArticleModal
+        open={!!selectedArticle}
+        onClose={() => setSelectedArticle(null)}
+        article={selectedArticle}
+      />
     </div>
   );
 }
