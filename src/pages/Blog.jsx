@@ -149,7 +149,10 @@ export default function Blog() {
     const slug = params.get('article');
     if (slug) {
       base44.entities.BlogArticle.filter({ slug, is_published: true }).then(results => {
-        if (results[0]) setSelectedArticle(results[0]);
+        if (results[0]) {
+          setSelectedArticle(results[0]);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       });
     }
   }, []);
@@ -240,7 +243,10 @@ export default function Blog() {
           {filtered[0] && (
             <motion.article
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              onClick={() => setSelectedArticle(filtered[0])}
+              onClick={() => {
+                setSelectedArticle(filtered[0]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               className="mb-5 lg:mb-8 bg-white/5 border border-white/10 rounded-xl lg:rounded-2xl overflow-hidden cursor-pointer hover:border-orange-500/30 group transition-all"
             >
               <div className="lg:flex">
@@ -273,7 +279,10 @@ export default function Blog() {
           {/* Rest of articles */}
           <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-4">
             {filtered.slice(1).map((article, i) => (
-              <ArticleCard key={article.id} article={article} onClick={() => setSelectedArticle(article)} />
+              <ArticleCard key={article.id} article={article} onClick={() => {
+                setSelectedArticle(article);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} />
             ))}
           </div>
         </>
