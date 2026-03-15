@@ -26,8 +26,10 @@ export default function DashboardHome() {
     try {
       const puzzles = await base44.entities.FeaturedPuzzle.list('position');
       const events = await base44.entities.FeaturedEvent.list('position');
+      const articles = await base44.entities.FeaturedArticle.list('position');
       setFeaturedPuzzles(puzzles);
       setFeaturedEvents(events);
+      setFeaturedArticles(articles);
     } catch (error) {
       console.error('Error loading featured:', error);
       toast.error('Erreur de chargement');

@@ -32,7 +32,7 @@ export default function Home() {
   const [eventsInMaintenance, setEventsInMaintenance] = useState(false);
 
   useEffect(() => {
-    Promise.all([loadTopPuzzles(), loadEvents(), loadPageSettings()]).finally(() => setLoading(false));
+    Promise.all([loadTopPuzzles(), loadEvents(), loadPageSettings(), loadFeaturedArticles()]).finally(() => setLoading(false));
   }, []);
 
   const loadPageSettings = async () => {
