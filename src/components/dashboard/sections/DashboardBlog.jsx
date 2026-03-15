@@ -11,7 +11,7 @@ const EMPTY_FORM = {
   title: '', subtitle: '', slug: '', content: '', cover_image: '',
   category: '', tags: '', meta_description: '',
   external_link: '', external_link_label: '',
-  puzzle_catalog_id: '', puzzle_title: '', puzzle_image: '',
+  featured_puzzles: [],
   is_published: false, read_time: 5
 };
 
@@ -39,9 +39,19 @@ function ArticleForm({ editingId, form, setForm, onSave, onCancel, saving, uploa
   };
 
   const selectPuzzle = (p) => {
-    setForm(f => ({ ...f, puzzle_catalog_id: p.id, puzzle_title: p.title, puzzle_image: p.image_hd || '' }));
+    setForm(f => ({
+      ...f,
+      featured_puzzles: [...(f.featured_puzzles || []), { puzzle_catalog_id: p.id, puzzle_title: p.title, puzzle_image: p.image_hd || '' }]
+    }));
     setPuzzleResults([]);
     setPuzzleSearch('');
+  };
+
+  const removePuzzle = (index) => {
+    setForm(f => ({
+      ...f,
+      featured_puzzles: f.featured_puzzles.filter((_, i) => i !== index)
+    }));
   };
 
   return (
@@ -128,16 +138,18 @@ function ArticleForm({ editingId, form, setForm, onSave, onCancel, saving, uploa
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-            <label className="text-sm font-semibold text-white flex items-center gap-2"><BookOpen className="w-4 h-4" /> Fiche puzzle</label>
-            {form.puzzle_title && (
-              <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg p-2">
-                {form.puzzle_image && <img src={form.puzzle_image} alt="" className="w-10 h-10 object-cover rounded" />}
-                <span className="text-xs text-white flex-1">{form.puzzle_title}</span>
-                <button onClick={() => setForm(f => ({ ...f, puzzle_catalog_id: '', puzzle_title: '', puzzle_image: '' }))}>
-                  <X className="w-4 h-4 text-white/40" />
-                </button>
-              </div>
-            )}
+            <label className="text-sm font-semibold text-white flex items-center gap-2"><BookOpen className="w-4 h-4" /> Fiches puzzles</label>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {form.featured_puzzles?.map((puzzle, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg p-2">
+                  {puzzle.puzzle_image && <img src={puzzle.puzzle_image} alt="" className="w-10 h-10 object-cover rounded" />}
+                  <span className="text-xs text-white flex-1 truncate">{puzzle.puzzle_title}</span>
+                  <button onClick={() => removePuzzle(idx)}>
+                    <X className="w-4 h-4 text-white/40 hover:text-white/60" />
+                  </button>
+                </div>
+              ))}
+            </div>
             <div className="flex gap-1">
               <Input value={puzzleSearch} onChange={e => setPuzzleSearch(e.target.value)}
                 placeholder="Rechercher un puzzle..." className="bg-white/5 border-white/20 text-white text-xs"
