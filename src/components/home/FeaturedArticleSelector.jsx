@@ -38,7 +38,7 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
         article_category: article.category || '',
         article_slug: article.slug || '',
       });
-    } else {
+    } else if (!currentArticle) {
       await base44.entities.FeaturedArticle.create({
         position,
         article_id: article.id,
