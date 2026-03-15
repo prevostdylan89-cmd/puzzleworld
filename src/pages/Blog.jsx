@@ -186,14 +186,14 @@ export default function Blog() {
   return (
     <div className="min-h-screen px-4 py-8 lg:px-8">
       {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-sm px-4 py-2 rounded-full mb-4">
-          <BookOpen className="w-4 h-4" /> Blog PuzzleWorld
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6 lg:mb-12">
+        <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs lg:text-sm px-3 py-1.5 lg:px-4 lg:py-2 rounded-full mb-3">
+          <BookOpen className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Blog PuzzleWorld
         </div>
-        <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+        <h1 className="text-2xl lg:text-5xl font-bold text-white mb-2 lg:mb-4">
           Conseils, actus & <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">inspirations puzzle</span>
         </h1>
-        <p className="text-white/50 text-lg max-w-xl mx-auto">
+        <p className="text-white/50 text-sm lg:text-lg max-w-xl mx-auto hidden lg:block">
           Découvrez nos articles, guides et actualités pour les passionnés de puzzles.
         </p>
 
