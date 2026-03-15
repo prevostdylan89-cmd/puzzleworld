@@ -273,7 +273,8 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
-          </section>
+          )}
+        </section>
 
         {/* Mobile Événements - vertical cards */}
         <section className="py-4 px-4">
@@ -496,6 +497,12 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
+            {featuredArticles.length === 0 ? (
+              <div className="text-center py-12 text-white/40">
+                <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Aucun article pour le moment</p>
+              </div>
+            ) : (
             <motion.div
               variants={container}
               initial="hidden"
@@ -529,6 +536,7 @@ export default function Home() {
                 </motion.div>
               ))}
             </motion.div>
+            )}
           </section>
 
         {/* Événements */}
