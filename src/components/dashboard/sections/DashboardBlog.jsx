@@ -140,15 +140,14 @@ export default function DashboardBlog() {
                 placeholder="Sous-titre accrocheur" className="bg-white/5 border-white/20 text-white" />
             </div>
             <div>
-              <label className="text-sm text-white/60 mb-1 block">Contenu *</label>
-              <div className="rounded-lg overflow-hidden border border-white/20">
-                <ReactQuill
-                  value={form.content}
-                  onChange={val => setForm(f => ({ ...f, content: val }))}
-                  theme="snow"
-                  style={{ background: '#0a0a2e', color: 'white', minHeight: 300 }}
-                />
-              </div>
+              <label className="text-sm text-white/60 mb-1 block">Contenu * <span className="text-white/30">(HTML supporté)</span></label>
+              <Textarea
+                value={form.content}
+                onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                placeholder="Écrivez votre article ici... Vous pouvez utiliser du HTML (<b>, <i>, <p>, <h2>, <ul>, <li>, <a href='...'>, etc.)"
+                className="bg-white/5 border-white/20 text-white font-mono text-sm"
+                rows={18}
+              />
             </div>
             <div>
               <label className="text-sm text-white/60 mb-1 block">Description SEO (meta)</label>
