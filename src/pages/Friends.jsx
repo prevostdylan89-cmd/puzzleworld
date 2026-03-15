@@ -246,83 +246,164 @@ export default function Friends() {
               <p className="text-white/60">Ajoutez des amis pour commencer à discuter</p>
             </div>
           ) : (
-            <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden flex h-[60vh]">
-              {/* Liste des amis */}
-              <div className="w-64 lg:w-80 border-r border-white/10 flex flex-col flex-shrink-0">
-                <div className="p-3 border-b border-white/10">
-                  <h3 className="text-white font-semibold text-sm">Conversations</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  {friends.map((friend) => (
-                    <button key={friend.email} onClick={() => setSelectedFriend(friend)}
-                      className={`w-full p-3 flex items-center gap-3 hover:bg-white/5 transition-colors border-b border-white/5 ${selectedFriend?.email === friend.email ? 'bg-white/10' : ''}`}>
-                      <Avatar className="h-9 w-9 ring-2 ring-orange-500/20 flex-shrink-0">
-                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                          {friend.name?.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left min-w-0">
-                        <p className="text-white font-medium text-sm truncate">{friend.name}</p>
-                        <p className="text-white/40 text-xs truncate">{friend.email}</p>
+            <>
+              {/* MOBILE : vue liste puis vue chat en plein écran */}
+              <div className="lg:hidden">
+                <AnimatePresence mode="wait">
+                  {!selectedFriend ? (
+                    // Liste des amis (mobile)
+                    <motion.div key="list" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                      className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                      <div className="p-4 border-b border-white/10">
+                        <h3 className="text-white font-semibold">Conversations</h3>
                       </div>
-                    </button>
-                  ))}
-                </div>
+                      {friends.map((friend) => (
+                        <button key={friend.email} onClick={() => setSelectedFriend(friend)}
+                          className="w-full p-4 flex items-center gap-3 hover:bg-white/5 active:bg-white/10 transition-colors border-b border-white/5">
+                          <Avatar className="h-11 w-11 ring-2 ring-orange-500/20 flex-shrink-0">
+                            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+                              {friend.name?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-white font-medium truncate">{friend.name}</p>
+                            <p className="text-white/40 text-sm truncate">{friend.email}</p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-white/30 flex-shrink-0" />
+                        </button>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    // Chat plein écran (mobile) — fixé, ne dépasse pas l'écran
+                    <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                      className="fixed inset-0 bg-[#000019] z-50 flex flex-col"
+                      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                      {/* Header */}
+                      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-[#000019] flex-shrink-0">
+                        <button onClick={() => setSelectedFriend(null)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 active:bg-white/15">
+                          <ArrowLeft className="w-5 h-5 text-white" />
+                        </button>
+                        <Avatar className="h-9 w-9 ring-2 ring-orange-500/20">
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+                            {selectedFriend.name?.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-white font-semibold">{selectedFriend.name}</p>
+                      </div>
+                      {/* Messages scrollables */}
+                      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                        {messages.length === 0 && (
+                          <p className="text-center text-white/30 text-sm py-8">Commencez la conversation !</p>
+                        )}
+                        {messages.map((msg) => {
+                          const isMine = msg.sender_email === user.email;
+                          return (
+                            <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[78%] px-4 py-2 rounded-2xl ${isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-white/10 text-white rounded-bl-sm'}`}>
+                                <p className="text-sm leading-relaxed">{msg.message}</p>
+                                <p className={`text-xs mt-1 ${isMine ? 'text-white/70' : 'text-white/40'}`}>
+                                  {new Date(msg.created_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div ref={messagesEndRef} />
+                      </div>
+                      {/* Input fixé en bas */}
+                      <div className="flex-shrink-0 px-4 py-3 border-t border-white/10 bg-[#000019]">
+                        <form onSubmit={sendMessage} className="flex gap-2">
+                          <Input placeholder="Message..." value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            className="bg-white/5 border-white/20 text-white flex-1"
+                            style={{ fontSize: '16px' }} />
+                          <Button type="submit" size="icon" className="bg-orange-500 hover:bg-orange-600 flex-shrink-0 w-11 h-11" disabled={!newMessage.trim()}>
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </form>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Zone de chat */}
-              <div className="flex-1 flex flex-col min-w-0">
-                {selectedFriend ? (
-                  <>
-                    <div className="p-3 border-b border-white/10 flex items-center gap-3">
-                      <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                          {selectedFriend.name?.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <p className="text-white font-medium">{selectedFriend.name}</p>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                      {messages.length === 0 && (
-                        <p className="text-center text-white/30 text-sm py-8">Commencez la conversation !</p>
-                      )}
-                      {messages.map((msg) => {
-                        const isMine = msg.sender_email === user.email;
-                        return (
-                          <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                            className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${isMine ? 'bg-orange-500 text-white' : 'bg-white/10 text-white'}`}>
-                              <p className="text-sm">{msg.message}</p>
-                              <p className={`text-xs mt-1 ${isMine ? 'text-white/70' : 'text-white/40'}`}>
-                                {new Date(msg.created_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
-                    <form onSubmit={sendMessage} className="p-3 border-t border-white/10">
-                      <div className="flex gap-2">
-                        <Input placeholder="Écrivez un message..." value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          className="bg-white/5 border-white/20 text-white text-sm" />
-                        <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={!newMessage.trim()}>
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </form>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <MessageCircle className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                      <p className="text-white/50 text-sm">Sélectionnez un ami pour discuter</p>
-                    </div>
+              {/* DESKTOP : layout côte à côte */}
+              <div className="hidden lg:flex bg-white/5 border border-white/10 rounded-xl overflow-hidden" style={{ height: '65vh' }}>
+                {/* Sidebar amis */}
+                <div className="w-80 border-r border-white/10 flex flex-col flex-shrink-0">
+                  <div className="p-4 border-b border-white/10">
+                    <h3 className="text-white font-semibold">Conversations</h3>
                   </div>
-                )}
+                  <div className="flex-1 overflow-y-auto">
+                    {friends.map((friend) => (
+                      <button key={friend.email} onClick={() => setSelectedFriend(friend)}
+                        className={`w-full p-4 flex items-center gap-3 hover:bg-white/5 transition-colors border-b border-white/5 ${selectedFriend?.email === friend.email ? 'bg-white/10 border-l-2 border-l-orange-500' : ''}`}>
+                        <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 flex-shrink-0">
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+                            {friend.name?.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left min-w-0">
+                          <p className="text-white font-medium truncate">{friend.name}</p>
+                          <p className="text-white/40 text-xs truncate">{friend.email}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Zone chat */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  {selectedFriend ? (
+                    <>
+                      <div className="p-4 border-b border-white/10 flex items-center gap-3 flex-shrink-0">
+                        <Avatar className="h-9 w-9 ring-2 ring-orange-500/20">
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+                            {selectedFriend.name?.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-white font-semibold">{selectedFriend.name}</p>
+                      </div>
+                      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                        {messages.length === 0 && (
+                          <p className="text-center text-white/30 text-sm py-8">Commencez la conversation !</p>
+                        )}
+                        {messages.map((msg) => {
+                          const isMine = msg.sender_email === user.email;
+                          return (
+                            <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-md px-4 py-2 rounded-2xl ${isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-white/10 text-white rounded-bl-sm'}`}>
+                                <p className="text-sm">{msg.message}</p>
+                                <p className={`text-xs mt-1 ${isMine ? 'text-white/70' : 'text-white/40'}`}>
+                                  {new Date(msg.created_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div ref={messagesEndRef} />
+                      </div>
+                      <form onSubmit={sendMessage} className="p-4 border-t border-white/10 flex-shrink-0">
+                        <div className="flex gap-2">
+                          <Input placeholder="Écrivez un message..." value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            className="bg-white/5 border-white/20 text-white" />
+                          <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={!newMessage.trim()}>
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </form>
+                    </>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <MessageCircle className="w-16 h-16 text-white/20 mx-auto mb-4" />
+                        <p className="text-white/50">Sélectionnez un ami pour discuter</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </TabsContent>
 
