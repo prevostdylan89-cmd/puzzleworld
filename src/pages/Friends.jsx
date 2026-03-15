@@ -159,6 +159,9 @@ export default function Friends() {
           <TabsTrigger value="requests" className="data-[state=active]:bg-orange-500/20">
             Demandes ({pendingRequests.length})
           </TabsTrigger>
+          <TabsTrigger value="sent" className="data-[state=active]:bg-orange-500/20">
+            Envoyées ({sentRequests.length})
+          </TabsTrigger>
           <TabsTrigger value="find" className="data-[state=active]:bg-orange-500/20">
             Trouver des amis
           </TabsTrigger>
