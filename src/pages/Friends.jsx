@@ -22,8 +22,10 @@ export default function Friends() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [activeTab, setActiveTab] = useState('friends');
+  const [unreadConversationsCount, setUnreadConversationsCount] = useState(0);
   const messagesEndRef = useRef(null);
   const intervalRef = useRef(null);
+  const unreadIntervalRef = useRef(null);
 
   useEffect(() => {
     // Check URL params
