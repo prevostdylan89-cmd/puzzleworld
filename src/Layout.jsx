@@ -236,7 +236,7 @@ function LayoutContent({ children, currentPageName }) {
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
-              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
+              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover mix-blend-screen" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               PuzzleWorld
@@ -378,7 +378,7 @@ function LayoutContent({ children, currentPageName }) {
 
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0">
-              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
+              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover mix-blend-screen" />
             </div>
             <span className="font-bold text-base">PuzzleWorld</span>
           </Link>
@@ -434,7 +434,7 @@ function LayoutContent({ children, currentPageName }) {
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
-                    <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
+                    <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover mix-blend-screen" />
                   </div>
                   <div>
                     <h2 className="font-bold text-white">PuzzleWorld</h2>
@@ -607,7 +607,7 @@ function LayoutContent({ children, currentPageName }) {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
+                  <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover mix-blend-screen" />
                 </div>
                 <span className="font-bold text-lg text-white">PuzzleWorld</span>
               </div>
