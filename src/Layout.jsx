@@ -260,6 +260,11 @@ function LayoutContent({ children, currentPageName }) {
                 >
                   <item.icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'group-hover:text-orange-400'}`} />
                   <span className="font-medium text-sm">{item.name}</span>
+                  {item.page === 'Friends' && unreadMessagesCount > 0 && (
+                    <span className="bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                      {unreadMessagesCount}
+                    </span>
+                  )}
                   {isActive && (
                     <motion.div
                       layoutId="activeNavDesktop"
