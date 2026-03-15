@@ -128,6 +128,55 @@ export default function DashboardHome() {
         </div>
       </div>
 
+      {/* Top 5 Articles Section */}
+      <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6 mb-8">
+        <h3 className="text-xl font-semibold text-white mb-4">Top 5 Articles Blog en Vedette</h3>
+        <p className="text-white/60 text-sm mb-6">
+          Sélectionnez les 5 articles à afficher sur la page d'accueil (dans l'ordre)
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((position) => {
+            const article = featuredArticles.find(a => a.position === position);
+            return (
+              <div
+                key={position}
+                className="bg-white/[0.03] border border-white/[0.06] rounded-lg overflow-hidden hover:border-orange-500/30 transition-all"
+              >
+                {article ? (
+                  <>
+                    <div className="aspect-video bg-white/5">
+                      {article.article_image ? (
+                        <img src={article.article_image} alt={article.article_title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <BookOpen className="w-8 h-8 text-white/20" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-white text-sm font-medium line-clamp-2 mb-1">{article.article_title}</p>
+                      {article.article_category && <p className="text-orange-400 text-xs mb-2">{article.article_category}</p>}
+                      <Button onClick={() => openArticleSelector(position)} size="sm" className="w-full bg-white/10 hover:bg-white/20 text-white">
+                        <Edit2 className="w-3 h-3 mr-2" /> Changer
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="aspect-video bg-white/5 flex flex-col items-center justify-center p-4">
+                    <BookOpen className="w-10 h-10 text-white/20 mb-3" />
+                    <p className="text-white/50 text-sm mb-3 text-center">Position {position} vide</p>
+                    <Button onClick={() => openArticleSelector(position)} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                      Sélectionner
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Top 3 Events Section */}
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl p-6">
         <h3 className="text-xl font-semibold text-white mb-4">Top 3 Événements en Vedette</h3>
