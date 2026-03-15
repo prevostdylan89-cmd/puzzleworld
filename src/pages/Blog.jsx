@@ -206,15 +206,15 @@ export default function Blog() {
 
       {/* Category filter */}
       {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
+        <div className="flex flex-wrap gap-1.5 lg:gap-2 justify-center mb-5 lg:mb-8">
           {categories.map(cat => (
             <button key={cat} onClick={() => setFilterCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 py-1 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all ${
                 filterCategory === cat
                   ? 'bg-orange-500 text-white'
                   : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}>
-              {cat === 'all' ? 'Tous les articles' : cat}
+              {cat === 'all' ? 'Tous' : cat}
             </button>
           ))}
         </div>
