@@ -120,8 +120,10 @@ export default function Friends() {
     pendingRequests.some(r => r.requester_email === email) ||
     sentRequests.some(r => r.addressee_email === email);
 
-  const filteredUsers = allUsers.filter(u => 
+  const filteredUsers = searchQuery.trim().length < 2 ? [] : allUsers.filter(u => 
     u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.friend_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
