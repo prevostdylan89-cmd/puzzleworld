@@ -377,8 +377,8 @@ function LayoutContent({ children, currentPageName }) {
           )}
 
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <Puzzle className="w-3.5 h-3.5 text-white" />
+            <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0">
+              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-base">PuzzleWorld</span>
           </Link>
