@@ -76,7 +76,7 @@ function LayoutContent({ children, currentPageName }) {
   // Desktop nav items
   const desktopNavItems = [
     { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
-    { name: t('social'), icon: Users, page: 'Social', hasHistory: true },
+    { name: t('social'), icon: Globe, page: 'Social', hasHistory: true },
     { name: t('collection'), icon: Grid3X3, page: 'Collection', hasHistory: true },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: 'Events', icon: Puzzle, page: 'Events' },
