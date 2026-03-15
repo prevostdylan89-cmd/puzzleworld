@@ -547,24 +547,26 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="min-h-screen lg:pb-6" style={{ paddingTop: '3.5rem', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={currentPageName}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {(() => {
-              const pageSetting = pageSettings.find(s => s.page_name === currentPageName);
-              if (pageSetting && pageSetting.is_active === false) {
-                return <MaintenancePage message={pageSetting.maintenance_message} />;
-              }
-              return children;
-            })()}
-          </motion.div>
-        </AnimatePresence>
+      <main id="pull-scroll-container" className="min-h-screen lg:pb-6 overflow-y-auto" style={{ paddingTop: '3.5rem', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
+        <PullToRefresh>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentPageName}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {(() => {
+                const pageSetting = pageSettings.find(s => s.page_name === currentPageName);
+                if (pageSetting && pageSetting.is_active === false) {
+                  return <MaintenancePage message={pageSetting.maintenance_message} />;
+                }
+                return children;
+              })()}
+            </motion.div>
+          </AnimatePresence>
+        </PullToRefresh>
       </main>
 
       {/* Footer */}
