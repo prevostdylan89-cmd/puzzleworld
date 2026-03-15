@@ -235,8 +235,8 @@ function LayoutContent({ children, currentPageName }) {
         <div className="flex items-center justify-between h-full px-6">
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <Puzzle className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+              <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
               PuzzleWorld
