@@ -225,7 +225,6 @@ export default function Home() {
         </section>
 
         {/* Mobile Top Articles Blog */}
-        {featuredArticles.length > 0 && (
           <section className="py-4">
             <div className="flex items-center justify-between px-4 mb-3">
               <div className="flex items-center gap-2">
@@ -275,7 +274,6 @@ export default function Home() {
               ))}
             </div>
           </section>
-        )}
 
         {/* Mobile Événements - vertical cards */}
         <section className="py-4 px-4">
@@ -481,8 +479,7 @@ export default function Home() {
         </section>
 
         {/* Top Articles Blog */}
-        {featuredArticles.length > 0 && (
-          <section className="px-8 py-10">
+        <section className="px-8 py-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
@@ -533,7 +530,6 @@ export default function Home() {
               ))}
             </motion.div>
           </section>
-        )}
 
         {/* Événements */}
         <section className="px-8 py-10">
