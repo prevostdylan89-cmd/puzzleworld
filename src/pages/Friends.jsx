@@ -226,7 +226,7 @@ export default function Friends() {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" className="bg-orange-500 hover:bg-orange-600"
-                    onClick={() => { setSelectedFriend(friend); document.querySelector('[value="messages"]')?.click(); }}>
+                    onClick={() => { setSelectedFriend(friend); setDefaultTab('messages'); }}>
                     <MessageCircle className="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => removeFriend(friend.friendshipId)}>
