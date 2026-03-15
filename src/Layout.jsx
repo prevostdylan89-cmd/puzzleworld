@@ -66,7 +66,7 @@ function LayoutContent({ children, currentPageName }) {
   // Sidebar menu items (mobile drawer)
   const sidebarMenuItems = [
     { name: t('home'), icon: Home, page: 'Home' },
-    { name: t('social'), icon: Users, page: 'Social' },
+    { name: t('social'), icon: Globe, page: 'Social' },
     { name: 'Events', icon: Calendar, page: 'Events' },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: t('profile'), icon: User, page: 'Profile' },
