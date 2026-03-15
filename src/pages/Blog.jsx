@@ -234,7 +234,7 @@ export default function Blog() {
             <motion.article
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               onClick={() => setSelectedArticle(filtered[0])}
-              className="mb-8 bg-white/5 border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-500/30 group transition-all"
+              className="mb-5 lg:mb-8 bg-white/5 border border-white/10 rounded-xl lg:rounded-2xl overflow-hidden cursor-pointer hover:border-orange-500/30 group transition-all"
             >
               <div className="lg:flex">
                 {filtered[0].cover_image && (
@@ -243,18 +243,18 @@ export default function Blog() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>
                 )}
-                <div className="p-8 lg:w-1/2 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <div className="p-4 lg:p-8 lg:w-1/2 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 mb-2 lg:mb-4 flex-wrap">
                     {filtered[0].category && (
                       <Badge className={`text-xs ${CATEGORY_COLORS[filtered[0].category] || ''}`}>{filtered[0].category}</Badge>
                     )}
                     <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">À la une</Badge>
                   </div>
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors">
+                  <h2 className="text-base lg:text-3xl font-bold text-white mb-1.5 lg:mb-3 group-hover:text-orange-400 transition-colors line-clamp-2">
                     {filtered[0].title}
                   </h2>
-                  {filtered[0].subtitle && <p className="text-white/60 mb-6">{filtered[0].subtitle}</p>}
-                  <div className="flex items-center gap-4 text-white/40 text-sm">
+                  {filtered[0].subtitle && <p className="text-white/60 text-sm mb-2 lg:mb-6 line-clamp-2 hidden sm:block">{filtered[0].subtitle}</p>}
+                  <div className="flex items-center gap-3 text-white/40 text-xs lg:text-sm">
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {filtered[0].read_time} min</span>
                     <span>{formatDate(filtered[0].created_date)}</span>
                   </div>
@@ -264,7 +264,7 @@ export default function Blog() {
           )}
 
           {/* Rest of articles */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6">
             {filtered.slice(1).map((article, i) => (
               <ArticleCard key={article.id} article={article} onClick={() => setSelectedArticle(article)} />
             ))}
