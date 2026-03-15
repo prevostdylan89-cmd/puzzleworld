@@ -77,6 +77,13 @@ export default function Home() {
     }
   };
 
+  const loadFeaturedArticles = async () => {
+    try {
+      const data = await base44.entities.FeaturedArticle.list('position', 5);
+      setFeaturedArticles(data.sort((a, b) => a.position - b.position));
+    } catch (e) {}
+  };
+
   const loadEvents = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];

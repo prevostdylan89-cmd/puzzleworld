@@ -48,6 +48,11 @@ export default function DashboardHome() {
     setShowEventSelector(true);
   };
 
+  const openArticleSelector = (position) => {
+    setSelectedPosition(position);
+    setShowArticleSelector(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
