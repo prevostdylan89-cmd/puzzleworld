@@ -40,6 +40,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
   };
 
   const handleSelectPuzzle = async (puzzle) => {
+    setIsLoading(true);
     try {
       if (currentPuzzle) {
         await base44.entities.FeaturedPuzzle.update(currentPuzzle.id, {
@@ -57,13 +58,14 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
           position
         });
       }
-
       toast.success('Puzzle mis en avant!');
-      onUpdate();
+      await onUpdate();
       onClose();
     } catch (error) {
-      console.error('Error updating featured puzzle:', error);
-      toast.error('Erreur lors de la mise à jour');
+      console.error('Error:', error);
+      toast.error('Erreur: ' + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 

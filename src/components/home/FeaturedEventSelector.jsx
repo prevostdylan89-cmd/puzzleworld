@@ -40,6 +40,7 @@ export default function FeaturedEventSelector({ open, onClose, position, current
   };
 
   const handleSelectEvent = async (event) => {
+    setIsLoading(true);
     try {
       if (currentEvent) {
         await base44.entities.FeaturedEvent.update(currentEvent.id, {
@@ -57,13 +58,14 @@ export default function FeaturedEventSelector({ open, onClose, position, current
           position
         });
       }
-
       toast.success('Événement mis en avant!');
-      onUpdate();
+      await onUpdate();
       onClose();
     } catch (error) {
-      console.error('Error updating featured event:', error);
-      toast.error('Erreur lors de la mise à jour');
+      console.error('Error:', error);
+      toast.error('Erreur: ' + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 

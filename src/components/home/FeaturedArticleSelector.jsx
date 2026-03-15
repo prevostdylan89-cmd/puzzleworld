@@ -53,7 +53,7 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
       await onUpdate();
       onClose();
     } catch (error) {
-      toast.error('Erreur lors de la sauvegarde');
+      toast.error('Erreur: ' + error.message);
       console.error(error);
     } finally {
       setSaving(false);
