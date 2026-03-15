@@ -271,7 +271,7 @@ export default function Blog() {
           )}
 
           {/* Rest of articles */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-4">
             {filtered.slice(1).map((article, i) => (
               <ArticleCard key={article.id} article={article} onClick={() => setSelectedArticle(article)} />
             ))}
