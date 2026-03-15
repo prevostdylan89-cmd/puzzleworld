@@ -72,6 +72,7 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: t('profile'), icon: User, page: 'Profile' },
     { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: 'Blog', icon: BookOpen, page: 'Blog' },
   ];
 
   // Desktop nav items
