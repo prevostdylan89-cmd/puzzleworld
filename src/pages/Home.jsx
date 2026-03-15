@@ -638,6 +638,7 @@ export default function Home() {
         open={!!selectedArticle}
         onClose={() => setSelectedArticle(null)}
         article={selectedArticle}
+        articleId={selectedArticle?.article_id}
       />
     </div>
   );
