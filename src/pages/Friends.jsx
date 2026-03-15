@@ -258,12 +258,18 @@ export default function Friends() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
             <Input
-              placeholder="Rechercher par nom ou email..."
+              placeholder="Rechercher par nom, pseudo ou code ami..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white/5 border-white/20 text-white"
             />
           </div>
+
+          {searchQuery.trim().length < 2 && (
+            <div className="text-center py-8 text-white/40 text-sm">
+              Tapez au moins 2 caractères pour rechercher
+            </div>
+          )}
 
           {filteredUsers.map((targetUser) => (
             <motion.div
