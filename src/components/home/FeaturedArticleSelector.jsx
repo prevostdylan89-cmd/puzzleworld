@@ -28,8 +28,9 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
 
   const loadCategories = async () => {
     try {
-      const cats = await base44.entities.BlogCategory.list('order');
-      setCategories(cats);
+      const allArticles = await base44.entities.BlogArticle.filter({ is_published: true }, '-created_date', 500);
+      const uniqueCats = [...new Set(allArticles.map(a => a.category).filter(Boolean))].sort();
+      setCategories(uniqueCats.map(name => ({ id: name, name })));
     } catch (error) {
       console.error('Error loading categories:', error);
     }
@@ -129,7 +130,7 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
             >
               <option value="all">Toutes les catégories</option>
               {categories.map(cat => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                <option key={cat.id} value={cat.name || cat}>{cat.name || cat}</option>
               ))}
             </select>
           </div>

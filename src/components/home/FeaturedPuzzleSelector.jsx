@@ -23,8 +23,9 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
 
   const loadCategories = async () => {
     try {
-      const cats = await base44.entities.PuzzleCategory.list('order');
-      setCategories(cats);
+      const allPuzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 500);
+      const uniqueCats = [...new Set(allPuzzles.map(p => p.category).filter(Boolean))].sort();
+      setCategories(uniqueCats.map(name => ({ id: name, name })));
     } catch (error) {
       console.error('Error loading categories:', error);
     }
@@ -124,7 +125,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
               >
                 <option value="all">Toutes les catégories</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  <option key={cat.id} value={cat.name || cat}>{cat.name || cat}</option>
                 ))}
               </select>
             </div>
