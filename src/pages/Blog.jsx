@@ -24,7 +24,7 @@ function ArticleCard({ article, onClick }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={onClick}
-      className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-500/30 hover:bg-white/[0.07] transition-all group"
+      className="bg-white/5 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-orange-500/30 hover:bg-white/[0.07] transition-all group"
     >
       {article.cover_image && (
         <div className="aspect-[16/9] overflow-hidden">
@@ -32,35 +32,25 @@ function ArticleCard({ article, onClick }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         </div>
       )}
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
+      <div className="p-3 lg:p-5">
+        <div className="flex items-center gap-1.5 mb-2 flex-wrap">
           {article.category && (
-            <Badge className={`text-xs ${CATEGORY_COLORS[article.category] || 'bg-white/10 text-white/60'}`}>
+            <Badge className={`text-[10px] lg:text-xs ${CATEGORY_COLORS[article.category] || 'bg-white/10 text-white/60'}`}>
               {article.category}
             </Badge>
           )}
-          <span className="text-white/30 text-xs flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {article.read_time} min
+          <span className="text-white/30 text-[10px] flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5" /> {article.read_time} min
           </span>
-          <span className="text-white/30 text-xs">{formatDate(article.created_date)}</span>
         </div>
-        <h2 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-orange-400 transition-colors">
+        <h2 className="text-xs lg:text-lg font-bold text-white mb-1 line-clamp-2 group-hover:text-orange-400 transition-colors leading-snug">
           {article.title}
         </h2>
         {article.subtitle && (
-          <p className="text-white/60 text-sm line-clamp-2 mb-4">{article.subtitle}</p>
+          <p className="text-white/60 text-[11px] lg:text-sm line-clamp-2 hidden lg:block">{article.subtitle}</p>
         )}
-        {article.tags && (
-          <div className="flex flex-wrap gap-1 mt-3">
-            {article.tags.split(',').slice(0, 3).map(tag => (
-              <span key={tag.trim()} className="text-[10px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full">
-                #{tag.trim()}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="flex items-center gap-1 mt-4 text-orange-400 text-sm font-medium">
-          Lire l'article <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        <div className="flex items-center gap-1 mt-2 text-orange-400 text-[10px] lg:text-sm font-medium">
+          Lire <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>
     </motion.article>
