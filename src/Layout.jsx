@@ -69,7 +69,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: t('profile'), icon: User, page: 'Profile' },
     { name: 'Amis', icon: Users, page: 'Friends' },
-    { name: 'Messages', icon: MessageCircle, page: 'Messages' },
   ];
 
   // Desktop nav items
@@ -81,7 +80,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
     { name: 'Amis', icon: Users, page: 'Friends' },
-    { name: 'Messages', icon: MessageCircle, page: 'Messages' }
   ];
 
   const adminNavItems = user?.role === 'admin' 
