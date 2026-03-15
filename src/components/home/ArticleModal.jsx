@@ -6,23 +6,21 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 
-export default function ArticleModal({ open, onClose, article }) {
+export default function ArticleModal({ open, onClose, article, articleId }) {
   const navigate = useNavigate();
   const [fullArticle, setFullArticle] = useState(null);
   
   if (!article) return null;
 
   useEffect(() => {
-    if (open && article?.id && !fullArticle) {
-      base44.entities.FeaturedArticle.filter({ id: article.id }).then(results => {
-        if (results[0]?.article_id) {
-          base44.entities.BlogArticle.filter({ id: results[0].article_id }).then(articles => {
-            if (articles[0]) setFullArticle(articles[0]);
-          });
-        }
-      });
+    if (open && articleId) {
+      base44.entities.BlogArticle.filter({ id: articleId }).then(articles => {
+        if (articles[0]) setFullArticle(articles[0]);
+      }).catch(() => setFullArticle(null));
+    } else {
+      setFullArticle(null);
     }
-  }, [open, article?.id]);
+  }, [open, articleId]);
 
   const handleReadFull = () => {
     onClose();
