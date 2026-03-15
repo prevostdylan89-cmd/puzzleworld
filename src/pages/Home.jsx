@@ -224,6 +224,59 @@ export default function Home() {
           )}
         </section>
 
+        {/* Mobile Top Articles Blog */}
+        {featuredArticles.length > 0 && (
+          <section className="py-4">
+            <div className="flex items-center justify-between px-4 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">Articles du Blog</h2>
+                  <p className="text-white/40 text-[10px]">À lire absolument</p>
+                </div>
+              </div>
+              <Link to={createPageUrl('Blog')}>
+                <span className="text-blue-400 text-xs font-medium flex items-center gap-0.5">
+                  Voir tout <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
+            </div>
+            <div className="flex gap-3 px-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+              {featuredArticles.map((article, index) => (
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => { window.location.href = createPageUrl('Blog'); }}
+                  className="flex-shrink-0 w-40 relative rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform border border-white/[0.06]"
+                  style={{ scrollSnapAlign: 'start' }}
+                >
+                  <div className="aspect-[4/3]">
+                    {article.article_image ? (
+                      <img src={article.article_image} alt={article.article_title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                        <BookOpen className="w-8 h-8 text-white/20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    {article.article_category && (
+                      <span className="text-blue-300 text-[9px] font-semibold uppercase tracking-wide">{article.article_category}</span>
+                    )}
+                    <p className="text-white text-[10px] font-semibold line-clamp-2 leading-tight mt-0.5">{article.article_title}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Mobile Événements - vertical cards */}
         <section className="py-4 px-4">
           <div className="flex items-center justify-between mb-3">
