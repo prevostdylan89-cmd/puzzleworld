@@ -83,7 +83,7 @@ export default function Friends() {
         const friend = acceptedFriends.find(f => f.email === friendEmail);
         if (friend) {
           setSelectedFriend(friend);
-          setDefaultTab('messages');
+          setActiveTab('messages');
         }
       }
     } catch (error) {
