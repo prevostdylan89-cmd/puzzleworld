@@ -72,11 +72,11 @@ export default function Friends() {
   const sendFriendRequest = async (targetUser) => {
     try {
       await base44.entities.Friendship.create({
-        requester_email: user.email,
-        requester_name: user.full_name || user.email,
-        addressee_email: targetUser.email,
-        addressee_name: targetUser.full_name || targetUser.email,
-        status: 'pending'
+      requester_email: user.email,
+      requester_name: user.full_name || user.email,
+      addressee_email: targetUser.email,
+      addressee_name: targetUser.display_name || targetUser.full_name || targetUser.email,
+      status: 'pending'
       });
       toast.success('Demande envoyée');
       loadData();
