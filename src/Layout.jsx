@@ -46,6 +46,7 @@ function LayoutContent({ children, currentPageName }) {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [pageSettings, setPageSettings] = useState([]);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   useEffect(() => {
     base44.entities.PageSettings.list().then(setPageSettings).catch(() => {});
