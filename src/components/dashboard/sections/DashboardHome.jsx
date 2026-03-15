@@ -252,6 +252,16 @@ export default function DashboardHome() {
         />
       )}
 
+      {showArticleSelector && (
+        <FeaturedArticleSelector
+          open={showArticleSelector}
+          onClose={() => { setShowArticleSelector(false); setSelectedPosition(null); }}
+          position={selectedPosition}
+          currentArticle={featuredArticles.find(a => a.position === selectedPosition)}
+          onUpdate={loadFeatured}
+        />
+      )}
+
       {showEventSelector && (
         <FeaturedEventSelector
           open={showEventSelector}
