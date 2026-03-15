@@ -30,28 +30,34 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
 
   const selectArticle = async (article) => {
     setSaving(true);
-    if (currentArticle) {
-      await base44.entities.FeaturedArticle.update(currentArticle.id, {
-        article_id: article.id,
-        article_title: article.title,
-        article_image: article.cover_image || '',
-        article_category: article.category || '',
-        article_slug: article.slug || '',
-      });
-    } else if (!currentArticle) {
-      await base44.entities.FeaturedArticle.create({
-        position,
-        article_id: article.id,
-        article_title: article.title,
-        article_image: article.cover_image || '',
-        article_category: article.category || '',
-        article_slug: article.slug || '',
-      });
+    try {
+      if (currentArticle) {
+        await base44.entities.FeaturedArticle.update(currentArticle.id, {
+          article_id: article.id,
+          article_title: article.title,
+          article_image: article.cover_image || '',
+          article_category: article.category || '',
+          article_slug: article.slug || '',
+        });
+      } else {
+        await base44.entities.FeaturedArticle.create({
+          position,
+          article_id: article.id,
+          article_title: article.title,
+          article_image: article.cover_image || '',
+          article_category: article.category || '',
+          article_slug: article.slug || '',
+        });
+      }
+      toast.success('Article sélectionné');
+      await onUpdate();
+      onClose();
+    } catch (error) {
+      toast.error('Erreur lors de la sauvegarde');
+      console.error(error);
+    } finally {
+      setSaving(false);
     }
-    toast.success('Article sélectionné');
-    await onUpdate();
-    onClose();
-    setSaving(false);
   };
 
   const removeArticle = async () => {
