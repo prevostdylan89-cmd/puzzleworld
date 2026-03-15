@@ -11,22 +11,54 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sortBy, setSortBy] = useState('date');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      loadCategories();
+      loadArticles();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (open) loadArticles();
-  }, [open]);
+  }, [search, sortBy, filterCategory]);
+
+  const loadCategories = async () => {
+    try {
+      const cats = await base44.entities.BlogCategory.list('order');
+      setCategories(cats);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const loadArticles = async () => {
     setLoading(true);
-    const data = await base44.entities.BlogArticle.filter({ is_published: true }, '-created_date', 50);
-    setArticles(data);
+    let data = await base44.entities.BlogArticle.filter({ is_published: true }, '-created_date', 100);
+    
+    // Filtre catégorie
+    if (filterCategory !== 'all') {
+      data = data.filter(a => a.category === filterCategory);
+    }
+
+    // Filtre recherche
+    let filtered = data.filter(a =>
+      a.title?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    // Tri
+    if (sortBy === 'category') {
+      filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+    }
+
+    setArticles(filtered);
     setLoading(false);
   };
 
-  const filtered = articles.filter(a =>
-    a.title?.toLowerCase().includes(search.toLowerCase()) ||
-    a.category?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = articles;
 
   const selectArticle = async (article) => {
     setSaving(true);
@@ -77,7 +109,7 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
           <DialogTitle className="text-white">Sélectionner un article — Position {position}</DialogTitle>
         </DialogHeader>
 
-        <div className="relative mb-4">
+        <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
           <Input
             value={search}
@@ -85,6 +117,33 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
             placeholder="Rechercher un article..."
             className="pl-10 bg-white/5 border-white/20 text-white"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label className="text-xs text-white/60 block mb-1.5">Catégorie</label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+            >
+              <option value="all">Toutes les catégories</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.name}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-white/60 block mb-1.5">Trier par</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+            >
+              <option value="date">Plus récent</option>
+              <option value="category">Catégorie (A-Z)</option>
+            </select>
+          </div>
         </div>
 
         {currentArticle && (
