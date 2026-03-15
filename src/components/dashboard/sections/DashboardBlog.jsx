@@ -87,11 +87,11 @@ export default function DashboardBlog() {
     setPuzzleSearch('');
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isPublished) => {
     if (!form.title || !form.content) { toast.error('Titre et contenu requis'); return; }
     setSaving(true);
     try {
-      const data = { ...form, slug: form.slug || generateSlug(form.title) };
+      const data = { ...form, is_published: isPublished, slug: form.slug || generateSlug(form.title) };
       if (editingId) {
         await base44.entities.BlogArticle.update(editingId, data);
         toast.success('Article modifié');
