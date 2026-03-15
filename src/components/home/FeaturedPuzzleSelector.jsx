@@ -12,59 +12,90 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState('likes'); // 'likes', 'category', 'pieces'
   const [filterCategory, setFilterCategory] = useState('all');
+  const [filterPieces, setFilterPieces] = useState('all');
   const [categories, setCategories] = useState([]);
+  const [piecesOptions, setPiecesOptions] = useState([]);
+  const [allPuzzlesData, setAllPuzzlesData] = useState([]);
 
   useEffect(() => {
     if (open) {
-      loadCategories();
-      loadPuzzles();
+      loadAllData();
     }
-  }, [open, searchQuery, sortBy, filterCategory]);
+  }, [open]);
 
-  const loadCategories = async () => {
-    try {
-      const allPuzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 500);
-      const uniqueCats = [...new Set(allPuzzles.map(p => p.category).filter(Boolean))].sort();
-      setCategories(uniqueCats.map(name => ({ id: name, name })));
-    } catch (error) {
-      console.error('Error loading categories:', error);
+  useEffect(() => {
+    if (open) {
+      filterAndSortPuzzles();
     }
-  };
+  }, [searchQuery, sortBy, filterCategory, filterPieces, allPuzzlesData]);
 
-  const loadPuzzles = async () => {
+  const loadAllData = async () => {
     setIsLoading(true);
     try {
-      const allPuzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 100);
+      const all = await base44.entities.PuzzleCatalog.list('-total_likes', 1000);
+      setAllPuzzlesData(all);
+
+      // Extract unique categories
+      const uniqueCats = [...new Set(all.map(p => p.category).filter(Boolean))].sort();
+      setCategories(uniqueCats.map(name => ({ id: name, name })));
+
+      // Extract unique piece counts and group them
+      const pieceCounts = [...new Set(all.map(p => p.piece_count).filter(n => n))].sort((a, b) => a - b);
+      const grouped = [];
+      if (pieceCounts.length > 0) {
+        grouped.push({ value: `0-500`, label: '0-500 pcs' });
+        grouped.push({ value: `500-1000`, label: '500-1000 pcs' });
+        grouped.push({ value: `1000-3000`, label: '1000-3000 pcs' });
+        grouped.push({ value: `3000+`, label: '3000+ pcs' });
+      }
+      setPiecesOptions(grouped);
       
-      let filtered = allPuzzles;
-
-      // Filtre par catégorie
-      if (filterCategory !== 'all') {
-        filtered = filtered.filter(p => p.category === filterCategory);
-      }
-
-      // Filtre par recherche
-      if (searchQuery) {
-        filtered = filtered.filter(p => 
-          p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      // Tri
-      if (sortBy === 'category') {
-        filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
-      } else if (sortBy === 'pieces') {
-        filtered.sort((a, b) => (a.piece_count || 0) - (b.piece_count || 0));
-      }
-
-      setPuzzles(filtered);
+      filterAndSortPuzzles();
     } catch (error) {
       console.error('Error loading puzzles:', error);
       toast.error('Erreur lors du chargement');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const filterAndSortPuzzles = () => {
+    let filtered = allPuzzlesData;
+
+    // Filtre par catégorie
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === filterCategory);
+    }
+
+    // Filtre par pièces
+    if (filterPieces !== 'all') {
+      if (filterPieces === '0-500') {
+        filtered = filtered.filter(p => (p.piece_count || 0) >= 0 && (p.piece_count || 0) <= 500);
+      } else if (filterPieces === '500-1000') {
+        filtered = filtered.filter(p => (p.piece_count || 0) > 500 && (p.piece_count || 0) <= 1000);
+      } else if (filterPieces === '1000-3000') {
+        filtered = filtered.filter(p => (p.piece_count || 0) > 1000 && (p.piece_count || 0) <= 3000);
+      } else if (filterPieces === '3000+') {
+        filtered = filtered.filter(p => (p.piece_count || 0) > 3000);
+      }
+    }
+
+    // Filtre par recherche
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Tri
+    if (sortBy === 'category') {
+      filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+    } else if (sortBy === 'pieces') {
+      filtered.sort((a, b) => (a.piece_count || 0) - (b.piece_count || 0));
+    }
+
+    setPuzzles(filtered);
   };
 
   const handleSelectPuzzle = async (puzzle) => {
@@ -115,33 +146,46 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-white/60 block mb-1.5">Catégorie</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
-              >
-                <option value="all">Toutes les catégories</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.name || cat}>{cat.name || cat}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-white/60 block mb-1.5">Trier par</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
-              >
-                <option value="likes">Les plus aimés</option>
-                <option value="category">Catégorie (A-Z)</option>
-                <option value="pieces">Nombre de pièces</option>
-              </select>
-            </div>
-          </div>
+          <div className="grid grid-cols-3 gap-3">
+             <div>
+               <label className="text-xs text-white/60 block mb-1.5">Catégorie</label>
+               <select
+                 value={filterCategory}
+                 onChange={(e) => setFilterCategory(e.target.value)}
+                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+               >
+                 <option value="all">Toutes</option>
+                 {categories.map(cat => (
+                   <option key={cat.id} value={cat.name}>{cat.name}</option>
+                 ))}
+               </select>
+             </div>
+             <div>
+               <label className="text-xs text-white/60 block mb-1.5">Nombre de pièces</label>
+               <select
+                 value={filterPieces}
+                 onChange={(e) => setFilterPieces(e.target.value)}
+                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+               >
+                 <option value="all">Tous</option>
+                 {piecesOptions.map(opt => (
+                   <option key={opt.value} value={opt.value}>{opt.label}</option>
+                 ))}
+               </select>
+             </div>
+             <div>
+               <label className="text-xs text-white/60 block mb-1.5">Trier par</label>
+               <select
+                 value={sortBy}
+                 onChange={(e) => setSortBy(e.target.value)}
+                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+               >
+                 <option value="likes">Les plus aimés</option>
+                 <option value="category">Catégorie</option>
+                 <option value="pieces">Pièces (asc)</option>
+               </select>
+             </div>
+           </div>
 
           <div className="max-h-[50vh] overflow-y-auto space-y-2">
             {isLoading ? (
