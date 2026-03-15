@@ -43,6 +43,20 @@ export default function Friends() {
   }, [selectedFriend, user]);
 
   useEffect(() => {
+    if (user) {
+      loadUnreadCount(user);
+      unreadIntervalRef.current = setInterval(() => loadUnreadCount(user), 5000);
+      return () => clearInterval(unreadIntervalRef.current);
+    }
+  }, [user]);
+
+  const loadUnreadCount = async (currentUser) => {
+    const unreadMsgs = await base44.entities.DirectMessage.filter({ receiver_email: currentUser.email, is_read: false });
+    const uniqueConvos = new Set(unreadMsgs.map(m => m.conversation_id));
+    setUnreadConversationsCount(uniqueConvos.size);
+  };
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
