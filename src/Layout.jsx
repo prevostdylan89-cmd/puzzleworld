@@ -84,6 +84,7 @@ function LayoutContent({ children, currentPageName }) {
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
     { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: 'Blog', icon: BookOpen, page: 'Blog' },
   ];
 
   const adminNavItems = user?.role === 'admin' 
