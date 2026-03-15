@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { BookOpen, X, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
 
 export default function ArticleModal({ open, onClose, article }) {
   const navigate = useNavigate();
+  const [fullArticle, setFullArticle] = useState(null);
   
   if (!article) return null;
+
+  useEffect(() => {
+    if (open && article?.id && !fullArticle) {
+      base44.entities.FeaturedArticle.filter({ id: article.id }).then(results => {
+        if (results[0]?.article_id) {
+          base44.entities.BlogArticle.filter({ id: results[0].article_id }).then(articles => {
+            if (articles[0]) setFullArticle(articles[0]);
+          });
+        }
+      });
+    }
+  }, [open, article?.id]);
 
   const handleReadFull = () => {
     onClose();
@@ -17,9 +31,10 @@ export default function ArticleModal({ open, onClose, article }) {
 
   // Extrait le début du contenu (première 400 caractères ou premier paragraphe)
   const getPreview = () => {
-    if (!article.content) return article.subtitle || '';
+    const content = fullArticle?.content || article.subtitle || '';
+    if (!content) return '';
     // Enlève les tags HTML et nettoie
-    const text = article.content
+    const text = String(content)
       .replace(/<[^>]*>/g, '') // Enlève les tags HTML
       .replace(/&nbsp;/g, ' ')
       .replace(/&quot;/g, '"')
