@@ -131,7 +131,7 @@ function LayoutContent({ children, currentPageName }) {
       setUnreadMessagesCount(uniqueConvos.size);
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 10000);
+    const interval = setInterval(fetchUnread, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
