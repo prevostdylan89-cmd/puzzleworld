@@ -606,8 +606,8 @@ function LayoutContent({ children, currentPageName }) {
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                  <Puzzle className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                  <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/bcb5f5e35_V10.jpg" alt="PuzzleWorld" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-bold text-lg text-white">PuzzleWorld</span>
               </div>
