@@ -183,7 +183,7 @@ export default function Friends() {
         <p className="text-white/60">Gérez vos amis et vos conversations</p>
       </motion.div>
 
-      <Tabs defaultValue={defaultTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-white/5 border border-white/10 flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="friends" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
             Amis ({friends.length})
