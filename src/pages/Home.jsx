@@ -27,6 +27,7 @@ export default function Home() {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [topPuzzles, setTopPuzzles] = useState([]);
   const [events, setEvents] = useState([]);
+  const [featuredArticles, setFeaturedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eventsInMaintenance, setEventsInMaintenance] = useState(false);
 

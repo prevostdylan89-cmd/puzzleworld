@@ -10,9 +10,11 @@ import { toast } from 'sonner';
 export default function DashboardHome() {
   const [featuredPuzzles, setFeaturedPuzzles] = useState([]);
   const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [featuredArticles, setFeaturedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPuzzleSelector, setShowPuzzleSelector] = useState(false);
   const [showEventSelector, setShowEventSelector] = useState(false);
+  const [showArticleSelector, setShowArticleSelector] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
 
   useEffect(() => {
