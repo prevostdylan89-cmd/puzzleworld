@@ -135,6 +135,7 @@ function ArticleView({ article, onBack }) {
 
 export default function Blog() {
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [user, setUser] = useState(null);
@@ -144,7 +145,6 @@ export default function Blog() {
     base44.auth.me().then(setUser).catch(() => {});
     load();
 
-    // Check URL for direct article slug
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('article');
     if (slug) {
@@ -156,14 +156,26 @@ export default function Blog() {
 
   const load = async () => {
     try {
-      const data = await base44.entities.BlogArticle.filter({ is_published: true }, '-created_date');
+      const [data, cats] = await Promise.all([
+        base44.entities.BlogArticle.filter({ is_published: true }, '-created_date'),
+        base44.entities.BlogCategory.list('order'),
+      ]);
       setArticles(data);
+      setCategories(cats);
     } catch {}
     finally { setLoading(false); }
   };
 
-  const categories = ['all', ...new Set(articles.map(a => a.category).filter(Boolean))];
-  const filtered = filterCategory === 'all' ? articles : articles.filter(a => a.category === filterCategory);
+  // Sort articles by category order, then date
+  const featuredCat = categories.find(c => c.is_featured);
+  const sortedArticles = [...articles].sort((a, b) => {
+    const ai = categories.findIndex(c => c.name === a.category);
+    const bi = categories.findIndex(c => c.name === b.category);
+    if (ai !== bi) return ai - bi;
+    return 0;
+  });
+
+  const filtered = filterCategory === 'all' ? sortedArticles : sortedArticles.filter(a => a.category === filterCategory);
 
   if (selectedArticle) {
     return (
