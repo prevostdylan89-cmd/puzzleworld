@@ -37,8 +37,8 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
       const all = await base44.entities.PuzzleCatalog.list('-total_likes', 1000);
       setAllPuzzlesData(all);
 
-      // Extract unique categories
-      const uniqueCats = [...new Set(all.map(p => p.category).filter(Boolean))].sort();
+      // Extract unique categories from category_tag
+      const uniqueCats = [...new Set(all.map(p => p.category_tag).filter(Boolean))].sort();
       setCategories(uniqueCats.map(name => ({ id: name, name })));
 
       // Extract unique brands
@@ -70,7 +70,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
 
     // Filtre par catégorie
     if (filterCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === filterCategory);
+      filtered = filtered.filter(p => p.category_tag === filterCategory);
     }
 
     // Filtre par marque
@@ -101,7 +101,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
 
     // Tri
     if (sortBy === 'category') {
-      filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+      filtered.sort((a, b) => (a.category_tag || '').localeCompare(b.category_tag || ''));
     } else if (sortBy === 'pieces') {
       filtered.sort((a, b) => (a.piece_count || 0) - (b.piece_count || 0));
     } else if (sortBy === 'brand') {
@@ -165,7 +165,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                <select
                  value={filterCategory}
                  onChange={(e) => setFilterCategory(e.target.value)}
-                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+                 className="w-full bg-[#000019] border border-white/10 text-white text-sm rounded px-3 py-2"
                >
                  <option value="all">Toutes</option>
                  {categories.map(cat => (
@@ -178,7 +178,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                <select
                  value={filterBrand}
                  onChange={(e) => setFilterBrand(e.target.value)}
-                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+                 className="w-full bg-[#000019] border border-white/10 text-white text-sm rounded px-3 py-2"
                >
                  <option value="all">Toutes</option>
                  {brands.map(brand => (
@@ -191,7 +191,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                <select
                  value={filterPieces}
                  onChange={(e) => setFilterPieces(e.target.value)}
-                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+                 className="w-full bg-[#000019] border border-white/10 text-white text-sm rounded px-3 py-2"
                >
                  <option value="all">Tous</option>
                  {piecesOptions.map(opt => (
@@ -204,7 +204,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                <select
                  value={sortBy}
                  onChange={(e) => setSortBy(e.target.value)}
-                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+                 className="w-full bg-[#000019] border border-white/10 text-white text-sm rounded px-3 py-2"
                >
                  <option value="likes">Les plus aimés</option>
                  <option value="category">Catégorie</option>
