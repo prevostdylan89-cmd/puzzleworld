@@ -37,7 +37,7 @@ export default function Friends() {
   useEffect(() => {
     if (selectedFriend && user) {
       loadMessages(selectedFriend.email);
-      intervalRef.current = setInterval(() => loadMessages(selectedFriend.email), 3000);
+      intervalRef.current = setInterval(() => loadMessages(selectedFriend.email), 8000);
       return () => clearInterval(intervalRef.current);
     }
   }, [selectedFriend, user]);
@@ -45,7 +45,7 @@ export default function Friends() {
   useEffect(() => {
     if (user) {
       loadUnreadCount(user);
-      unreadIntervalRef.current = setInterval(() => loadUnreadCount(user), 5000);
+      unreadIntervalRef.current = setInterval(() => loadUnreadCount(user), 30000);
       return () => clearInterval(unreadIntervalRef.current);
     }
   }, [user]);
