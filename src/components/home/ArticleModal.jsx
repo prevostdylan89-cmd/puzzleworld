@@ -7,10 +7,10 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 
 export default function ArticleModal({ open, onClose, article, articleId }) {
+  if (!article) return null;
+  
   const navigate = useNavigate();
   const [fullArticle, setFullArticle] = useState(null);
-  
-  if (!article) return null;
 
   useEffect(() => {
     if (open && articleId) {
