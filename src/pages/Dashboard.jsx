@@ -26,6 +26,7 @@ const SECTIONS = [
   { id: 'data', label: 'Données', icon: BarChart3, component: DashboardData },
   { id: 'profile', label: 'Utilisateurs', icon: User, component: DashboardProfile },
   { id: 'visibility', label: 'Pages', icon: Eye, component: DashboardPageVisibility },
+  { id: 'blog', label: 'Blog', icon: BookOpen, component: DashboardBlog },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
 ];
 
