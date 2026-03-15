@@ -41,19 +41,14 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
 
   const handleSelectPuzzle = async (puzzle) => {
     try {
-      // Check if already exists at this position
-      const existing = await base44.entities.FeaturedPuzzle.filter({ position });
-      
-      if (existing.length > 0) {
-        // Update existing
-        await base44.entities.FeaturedPuzzle.update(existing[0].id, {
+      if (currentPuzzle) {
+        await base44.entities.FeaturedPuzzle.update(currentPuzzle.id, {
           puzzle_catalog_id: puzzle.id,
           puzzle_asin: puzzle.asin,
           puzzle_title: puzzle.title,
           puzzle_image: puzzle.image_hd
         });
       } else {
-        // Create new
         await base44.entities.FeaturedPuzzle.create({
           puzzle_catalog_id: puzzle.id,
           puzzle_asin: puzzle.asin,

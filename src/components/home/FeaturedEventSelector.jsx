@@ -41,10 +41,8 @@ export default function FeaturedEventSelector({ open, onClose, position, current
 
   const handleSelectEvent = async (event) => {
     try {
-      const existing = await base44.entities.FeaturedEvent.filter({ position });
-      
-      if (existing.length > 0) {
-        await base44.entities.FeaturedEvent.update(existing[0].id, {
+      if (currentEvent) {
+        await base44.entities.FeaturedEvent.update(currentEvent.id, {
           event_id: event.id,
           event_title: event.title,
           event_image: event.image,
