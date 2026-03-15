@@ -10,27 +10,54 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
   const [searchQuery, setSearchQuery] = useState('');
   const [puzzles, setPuzzles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sortBy, setSortBy] = useState('likes'); // 'likes', 'category', 'pieces'
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     if (open) {
+      loadCategories();
       loadPuzzles();
     }
-  }, [open, searchQuery]);
+  }, [open, searchQuery, sortBy, filterCategory]);
+
+  const loadCategories = async () => {
+    try {
+      const cats = await base44.entities.PuzzleCategory.list('order');
+      setCategories(cats);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const loadPuzzles = async () => {
     setIsLoading(true);
     try {
-      const allPuzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 50);
+      const allPuzzles = await base44.entities.PuzzleCatalog.list('-total_likes', 100);
       
+      let filtered = allPuzzles;
+
+      // Filtre par catégorie
+      if (filterCategory !== 'all') {
+        filtered = filtered.filter(p => p.category === filterCategory);
+      }
+
+      // Filtre par recherche
       if (searchQuery) {
-        const filtered = allPuzzles.filter(p => 
+        filtered = filtered.filter(p => 
           p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
         );
-        setPuzzles(filtered);
-      } else {
-        setPuzzles(allPuzzles);
       }
+
+      // Tri
+      if (sortBy === 'category') {
+        filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+      } else if (sortBy === 'pieces') {
+        filtered.sort((a, b) => (a.piece_count || 0) - (b.piece_count || 0));
+      }
+
+      setPuzzles(filtered);
     } catch (error) {
       console.error('Error loading puzzles:', error);
       toast.error('Erreur lors du chargement');
@@ -85,6 +112,34 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
               placeholder="Rechercher un puzzle..."
               className="pl-10 bg-white/5 border-white/10 text-white"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-white/60 block mb-1.5">Catégorie</label>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+              >
+                <option value="all">Toutes les catégories</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-white/60 block mb-1.5">Trier par</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+              >
+                <option value="likes">Les plus aimés</option>
+                <option value="category">Catégorie (A-Z)</option>
+                <option value="pieces">Nombre de pièces</option>
+              </select>
+            </div>
           </div>
 
           <div className="max-h-[50vh] overflow-y-auto space-y-2">
