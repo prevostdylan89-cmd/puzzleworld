@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 
-const THRESHOLD = 80;
+const THRESHOLD = 120;
 
 export default function PullToRefresh({ children }) {
   const [pullDistance, setPullDistance] = useState(0);
