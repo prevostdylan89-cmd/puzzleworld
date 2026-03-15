@@ -30,10 +30,8 @@ export default function FeaturedArticleSelector({ open, onClose, position, curre
 
   const selectArticle = async (article) => {
     setSaving(true);
-    // Check if position already exists
-    const existing = await base44.entities.FeaturedArticle.filter({ position });
-    if (existing.length > 0) {
-      await base44.entities.FeaturedArticle.update(existing[0].id, {
+    if (currentArticle) {
+      await base44.entities.FeaturedArticle.update(currentArticle.id, {
         article_id: article.id,
         article_title: article.title,
         article_image: article.cover_image || '',
