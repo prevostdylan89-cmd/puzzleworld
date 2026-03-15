@@ -204,8 +204,13 @@ export default function Friends() {
           <TabsTrigger value="friends" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
             Amis ({friends.length})
           </TabsTrigger>
-          <TabsTrigger value="messages" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
+          <TabsTrigger value="messages" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm relative">
             Messages
+            {unreadConversationsCount > 0 && (
+              <span className="ml-1.5 bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {unreadConversationsCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="requests" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
             Reçues ({pendingRequests.length})
