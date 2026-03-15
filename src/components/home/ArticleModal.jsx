@@ -2,11 +2,25 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { BookOpen, X, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 export default function ArticleModal({ open, onClose, article }) {
+  const navigate = useNavigate();
+  
   if (!article) return null;
+
+  const handleReadFull = () => {
+    onClose();
+    navigate(`${createPageUrl('Blog')}?article=${article.article_slug}`);
+  };
+
+  // Extrait le début du contenu (première 300 caractères ou premier paragraphe)
+  const getPreview = () => {
+    if (!article.content) return '';
+    const text = article.content.replace(/<[^>]*>/g, ''); // Enlève les tags HTML
+    return text.substring(0, 300) + (text.length > 300 ? '...' : '');
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -43,9 +57,9 @@ export default function ArticleModal({ open, onClose, article }) {
             </div>
           )}
 
-          <p className="text-white/70 text-sm leading-relaxed">
-            Cliquez sur "Lire l'article complet" pour accéder au contenu détaillé sur la page blog.
-          </p>
+          <div className="text-white/70 text-sm leading-relaxed">
+            {getPreview()}
+          </div>
 
           <div className="flex gap-3 pt-4">
             <Button
@@ -55,12 +69,13 @@ export default function ArticleModal({ open, onClose, article }) {
             >
               Fermer
             </Button>
-            <Link to={createPageUrl('Blog')} className="flex-1">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-                Lire l'article complet
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button 
+              onClick={handleReadFull}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+            >
+              Lire l'article complet
+              <ExternalLink className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </DialogContent>
