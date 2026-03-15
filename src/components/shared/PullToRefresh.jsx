@@ -1,39 +1,63 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 
-const THRESHOLD = 70; // px to pull before triggering
+const THRESHOLD = 80;
 
 export default function PullToRefresh({ children }) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const startYRef = useRef(null);
   const isPullingRef = useRef(false);
+  const pullDistanceRef = useRef(0);
+  const isRefreshingRef = useRef(false);
 
   useEffect(() => {
     const el = document.getElementById('pull-scroll-container');
     if (!el) return;
 
     const onTouchStart = (e) => {
-      if (el.scrollTop === 0) {
+      // Only allow pull-to-refresh if we're truly at the very top
+      if (el.scrollTop <= 0 && !isRefreshingRef.current) {
         startYRef.current = e.touches[0].clientY;
         isPullingRef.current = true;
+      } else {
+        isPullingRef.current = false;
+        startYRef.current = null;
       }
     };
 
     const onTouchMove = (e) => {
       if (!isPullingRef.current || startYRef.current === null) return;
-      const dy = e.touches[0].clientY - startYRef.current;
-      if (dy > 0 && el.scrollTop === 0) {
-        e.preventDefault();
-        setPullDistance(Math.min(dy * 0.5, THRESHOLD + 20));
-      } else {
+
+      // If user scrolled down since touch start, cancel pull
+      if (el.scrollTop > 0) {
         isPullingRef.current = false;
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        return;
+      }
+
+      const dy = e.touches[0].clientY - startYRef.current;
+
+      if (dy > 0) {
+        e.preventDefault();
+        const dist = Math.min(dy * 0.45, THRESHOLD + 20);
+        pullDistanceRef.current = dist;
+        setPullDistance(dist);
+      } else {
+        // User is scrolling up (negative dy) — cancel
+        isPullingRef.current = false;
+        pullDistanceRef.current = 0;
         setPullDistance(0);
       }
     };
 
     const onTouchEnd = () => {
-      if (pullDistance >= THRESHOLD && !isRefreshing) {
+      if (!isPullingRef.current) return;
+
+      if (pullDistanceRef.current >= THRESHOLD && !isRefreshingRef.current) {
+        isRefreshingRef.current = true;
         setIsRefreshing(true);
         setPullDistance(THRESHOLD);
         setTimeout(() => {
@@ -42,20 +66,24 @@ export default function PullToRefresh({ children }) {
       } else {
         setPullDistance(0);
       }
+
       startYRef.current = null;
       isPullingRef.current = false;
+      pullDistanceRef.current = 0;
     };
 
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, [pullDistance, isRefreshing]);
+  }, []); // Empty deps — use refs to avoid stale closures
 
   const progress = Math.min(pullDistance / THRESHOLD, 1);
   const triggered = pullDistance >= THRESHOLD;
