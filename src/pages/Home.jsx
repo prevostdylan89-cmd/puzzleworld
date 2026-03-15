@@ -480,6 +480,61 @@ export default function Home() {
           )}
         </section>
 
+        {/* Top Articles Blog */}
+        {featuredArticles.length > 0 && (
+          <section className="px-8 py-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Articles du Blog</h2>
+                  <p className="text-white/40 text-xs">À lire absolument</p>
+                </div>
+              </div>
+              <Link to={createPageUrl('Blog')}>
+                <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 gap-1">
+                  Voir tout <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+            <motion.div
+              variants={container}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              className="grid grid-cols-5 gap-4"
+            >
+              {featuredArticles.map((article) => (
+                <motion.div
+                  key={article.id}
+                  variants={item}
+                  onClick={() => { window.location.href = createPageUrl('Blog'); }}
+                  className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-200 border border-white/[0.06] hover:border-blue-500/30"
+                >
+                  <div className="aspect-[4/3] overflow-hidden">
+                    {article.article_image ? (
+                      <img src={article.article_image} alt={article.article_title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                        <BookOpen className="w-10 h-10 text-white/20" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    {article.article_category && (
+                      <span className="text-blue-300 text-[10px] font-semibold uppercase tracking-wide">{article.article_category}</span>
+                    )}
+                    <p className="text-white font-bold text-sm line-clamp-2 mt-1">{article.article_title}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </section>
+        )}
+
         {/* Événements */}
         <section className="px-8 py-10">
           <div className="flex items-center justify-between mb-6">
