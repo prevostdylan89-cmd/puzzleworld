@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, BarChart3, Gamepad2, Eye } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, BarChart3, Gamepad2, Eye, BookOpen } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
