@@ -207,16 +207,21 @@ export default function Blog() {
       </motion.div>
 
       {/* Category filter */}
-      {categories.length > 1 && (
+      {categories.length > 0 && (
         <div className="flex flex-wrap gap-1.5 lg:gap-2 justify-center mb-5 lg:mb-8">
+          <button onClick={() => setFilterCategory('all')}
+            className={`px-3 py-1 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all ${
+              filterCategory === 'all' ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}>
+            Tous
+          </button>
           {categories.map(cat => (
-            <button key={cat} onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all ${
-                filterCategory === cat
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+            <button key={cat.id} onClick={() => setFilterCategory(cat.name)}
+              className={`px-3 py-1 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-medium transition-all flex items-center gap-1 ${
+                filterCategory === cat.name ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
               }`}>
-              {cat === 'all' ? 'Tous' : cat}
+              {cat.name}
+              {cat.is_featured && <span className="text-yellow-400 text-[10px]">⭐</span>}
             </button>
           ))}
         </div>
