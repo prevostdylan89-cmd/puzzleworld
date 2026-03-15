@@ -285,7 +285,10 @@ export default function Friends() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-white font-medium">{targetUser.full_name || targetUser.email}</p>
+                  <p className="text-white font-medium">{targetUser.display_name || targetUser.full_name || targetUser.email}</p>
+                  {targetUser.friend_code && (
+                    <p className="text-orange-400/70 text-xs">{targetUser.friend_code}</p>
+                  )}
                   <p className="text-white/40 text-sm">{targetUser.email}</p>
                 </div>
               </div>
