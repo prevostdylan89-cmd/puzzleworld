@@ -462,6 +462,11 @@ function LayoutContent({ children, currentPageName }) {
                     >
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium">{item.name}</span>
+                      {item.page === 'Friends' && unreadMessagesCount > 0 && (
+                        <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {unreadMessagesCount}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
