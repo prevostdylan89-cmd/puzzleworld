@@ -31,15 +31,17 @@ export default function PullToRefresh({ children }) {
     };
 
     const onTouchStart = (e) => {
-      // Only allow pull-to-refresh if we're truly at the very top and not inside a scrollable child
+      // Only allow pull-to-refresh if scroll container is at very top AND not inside a scrollable child
       if (el.scrollTop <= 0 && !isRefreshingRef.current && !isInsideScrollableChild(e.target)) {
         startYRef.current = e.touches[0].clientY;
-        isPullingRef.current = true;
+        isPullingRef.current = false; // Don't start pull yet, wait for significant downward movement
       } else {
-        isPullingRef.current = false;
         startYRef.current = null;
+        isPullingRef.current = false;
       }
     };
+
+    const MIN_PULL_START = 15; // Minimum px before activating pull mode
 
     const onTouchMove = (e) => {
       if (!isPullingRef.current || startYRef.current === null) return;
