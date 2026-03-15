@@ -16,6 +16,7 @@ import {
   Sparkles,
   Settings,
   MessageCircle,
+  BookOpen,
   Menu,
   X as XIcon,
   Calendar,
