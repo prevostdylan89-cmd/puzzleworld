@@ -14,6 +14,7 @@ import DashboardData from '@/components/dashboard/sections/DashboardData';
 import DashboardOnline from '@/components/dashboard/sections/DashboardOnline';
 import DashboardPendingPuzzles from '@/components/dashboard/sections/DashboardPendingPuzzles';
 import DashboardPageVisibility from '@/components/dashboard/sections/DashboardPageVisibility';
+import DashboardBlog from '@/components/dashboard/sections/DashboardBlog';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
