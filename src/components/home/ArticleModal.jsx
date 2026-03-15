@@ -15,11 +15,16 @@ export default function ArticleModal({ open, onClose, article }) {
     navigate(`${createPageUrl('Blog')}?article=${article.article_slug}`);
   };
 
-  // Extrait le début du contenu (première 300 caractères ou premier paragraphe)
+  // Extrait le début du contenu (première 400 caractères ou premier paragraphe)
   const getPreview = () => {
-    if (!article.content) return '';
-    const text = article.content.replace(/<[^>]*>/g, ''); // Enlève les tags HTML
-    return text.substring(0, 300) + (text.length > 300 ? '...' : '');
+    if (!article.content) return article.subtitle || '';
+    // Enlève les tags HTML et nettoie
+    const text = article.content
+      .replace(/<[^>]*>/g, '') // Enlève les tags HTML
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .trim();
+    return text.substring(0, 400) + (text.length > 400 ? '...' : '');
   };
 
   return (
@@ -50,16 +55,18 @@ export default function ArticleModal({ open, onClose, article }) {
           )}
 
           {article.article_category && (
-            <div className="flex items-center gap-2">
-              <span className="text-blue-300 text-sm font-semibold uppercase tracking-wide">
-                {article.article_category}
-              </span>
-            </div>
-          )}
+             <div className="flex items-center gap-2">
+               <span className="text-blue-300 text-sm font-semibold uppercase tracking-wide">
+                 {article.article_category}
+               </span>
+             </div>
+           )}
 
-          <div className="text-white/70 text-sm leading-relaxed">
-            {getPreview()}
-          </div>
+           <div className="bg-white/5 border border-white/10 rounded-lg p-4 min-h-[120px]">
+             <p className="text-white/80 text-sm leading-relaxed">
+               {getPreview()}
+             </p>
+           </div>
 
           <div className="flex gap-3 pt-4">
             <Button
