@@ -257,6 +257,45 @@ export default function Friends() {
           )}
         </TabsContent>
 
+        <TabsContent value="sent" className="space-y-4">
+          {sentRequests.length === 0 ? (
+            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+              <UserPlus className="w-12 h-12 text-white/20 mx-auto mb-4" />
+              <p className="text-white/60">Aucune demande envoyée en attente</p>
+            </div>
+          ) : (
+            sentRequests.map((request) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+                      {request.addressee_name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-white font-medium">{request.addressee_name}</p>
+                    <p className="text-white/40 text-sm">{request.addressee_email}</p>
+                    <p className="text-orange-400/70 text-xs">En attente de réponse</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => declineRequest(request.id)}
+                >
+                  <UserX className="w-4 h-4 mr-1" />
+                  Annuler
+                </Button>
+              </motion.div>
+            ))
+          )}
+        </TabsContent>
+
         <TabsContent value="find" className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
