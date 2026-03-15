@@ -13,8 +13,10 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
   const [sortBy, setSortBy] = useState('likes'); // 'likes', 'category', 'pieces'
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterPieces, setFilterPieces] = useState('all');
+  const [filterBrand, setFilterBrand] = useState('all');
   const [categories, setCategories] = useState([]);
   const [piecesOptions, setPiecesOptions] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [allPuzzlesData, setAllPuzzlesData] = useState([]);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
     if (open) {
       filterAndSortPuzzles();
     }
-  }, [searchQuery, sortBy, filterCategory, filterPieces, allPuzzlesData]);
+  }, [searchQuery, sortBy, filterCategory, filterPieces, filterBrand, allPuzzlesData]);
 
   const loadAllData = async () => {
     setIsLoading(true);
@@ -38,6 +40,10 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
       // Extract unique categories
       const uniqueCats = [...new Set(all.map(p => p.category).filter(Boolean))].sort();
       setCategories(uniqueCats.map(name => ({ id: name, name })));
+
+      // Extract unique brands
+      const uniqueBrands = [...new Set(all.map(p => p.brand).filter(Boolean))].sort();
+      setBrands(uniqueBrands.map(name => ({ id: name, name })));
 
       // Extract unique piece counts and group them
       const pieceCounts = [...new Set(all.map(p => p.piece_count).filter(n => n))].sort((a, b) => a - b);
@@ -67,6 +73,11 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
       filtered = filtered.filter(p => p.category === filterCategory);
     }
 
+    // Filtre par marque
+    if (filterBrand !== 'all') {
+      filtered = filtered.filter(p => p.brand === filterBrand);
+    }
+
     // Filtre par pièces
     if (filterPieces !== 'all') {
       if (filterPieces === '0-500') {
@@ -93,6 +104,8 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
       filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
     } else if (sortBy === 'pieces') {
       filtered.sort((a, b) => (a.piece_count || 0) - (b.piece_count || 0));
+    } else if (sortBy === 'brand') {
+      filtered.sort((a, b) => (a.brand || '').localeCompare(b.brand || ''));
     }
 
     setPuzzles(filtered);
@@ -146,7 +159,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
              <div>
                <label className="text-xs text-white/60 block mb-1.5">Catégorie</label>
                <select
@@ -157,6 +170,19 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                  <option value="all">Toutes</option>
                  {categories.map(cat => (
                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                 ))}
+               </select>
+             </div>
+             <div>
+               <label className="text-xs text-white/60 block mb-1.5">Marque</label>
+               <select
+                 value={filterBrand}
+                 onChange={(e) => setFilterBrand(e.target.value)}
+                 className="w-full bg-white/5 border border-white/10 text-white text-sm rounded px-3 py-2"
+               >
+                 <option value="all">Toutes</option>
+                 {brands.map(brand => (
+                   <option key={brand.id} value={brand.name}>{brand.name}</option>
                  ))}
                </select>
              </div>
@@ -182,6 +208,7 @@ export default function FeaturedPuzzleSelector({ open, onClose, position, curren
                >
                  <option value="likes">Les plus aimés</option>
                  <option value="category">Catégorie</option>
+                 <option value="brand">Marque</option>
                  <option value="pieces">Pièces (asc)</option>
                </select>
              </div>
