@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Puzzle, Edit2, Loader2, Calendar } from 'lucide-react';
+import { Puzzle, Edit2, Loader2, Calendar, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FeaturedPuzzleSelector from '@/components/home/FeaturedPuzzleSelector';
 import FeaturedEventSelector from '@/components/home/FeaturedEventSelector';
+import FeaturedArticleSelector from '@/components/home/FeaturedArticleSelector';
 import { toast } from 'sonner';
 
 export default function DashboardHome() {
