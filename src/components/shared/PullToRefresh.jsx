@@ -44,28 +44,37 @@ export default function PullToRefresh({ children }) {
     const MIN_PULL_START = 15; // Minimum px before activating pull mode
 
     const onTouchMove = (e) => {
-      if (!isPullingRef.current || startYRef.current === null) return;
+      if (startYRef.current === null) return;
 
-      // If user scrolled down since touch start, cancel pull
+      // If container scrolled down, cancel everything
       if (el.scrollTop > 0) {
+        isPullingRef.current = false;
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        startYRef.current = null;
+        return;
+      }
+
+      const dy = e.touches[0].clientY - startYRef.current;
+
+      if (dy <= 0) {
+        // Scrolling up — cancel pull
         isPullingRef.current = false;
         pullDistanceRef.current = 0;
         setPullDistance(0);
         return;
       }
 
-      const dy = e.touches[0].clientY - startYRef.current;
+      // Activate pull only after intentional downward gesture
+      if (!isPullingRef.current && dy > MIN_PULL_START) {
+        isPullingRef.current = true;
+      }
 
-      if (dy > 0) {
+      if (isPullingRef.current) {
         e.preventDefault();
-        const dist = Math.min(dy * 0.45, THRESHOLD + 20);
+        const dist = Math.min(dy * 0.4, THRESHOLD + 20);
         pullDistanceRef.current = dist;
         setPullDistance(dist);
-      } else {
-        // User is scrolling up (negative dy) — cancel
-        isPullingRef.current = false;
-        pullDistanceRef.current = 0;
-        setPullDistance(0);
       }
     };
 
