@@ -21,7 +21,7 @@ export default function Friends() {
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [defaultTab, setDefaultTab] = useState('friends');
+  const [activeTab, setActiveTab] = useState('friends');
   const messagesEndRef = useRef(null);
   const intervalRef = useRef(null);
 
