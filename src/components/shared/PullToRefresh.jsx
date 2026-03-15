@@ -16,9 +16,23 @@ export default function PullToRefresh({ children }) {
     const el = document.getElementById('pull-scroll-container');
     if (!el) return;
 
+    const isInsideScrollableChild = (target) => {
+      let node = target;
+      while (node && node !== el) {
+        if (node.scrollTop > 0) return true;
+        const style = window.getComputedStyle(node);
+        const overflow = style.overflow + style.overflowY;
+        if (/(auto|scroll)/.test(overflow) && node.scrollHeight > node.clientHeight) {
+          return true;
+        }
+        node = node.parentElement;
+      }
+      return false;
+    };
+
     const onTouchStart = (e) => {
-      // Only allow pull-to-refresh if we're truly at the very top
-      if (el.scrollTop <= 0 && !isRefreshingRef.current) {
+      // Only allow pull-to-refresh if we're truly at the very top and not inside a scrollable child
+      if (el.scrollTop <= 0 && !isRefreshingRef.current && !isInsideScrollableChild(e.target)) {
         startYRef.current = e.touches[0].clientY;
         isPullingRef.current = true;
       } else {
