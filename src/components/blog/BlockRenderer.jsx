@@ -4,8 +4,49 @@ import { ExternalLink, Link } from 'lucide-react';
 function renderText(text = '') {
   let result = text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/__(.+?)__/g, '<u>$1</u>');
   return <span dangerouslySetInnerHTML={{ __html: result }} />;
+}
+
+const HIGHLIGHT_CLASSES = {
+  yellow: 'bg-yellow-400/30 text-yellow-100',
+  orange: 'bg-orange-400/30 text-orange-100',
+  blue: 'bg-blue-400/30 text-blue-100',
+  green: 'bg-green-400/30 text-green-100',
+  pink: 'bg-pink-400/30 text-pink-100',
+};
+
+const SIZE_CLASSES = {
+  sm: 'text-sm',
+  base: 'text-base lg:text-lg',
+  lg: 'text-lg lg:text-xl',
+  xl: 'text-xl lg:text-2xl',
+  '2xl': 'text-2xl lg:text-3xl',
+};
+
+const FONT_CLASSES = {
+  sans: 'font-sans',
+  serif: 'font-serif',
+  mono: 'font-mono',
+};
+
+const ALIGN_CLASSES = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+  justify: 'text-justify',
+};
+
+function fmtClass(fmt = {}) {
+  return [
+    SIZE_CLASSES[fmt.size || 'base'],
+    FONT_CLASSES[fmt.font || 'sans'],
+    ALIGN_CLASSES[fmt.align || 'left'],
+    fmt.bold ? 'font-bold' : '',
+    fmt.italic ? 'italic' : '',
+    fmt.highlight ? HIGHLIGHT_CLASSES[fmt.highlight] || '' : '',
+  ].filter(Boolean).join(' ');
 }
 
 function HeadingRenderer({ block }) {
