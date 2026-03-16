@@ -27,8 +27,10 @@ function ParagraphRenderer({ block }) {
 function ImageRenderer({ block }) {
   if (!block.url) return null;
   return (
-    <figure className="my-2">
-      <img src={block.url} alt={block.alt || ''} className="w-full rounded-xl object-cover max-h-96" />
+    <figure className="my-2 w-full">
+      <div className="w-full overflow-hidden rounded-xl">
+        <img src={block.url} alt={block.alt || ''} className="w-full h-auto block object-cover" style={{ maxHeight: '400px' }} />
+      </div>
       {block.caption && (
         <figcaption className="text-center text-white/40 text-sm mt-2 italic">{block.caption}</figcaption>
       )}
