@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Clock, Tag, ChevronRight, BookOpen, Plus, ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import BlockRenderer from '@/components/blog/BlockRenderer';
 
 const CATEGORY_COLORS = {
   Conseils: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
