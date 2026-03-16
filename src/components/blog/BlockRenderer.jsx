@@ -58,8 +58,10 @@ function HeadingRenderer({ block }) {
 }
 
 function ParagraphRenderer({ block }) {
+  const extra = fmtClass(block.fmt);
+  const highlight = block.fmt?.highlight ? HIGHLIGHT_CLASSES[block.fmt.highlight] : '';
   return (
-    <p className="text-white/80 text-base lg:text-lg leading-relaxed">
+    <p className={`text-white/80 leading-relaxed ${extra} ${highlight ? 'px-2 py-1 rounded' : ''}`}>
       {renderText(block.text)}
     </p>
   );
