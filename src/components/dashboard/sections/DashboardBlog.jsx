@@ -426,7 +426,7 @@ export default function DashboardBlog() {
   };
 
   const handleSave = async (isPublished) => {
-    if (!form.title || !form.content) { toast.error('Titre et contenu requis'); return; }
+    if (!form.title) { toast.error('Le titre est requis'); return; }
     setSaving(true);
     const data = { ...form, is_published: isPublished, slug: form.slug || generateSlug(form.title) };
     if (editingId) {
