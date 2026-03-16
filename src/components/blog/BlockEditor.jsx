@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { base44 } from '@/api/base44Client';
 import {
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ImageCropModal from './ImageCropModal';
+import TextFormatToolbar from './TextFormatToolbar';
 
 const BLOCK_TYPES = [
   { type: 'heading', label: 'Titre (H2/H3)', icon: Type },
