@@ -164,9 +164,10 @@ function LinkRenderer({ block }) {
 }
 
 function QuoteRenderer({ block }) {
+  const extra = fmtClass(block.fmt);
   return (
     <blockquote className="border-l-4 border-orange-500 pl-6 my-2">
-      <p className="text-white/70 text-lg italic leading-relaxed">{block.text}</p>
+      <p className={`text-white/70 italic leading-relaxed ${extra}`}>{block.text}</p>
     </blockquote>
   );
 }
