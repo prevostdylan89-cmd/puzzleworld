@@ -27,16 +27,16 @@ export default function ArticleModal({ open, onClose, article, articleId }) {
     navigate(`${createPageUrl('Blog')}?article=${article.article_slug}`);
   };
 
-  // Extrait le début du contenu (première 400 caractères ou premier paragraphe)
   const getPreview = () => {
+    // Essaie d'abord les blocs (nouveau format)
+    if (fullArticle?.blocks?.length) {
+      const paragraphs = fullArticle.blocks.filter(b => b.type === 'paragraph' && b.text);
+      const text = paragraphs.slice(0, 2).map(b => b.text).join(' ');
+      return text.substring(0, 400) + (text.length > 400 ? '...' : '');
+    }
     const content = fullArticle?.content || article.subtitle || '';
     if (!content) return '';
-    // Enlève les tags HTML et nettoie
-    const text = String(content)
-      .replace(/<[^>]*>/g, '') // Enlève les tags HTML
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&quot;/g, '"')
-      .trim();
+    const text = String(content).replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').trim();
     return text.substring(0, 400) + (text.length > 400 ? '...' : '');
   };
 
