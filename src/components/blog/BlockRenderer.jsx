@@ -2,7 +2,6 @@ import React from 'react';
 import { ExternalLink, Link } from 'lucide-react';
 
 function renderText(text = '') {
-  // Convert **bold** and *italic* to HTML spans
   let result = text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>');
@@ -19,7 +18,7 @@ function HeadingRenderer({ block }) {
 
 function ParagraphRenderer({ block }) {
   return (
-    <p className="text-white/80 text-base lg:text-lg leading-relaxed mb-0">
+    <p className="text-white/80 text-base lg:text-lg leading-relaxed">
       {renderText(block.text)}
     </p>
   );
@@ -34,6 +33,53 @@ function ImageRenderer({ block }) {
         <figcaption className="text-center text-white/40 text-sm mt-2 italic">{block.caption}</figcaption>
       )}
     </figure>
+  );
+}
+
+function PuzzleCardRenderer({ block }) {
+  if (!block.puzzle_title) return null;
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+      {block.puzzle_image && (
+        <img src={block.puzzle_image} alt={block.puzzle_title} className="w-full h-44 object-cover" />
+      )}
+      <div className="p-4">
+        <h3 className="text-white font-bold text-base mb-1 leading-tight">{block.puzzle_title}</h3>
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {block.puzzle_brand && (
+            <span className="bg-white/10 text-white/60 text-xs px-2 py-0.5 rounded">{block.puzzle_brand}</span>
+          )}
+          {block.piece_count && (
+            <span className="bg-orange-500/20 text-orange-300 text-xs px-2 py-0.5 rounded">{block.piece_count} pièces</span>
+          )}
+          {block.category_tag && (
+            <span className="bg-white/10 text-white/60 text-xs px-2 py-0.5 rounded">{block.category_tag}</span>
+          )}
+        </div>
+        {block.description && (
+          <p className="text-white/60 text-sm mb-3 line-clamp-3 leading-relaxed">{block.description}</p>
+        )}
+        <div className="flex items-end justify-between gap-2">
+          <div>
+            {block.amazon_rating && (
+              <p className="text-yellow-400 text-xs">
+                ⭐ {block.amazon_rating}/5
+                {block.amazon_ratings_total && <span className="text-white/40 ml-1">({block.amazon_ratings_total} avis)</span>}
+              </p>
+            )}
+            {block.amazon_price && (
+              <p className="text-orange-400 font-bold text-xl">{block.amazon_price}€</p>
+            )}
+          </div>
+          {block.amazon_link && (
+            <a href={block.amazon_link} target="_blank" rel="noopener noreferrer"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 flex-shrink-0">
+              <ExternalLink className="w-3 h-3" /> Voir sur Amazon
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -84,22 +130,82 @@ function DividerRenderer() {
   return <hr className="border-white/10 my-2" />;
 }
 
+function BlockItem({ block }) {
+  switch (block.type) {
+    case 'heading': return <HeadingRenderer block={block} />;
+    case 'paragraph': return <ParagraphRenderer block={block} />;
+    case 'image': return <ImageRenderer block={block} />;
+    case 'puzzle_card': return <PuzzleCardRenderer block={block} />;
+    case 'list': return <ListRenderer block={block} />;
+    case 'link': return <LinkRenderer block={block} />;
+    case 'quote': return <QuoteRenderer block={block} />;
+    case 'divider': return <DividerRenderer />;
+    default: return null;
+  }
+}
+
+// Group blocks into visual rows based on column placement
+function groupBlocksIntoRows(blocks) {
+  const rows = [];
+  let i = 0;
+  while (i < blocks.length) {
+    const block = blocks[i];
+    const col = block.column || 'full';
+    if (col === 'full') {
+      rows.push({ type: 'full', left: block, right: null });
+      i++;
+    } else if (col === 'left') {
+      if (i + 1 < blocks.length && blocks[i + 1].column === 'right') {
+        rows.push({ type: 'two-col', left: block, right: blocks[i + 1] });
+        i += 2;
+      } else {
+        rows.push({ type: 'half-left', left: block, right: null });
+        i++;
+      }
+    } else {
+      // right block with no preceding left
+      rows.push({ type: 'half-right', left: null, right: block });
+      i++;
+    }
+  }
+  return rows;
+}
+
 export default function BlockRenderer({ blocks = [] }) {
   if (!blocks || blocks.length === 0) return null;
+  const rows = groupBlocksIntoRows(blocks);
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {blocks.map((block) => {
-        switch (block.type) {
-          case 'heading': return <HeadingRenderer key={block.id} block={block} />;
-          case 'paragraph': return <ParagraphRenderer key={block.id} block={block} />;
-          case 'image': return <ImageRenderer key={block.id} block={block} />;
-          case 'list': return <ListRenderer key={block.id} block={block} />;
-          case 'link': return <LinkRenderer key={block.id} block={block} />;
-          case 'quote': return <QuoteRenderer key={block.id} block={block} />;
-          case 'divider': return <DividerRenderer key={block.id} />;
-          default: return null;
+      {rows.map((row, i) => {
+        if (row.type === 'full') {
+          return <BlockItem key={row.left.id} block={row.left} />;
         }
+        if (row.type === 'two-col') {
+          return (
+            <div key={`${row.left.id}-${row.right.id}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start">
+              <BlockItem block={row.left} />
+              <BlockItem block={row.right} />
+            </div>
+          );
+        }
+        if (row.type === 'half-left') {
+          return (
+            <div key={row.left.id} className="grid grid-cols-2 gap-4 items-start">
+              <BlockItem block={row.left} />
+              <div />
+            </div>
+          );
+        }
+        if (row.type === 'half-right') {
+          return (
+            <div key={row.right.id} className="grid grid-cols-2 gap-4 items-start">
+              <div />
+              <BlockItem block={row.right} />
+            </div>
+          );
+        }
+        return null;
       })}
     </div>
   );
