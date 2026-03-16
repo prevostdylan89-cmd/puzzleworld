@@ -84,12 +84,16 @@ function ArticleView({ article, onBack }) {
       <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">{article.title}</h1>
       {article.subtitle && <p className="text-xl text-white/60 mb-8 leading-relaxed">{article.subtitle}</p>}
 
-      {/* Content */}
-      <div
-        className="prose prose-invert prose-orange max-w-none text-white/80 leading-relaxed"
-        style={{ lineHeight: '1.8' }}
-        dangerouslySetInnerHTML={{ __html: article.content }}
-      />
+      {/* Content — blocs ou HTML legacy */}
+      {article.blocks && article.blocks.length > 0 ? (
+        <BlockRenderer blocks={article.blocks} />
+      ) : article.content ? (
+        <div
+          className="prose prose-invert prose-orange max-w-none text-white/80 leading-relaxed"
+          style={{ lineHeight: '1.8' }}
+          dangerouslySetInnerHTML={{ __html: article.content }}
+        />
+      ) : null}
 
       {/* Tags */}
       {article.tags && (
