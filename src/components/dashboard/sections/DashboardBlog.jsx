@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, X, ImageIcon, Link, BookOpen, Star, GripVertical, ArrowUp, ArrowDown, Tag } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, X, ImageIcon, Link, BookOpen, Star, GripVertical, ArrowUp, ArrowDown, Tag, Search, LayoutTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import BlockEditor, { createBlock } from '@/components/blog/BlockEditor';
+import BlockRenderer from '@/components/blog/BlockRenderer';
+import SeoPanel from '@/components/blog/SeoPanel';
 
 const EMPTY_FORM = {
-  title: '', subtitle: '', slug: '', content: '', cover_image: '',
-  category: '', tags: '', meta_description: '',
+  title: '', subtitle: '', slug: '', content: '', blocks: [],
+  cover_image: '', category: '', tags: '', meta_description: '', meta_title: '',
   external_link: '', external_link_label: '',
   featured_puzzles: [],
   is_published: false, read_time: 5
