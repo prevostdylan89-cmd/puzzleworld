@@ -27,150 +27,153 @@ function generateSlug(title) {
 
 // ─── Article Form ──────────────────────────────────────────────────────────────
 function ArticleForm({ editingId, form, setForm, onSave, onCancel, saving, uploading, handleImageUpload }) {
-  const [puzzleSearch, setPuzzleSearch] = useState('');
-  const [puzzleResults, setPuzzleResults] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [activeTab, setActiveTab] = useState('content');
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     base44.entities.BlogCategory.list('order').then(setCategories).catch(() => {});
   }, []);
 
-  const searchPuzzle = async () => {
-    if (!puzzleSearch.trim()) return;
-    const results = await base44.entities.PuzzleCatalog.filter({ title: { $regex: puzzleSearch, $options: 'i' } }, '-created_date', 10);
-    setPuzzleResults(results);
-  };
+  const blocks = form.blocks || [];
+  const setBlocks = (newBlocks) => setForm(f => ({ ...f, blocks: newBlocks }));
 
-  const selectPuzzle = (p) => {
-    setForm(f => ({
-      ...f,
-      featured_puzzles: [...(f.featured_puzzles || []), { puzzle_catalog_id: p.id, puzzle_title: p.title, puzzle_image: p.image_hd || '' }]
-    }));
-    setPuzzleResults([]);
-    setPuzzleSearch('');
-  };
-
-  const removePuzzle = (index) => {
-    setForm(f => ({
-      ...f,
-      featured_puzzles: f.featured_puzzles.filter((_, i) => i !== index)
-    }));
-  };
+  if (showPreview) {
+    return (
+      <div className="text-white">
+        <div className="flex items-center gap-3 mb-6">
+          <Button variant="ghost" onClick={() => setShowPreview(false)} className="text-white/60 hover:text-white">
+            <X className="w-4 h-4 mr-2" /> Fermer l'aperçu
+          </Button>
+          <span className="text-white/30 text-sm">Aperçu de l'article</span>
+        </div>
+        <div className="max-w-3xl mx-auto">
+          {form.cover_image && (
+            <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-8">
+              <img src={form.cover_image} alt={form.title} className="w-full h-full object-cover" />
+            </div>
+          )}
+          {form.category && <span className="text-orange-400 text-sm font-semibold uppercase tracking-wide">{form.category}</span>}
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mt-2 mb-3">{form.title || 'Titre de l\'article'}</h1>
+          {form.subtitle && <p className="text-xl text-white/60 mb-8">{form.subtitle}</p>}
+          <div className="mt-6">
+            <BlockRenderer blocks={blocks} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="text-white">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">{editingId ? "Modifier l'article" : 'Nouvel article'}</h2>
-        <Button variant="ghost" onClick={onCancel}><X className="w-5 h-5" /></Button>
+        <h2 className="text-xl font-bold">{editingId ? "Modifier l'article" : 'Nouvel article'}</h2>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowPreview(true)} className="border-white/20 text-white/70 hover:text-white gap-1.5">
+            <Eye className="w-4 h-4" /> Aperçu
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onCancel}><X className="w-5 h-5" /></Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          <div>
-            <label className="text-sm text-white/60 mb-1 block">Titre *</label>
-            <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: f.slug || generateSlug(e.target.value) }))}
-              placeholder="Titre de l'article" className="bg-white/5 border-white/20 text-white" />
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-xl w-fit">
+        {[['content', 'Contenu'], ['seo', 'SEO'], ['settings', 'Paramètres']].map(([id, label]) => (
+          <button key={id} onClick={() => setActiveTab(id)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === id ? 'bg-orange-500 text-white' : 'text-white/60 hover:text-white'}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'content' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div>
+              <label className="text-sm text-white/60 mb-1 block">Titre H1 *</label>
+              <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: f.slug || generateSlug(e.target.value) }))}
+                placeholder="Titre principal de l'article" className="bg-white/5 border-white/20 text-white text-xl font-bold" />
+            </div>
+            <div>
+              <label className="text-sm text-white/60 mb-1 block">Introduction / sous-titre</label>
+              <Textarea value={form.subtitle || ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
+                placeholder="Accroche ou introduction courte..." className="bg-white/5 border-white/20 text-white text-base" rows={2} />
+            </div>
+            <div>
+              <label className="text-sm text-white/60 mb-2 block">Contenu de l'article</label>
+              <BlockEditor blocks={blocks} onChange={setBlocks} />
+            </div>
           </div>
-          <div>
-            <label className="text-sm text-white/60 mb-1 block">Sous-titre</label>
-            <Input value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
-              placeholder="Sous-titre accrocheur" className="bg-white/5 border-white/20 text-white" />
-          </div>
-          <div>
-            <label className="text-sm text-white/60 mb-1 block">Contenu * <span className="text-white/30">(HTML supporté)</span></label>
-            <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-              placeholder="Écrivez votre article ici..." className="bg-white/5 border-white/20 text-white font-mono text-sm" rows={18} />
-          </div>
-          <div>
-            <label className="text-sm text-white/60 mb-1 block">Description SEO</label>
-            <Textarea value={form.meta_description} onChange={e => setForm(f => ({ ...f, meta_description: e.target.value }))}
-              placeholder="Description courte (150 car. max)" maxLength={160} className="bg-white/5 border-white/20 text-white" rows={2} />
-            <p className="text-xs text-white/30 mt-1">{form.meta_description?.length || 0}/160</p>
+
+          <div className="space-y-4">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" /> Image principale
+              </label>
+              {form.cover_image && <img src={form.cover_image} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
+              <label className="cursor-pointer block">
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <div className="border-2 border-dashed border-white/20 rounded-lg p-3 text-center text-white/50 text-sm hover:border-orange-500/50 transition-colors">
+                  {uploading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Uploader une image'}
+                </div>
+              </label>
+              <Input value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))}
+                placeholder="Ou coller une URL" className="bg-white/5 border-white/20 text-white mt-2 text-xs" />
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+              <label className="text-sm font-semibold text-white">Catégorie & Tags</label>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Catégorie</label>
+                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                  className="w-full bg-[#0a0a2e] border border-white/20 text-white rounded-md px-3 py-2 text-sm">
+                  <option value="">— Choisir —</option>
+                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Tags (virgule)</label>
+                <Input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
+                  placeholder="puzzle, conseil, débutant" className="bg-white/5 border-white/20 text-white text-xs" />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Temps de lecture (min)</label>
+                <Input type="number" value={form.read_time} onChange={e => setForm(f => ({ ...f, read_time: Number(e.target.value) }))}
+                  className="bg-white/5 border-white/20 text-white text-xs" />
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+              <label className="text-sm font-semibold text-white flex items-center gap-2"><Link className="w-4 h-4" /> Lien externe</label>
+              <Input value={form.external_link} onChange={e => setForm(f => ({ ...f, external_link: e.target.value }))}
+                placeholder="https://..." className="bg-white/5 border-white/20 text-white text-xs" />
+              <Input value={form.external_link_label} onChange={e => setForm(f => ({ ...f, external_link_label: e.target.value }))}
+                placeholder="Libellé du lien" className="bg-white/5 border-white/20 text-white text-xs" />
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="space-y-4">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" /> Image de couverture
-            </label>
-            {form.cover_image && <img src={form.cover_image} alt="" className="w-full h-32 object-cover rounded-lg mb-3" />}
-            <label className="cursor-pointer block">
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <div className="border-2 border-dashed border-white/20 rounded-lg p-3 text-center text-white/50 text-sm hover:border-orange-500/50 transition-colors">
-                {uploading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Cliquer pour uploader'}
-              </div>
-            </label>
-            <Input value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))}
-              placeholder="Ou coller une URL" className="bg-white/5 border-white/20 text-white mt-2 text-xs" />
-          </div>
+      {activeTab === 'seo' && (
+        <div className="max-w-2xl">
+          <SeoPanel form={form} setForm={setForm} />
+        </div>
+      )}
 
+      {activeTab === 'settings' && (
+        <div className="max-w-md space-y-4">
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
-            <label className="text-sm font-semibold text-white">Paramètres</label>
-            <div>
-              <label className="text-xs text-white/50 mb-1 block">Catégorie</label>
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                className="w-full bg-[#0a0a2e] border border-white/20 text-white rounded-md px-3 py-2 text-sm">
-                <option value="">— Choisir —</option>
-                {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-              </select>
-            </div>
+            <label className="text-sm font-semibold text-white">Paramètres avancés</label>
             <div>
               <label className="text-xs text-white/50 mb-1 block">Slug URL</label>
               <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                placeholder="mon-article-seo" className="bg-white/5 border-white/20 text-white text-xs" />
+                placeholder="mon-article-seo" className="bg-white/5 border-white/20 text-white text-sm" />
             </div>
-            <div>
-              <label className="text-xs text-white/50 mb-1 block">Tags (virgule)</label>
-              <Input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
-                placeholder="puzzle, conseil, débutant" className="bg-white/5 border-white/20 text-white text-xs" />
-            </div>
-            <div>
-              <label className="text-xs text-white/50 mb-1 block">Temps de lecture (min)</label>
-              <Input type="number" value={form.read_time} onChange={e => setForm(f => ({ ...f, read_time: Number(e.target.value) }))}
-                className="bg-white/5 border-white/20 text-white text-xs" />
-            </div>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-            <label className="text-sm font-semibold text-white flex items-center gap-2"><Link className="w-4 h-4" /> Lien externe</label>
-            <Input value={form.external_link} onChange={e => setForm(f => ({ ...f, external_link: e.target.value }))}
-              placeholder="https://..." className="bg-white/5 border-white/20 text-white text-xs" />
-            <Input value={form.external_link_label} onChange={e => setForm(f => ({ ...f, external_link_label: e.target.value }))}
-              placeholder="Libellé du lien" className="bg-white/5 border-white/20 text-white text-xs" />
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-            <label className="text-sm font-semibold text-white flex items-center gap-2"><BookOpen className="w-4 h-4" /> Fiches puzzles</label>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {form.featured_puzzles?.map((puzzle, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg p-2">
-                  {puzzle.puzzle_image && <img src={puzzle.puzzle_image} alt="" className="w-10 h-10 object-cover rounded" />}
-                  <span className="text-xs text-white flex-1 truncate">{puzzle.puzzle_title}</span>
-                  <button onClick={() => removePuzzle(idx)}>
-                    <X className="w-4 h-4 text-white/40 hover:text-white/60" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-1">
-              <Input value={puzzleSearch} onChange={e => setPuzzleSearch(e.target.value)}
-                placeholder="Rechercher un puzzle..." className="bg-white/5 border-white/20 text-white text-xs"
-                onKeyDown={e => e.key === 'Enter' && searchPuzzle()} />
-              <Button size="sm" onClick={searchPuzzle} className="bg-orange-500 hover:bg-orange-600 text-xs px-2">OK</Button>
-            </div>
-            {puzzleResults.map(p => (
-              <button key={p.id} onClick={() => selectPuzzle(p)}
-                className="w-full text-left flex items-center gap-2 p-2 bg-white/5 hover:bg-white/10 rounded-lg">
-                {p.image_hd && <img src={p.image_hd} alt="" className="w-8 h-8 object-cover rounded" />}
-                <span className="text-xs text-white truncate">{p.title}</span>
-              </button>
-            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex items-center gap-3 mt-8 pt-6 border-t border-white/10">
+      <div className="flex items-center gap-3 mt-8 pt-6 border-t border-white/10 sticky bottom-0 bg-[#000019] pb-4">
         <Button onClick={() => onSave(false)} variant="outline" className="border-white/20 text-white hover:bg-white/10" disabled={saving}>
           Sauvegarder brouillon
         </Button>
