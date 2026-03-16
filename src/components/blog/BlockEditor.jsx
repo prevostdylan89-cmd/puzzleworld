@@ -321,10 +321,18 @@ function LinkBlock({ block, onChange }) {
 }
 
 function QuoteBlock({ block, onChange }) {
+  const taRef = useRef(null);
+  const fmt = block.fmt || {};
   return (
     <div className="border-l-4 border-orange-500 pl-4">
-      <Textarea value={block.text} onChange={e => onChange({ ...block, text: e.target.value })}
-        placeholder="Texte de la citation..." className="bg-white/5 border-white/20 text-white italic text-sm resize-none" rows={3} />
+      <TextFormatToolbar
+        fmt={fmt}
+        onChange={(newFmt) => onChange({ ...block, fmt: newFmt })}
+        textareaRef={taRef}
+        onTextChange={(text) => onChange({ ...block, text })}
+      />
+      <Textarea ref={taRef} value={block.text} onChange={e => onChange({ ...block, text: e.target.value })}
+        placeholder="Texte de la citation..." className="bg-white/5 border-white/20 text-white italic text-sm resize-none rounded-t-none border-t-0" rows={3} />
     </div>
   );
 }
