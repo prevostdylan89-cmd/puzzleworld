@@ -106,12 +106,19 @@ function HeadingBlock({ block, onChange }) {
 }
 
 function ParagraphBlock({ block, onChange }) {
+  const taRef = useRef(null);
+  const fmt = block.fmt || {};
   return (
     <div>
-      <Textarea value={block.text} onChange={e => onChange({ ...block, text: e.target.value })}
-        placeholder="Écrivez... **gras** *italique*"
-        className="bg-white/5 border-white/20 text-white text-sm resize-none" rows={4} />
-      <p className="text-xs text-white/20 mt-1">**gras** · *italique*</p>
+      <TextFormatToolbar
+        fmt={fmt}
+        onChange={(newFmt) => onChange({ ...block, fmt: newFmt })}
+        textareaRef={taRef}
+        onTextChange={(text) => onChange({ ...block, text })}
+      />
+      <Textarea ref={taRef} value={block.text} onChange={e => onChange({ ...block, text: e.target.value })}
+        placeholder="Écrivez... **gras** *italique* __souligné__"
+        className="bg-white/5 border-white/20 text-white text-sm resize-none rounded-t-none border-t-0" rows={4} />
     </div>
   );
 }
