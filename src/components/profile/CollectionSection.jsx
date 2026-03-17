@@ -276,6 +276,16 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
                 {label}
               </DropdownMenuItem>
             ))}
+            {puzzle.status === 'done' && (
+              <DropdownMenuItem
+                onClick={() => fileInputRef.current?.click()}
+                className="text-orange-400 cursor-pointer hover:bg-white/10"
+                disabled={isUploadingPhoto}
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                {isUploadingPhoto ? 'Upload...' : puzzle.progress_photo ? 'Changer ma photo' : 'Ajouter ma photo'}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem 
               onClick={handleDelete}
               className="text-red-400 cursor-pointer hover:bg-white/10"
