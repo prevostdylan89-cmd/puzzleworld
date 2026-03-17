@@ -598,14 +598,12 @@ export default function Collection() {
       )}
 
       {/* Discovery Section */}
-      {!isLoading && globalPuzzles.length > 0 && (
-        <div className="border-b border-white/[0.06]">
-          <DiscoverySection globalPuzzles={globalPuzzles} />
-        </div>
+      {showDiscovery && !isLoading && globalPuzzles.length > 0 && (
+        <DiscoverySection globalPuzzles={globalPuzzles} />
       )}
 
       {/* Puzzle Grid */}
-      <div className="px-4 lg:px-8 py-6">
+      {!showDiscovery && <div className="px-4 lg:px-8 py-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
