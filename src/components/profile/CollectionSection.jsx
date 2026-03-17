@@ -176,6 +176,25 @@ export default function CollectionSection({ user }) {
 
 function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleCompletionPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.UserPuzzle.update(puzzle.id, { progress_photo: file_url });
+      toast.success('📸 Photo ajoutée !');
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      toast.error('Erreur lors de l\'upload');
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
 
   const handleMove = async (newStatus) => {
     if (isUpdating) return;
