@@ -679,8 +679,6 @@ export default function Collection() {
           </div>
       </div>}
 
-
-      {/* Puzzle Detail Modal */}
       <PuzzleDetailModal
         open={showDetailModal}
         onClose={() => setShowDetailModal(false)}
