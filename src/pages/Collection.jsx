@@ -511,26 +511,33 @@ export default function Collection() {
             <div className="flex items-center gap-2">
               <ReclassifyButton onComplete={() => refetch()} />
               <Button
-                variant={sortBy === 'newest' ? 'default' : 'ghost'}
+                variant="outline"
                 size="sm"
-                onClick={() => setSortBy('newest')}
-                className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
-              >Nouveautés</Button>
-              <Button
-                variant={sortBy === 'popular' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setSortBy('popular')}
-                className={`rounded-full ${sortBy === 'popular' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
-              >Populaires</Button>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
-                  <SelectValue placeholder="Plus..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
-                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
-                </SelectContent>
-              </Select>
+                onClick={() => setShowDiscovery(d => !d)}
+                className={`rounded-full border-orange-500/40 gap-1.5 ${showDiscovery ? 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600' : 'text-orange-400 hover:bg-orange-500/10'}`}
+              >
+                <span>✨</span>
+                {showDiscovery ? 'Collection globale' : 'Découverte'}
+              </Button>
+              {!showDiscovery && (
+                <Button
+                  variant={sortBy === 'newest' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSortBy('newest')}
+                  className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+                >Nouveautés</Button>
+              )}
+              {!showDiscovery && (
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
+                    <SelectValue placeholder="Plus..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0a0a2e] border-white/10">
+                    <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
+                    <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </div>
