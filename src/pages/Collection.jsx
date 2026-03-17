@@ -205,6 +205,7 @@ export default function Collection() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [addingToCollection, setAddingToCollection] = useState(false);
+  const [showDiscovery, setShowDiscovery] = useState(false);
 
   const addToMyCollection = useCallback(async (puzzles, status = 'inbox') => {
     try {

@@ -116,7 +116,22 @@ export default function DiscoverySection({ globalPuzzles }) {
 
       const userPuzzles = await base44.entities.UserPuzzle.filter({ created_by: currentUser.email });
 
-      if (userPuzzles.length === 0) { setLoading(false); setDiscovery(null); return; }
+      // If user has no puzzles, show a varied selection from catalog
+      if (userPuzzles.length === 0) {
+        const validPuzzles = catalogPuzzles.filter(p => p.piece_count >= 500);
+        const brandMap = {};
+        validPuzzles.forEach(p => { if (p.brand) brandMap[p.brand] = (brandMap[p.brand] || []); brandMap[p.brand].push(p); });
+        const variedSelection = shuffle(validPuzzles).slice(0, 30);
+        setDiscovery({
+          topBrand: null, topPieceBucket: null, topCategory: null,
+          brandPuzzles: [], piecePuzzles: [], catPuzzles: [],
+          discoveryPuzzles: variedSelection,
+          isGeneric: true,
+          total: variedSelection.length,
+        });
+        setLoading(false);
+        return;
+      }
 
       // Exclude already owned
       const ownedRefs = new Set(userPuzzles.map(p => p.puzzle_reference).filter(Boolean));
@@ -130,21 +145,12 @@ export default function DiscoverySection({ globalPuzzles }) {
       // Top brand
       const topBrand = getTopValue(userPuzzles, 'puzzle_brand');
 
-      // Top piece count bucket
-      const pieceCounts = userPuzzles.map(p => p.puzzle_pieces).filter(Boolean);
-      const pieceCountBuckets = {};
-      pieceCounts.forEach(pc => {
-        const bucket = Math.round(pc / 500) * 500;
-        pieceCountBuckets[bucket] = (pieceCountBuckets[bucket] || 0) + 1;
-      });
-      const topPieceBucket = parseInt(Object.entries(pieceCountBuckets).sort((a, b) => b[1] - a[1])[0]?.[0] || 1000);
-
       // Top category
       const topCategory = getTopValue(userPuzzles, 'puzzle_category') || getTopValue(userPuzzles, 'category_tag');
 
-      // User known brands & piece buckets (for "nouveaux horizons")
+      // User known brands & piece counts
       const userBrands = new Set(userPuzzles.map(p => p.puzzle_brand?.toLowerCase().trim()).filter(Boolean));
-      const userPieceBuckets = new Set(pieceCounts.map(pc => Math.round(pc / 500) * 500));
+      const userPieceCounts = new Set(userPuzzles.map(p => p.puzzle_pieces).filter(Boolean));
 
       // 1. Top brand (10)
       const brandPuzzles = shuffle(
@@ -153,14 +159,21 @@ export default function DiscoverySection({ globalPuzzles }) {
 
       const usedIds = new Set(brandPuzzles.map(p => p.id));
 
-      // 2. Top piece count (5)
-      const piecePuzzles = shuffle(
-        available.filter(p => {
-          if (usedIds.has(p.id)) return false;
-          if (!p.piece_count) return false;
-          return Math.abs(p.piece_count - topPieceBucket) <= 250;
-        })
-      ).slice(0, 5);
+      // 2. Varied piece counts ≥500, 5 puzzles with different piece counts
+      const piecePool = shuffle(available.filter(p => {
+        if (usedIds.has(p.id)) return false;
+        if (!p.piece_count || p.piece_count < 500) return false;
+        return true;
+      }));
+      const piecePuzzles = [];
+      const usedPieceCounts = new Set();
+      for (const p of piecePool) {
+        if (piecePuzzles.length >= 5) break;
+        if (!usedPieceCounts.has(p.piece_count)) {
+          piecePuzzles.push(p);
+          usedPieceCounts.add(p.piece_count);
+        }
+      }
       piecePuzzles.forEach(p => usedIds.add(p.id));
 
       // 3. Top category (5)
@@ -173,27 +186,26 @@ export default function DiscoverySection({ globalPuzzles }) {
       ).slice(0, 5);
       catPuzzles.forEach(p => usedIds.add(p.id));
 
-      // 4. Nouveaux horizons (10) - brand unknown to user + piece bucket unknown + min 500 pieces
+      // 4. Nouveaux horizons (10) - brand unknown to user + min 500 pieces
       const discoveryPuzzles = shuffle(
         available.filter(p => {
           if (usedIds.has(p.id)) return false;
           if (!p.piece_count || p.piece_count < 500) return false;
           const brand = p.brand?.toLowerCase().trim();
           if (brand && userBrands.has(brand)) return false;
-          const bucket = Math.round(p.piece_count / 500) * 500;
-          if (userPieceBuckets.has(bucket)) return false;
+          if (userPieceCounts.has(p.piece_count)) return false;
           return true;
         })
       ).slice(0, 10);
 
       setDiscovery({
         topBrand,
-        topPieceBucket,
         topCategory,
         brandPuzzles,
         piecePuzzles,
         catPuzzles,
         discoveryPuzzles,
+        isGeneric: false,
         total: brandPuzzles.length + piecePuzzles.length + catPuzzles.length + discoveryPuzzles.length,
       });
     } catch (e) {
