@@ -218,6 +218,32 @@ export default function DiscoverySection({ globalPuzzles }) {
     if (globalPuzzles.length > 0) buildDiscovery(globalPuzzles);
   }, [globalPuzzles.length]);
 
+  // Real-time: rebuild discovery whenever user adds/updates/deletes a puzzle
+  useEffect(() => {
+    if (globalPuzzles.length === 0) return;
+    const unsubscribe = base44.entities.UserPuzzle.subscribe(() => {
+      buildDiscovery(globalPuzzles);
+    });
+    return () => unsubscribe();
+  }, [globalPuzzles.length]);
+
+  // Midnight refresh
+  useEffect(() => {
+    if (globalPuzzles.length === 0) return;
+    const scheduleNextMidnight = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(24, 0, 0, 0); // next midnight
+      return setTimeout(() => {
+        buildDiscovery(globalPuzzles);
+        const daily = setInterval(() => buildDiscovery(globalPuzzles), 24 * 60 * 60 * 1000);
+        return daily;
+      }, next - now);
+    };
+    const timeout = scheduleNextMidnight();
+    return () => clearTimeout(timeout);
+  }, [globalPuzzles.length]);
+
   const addToMyCollection = async (puzzle, status = 'inbox') => {
     if (!user) { toast.error('Connectez-vous pour ajouter à votre collection'); return; }
     const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: puzzle.asin || puzzle.id });
