@@ -280,11 +280,17 @@ export default function DiscoverySection({ globalPuzzles }) {
         </button>
       </div>
 
-      <div className="px-4 lg:px-8 mb-5 flex flex-wrap gap-2">
-        {discovery.topBrand && <span className="bg-white/5 border border-white/10 text-xs text-white/50 px-2.5 py-1 rounded-full">🏷️ Marque favorite: <span className="text-orange-300 font-medium">{discovery.topBrand}</span></span>}
-        {discovery.topPieceBucket > 0 && <span className="bg-white/5 border border-white/10 text-xs text-white/50 px-2.5 py-1 rounded-full">🧩 Format favori: <span className="text-orange-300 font-medium">~{discovery.topPieceBucket} pcs</span></span>}
-        {discovery.topCategory && <span className="bg-white/5 border border-white/10 text-xs text-white/50 px-2.5 py-1 rounded-full">🎨 Catégorie favorite: <span className="text-orange-300 font-medium">{discovery.topCategory}</span></span>}
-      </div>
+      {!discovery.isGeneric && (
+        <div className="px-4 lg:px-8 mb-5 flex flex-wrap gap-2">
+          {discovery.topBrand && <span className="bg-white/5 border border-white/10 text-xs text-white/50 px-2.5 py-1 rounded-full">🏷️ Marque favorite: <span className="text-orange-300 font-medium">{discovery.topBrand}</span></span>}
+          {discovery.topCategory && <span className="bg-white/5 border border-white/10 text-xs text-white/50 px-2.5 py-1 rounded-full">🎨 Catégorie favorite: <span className="text-orange-300 font-medium">{discovery.topCategory}</span></span>}
+        </div>
+      )}
+      {discovery.isGeneric && (
+        <div className="px-4 lg:px-8 mb-5">
+          <p className="text-white/30 text-xs">Ajoutez des puzzles à votre collection pour obtenir des recommandations personnalisées</p>
+        </div>
+      )}
 
       <div className="lg:px-8">
         <HorizontalSection
