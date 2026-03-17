@@ -267,8 +267,8 @@ export default function DiscoverySection({ globalPuzzles }) {
             <Sparkles className="w-5 h-5 text-orange-400" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-lg">Découverte personnalisée</h2>
-            <p className="text-white/40 text-xs">{discovery.total} puzzles sélectionnés rien que pour vous</p>
+            <h2 className="text-white font-bold text-lg">{discovery.isGeneric ? 'Sélection variée' : 'Découverte personnalisée'}</h2>
+            <p className="text-white/40 text-xs">{discovery.total} puzzles {discovery.isGeneric ? 'à découvrir' : 'sélectionnés rien que pour vous'}</p>
           </div>
         </div>
         <button
