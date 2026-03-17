@@ -297,16 +297,59 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
         </DropdownMenu>
       </div>
 
-      <div className="aspect-square overflow-hidden bg-white/5">
-        {puzzle.image_url ? (
-          <img
-            src={puzzle.image_url}
-            alt={puzzle.puzzle_name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleCompletionPhotoUpload}
+      />
+
+      <div className="aspect-square overflow-hidden bg-white/5 relative">
+        {/* For done puzzles: show completion photo if available, then puzzle image */}
+        {(puzzle.status === 'done' && puzzle.progress_photo) ? (
+          <>
+            <img
+              src={puzzle.progress_photo}
+              alt={`${puzzle.puzzle_name} - terminé`}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute bottom-1 right-1 bg-green-500/80 rounded-full p-1">
+              <Camera className="w-3 h-3 text-white" />
+            </div>
+          </>
+        ) : puzzle.image_url ? (
+          <>
+            <img
+              src={puzzle.image_url}
+              alt={puzzle.puzzle_name}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            {puzzle.status === 'done' && (
+              <div
+                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="flex flex-col items-center gap-1 text-white">
+                  <ImagePlus className="w-8 h-8" />
+                  <span className="text-xs font-medium">Ma photo</span>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className="w-12 h-12 text-white/20" />
+          <div
+            className="w-full h-full flex items-center justify-center cursor-pointer"
+            onClick={puzzle.status === 'done' ? () => fileInputRef.current?.click() : undefined}
+          >
+            {puzzle.status === 'done' ? (
+              <div className="flex flex-col items-center gap-2 text-white/30 hover:text-orange-400 transition-colors">
+                <ImagePlus className="w-10 h-10" />
+                <span className="text-xs">Ajouter ma photo</span>
+              </div>
+            ) : (
+              <Puzzle className="w-12 h-12 text-white/20" />
+            )}
           </div>
         )}
       </div>
