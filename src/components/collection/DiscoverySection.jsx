@@ -301,7 +301,7 @@ export default function DiscoverySection({ globalPuzzles }) {
           onPuzzleClick={(p) => { setSelectedPuzzle(p); setShowModal(true); }}
         />
         <HorizontalSection
-          title={`Puzzles ~${discovery.topPieceBucket} pièces`}
+          title="Formats variés (≥500 pièces)"
           icon="🧩"
           puzzles={discovery.piecePuzzles}
           onAddToCollection={addToMyCollection}
