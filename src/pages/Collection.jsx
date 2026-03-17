@@ -677,7 +677,8 @@ export default function Collection() {
               <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
             </Button>
           </div>
-      </div>
+      </div>}
+
 
       {/* Puzzle Detail Modal */}
       <PuzzleDetailModal
