@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, BarChart3, Gamepad2, Eye, BookOpen, Menu, X } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -22,7 +22,6 @@ const SECTIONS = [
   { id: 'social', label: 'Social', icon: Users, component: DashboardSocial },
   { id: 'events', label: 'Événements', icon: Calendar, component: DashboardEvents },
   { id: 'online', label: 'En Ligne', icon: Gamepad2, component: DashboardOnline },
-  { id: 'data', label: 'Données', icon: BarChart3, component: DashboardData },
   { id: 'profile', label: 'Utilisateurs', icon: User, component: DashboardProfile },
   { id: 'visibility', label: 'Pages', icon: Eye, component: DashboardPageVisibility },
   { id: 'blog', label: 'Blog', icon: BookOpen, component: DashboardBlog },

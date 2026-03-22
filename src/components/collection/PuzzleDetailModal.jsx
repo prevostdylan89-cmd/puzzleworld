@@ -10,8 +10,6 @@ const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
-  const [popularityScore, setPopularityScore] = useState(null);
-  const [loadingScore, setLoadingScore] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [user, setUser] = useState(null);
@@ -31,7 +29,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
           availability: { type: 'in_stock' }
         } : null
       });
-      calculatePopularityScore();
       checkLikeAndWishlistStatus();
       setLoading(false);
     } else {
