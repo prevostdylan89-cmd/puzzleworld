@@ -10,7 +10,6 @@ import DashboardSocial from '@/components/dashboard/sections/DashboardSocial';
 import DashboardEvents from '@/components/dashboard/sections/DashboardEvents';
 import DashboardProfile from '@/components/dashboard/sections/DashboardProfile';
 import DashboardSettings from '@/components/dashboard/sections/DashboardSettings';
-import DashboardData from '@/components/dashboard/sections/DashboardData';
 import DashboardOnline from '@/components/dashboard/sections/DashboardOnline';
 import DashboardPendingPuzzles from '@/components/dashboard/sections/DashboardPendingPuzzles';
 import DashboardPageVisibility from '@/components/dashboard/sections/DashboardPageVisibility';

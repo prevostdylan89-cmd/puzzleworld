@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
 import { toast } from 'sonner';
-import PopularityScore from '@/components/shared/PopularityScore';
 import { base44 } from '@/api/base44Client';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
