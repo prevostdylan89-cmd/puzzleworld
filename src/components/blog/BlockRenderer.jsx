@@ -178,8 +178,8 @@ function DividerRenderer() {
 
 function HeadingParagraphRenderer({ block }) {
   const className = block.level === 'h2'
-    ? "text-2xl lg:text-3xl font-bold text-white mt-10 mb-2"
-    : "text-xl lg:text-2xl font-bold text-white mt-8 mb-1.5";
+    ? "text-2xl lg:text-3xl font-bold text-white mb-2"
+    : "text-xl lg:text-2xl font-bold text-white mb-1.5";
   const Tag = block.level === 'h3' ? 'h3' : 'h2';
   const extra = fmtClass(block.fmt);
   return (
@@ -246,7 +246,7 @@ export default function BlockRenderer({ blocks = [] }) {
         }
         if (row.type === 'two-col') {
           return (
-            <div key={`${row.left.id}-${row.right.id}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start">
+            <div key={`${row.left.id}-${row.right.id}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start [&>*]:mt-0 [&_h2]:mt-0 [&_h3]:mt-0">
               <BlockItem block={row.left} />
               <BlockItem block={row.right} />
             </div>
