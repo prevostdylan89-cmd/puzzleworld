@@ -192,10 +192,10 @@ function HeadingParagraphRenderer({ block }) {
   );
 }
 
-function BlockItem({ block }) {
+function BlockItem({ block, noTopMargin = false }) {
   switch (block.type) {
     case 'heading_paragraph': return <HeadingParagraphRenderer block={block} />;
-    case 'heading': return <HeadingRenderer block={block} />;
+    case 'heading': return <HeadingRenderer block={block} noTopMargin={noTopMargin} />;
     case 'paragraph': return <ParagraphRenderer block={block} />;
     case 'image': return <ImageRenderer block={block} />;
     case 'puzzle_card': return <PuzzleCardRenderer block={block} />;
@@ -246,9 +246,9 @@ export default function BlockRenderer({ blocks = [] }) {
         }
         if (row.type === 'two-col') {
           return (
-            <div key={`${row.left.id}-${row.right.id}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start [&>*]:mt-0 [&_h2]:mt-0 [&_h3]:mt-0">
-              <BlockItem block={row.left} />
-              <BlockItem block={row.right} />
+            <div key={`${row.left.id}-${row.right.id}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start">
+              <BlockItem block={row.left} noTopMargin={true} />
+              <BlockItem block={row.right} noTopMargin={true} />
             </div>
           );
         }
