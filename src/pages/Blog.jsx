@@ -88,16 +88,20 @@ function ArticleView({ article, onBack }) {
       {(() => {
         let blocks = article.blocks;
         if (typeof blocks === 'string') { try { blocks = JSON.parse(blocks); } catch { blocks = []; } }
-        if (blocks && Array.isArray(blocks) && blocks.length > 0) return <BlockRenderer blocks={blocks} />;
+        if (Array.isArray(blocks) && blocks.length > 0) {
+          return <BlockRenderer blocks={blocks} />;
+        }
+        if (article.content) {
+          return (
+            <div
+              className="prose prose-invert prose-orange max-w-none text-white/80 leading-relaxed"
+              style={{ lineHeight: '1.8' }}
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          );
+        }
         return null;
       })()}
-      {article.content && !(Array.isArray(article.blocks) ? article.blocks : (()=>{ try { return JSON.parse(article.blocks||'[]'); } catch { return []; } })()).length ? (
-        <div
-          className="prose prose-invert prose-orange max-w-none text-white/80 leading-relaxed"
-          style={{ lineHeight: '1.8' }}
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
-      ) : null}
 
       {/* Tags */}
       {article.tags && (
