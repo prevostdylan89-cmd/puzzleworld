@@ -176,8 +176,25 @@ function DividerRenderer() {
   return <hr className="border-white/10 my-2" />;
 }
 
+function HeadingParagraphRenderer({ block }) {
+  const className = block.level === 'h2'
+    ? "text-2xl lg:text-3xl font-bold text-white mt-10 mb-2"
+    : "text-xl lg:text-2xl font-bold text-white mt-8 mb-1.5";
+  const Tag = block.level === 'h3' ? 'h3' : 'h2';
+  const extra = fmtClass(block.fmt);
+  return (
+    <div>
+      <Tag className={className}>{block.heading_text}</Tag>
+      {block.paragraph_text && (
+        <p className={`text-white/80 leading-relaxed ${extra}`}>{renderText(block.paragraph_text)}</p>
+      )}
+    </div>
+  );
+}
+
 function BlockItem({ block }) {
   switch (block.type) {
+    case 'heading_paragraph': return <HeadingParagraphRenderer block={block} />;
     case 'heading': return <HeadingRenderer block={block} />;
     case 'paragraph': return <ParagraphRenderer block={block} />;
     case 'image': return <ImageRenderer block={block} />;
