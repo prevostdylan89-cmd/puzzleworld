@@ -49,10 +49,10 @@ function fmtClass(fmt = {}) {
   ].filter(Boolean).join(' ');
 }
 
-function HeadingRenderer({ block }) {
+function HeadingRenderer({ block, noTopMargin = false }) {
   const className = block.level === 'h2'
-    ? "text-2xl lg:text-3xl font-bold text-white mt-10 mb-4"
-    : "text-xl lg:text-2xl font-bold text-white mt-8 mb-3";
+    ? `text-2xl lg:text-3xl font-bold text-white ${noTopMargin ? '' : 'mt-10'} mb-4`
+    : `text-xl lg:text-2xl font-bold text-white ${noTopMargin ? '' : 'mt-8'} mb-3`;
   if (block.level === 'h3') return <h3 className={className}>{block.text}</h3>;
   return <h2 className={className}>{block.text}</h2>;
 }
