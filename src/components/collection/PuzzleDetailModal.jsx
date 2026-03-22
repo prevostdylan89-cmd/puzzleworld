@@ -72,21 +72,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     }
   };
 
-  const calculatePopularityScore = async () => {
-    if (!puzzle) return;
-    
-    setLoadingScore(true);
-    try {
-      // Use socialScore from PuzzleCatalog
-      const score = puzzle.socialScore || 0;
-      setPopularityScore(score > 0 ? Math.min(100, Math.max(0, score * 10)) : 0);
-    } catch (error) {
-      console.error('Error calculating score:', error);
-    } finally {
-      setLoadingScore(false);
-    }
-  };
-
   const getAffiliateLink = () => {
     // Try amazon_link first, then construct from ASIN
     if (puzzle?.amazon_link) {
@@ -227,13 +212,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
                   <span className="text-2xl">🧩</span>
                   <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
-                </div>
-              )}
-
-              {/* Popularity Score */}
-              {!loadingScore && popularityScore !== null && popularityScore > 0 && (
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <PopularityScore score={popularityScore} size="default" />
                 </div>
               )}
 
