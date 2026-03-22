@@ -88,16 +88,18 @@ function ArticleForm({ editingId, form, setForm, onSave, onCancel, saving, uploa
 
       {activeTab === 'content' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div>
-              <label className="text-sm text-white/60 mb-1 block">Titre H1 *</label>
-              <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: f.slug || generateSlug(e.target.value) }))}
-                placeholder="Titre principal de l'article" className="bg-white/5 border-white/20 text-white text-xl font-bold" />
-            </div>
-            <div>
-              <label className="text-sm text-white/60 mb-1 block">Introduction / sous-titre</label>
-              <Textarea value={form.subtitle || ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
-                placeholder="Accroche ou introduction courte..." className="bg-white/5 border-white/20 text-white text-base" rows={2} />
+          <div className="lg:col-span-2">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3 mb-4">
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Titre H1 *</label>
+                <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: f.slug || generateSlug(e.target.value) }))}
+                  placeholder="Titre principal de l'article" className="bg-white/[0.05] border-white/20 text-white text-xl font-bold" />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 mb-1 block">Introduction / sous-titre</label>
+                <Textarea value={form.subtitle || ''} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))}
+                  placeholder="Accroche ou introduction courte..." className="bg-white/[0.05] border-white/20 text-white text-base" rows={2} />
+              </div>
             </div>
             <div>
               <label className="text-sm text-white/60 mb-2 block">Contenu de l'article</label>
