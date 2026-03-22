@@ -357,6 +357,17 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
         <div className="space-y-3">
           {filtered.map(a => (
             <div key={a.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3 w-full overflow-hidden">
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Button size="sm" variant="ghost" onClick={() => onTogglePublish(a)} title={a.is_published ? 'Dépublier' : 'Publier'}>
+                  {a.is_published ? <EyeOff className="w-4 h-4 text-white/50" /> : <Eye className="w-4 h-4 text-green-400" />}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onEdit(a)}>
+                  <Pencil className="w-4 h-4 text-white/50" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => onDelete(a.id)}>
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </Button>
+              </div>
               {a.cover_image && <img src={a.cover_image} alt="" className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -369,7 +380,7 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
                 {a.subtitle && <p className="text-white/50 text-sm line-clamp-1 truncate">{a.subtitle}</p>}
                 <p className="text-white/30 text-xs mt-1">/blog/{a.slug} • {a.read_time} min</p>
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
+              <div className="hidden">
                 <Button size="sm" variant="ghost" onClick={() => onTogglePublish(a)} title={a.is_published ? 'Dépublier' : 'Publier'}>
                   {a.is_published ? <EyeOff className="w-4 h-4 text-white/50" /> : <Eye className="w-4 h-4 text-green-400" />}
                 </Button>
