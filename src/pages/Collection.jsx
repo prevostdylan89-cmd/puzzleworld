@@ -544,9 +544,9 @@ export default function Collection() {
         </div>
       </div>
 
-      {/* Selection Mode Bar — fixed floating bottom bar */}
-      {selectionMode && (
-        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-orange-500 shadow-xl shadow-orange-500/30 rounded-full px-3 py-2">
+      {/* Selection Mode Bar — portal to body to avoid transform stacking context */}
+      {selectionMode && createPortal(
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 bg-orange-500 shadow-xl shadow-orange-500/30 rounded-full px-3 py-2">
           <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white/80 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
@@ -595,7 +595,8 @@ export default function Collection() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Discovery Section */}
