@@ -85,9 +85,13 @@ function ArticleView({ article, onBack }) {
       {article.subtitle && <p className="text-xl text-white/60 mb-8 leading-relaxed">{article.subtitle}</p>}
 
       {/* Content — blocs ou HTML legacy */}
-      {article.blocks && article.blocks.length > 0 ? (
-        <BlockRenderer blocks={article.blocks} />
-      ) : article.content ? (
+      {(() => {
+        let blocks = article.blocks;
+        if (typeof blocks === 'string') { try { blocks = JSON.parse(blocks); } catch { blocks = []; } }
+        if (blocks && Array.isArray(blocks) && blocks.length > 0) return <BlockRenderer blocks={blocks} />;
+        return null;
+      })()}
+      {article.content && !(Array.isArray(article.blocks) ? article.blocks : (()=>{ try { return JSON.parse(article.blocks||'[]'); } catch { return []; } })()).length ? (
         <div
           className="prose prose-invert prose-orange max-w-none text-white/80 leading-relaxed"
           style={{ lineHeight: '1.8' }}
