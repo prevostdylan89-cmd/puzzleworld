@@ -33,7 +33,6 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
       setLoading(false);
     } else {
       setProductData(null);
-      setPopularityScore(null);
       setIsLiked(false);
       setIsWishlisted(false);
     }
