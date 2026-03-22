@@ -377,7 +377,7 @@ function LayoutContent({ children, currentPageName }) {
           )}
 
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
               <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/4bbfd7a69_JUSTELAPIECE.png" alt="PuzzleWorld" className="w-full h-full object-contain" />
             </div>
             <span className="font-bold text-base">PuzzleWorld</span>
@@ -433,7 +433,7 @@ function LayoutContent({ children, currentPageName }) {
               {/* Menu Header */}
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
                     <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/4bbfd7a69_JUSTELAPIECE.png" alt="PuzzleWorld" className="w-full h-full object-contain" />
                   </div>
                   <div>
