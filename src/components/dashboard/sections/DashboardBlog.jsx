@@ -366,7 +366,7 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
                   {a.category && <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{a.category}</Badge>}
                 </div>
                 <h3 className="font-semibold text-white truncate">{a.title}</h3>
-                {a.subtitle && <p className="text-white/50 text-sm truncate">{a.subtitle}</p>}
+                {a.subtitle && <p className="text-white/50 text-sm line-clamp-1 truncate">{a.subtitle}</p>}
                 <p className="text-white/30 text-xs mt-1">/blog/{a.slug} • {a.read_time} min</p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
