@@ -12,8 +12,9 @@ import ImageCropModal from './ImageCropModal';
 import TextFormatToolbar from './TextFormatToolbar';
 
 const BLOCK_TYPES = [
-  { type: 'heading', label: 'Titre (H2/H3)', icon: Type },
-  { type: 'paragraph', label: 'Paragraphe', icon: AlignLeft },
+  { type: 'heading_paragraph', label: 'Titre + Texte', icon: Type },
+  { type: 'heading', label: 'Titre seul (H2/H3)', icon: Type },
+  { type: 'paragraph', label: 'Paragraphe seul', icon: AlignLeft },
   { type: 'image', label: 'Image', icon: ImageIcon },
   { type: 'puzzle_card', label: 'Fiche Puzzle', icon: Grid3X3 },
   { type: 'list', label: 'Liste', icon: List },
@@ -23,7 +24,7 @@ const BLOCK_TYPES = [
 ];
 
 const BLOCK_LABELS = {
-  heading: 'Titre', paragraph: 'Paragraphe', image: 'Image',
+  heading_paragraph: 'Titre + Texte', heading: 'Titre', paragraph: 'Paragraphe', image: 'Image',
   list: 'Liste', link: 'Lien', quote: 'Citation', divider: 'Séparateur', puzzle_card: 'Fiche Puzzle',
 };
 
@@ -34,6 +35,7 @@ export function generateBlockId() {
 export function createBlock(type) {
   const base = { id: generateBlockId(), type, column: 'full' };
   switch (type) {
+    case 'heading_paragraph': return { ...base, level: 'h2', heading_text: '', paragraph_text: '', fmt: {} };
     case 'heading': return { ...base, level: 'h2', text: '' };
     case 'paragraph': return { ...base, text: '' };
     case 'image': return { ...base, url: '', alt: '', caption: '' };
@@ -87,6 +89,29 @@ function ColumnSelector({ column, onChange }) {
 }
 
 // ---- Block content editors ----
+
+function HeadingParagraphBlock({ block, onChange }) {
+  const taRef = useRef(null);
+  const fmt = block.fmt || {};
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-1.5 mb-1">
+        {['h2', 'h3'].map(l => (
+          <button key={l} onClick={() => onChange({ ...block, level: l })}
+            className={`px-2.5 py-1 rounded text-xs font-bold transition-colors ${block.level === l ? 'bg-orange-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <Input value={block.heading_text || ''} onChange={e => onChange({ ...block, heading_text: e.target.value })}
+        placeholder="Titre..." className={`bg-white/5 border-white/20 text-white font-bold ${block.level === 'h2' ? 'text-xl' : 'text-lg'}`} />
+      <TextFormatToolbar fmt={fmt} onChange={(newFmt) => onChange({ ...block, fmt: newFmt })} textareaRef={taRef} onTextChange={(text) => onChange({ ...block, paragraph_text: text })} />
+      <Textarea ref={taRef} value={block.paragraph_text || ''} onChange={e => onChange({ ...block, paragraph_text: e.target.value })}
+        placeholder="Contenu... **gras** *italique*"
+        className="bg-white/5 border-white/20 text-white text-sm resize-none rounded-t-none border-t-0" rows={4} />
+    </div>
+  );
+}
 
 function HeadingBlock({ block, onChange }) {
   return (
@@ -339,6 +364,7 @@ function QuoteBlock({ block, onChange }) {
 
 function BlockContent({ block, onChange }) {
   switch (block.type) {
+    case 'heading_paragraph': return <HeadingParagraphBlock block={block} onChange={onChange} />;
     case 'heading': return <HeadingBlock block={block} onChange={onChange} />;
     case 'paragraph': return <ParagraphBlock block={block} onChange={onChange} />;
     case 'image': return <ImageBlock block={block} onChange={onChange} />;
