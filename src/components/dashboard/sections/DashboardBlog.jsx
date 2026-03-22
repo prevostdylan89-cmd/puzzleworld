@@ -356,7 +356,7 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
       ) : (
         <div className="space-y-3">
           {filtered.map(a => (
-            <div key={a.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4 overflow-hidden h-24">
+            <div key={a.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3 w-full overflow-hidden">
               {a.cover_image && <img src={a.cover_image} alt="" className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
