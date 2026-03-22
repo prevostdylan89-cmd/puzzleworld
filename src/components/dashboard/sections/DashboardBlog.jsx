@@ -380,17 +380,7 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
                 {a.subtitle && <p className="text-white/50 text-sm line-clamp-1 truncate">{a.subtitle}</p>}
                 <p className="text-white/30 text-xs mt-1">/blog/{a.slug} • {a.read_time} min</p>
               </div>
-              <div className="hidden">
-                <Button size="sm" variant="ghost" onClick={() => onTogglePublish(a)} title={a.is_published ? 'Dépublier' : 'Publier'}>
-                  {a.is_published ? <EyeOff className="w-4 h-4 text-white/50" /> : <Eye className="w-4 h-4 text-green-400" />}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onEdit(a)}>
-                  <Pencil className="w-4 h-4 text-white/50" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => onDelete(a.id)}>
-                  <Trash2 className="w-4 h-4 text-red-400" />
-                </Button>
-              </div>
+
             </div>
           ))}
         </div>
