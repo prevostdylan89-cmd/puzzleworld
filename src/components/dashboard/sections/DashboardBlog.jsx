@@ -353,7 +353,10 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 bg-white/5 rounded-xl border border-white/10">
           <BookOpen className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/50">Aucun article dans cette catégorie.</p>
+          <p className="text-white/50 mb-4">Aucun article. Créez votre premier article !</p>
+          <Button onClick={onNew} className="bg-orange-500 hover:bg-orange-600">
+            <Plus className="w-4 h-4 mr-2" /> Créer un article
+          </Button>
         </div>
       ) : (
         <div className="space-y-3">
