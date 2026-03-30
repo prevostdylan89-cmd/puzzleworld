@@ -361,7 +361,7 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
       ) : (
         <div className="space-y-3">
           {filtered.map(a => (
-            <div key={a.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3 w-full overflow-hidden">
+            <div key={a.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3 w-full max-w-full overflow-hidden min-w-0">
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Button size="sm" variant="ghost" onClick={() => onTogglePublish(a)} title={a.is_published ? 'Dépublier' : 'Publier'}>
                   {a.is_published ? <EyeOff className="w-4 h-4 text-white/50" /> : <Eye className="w-4 h-4 text-green-400" />}
