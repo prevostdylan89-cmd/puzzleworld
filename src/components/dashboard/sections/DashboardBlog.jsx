@@ -12,7 +12,7 @@ import SeoPanel from '@/components/blog/SeoPanel';
 
 const EMPTY_FORM = {
   title: '', subtitle: '', slug: '', content: '', blocks: [],
-  cover_image: '', category: '', tags: '', meta_description: '', meta_title: '',
+  cover_image: '', show_cover_in_article: true, category: '', tags: '', meta_description: '', meta_title: '',
   external_link: '', external_link_label: '',
   featured_puzzles: [],
   is_published: false, read_time: 5
@@ -121,6 +121,15 @@ function ArticleForm({ editingId, form, setForm, onSave, onCancel, saving, uploa
               </label>
               <Input value={form.cover_image} onChange={e => setForm(f => ({ ...f, cover_image: e.target.value }))}
                 placeholder="Ou coller une URL" className="bg-white/5 border-white/20 text-white mt-2 text-xs" />
+              <label className="flex items-center gap-2 mt-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.show_cover_in_article !== false}
+                  onChange={e => setForm(f => ({ ...f, show_cover_in_article: e.target.checked }))}
+                  className="w-4 h-4 accent-orange-500"
+                />
+                <span className="text-xs text-white/70">Afficher aussi dans l'article</span>
+              </label>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">

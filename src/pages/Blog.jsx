@@ -65,7 +65,7 @@ function ArticleView({ article, onBack }) {
         <ArrowLeft className="w-4 h-4" /> Retour au blog
       </button>
 
-      {article.cover_image && (
+      {article.cover_image && article.show_cover_in_article !== false && (
         <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-8">
           <img src={article.cover_image} alt={article.title} className="w-full h-full object-cover" />
         </div>

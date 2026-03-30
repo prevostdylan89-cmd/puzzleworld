@@ -1,0 +1,81 @@
+{
+  "name": "BlogArticle",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Titre principal de l'article"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Introduction / sous-titre"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug SEO"
+    },
+    "content": {
+      "type": "string",
+      "description": "Contenu HTML legacy"
+    },
+    "blocks": {
+      "type": "array",
+      "description": "Blocs de contenu structur\u00e9s (BlockEditor)",
+      "items": {
+        "type": "object"
+      }
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Image de couverture"
+    },
+    "show_cover_in_article": {
+      "type": "boolean",
+      "default": true,
+      "description": "Afficher l'image principale en haut de l'article (en plus de la fiche)"
+    },
+    "category": {
+      "type": "string",
+      "description": "Cat\u00e9gorie de l'article"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Tags s\u00e9par\u00e9s par des virgules"
+    },
+    "meta_title": {
+      "type": "string",
+      "description": "Titre SEO"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "Description SEO (150 caract\u00e8res max)"
+    },
+    "external_link": {
+      "type": "string",
+      "description": "Lien externe associ\u00e9 \u00e0 l'article"
+    },
+    "external_link_label": {
+      "type": "string",
+      "description": "Texte du lien externe"
+    },
+    "featured_puzzles": {
+      "type": "array",
+      "description": "Puzzles mis en avant",
+      "items": {
+        "type": "object"
+      }
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": false,
+      "description": "Article publi\u00e9 ou brouillon"
+    },
+    "read_time": {
+      "type": "number",
+      "description": "Temps de lecture estim\u00e9 en minutes"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
