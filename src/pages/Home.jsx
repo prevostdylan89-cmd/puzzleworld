@@ -275,7 +275,6 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
-          )}
         </section>
 
         {/* Mobile Événements - vertical cards */}
