@@ -373,17 +373,14 @@ function ArticlesList({ articles, loading, categories, onEdit, onTogglePublish, 
                   <Trash2 className="w-4 h-4 text-red-400" />
                 </Button>
               </div>
-              {a.cover_image && <img src={a.cover_image} alt="" className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <div className="flex-1 min-w-0 flex items-center gap-3 flex-wrap">
+                <h3 className="font-semibold text-white truncate flex-1 min-w-0">{a.title}</h3>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {a.category && <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{a.category}</Badge>}
                   <Badge className={a.is_published ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-white/10 text-white/50 border-white/20'}>
                     {a.is_published ? 'Publié' : 'Brouillon'}
                   </Badge>
-                  {a.category && <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">{a.category}</Badge>}
                 </div>
-                <h3 className="font-semibold text-white truncate">{a.title}</h3>
-                {a.subtitle && <p className="text-white/50 text-sm line-clamp-1 truncate">{a.subtitle}</p>}
-                <p className="text-white/30 text-xs mt-1">/blog/{a.slug} • {a.read_time} min</p>
               </div>
 
             </div>
