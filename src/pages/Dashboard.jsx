@@ -93,7 +93,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#000019] flex">
+    <div className="min-h-screen bg-[#000019] flex overflow-x-hidden">
       {/* Sidebar desktop */}
       <aside className="hidden lg:block w-64 bg-[#0a0a2e] border-r border-white/[0.06] fixed h-full overflow-y-auto">
         <div className="p-6">
@@ -123,7 +123,7 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-64 flex-1 p-4 lg:p-8">
+      <main className="lg:ml-64 flex-1 min-w-0 p-4 lg:p-8 overflow-x-hidden w-full">
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center gap-3 mb-6">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg bg-white/5 text-white hover:bg-white/10 transition-colors">
