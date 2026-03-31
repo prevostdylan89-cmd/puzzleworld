@@ -30,7 +30,8 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
     price: '',
     asin: '',
     ean: '',
-    image_hd: ''
+    image_hd: '',
+    amazon_link: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -44,10 +45,11 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         price: puzzle.amazon_price || puzzle.price || '',
         asin: puzzle.asin || '',
         ean: puzzle.ean || '',
-        image_hd: puzzle.image_hd || ''
+        image_hd: puzzle.image_hd || '',
+        amazon_link: puzzle.amazon_link || ''
       });
     } else {
-      setFormData({ title: '', brand: '', piece_count: '', category_tag: '', price: '', asin: '', ean: '', image_hd: '' });
+      setFormData({ title: '', brand: '', piece_count: '', category_tag: '', price: '', asin: '', ean: '', image_hd: '', amazon_link: '' });
     }
   }, [puzzle, open]);
 
@@ -64,7 +66,7 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
         amazon_price: parseFloat(formData.price) || 0,
         asin: formData.asin,
         ean: formData.ean,
-        amazon_link: formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=puzzleworld-21` : '',
+        amazon_link: formData.amazon_link || (formData.asin ? `https://www.amazon.fr/dp/${formData.asin}?tag=puzzleworld-21` : ''),
         image_hd: formData.image_hd,
         ...(isCreating ? { socialScore: 0, wishlistCount: 0, added_count: 0, total_likes: 0, total_dislikes: 0 } : {})
       };
@@ -175,6 +177,26 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
                 maxLength={13}
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-white/70 text-sm mb-2 block">Lien Amazon affilié</label>
+            <Input
+              value={formData.amazon_link}
+              onChange={(e) => setFormData({ ...formData, amazon_link: e.target.value })}
+              className="bg-white/5 border-white/10 text-white"
+              placeholder="https://www.amazon.fr/dp/ASIN?tag=votre-tag-21"
+            />
+            {!formData.amazon_link && formData.asin && (
+              <p className="text-white/40 text-xs mt-1">
+                Laissez vide pour générer auto depuis l'ASIN : amazon.fr/dp/{formData.asin}?tag=puzzleworld-21
+              </p>
+            )}
+            {formData.amazon_link && (
+              <a href={formData.amazon_link} target="_blank" rel="noopener noreferrer" className="text-orange-400 text-xs mt-1 block hover:underline truncate">
+                ↗ {formData.amazon_link}
+              </a>
+            )}
           </div>
 
           <div>
