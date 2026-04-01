@@ -7,8 +7,6 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 
 export default function ArticleModal({ open, onClose, article, articleId }) {
-  if (!article) return null;
-  
   const navigate = useNavigate();
   const [fullArticle, setFullArticle] = useState(null);
 
@@ -39,6 +37,8 @@ export default function ArticleModal({ open, onClose, article, articleId }) {
     const text = String(content).replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').trim();
     return text.substring(0, 400) + (text.length > 400 ? '...' : '');
   };
+
+  if (!article) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

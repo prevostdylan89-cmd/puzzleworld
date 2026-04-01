@@ -449,7 +449,17 @@ export default function Collection() {
           {/* Category Filters — desktop: scroll horizontal / mobile: select dropdown */}
           <div className="mt-3 mb-1">
             {/* Mobile: dropdown select */}
-            <div className="flex gap-2 lg:hidden">
+            <div className="flex flex-col gap-2 lg:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDiscovery(d => !d)}
+                className={`w-full rounded-full border-orange-500/40 gap-1.5 ${showDiscovery ? 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600' : 'text-orange-400 hover:bg-orange-500/10 border-orange-500/40'}`}
+              >
+                <span>✨</span>
+                {showDiscovery ? 'Collection globale' : 'Mode Découverte'}
+              </Button>
+              {!showDiscovery && <div className="flex gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
                   <SelectValue>
@@ -478,6 +488,7 @@ export default function Collection() {
                   <SelectItem value="pieces-desc" className="text-white text-sm">Pièces ↓</SelectItem>
                 </SelectContent>
               </Select>
+              </div>}
             </div>
 
             {/* Desktop: scroll horizontal */}

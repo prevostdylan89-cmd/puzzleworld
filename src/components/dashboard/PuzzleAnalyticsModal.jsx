@@ -74,7 +74,7 @@ export default function PuzzleAnalyticsModal({ open, onClose, puzzle }) {
       setAnalytics({
         daysOnSite,
         likesCount: likeCount,
-        wishlistCount: wishlistCount,
+        wishlistCount: puzzle.wishlistCount || 0,
         dislikesCount: dislikeCount,
         popularityScore: popularityScore,
         totalInteractions: totalInteractions,
