@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Trash2, Edit3, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+function useScrollSafeDropdown() {
+  const [open, setOpen] = useState(false);
+  const pointerStartRef = useRef(null);
+  const handlePointerDown = useCallback((e) => {
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
+  const handleClick = useCallback((e) => {
+    if (pointerStartRef.current) {
+      const dx = Math.abs(e.clientX - pointerStartRef.current.x);
+      const dy = Math.abs(e.clientY - pointerStartRef.current.y);
+      if (dx > 8 || dy > 8) { e.preventDefault(); e.stopPropagation(); return; }
+    }
+    setOpen(o => !o);
+  }, []);
+  return { open, setOpen, handlePointerDown, handleClick };
+}
+
 export default function WishlistSection({ user }) {
   const [wishlist, setWishlist] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
+  const sortDropdown = useScrollSafeDropdown();
 
   useEffect(() => {
     loadWishlist();
@@ -133,34 +151,39 @@ export default function WishlistSection({ user }) {
   return (
     <>
       <div className="flex justify-end mb-6">
-        <DropdownMenu>
+        <DropdownMenu open={sortDropdown.open} onOpenChange={sortDropdown.setOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+            <Button
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/5"
+              onPointerDown={sortDropdown.handlePointerDown}
+              onClick={sortDropdown.handleClick}
+            >
               <ArrowUpDown className="w-4 h-4 mr-2" />
               Trier par
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
             <DropdownMenuItem 
-              onClick={() => setSortBy('date-desc')}
+              onClick={() => { setSortBy('date-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
             >
               Date (Plus récent)
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => setSortBy('date-asc')}
+              onClick={() => { setSortBy('date-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
             >
               Date (Plus ancien)
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => setSortBy('pieces-asc')}
+              onClick={() => { setSortBy('pieces-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
             >
               Pièces (Croissant)
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => setSortBy('pieces-desc')}
+              onClick={() => { setSortBy('pieces-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
             >
               Pièces (Décroissant)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
-import { Sparkles, Loader2, RefreshCw, MoreVertical } from 'lucide-react';
+import { Sparkles, Loader2, RefreshCw, MoreVertical, X, Plus, ChevronDown, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 import {
@@ -28,35 +29,54 @@ function shuffle(arr) {
   return a;
 }
 
-function DiscoveryPuzzleCard({ puzzle, onAddToCollection, onClick }) {
+function DiscoveryPuzzleCard({ puzzle, onAddToCollection, onClick, selectionMode, isSelected, onStartSelection }) {
   return (
     <div
-      className="relative bg-white/[0.03] border border-white/[0.06] hover:border-orange-500/30 rounded-xl overflow-hidden transition-all group cursor-pointer active:scale-95 flex-shrink-0 w-36 lg:w-44"
+      className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer active:scale-95 flex-shrink-0 w-36 lg:w-44 ${
+        isSelected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-white/[0.06] hover:border-orange-500/30'
+      }`}
       onClick={onClick}
     >
-      <div className="absolute top-1.5 right-1.5 z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              onClick={(e) => e.stopPropagation()}
-              className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
-            >
-              <MoreVertical className="w-3.5 h-3.5 text-white" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50 min-w-[180px]">
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('wishlist'); }} className="text-white hover:bg-white/10 cursor-pointer">
-              ⭐ Wishlist
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('inbox'); }} className="text-white hover:bg-white/10 cursor-pointer">
-              📦 Dans sa boîte
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('done'); }} className="text-white hover:bg-white/10 cursor-pointer">
-              🏆 Terminé
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {/* Selection checkbox */}
+      {selectionMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+            isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
+          }`}>
+            {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+          </div>
+        </div>
+      )}
+
+      {!selectionMode && (
+        <div className="absolute top-1.5 right-1.5 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+              >
+                <MoreVertical className="w-3.5 h-3.5 text-white" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50 min-w-[180px]">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('wishlist'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                ⭐ Wishlist
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('inbox'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                📦 Dans sa boîte
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onAddToCollection('done'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                🏆 Terminé
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStartSelection(); }} className="text-white/50 hover:bg-white/10 cursor-pointer border-t border-white/10 mt-1 pt-1">
+                ☑️ Sélection multiple
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       <div className="aspect-[3/4] overflow-hidden bg-white/5">
         {puzzle.image_hd ? (
           <img src={puzzle.image_hd} alt={puzzle.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
@@ -77,7 +97,7 @@ function DiscoveryPuzzleCard({ puzzle, onAddToCollection, onClick }) {
   );
 }
 
-function HorizontalSection({ title, icon, puzzles, onAddToCollection, onPuzzleClick }) {
+function HorizontalSection({ title, icon, puzzles, onAddToCollection, onPuzzleClick, selectionMode, selectedIds, onToggleSelect, onStartSelection }) {
   if (!puzzles.length) return null;
   return (
     <div className="mb-6">
@@ -92,7 +112,17 @@ function HorizontalSection({ title, icon, puzzles, onAddToCollection, onPuzzleCl
             key={puzzle.id}
             puzzle={puzzle}
             onAddToCollection={(status) => onAddToCollection(puzzle, status)}
-            onClick={() => onPuzzleClick(puzzle)}
+            selectionMode={selectionMode}
+            isSelected={selectedIds.has(puzzle.id)}
+            onToggleSelect={() => onToggleSelect(puzzle.id)}
+            onStartSelection={() => onStartSelection(puzzle.id)}
+            onClick={() => {
+              if (selectionMode) {
+                onToggleSelect(puzzle.id);
+              } else {
+                onPuzzleClick(puzzle);
+              }
+            }}
           />
         ))}
       </div>
@@ -106,6 +136,9 @@ export default function DiscoverySection({ globalPuzzles }) {
   const [discovery, setDiscovery] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [addingToCollection, setAddingToCollection] = useState(false);
 
   const buildDiscovery = async (catalogPuzzles) => {
     setLoading(true);
@@ -260,6 +293,40 @@ export default function DiscoverySection({ globalPuzzles }) {
     toast.success(`Ajouté en ${labels[status]} !`);
   };
 
+  const allDiscoveryPuzzles = discovery ? [
+    ...(discovery.brandPuzzles || []),
+    ...(discovery.piecePuzzles || []),
+    ...(discovery.catPuzzles || []),
+    ...(discovery.discoveryPuzzles || []),
+  ] : [];
+
+  const addSelectionToCollection = async (status) => {
+    if (!user) { toast.error('Connectez-vous pour ajouter à votre collection'); return; }
+    setAddingToCollection(true);
+    const puzzles = allDiscoveryPuzzles.filter(p => selectedIds.has(p.id));
+    let added = 0;
+    for (const puzzle of puzzles) {
+      const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: puzzle.asin || puzzle.id });
+      if (existing.length === 0) {
+        await base44.entities.UserPuzzle.create({
+          puzzle_name: puzzle.title,
+          puzzle_brand: puzzle.brand || '',
+          puzzle_pieces: puzzle.piece_count || 0,
+          puzzle_reference: puzzle.asin || puzzle.id,
+          image_url: puzzle.image_hd || '',
+          status
+        });
+        added++;
+      }
+    }
+    const labels = { wishlist: 'wishlist', inbox: 'collection', done: 'terminés' };
+    if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} en ${labels[status]} !`);
+    else toast.info('Ces puzzles sont déjà dans votre collection');
+    setAddingToCollection(false);
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
   if (loading) {
     return (
       <div className="px-4 lg:px-8 py-8 flex items-center gap-3 text-white/40">
@@ -285,8 +352,63 @@ export default function DiscoverySection({ globalPuzzles }) {
     );
   }
 
+  const selectionProps = {
+    selectionMode,
+    selectedIds,
+    onToggleSelect: (id) => setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    }),
+    onStartSelection: (id) => { setSelectionMode(true); setSelectedIds(new Set([id])); },
+  };
+
   return (
     <div className="py-6">
+      {/* Selection bar portal */}
+      {selectionMode && createPortal(
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 bg-orange-500 shadow-xl shadow-orange-500/30 rounded-full px-3 py-2">
+          <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white/80 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+          <span className="text-white font-semibold text-sm">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
+          <div className="w-px h-4 bg-white/30" />
+          <button
+            onClick={() => {
+              if (selectedIds.size === allDiscoveryPuzzles.length) setSelectedIds(new Set());
+              else setSelectedIds(new Set(allDiscoveryPuzzles.map(p => p.id)));
+            }}
+            className="text-white/80 hover:text-white text-xs transition-colors"
+          >
+            {selectedIds.size === allDiscoveryPuzzles.length ? 'Désélect.' : 'Tout'}
+          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                disabled={selectedIds.size === 0 || addingToCollection}
+                className="flex items-center gap-1 bg-white text-orange-500 font-semibold px-3 py-1 rounded-full text-sm disabled:opacity-50"
+              >
+                {addingToCollection ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                Ajouter
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
+              {[
+                { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
+                { status: 'inbox', label: 'Dans sa boîte', emoji: '📦' },
+                { status: 'done', label: 'Terminé', emoji: '🏆' },
+              ].map(({ status, label, emoji }) => (
+                <DropdownMenuItem key={status} onClick={() => addSelectionToCollection(status)} className="text-white hover:bg-white/10 cursor-pointer gap-2">
+                  {emoji} {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>,
+        document.body
+      )}
+
       <div className="px-4 lg:px-8 mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 border border-orange-500/20 flex items-center justify-center">
@@ -325,6 +447,7 @@ export default function DiscoverySection({ globalPuzzles }) {
           puzzles={discovery.brandPuzzles}
           onAddToCollection={addToMyCollection}
           onPuzzleClick={(p) => { setSelectedPuzzle(p); setShowModal(true); }}
+          {...selectionProps}
         />
         <HorizontalSection
           title="Formats variés (≥500 pièces)"
@@ -332,6 +455,7 @@ export default function DiscoverySection({ globalPuzzles }) {
           puzzles={discovery.piecePuzzles}
           onAddToCollection={addToMyCollection}
           onPuzzleClick={(p) => { setSelectedPuzzle(p); setShowModal(true); }}
+          {...selectionProps}
         />
         <HorizontalSection
           title={`Catégorie ${discovery.topCategory || 'préférée'}`}
@@ -339,6 +463,7 @@ export default function DiscoverySection({ globalPuzzles }) {
           puzzles={discovery.catPuzzles}
           onAddToCollection={addToMyCollection}
           onPuzzleClick={(p) => { setSelectedPuzzle(p); setShowModal(true); }}
+          {...selectionProps}
         />
         <HorizontalSection
           title="Nouveaux horizons"
@@ -346,6 +471,7 @@ export default function DiscoverySection({ globalPuzzles }) {
           puzzles={discovery.discoveryPuzzles}
           onAddToCollection={addToMyCollection}
           onPuzzleClick={(p) => { setSelectedPuzzle(p); setShowModal(true); }}
+          {...selectionProps}
         />
       </div>
 
