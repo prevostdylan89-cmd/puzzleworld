@@ -51,19 +51,30 @@ export default function WishlistSection({ user }) {
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }, '-created_date'),
       ]);
       
-      // Normalize UserPuzzle wishlist items to same shape
-      const normalizedUserPuzzles = userPuzzleWishlist.map(p => ({
-        id: p.id,
-        puzzle_name: p.puzzle_name,
-        puzzle_brand: p.puzzle_brand,
-        puzzle_pieces: p.puzzle_pieces,
-        image_url: p.image_url,
-        notes: p.notes || '',
-        priority: 'medium',
-        created_date: p.created_date,
-        _source: 'user_puzzle',
-        _raw: p,
-        catalogData: null,
+      // Enrich UserPuzzle wishlist items with catalog data (for Amazon link)
+      const normalizedUserPuzzles = await Promise.all(userPuzzleWishlist.map(async (p) => {
+        let catalogData = null;
+        if (p.puzzle_reference) {
+          const results = await base44.entities.PuzzleCatalog.filter({ asin: p.puzzle_reference });
+          if (results.length > 0) catalogData = results[0];
+        }
+        if (!catalogData) {
+          const results = await base44.entities.PuzzleCatalog.filter({ title: p.puzzle_name });
+          if (results.length > 0) catalogData = results[0];
+        }
+        return {
+          id: p.id,
+          puzzle_name: p.puzzle_name,
+          puzzle_brand: p.puzzle_brand,
+          puzzle_pieces: p.puzzle_pieces,
+          image_url: p.image_url,
+          notes: p.notes || '',
+          priority: 'medium',
+          created_date: p.created_date,
+          _source: 'user_puzzle',
+          _raw: p,
+          catalogData,
+        };
       }));
 
       // Enrich old wishlist items with catalog data
@@ -233,17 +244,30 @@ export default function WishlistSection({ user }) {
             )}
 
             <div className="flex gap-2">
+              {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
+                <Button
+                  size="sm"
+                  className="flex-1 bg-[#FF9900] hover:bg-[#e68900] text-black font-semibold"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const link = item.catalogData.amazon_link || `https://www.amazon.fr/dp/${item.catalogData.asin}?tag=MON_PUZZLE_ID-21`;
+                    window.open(link, '_blank');
+                  }}
+                >
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  Amazon
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(item);
                 }}
               >
-                <Trash2 className="w-3 h-3 mr-1" />
-                Remove
+                <Trash2 className="w-3 h-3" />
               </Button>
             </div>
           </div>
