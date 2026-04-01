@@ -27,25 +27,49 @@ export default function WishlistSection({ user }) {
     if (!user) return;
     
     try {
-      const items = await base44.entities.Wishlist.filter(
-        { created_by: user.email },
-        '-created_date'
-      );
+      // Load both old Wishlist entity AND UserPuzzle with status='wishlist'
+      const [oldWishlistItems, userPuzzleWishlist] = await Promise.all([
+        base44.entities.Wishlist.filter({ created_by: user.email }, '-created_date'),
+        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }, '-created_date'),
+      ]);
       
-      // Fetch full puzzle data from PuzzleCatalog for each wishlist item
-      const enrichedItems = [];
-      for (const item of items) {
-        const catalogPuzzles = await base44.entities.PuzzleCatalog.filter({
-          title: item.puzzle_name
-        });
-        
-        enrichedItems.push({
+      // Normalize UserPuzzle wishlist items to same shape
+      const normalizedUserPuzzles = userPuzzleWishlist.map(p => ({
+        id: p.id,
+        puzzle_name: p.puzzle_name,
+        puzzle_brand: p.puzzle_brand,
+        puzzle_pieces: p.puzzle_pieces,
+        image_url: p.image_url,
+        notes: p.notes || '',
+        priority: 'medium',
+        created_date: p.created_date,
+        _source: 'user_puzzle',
+        _raw: p,
+        catalogData: null,
+      }));
+
+      // Enrich old wishlist items with catalog data
+      const enrichedOld = [];
+      for (const item of oldWishlistItems) {
+        const catalogPuzzles = await base44.entities.PuzzleCatalog.filter({ title: item.puzzle_name });
+        enrichedOld.push({
           ...item,
+          _source: 'wishlist',
           catalogData: catalogPuzzles.length > 0 ? catalogPuzzles[0] : null
         });
       }
       
-      setWishlist(enrichedItems);
+      // Merge, dedup by puzzle_name
+      const seen = new Set();
+      const merged = [];
+      for (const item of [...normalizedUserPuzzles, ...enrichedOld]) {
+        const key = item.puzzle_name?.toLowerCase().trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(item);
+      }
+
+      setWishlist(merged);
     } catch (error) {
       console.error('Error loading wishlist:', error);
     } finally {
@@ -53,14 +77,18 @@ export default function WishlistSection({ user }) {
     }
   };
 
-  const handleDelete = async (itemId) => {
+  const handleDelete = async (item) => {
     try {
-      await base44.entities.Wishlist.delete(itemId);
-      setWishlist(wishlist.filter(item => item.id !== itemId));
-      toast.success('Removed from wishlist');
+      if (item._source === 'user_puzzle') {
+        await base44.entities.UserPuzzle.delete(item.id);
+      } else {
+        await base44.entities.Wishlist.delete(item.id);
+      }
+      setWishlist(wishlist.filter(w => w.id !== item.id));
+      toast.success('Retiré de la wishlist');
     } catch (error) {
       console.error('Error deleting item:', error);
-      toast.error('Failed to remove item');
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -188,7 +216,7 @@ export default function WishlistSection({ user }) {
                 className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDelete(item.id);
+                  handleDelete(item);
                 }}
               >
                 <Trash2 className="w-3 h-3 mr-1" />
