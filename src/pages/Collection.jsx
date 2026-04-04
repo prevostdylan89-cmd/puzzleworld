@@ -751,15 +751,17 @@ export default function Collection() {
       )}
 
       {/* Owned badge */}
-      {!selectionMode && ownedStatus && ownedStatus !== 'wishlist' && (
+      {!selectionMode && ownedStatus && (
         <div className="absolute top-2 left-2 z-10">
           <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
             ownedStatus === 'done'
               ? 'bg-green-500 border-green-400 text-white'
+              : ownedStatus === 'wishlist'
+              ? 'bg-yellow-500 border-yellow-400 text-white'
               : 'bg-blue-500 border-blue-400 text-white'
           }`}>
-            <span>{ownedStatus === 'done' ? '🏆' : '📦'}</span>
-            <span className="hidden lg:inline">{ownedStatus === 'done' ? 'Terminé' : 'Ma boîte'}</span>
+            <span>{ownedStatus === 'done' ? '🏆' : ownedStatus === 'wishlist' ? '⭐' : '📦'}</span>
+            <span className="hidden lg:inline">{ownedStatus === 'done' ? 'Terminé' : ownedStatus === 'wishlist' ? 'Wishlist' : 'Ma boîte'}</span>
           </div>
         </div>
       )}
