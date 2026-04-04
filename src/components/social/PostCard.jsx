@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle, Bookmark, BookmarkCheck, ThumbsDown, Flame } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -643,12 +644,13 @@ export default function PostCard({ post, user, isFeatured = false }) {
         />
       )}
 
-      {/* User Profile Dialog */}
-      {showUserProfile && (
+      {/* User Profile Dialog — rendu via portail pour se superposer à toute la page */}
+      {showUserProfile && createPortal(
         <UserProfileDialog 
           userEmail={post.created_by} 
           onClose={() => setShowUserProfile(false)} 
-        />
+        />,
+        document.body
       )}
 
       {/* Puzzle Detail Dialog */}
