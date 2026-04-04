@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Edit3, ExternalLink, ArrowUpDown } from 'lucide-react';
+import { Trash2, Edit3, ExternalLink, ArrowUpDown, MoveRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
@@ -103,6 +103,30 @@ export default function WishlistSection({ user }) {
       console.error('Error loading wishlist:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMove = async (item, newStatus) => {
+    try {
+      if (item._source === 'user_puzzle') {
+        await base44.entities.UserPuzzle.update(item.id, { status: newStatus });
+      } else {
+        // Old Wishlist entity: create a UserPuzzle and delete the old one
+        await base44.entities.UserPuzzle.create({
+          puzzle_name: item.puzzle_name,
+          puzzle_brand: item.puzzle_brand || '',
+          puzzle_pieces: item.puzzle_pieces || 0,
+          image_url: item.image_url || '',
+          status: newStatus,
+        });
+        await base44.entities.Wishlist.delete(item.id);
+      }
+      setWishlist(wishlist.filter(w => w.id !== item.id));
+      const labels = { inbox: 'dans sa boîte 📦', done: 'terminés 🏆' };
+      toast.success(`Déplacé vers ${labels[newStatus]}`);
+    } catch (error) {
+      console.error('Error moving item:', error);
+      toast.error('Erreur lors du déplacement');
     }
   };
 
@@ -243,7 +267,34 @@ export default function WishlistSection({ user }) {
               <p className="text-white/60 text-sm mb-3 line-clamp-2">{item.notes}</p>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-white/20 text-white/70 hover:bg-white/5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoveRight className="w-3 h-3 mr-1" />
+                    Déplacer
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }}
+                    className="text-white hover:bg-white/10 cursor-pointer"
+                  >
+                    📦 Dans sa boîte
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }}
+                    className="text-white hover:bg-white/10 cursor-pointer"
+                  >
+                    🏆 Terminé
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
                 <Button
                   size="sm"
