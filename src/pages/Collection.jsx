@@ -209,14 +209,17 @@ export default function Collection() {
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [userOwnedMap, setUserOwnedMap] = useState({}); // { puzzle_reference: status }
 
-  // Load user's owned puzzles (inbox + done) to show badges
+  // Load user's owned puzzles to show badges on community catalog
   useEffect(() => {
     base44.auth.me().then(user => {
       if (!user) return;
       base44.entities.UserPuzzle.filter({ created_by: user.email }).then(puzzles => {
         const map = {};
         puzzles.forEach(p => {
-          if (p.puzzle_reference) map[p.puzzle_reference] = p.status;
+          // Match by ASIN/reference (primary key)
+          if (p.puzzle_reference) map[`ref:${p.puzzle_reference}`] = p.status;
+          // Match by name as fallback
+          if (p.puzzle_name) map[`name:${p.puzzle_name.toLowerCase().trim()}`] = p.status;
         });
         setUserOwnedMap(map);
       });
@@ -663,7 +666,12 @@ export default function Collection() {
                     variant={viewMode === 'large' ? 'large' : 'default'}
                     selectionMode={selectionMode}
                     isSelected={selectedIds.has(puzzle.id)}
-                    ownedStatus={userOwnedMap[puzzle.asin] || userOwnedMap[puzzle.id] || null}
+                    ownedStatus={
+                      userOwnedMap[`ref:${puzzle.asin}`] ||
+                      userOwnedMap[`ref:${puzzle.id}`] ||
+                      userOwnedMap[`name:${puzzle.title?.toLowerCase().trim()}`] ||
+                      null
+                    }
                     onToggleSelect={() => {
                       setSelectedIds(prev => {
                         const next = new Set(prev);
@@ -745,10 +753,13 @@ export default function Collection() {
       {/* Owned badge */}
       {!selectionMode && ownedStatus && ownedStatus !== 'wishlist' && (
         <div className="absolute top-2 left-2 z-10">
-          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm ${
-            ownedStatus === 'done' ? 'bg-green-500/90 text-white' : 'bg-blue-500/90 text-white'
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
+            ownedStatus === 'done'
+              ? 'bg-green-500 border-green-400 text-white'
+              : 'bg-blue-500 border-blue-400 text-white'
           }`}>
-            {ownedStatus === 'done' ? '🏆' : '📦'}
+            <span>{ownedStatus === 'done' ? '🏆' : '📦'}</span>
+            <span className="hidden lg:inline">{ownedStatus === 'done' ? 'Terminé' : 'Ma boîte'}</span>
           </div>
         </div>
       )}
