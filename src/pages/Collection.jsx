@@ -207,6 +207,21 @@ export default function Collection() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [addingToCollection, setAddingToCollection] = useState(false);
   const [showDiscovery, setShowDiscovery] = useState(false);
+  const [userOwnedMap, setUserOwnedMap] = useState({}); // { puzzle_reference: status }
+
+  // Load user's owned puzzles (inbox + done) to show badges
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (!user) return;
+      base44.entities.UserPuzzle.filter({ created_by: user.email }).then(puzzles => {
+        const map = {};
+        puzzles.forEach(p => {
+          if (p.puzzle_reference) map[p.puzzle_reference] = p.status;
+        });
+        setUserOwnedMap(map);
+      });
+    }).catch(() => {});
+  }, []);
 
   const addToMyCollection = useCallback(async (puzzles, status = 'inbox') => {
     try {
@@ -648,6 +663,7 @@ export default function Collection() {
                     variant={viewMode === 'large' ? 'large' : 'default'}
                     selectionMode={selectionMode}
                     isSelected={selectedIds.has(puzzle.id)}
+                    ownedStatus={userOwnedMap[puzzle.asin] || userOwnedMap[puzzle.id] || null}
                     onToggleSelect={() => {
                       setSelectedIds(prev => {
                         const next = new Set(prev);
@@ -702,7 +718,7 @@ export default function Collection() {
 }
 
 
-        function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection }) {
+        function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection, ownedStatus }) {
         // Icons needed
         const Star = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>;
         const Archive = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>;
@@ -722,6 +738,17 @@ export default function Collection() {
             isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
           }`}>
             {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+          </div>
+        </div>
+      )}
+
+      {/* Owned badge */}
+      {!selectionMode && ownedStatus && ownedStatus !== 'wishlist' && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm ${
+            ownedStatus === 'done' ? 'bg-green-500/90 text-white' : 'bg-blue-500/90 text-white'
+          }`}>
+            {ownedStatus === 'done' ? '🏆' : '📦'}
           </div>
         </div>
       )}
