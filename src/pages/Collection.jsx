@@ -751,7 +751,7 @@ export default function Collection() {
       )}
 
       {/* Owned badge */}
-      {!selectionMode && ownedStatus && (
+      {ownedStatus && (
         <div className="absolute top-2 left-2 z-10">
           <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
             ownedStatus === 'done'
