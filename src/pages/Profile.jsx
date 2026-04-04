@@ -31,6 +31,7 @@ import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/compo
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
+import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
 import { Crown, Camera } from 'lucide-react';
 
 
@@ -422,6 +423,14 @@ export default function Profile() {
               <Heart className="w-4 h-4 shrink-0" />
               <span className="ml-1.5">Wishlist</span>
             </TabsTrigger>
+            <TabsTrigger 
+              value="personal" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
+            >
+              <span className="text-base shrink-0">🔒</span>
+              <span className="ml-1.5 hidden sm:inline">Perso</span>
+              <span className="ml-1.5 sm:hidden">Perso</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="collection" className="mt-6">
@@ -432,6 +441,9 @@ export default function Profile() {
             <WishlistSection user={user} />
           </TabsContent>
 
+          <TabsContent value="personal" className="mt-6">
+            <PersonalPuzzleSection user={user} />
+          </TabsContent>
 
         </Tabs>
 

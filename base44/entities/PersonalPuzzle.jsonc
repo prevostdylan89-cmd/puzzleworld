@@ -1,0 +1,21 @@
+{
+  "name": "PersonalPuzzle",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom du puzzle personnel"
+    },
+    "piece_count": {
+      "type": "number",
+      "description": "Nombre de pi\u00e8ces"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Photo personnelle du puzzle"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
