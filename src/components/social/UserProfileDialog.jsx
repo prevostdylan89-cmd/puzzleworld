@@ -175,7 +175,7 @@ export default function UserProfileDialog({ userEmail, onClose }) {
         onClick={(e) => e.stopPropagation()}
         className="bg-[#0a0a2e] border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
-        {/* Header */}
+        {/* Header with actions */}
         <div className="relative h-32 bg-gradient-to-br from-orange-500/20 to-purple-500/20">
           <button
             onClick={onClose}
@@ -183,6 +183,36 @@ export default function UserProfileDialog({ userEmail, onClose }) {
           >
             <X className="w-5 h-5" />
           </button>
+          {currentUser && currentUser.email !== userEmail && (
+            <div className="absolute bottom-4 right-4 flex gap-2">
+              <Button
+                onClick={handleFollow}
+                size="sm"
+                className={`rounded-xl ${
+                  isFollowing
+                    ? 'bg-white/10 text-white hover:bg-white/20'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
+                }`}
+              >
+                {isFollowing ? <><UserCheck className="w-4 h-4 mr-1" />Suivi</> : <><UserPlus className="w-4 h-4 mr-1" />Suivre</>}
+              </Button>
+              {!isFriend && !friendRequestPending && (
+                <Button size="sm" onClick={handleSendFriendRequest} className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white">
+                  <Users className="w-4 h-4 mr-1" />Ami
+                </Button>
+              )}
+              {friendRequestPending && (
+                <Button size="sm" disabled className="rounded-xl bg-white/10 text-white/50">
+                  <Users className="w-4 h-4 mr-1" />En attente
+                </Button>
+              )}
+              {isFriend && (
+                <Button size="sm" disabled className="rounded-xl bg-green-500/20 text-green-400">
+                  <UserCheck className="w-4 h-4 mr-1" />Amis
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Profile Info - Scrollable */}
@@ -193,57 +223,7 @@ export default function UserProfileDialog({ userEmail, onClose }) {
                 {userInitials}
               </AvatarFallback>
             </Avatar>
-            {currentUser && currentUser.email !== userEmail && (
-              <div className="flex-1 mb-2 flex gap-2">
-                <Button 
-                  onClick={handleFollow}
-                  className={`flex-1 rounded-xl ${
-                    isFollowing 
-                      ? 'bg-white/10 text-white hover:bg-white/20' 
-                      : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
-                  }`}
-                >
-                  {isFollowing ? (
-                    <>
-                      <UserCheck className="w-4 h-4 mr-2" />
-                      Suivi
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Suivre
-                    </>
-                  )}
-                </Button>
-                
-                {!isFriend && !friendRequestPending && (
-                  <Button 
-                    onClick={handleSendFriendRequest}
-                    className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white"
-                  >
-                    <Users className="w-4 h-4" />
-                  </Button>
-                )}
-                
-                {friendRequestPending && (
-                  <Button 
-                    disabled
-                    className="rounded-xl bg-white/10 text-white/50"
-                  >
-                    <Users className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {isFriend && (
-                  <Button 
-                    disabled
-                    className="rounded-xl bg-green-500/20 text-green-400"
-                  >
-                    <UserCheck className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            )}
+            
           </div>
 
           <div className="mb-4">
@@ -286,46 +266,7 @@ export default function UserProfileDialog({ userEmail, onClose }) {
             </div>
           </div>
 
-          {/* Collection */}
-          <div>
-            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4 text-orange-400" />
-              Collection Personnelle
-            </h3>
-            {completedPuzzles.length === 0 ? (
-              <div className="text-center py-8 text-white/50 text-sm">
-                Aucun puzzle complété pour le moment
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {completedPuzzles.slice(0, 6).map((puzzle) => (
-                  <div key={puzzle.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
-                    {puzzle.image_url && (
-                      <img 
-                        src={puzzle.image_url} 
-                        alt={puzzle.puzzle_name}
-                        className="w-full h-24 object-cover"
-                      />
-                    )}
-                    <div className="p-2">
-                      <p className="text-white text-xs font-medium truncate">{puzzle.puzzle_name}</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-white/40 text-[10px]">{puzzle.puzzle_brand}</span>
-                        <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-[10px] px-1 py-0">
-                          {puzzle.puzzle_pieces} pcs
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {completedPuzzles.length > 6 && (
-              <p className="text-center text-white/40 text-xs mt-3">
-                +{completedPuzzles.length - 6} autres puzzles
-              </p>
-            )}
-          </div>
+
         </div>
       </motion.div>
     </div>

@@ -41,6 +41,13 @@ export default function WishlistSection({ user }) {
     loadWishlist();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const unsubWishlist = base44.entities.Wishlist.subscribe(() => loadWishlist());
+    const unsubUserPuzzle = base44.entities.UserPuzzle.subscribe(() => loadWishlist());
+    return () => { unsubWishlist(); unsubUserPuzzle(); };
+  }, [user]);
+
   const loadWishlist = async () => {
     if (!user) return;
     
