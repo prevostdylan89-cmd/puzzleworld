@@ -616,9 +616,7 @@ function LayoutContent({ children, currentPageName }) {
                 <a href="https://www.instagram.com/puzzle__world__?igsh=NGI5cHJoOXpuZHQ5" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">📷</span>
                 </a>
-                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-white/70">👍</span>
-                </div>
+
                 <a href="https://www.tiktok.com/@puzzleworld58?_r=1&_t=ZN-93ubJQIrj3m" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">🎵</span>
                 </a>
