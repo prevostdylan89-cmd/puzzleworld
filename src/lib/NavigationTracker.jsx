@@ -10,6 +10,14 @@ export default function NavigationTracker() {
     const { Pages, mainPage } = pagesConfig;
     const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 
+    // Scroll to top on every page change
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        // Also scroll the main content container (mobile)
+        const mainContainer = document.getElementById('pull-scroll-container');
+        if (mainContainer) mainContainer.scrollTop = 0;
+    }, [location.pathname]);
+
     // Log user activity when navigating to a page
     useEffect(() => {
         // Extract page name from pathname
