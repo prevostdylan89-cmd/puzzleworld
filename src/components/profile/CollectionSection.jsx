@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -205,9 +206,76 @@ export default function CollectionSection({ user }) {
   );
 }
 
+function UserPuzzleDetailModal({ open, onClose, puzzle }) {
+  if (!puzzle) return null;
+
+  const displayImage = (puzzle.status === 'done' && puzzle.progress_photo) ? puzzle.progress_photo : puzzle.image_url;
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto p-0">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+
+        {displayImage && (
+          <div className="w-full bg-white/5">
+            <img src={displayImage} alt={puzzle.puzzle_name} className="w-full h-64 object-contain" />
+          </div>
+        )}
+
+        <div className="p-6 space-y-4">
+          <div>
+            <h2 className="text-xl font-bold text-white">{puzzle.puzzle_name}</h2>
+            {puzzle.puzzle_brand && (
+              <p className="text-orange-400 font-semibold mt-1">par {puzzle.puzzle_brand}</p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {puzzle.puzzle_pieces && (
+              <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
+                <span>🧩</span>
+                <span className="text-white font-semibold">{puzzle.puzzle_pieces} pièces</span>
+              </div>
+            )}
+            {puzzle.puzzle_reference && (
+              <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
+                <span className="text-white/60 text-sm">Réf: {puzzle.puzzle_reference}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
+              <span className="text-white/60 text-sm capitalize">
+                {puzzle.status === 'inbox' ? '📦 Dans la boîte' : puzzle.status === 'done' ? '✅ Terminé' : puzzle.status}
+              </span>
+            </div>
+          </div>
+
+          {puzzle.notes && (
+            <div className="bg-white/5 rounded-lg p-4">
+              <p className="text-white/70 text-sm">{puzzle.notes}</p>
+            </div>
+          )}
+
+          {puzzle.start_date && (
+            <p className="text-white/50 text-sm">Commencé le : {new Date(puzzle.start_date).toLocaleDateString('fr-FR')}</p>
+          )}
+          {puzzle.end_date && (
+            <p className="text-white/50 text-sm">Terminé le : {new Date(puzzle.end_date).toLocaleDateString('fr-FR')}</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleCompletionPhotoUpload = async (e) => {
@@ -279,14 +347,17 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
   };
 
   return (
+    <>
+    <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative"
+      onClick={() => setShowDetail(true)}
+      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative cursor-pointer"
     >
       {/* Menu d'actions */}
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-2 right-2 z-10" onClick={e => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -360,7 +431,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
             {puzzle.status === 'done' && (
               <div
                 className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
               >
                 <div className="flex flex-col items-center gap-1 text-white">
                   <ImagePlus className="w-8 h-8" />
@@ -372,7 +443,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
         ) : (
           <div
             className="w-full h-full flex items-center justify-center cursor-pointer"
-            onClick={puzzle.status === 'done' ? () => fileInputRef.current?.click() : undefined}
+            onClick={puzzle.status === 'done' ? (e) => { e.stopPropagation(); fileInputRef.current?.click(); } : undefined}
           >
             {puzzle.status === 'done' ? (
               <div className="flex flex-col items-center gap-2 text-white/30 hover:text-orange-400 transition-colors">
@@ -395,5 +466,6 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
