@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/components/LanguageContext';
 import { Users, UserPlus, UserCheck, UserX, Loader2, Search, MessageCircle, Send, ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
 export default function Friends() {
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -145,25 +147,25 @@ export default function Friends() {
       addressee_name: targetUser.display_name || targetUser.full_name || targetUser.email,
       status: 'pending'
     });
-    toast.success('Demande envoyée');
+    toast.success(t('requestSent'));
     loadData();
   };
 
   const acceptRequest = async (requestId) => {
     await base44.entities.Friendship.update(requestId, { status: 'accepted' });
-    toast.success('Demande acceptée');
+    toast.success(t('requestAccepted'));
     loadData();
   };
 
   const declineRequest = async (requestId) => {
     await base44.entities.Friendship.delete(requestId);
-    toast.success('Demande supprimée');
+    toast.success(t('requestDeleted'));
     loadData();
   };
 
   const removeFriend = async (friendshipId) => {
     await base44.entities.Friendship.delete(friendshipId);
-    toast.success('Ami supprimé');
+    toast.success(t('friendRemoved'));
     loadData();
   };
 
@@ -175,8 +177,7 @@ export default function Friends() {
   const filteredUsers = searchQuery.trim().length < 2 ? [] : allUsers.filter(u =>
     u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.friend_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    u.friend_code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -194,18 +195,18 @@ export default function Friends() {
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
             <Users className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Amis & Messages</h1>
+          <h1 className="text-3xl font-bold text-white">{t('friendsAndMessages')}</h1>
         </div>
-        <p className="text-white/60">Gérez vos amis et vos conversations</p>
+        <p className="text-white/60">{t('manageFriendsConversations')}</p>
       </motion.div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-white/5 border border-white/10 flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="friends" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
-            Amis ({friends.length})
+            {t('friends')} ({friends.length})
           </TabsTrigger>
           <TabsTrigger value="messages" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm relative">
-            Messages
+            {t('messages')}
             {unreadConversationsCount > 0 && (
               <span className="ml-1.5 bg-orange-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {unreadConversationsCount}
@@ -213,13 +214,13 @@ export default function Friends() {
             )}
           </TabsTrigger>
           <TabsTrigger value="requests" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
-            Reçues ({pendingRequests.length})
+            {t('received')} ({pendingRequests.length})
           </TabsTrigger>
           <TabsTrigger value="sent" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
-            Envoyées ({sentRequests.length})
+            {t('sent')} ({sentRequests.length})
           </TabsTrigger>
           <TabsTrigger value="find" className="data-[state=active]:bg-orange-500/20 text-xs sm:text-sm">
-            Rechercher
+            {t('findFriends')}
           </TabsTrigger>
         </TabsList>
 
@@ -228,7 +229,7 @@ export default function Friends() {
           {friends.length === 0 ? (
             <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
               <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/60">Vous n'avez pas encore d'amis</p>
+              <p className="text-white/60">{t('noFriendsYet')}</p>
             </div>
           ) : (
             friends.map((friend) => (
@@ -241,8 +242,7 @@ export default function Friends() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-white font-medium">{friend.name}</p>
-                    <p className="text-white/40 text-sm">{friend.email}</p>
+                   <p className="text-white font-medium">{friend.name}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -264,7 +264,7 @@ export default function Friends() {
           {friends.length === 0 ? (
             <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
               <MessageCircle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/60">Ajoutez des amis pour commencer à discuter</p>
+              <p className="text-white/60">{t('addFriendsToChatPrompt')}</p>
             </div>
           ) : (
             <>
@@ -276,7 +276,7 @@ export default function Friends() {
                     <motion.div key="list" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
                       className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
                       <div className="p-4 border-b border-white/10">
-                        <h3 className="text-white font-semibold">Conversations</h3>
+                        <h3 className="text-white font-semibold">{t('conversations')}</h3>
                       </div>
                       {friends.map((friend) => (
                         <button key={friend.email} onClick={() => setSelectedFriend(friend)}
@@ -288,7 +288,6 @@ export default function Friends() {
                           </Avatar>
                           <div className="flex-1 text-left min-w-0">
                             <p className="text-white font-medium truncate">{friend.name}</p>
-                            <p className="text-white/40 text-sm truncate">{friend.email}</p>
                           </div>
                           <ChevronRight className="w-5 h-5 text-white/30 flex-shrink-0" />
                         </button>
@@ -314,7 +313,7 @@ export default function Friends() {
                       {/* Messages scrollables */}
                       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                         {messages.length === 0 && (
-                          <p className="text-center text-white/30 text-sm py-8">Commencez la conversation !</p>
+                          <p className="text-center text-white/30 text-sm py-8">{t('startConversation')}</p>
                         )}
                         {messages.map((msg) => {
                           const isMine = msg.sender_email === user.email;
@@ -353,7 +352,7 @@ export default function Friends() {
                 {/* Sidebar amis */}
                 <div className="w-80 border-r border-white/10 flex flex-col flex-shrink-0">
                   <div className="p-4 border-b border-white/10">
-                    <h3 className="text-white font-semibold">Conversations</h3>
+                    <h3 className="text-white font-semibold">{t('conversations')}</h3>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     {friends.map((friend) => (
@@ -366,7 +365,6 @@ export default function Friends() {
                         </Avatar>
                         <div className="flex-1 text-left min-w-0">
                           <p className="text-white font-medium truncate">{friend.name}</p>
-                          <p className="text-white/40 text-xs truncate">{friend.email}</p>
                         </div>
                       </button>
                     ))}
@@ -386,7 +384,7 @@ export default function Friends() {
                       </div>
                       <div className="flex-1 overflow-y-auto p-4 space-y-3">
                         {messages.length === 0 && (
-                          <p className="text-center text-white/30 text-sm py-8">Commencez la conversation !</p>
+                          <p className="text-center text-white/30 text-sm py-8">{t('startConversation')}</p>
                         )}
                         {messages.map((msg) => {
                           const isMine = msg.sender_email === user.email;
@@ -405,7 +403,7 @@ export default function Friends() {
                       </div>
                       <form onSubmit={sendMessage} className="p-4 border-t border-white/10 flex-shrink-0">
                         <div className="flex gap-2">
-                          <Input placeholder="Écrivez un message..." value={newMessage}
+                          <Input placeholder={t('writeMessage')} value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             className="bg-white/5 border-white/20 text-white" />
                           <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={!newMessage.trim()}>
@@ -418,7 +416,7 @@ export default function Friends() {
                     <div className="flex-1 flex items-center justify-center">
                       <div className="text-center">
                         <MessageCircle className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/50">Sélectionnez un ami pour discuter</p>
+                        <p className="text-white/50">{t('selectFriendToChat')}</p>
                       </div>
                     </div>
                   )}
@@ -433,7 +431,7 @@ export default function Friends() {
           {pendingRequests.length === 0 ? (
             <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
               <UserPlus className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/60">Aucune demande reçue en attente</p>
+              <p className="text-white/60">{t('noPendingRequests')}</p>
             </div>
           ) : (
             pendingRequests.map((request) => (
@@ -447,7 +445,6 @@ export default function Friends() {
                   </Avatar>
                   <div>
                     <p className="text-white font-medium">{request.requester_name}</p>
-                    <p className="text-white/40 text-sm">{request.requester_email}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -468,7 +465,7 @@ export default function Friends() {
           {sentRequests.length === 0 ? (
             <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
               <UserPlus className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/60">Aucune demande envoyée en attente</p>
+              <p className="text-white/60">{t('noSentRequests')}</p>
             </div>
           ) : (
             sentRequests.map((request) => (
@@ -482,7 +479,6 @@ export default function Friends() {
                   </Avatar>
                   <div>
                     <p className="text-white font-medium">{request.addressee_name}</p>
-                    <p className="text-white/40 text-sm">{request.addressee_email}</p>
                     <p className="text-orange-400/70 text-xs">En attente de réponse</p>
                   </div>
                 </div>
@@ -515,9 +511,8 @@ export default function Friends() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-white font-medium">{targetUser.display_name || targetUser.full_name || targetUser.email}</p>
-                  {targetUser.friend_code && <p className="text-orange-400/70 text-xs">{targetUser.friend_code}</p>}
-                  <p className="text-white/40 text-sm">{targetUser.email}</p>
+                  <p className="text-white font-medium">{targetUser.display_name || targetUser.full_name}</p>
+                  {targetUser.friend_code && <p className="text-orange-400/70 text-xs">@{targetUser.friend_code}</p>}
                 </div>
               </div>
               {isFriend(targetUser.email) ? (
