@@ -229,7 +229,7 @@ export default function Collection() {
   const addToMyCollection = useCallback(async (puzzles, status = 'inbox') => {
     try {
       const user = await base44.auth.me();
-      if (!user) { toast.error('Connectez-vous pour ajouter à votre collection'); return; }
+      if (!user) { toast.error(t('loginToAdd')); return; }
       let added = 0;
       for (const puzzle of puzzles) {
         const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: puzzle.asin || puzzle.id });
@@ -247,9 +247,9 @@ export default function Collection() {
       }
       const statusLabels = { wishlist: 'wishlist', inbox: 'collection', done: 'terminés' };
       if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} en ${statusLabels[status] || 'collection'} !`);
-      else toast.info('Ces puzzles sont déjà dans votre collection');
+      else toast.info(t('alreadyInCollection'));
     } catch (e) {
-      toast.error("Erreur lors de l'ajout");
+      toast.error(t('addError'));
     }
   }, []);
 
@@ -343,9 +343,9 @@ export default function Collection() {
         <div className="px-4 lg:px-8 py-3 lg:py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-4">
             <div className="hidden lg:block">
-              <h1 className="text-2xl font-bold text-white">Collection Communautaire</h1>
+              <h1 className="text-2xl font-bold text-white">{t('communityCollection')}</h1>
               <p className="text-white/50 text-sm mt-1">
-                {isLoading ? 'Chargement...' : `${sortedPuzzles.length} puzzles partagés par la communauté`}
+                {isLoading ? t('loading') : `${sortedPuzzles.length} ${t('communityPuzzlesCount').replace('{count}', '').trim()}`}
               </p>
             </div>
 
@@ -403,7 +403,7 @@ export default function Collection() {
 
                     {/* Brand Filter */}
                     <div>
-                      <label className="text-sm text-white/70 mb-3 block">Marque</label>
+                      <label className="text-sm text-white/70 mb-3 block">{t('brandFilter')}</label>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => setSelectedBrand('all')}
@@ -413,7 +413,7 @@ export default function Collection() {
                               : 'bg-white/5 text-white/70 hover:bg-white/10'
                           }`}
                         >
-                          Toutes
+                          {t('allBrands')}
                         </button>
                         {brandOptions.map(brand => (
                           <button
@@ -425,7 +425,7 @@ export default function Collection() {
                                 : 'bg-white/5 text-white/70 hover:bg-white/10'
                             }`}
                           >
-                            {brand === '__unknown__' ? '❓ Marque inconnue' : brand}
+                            {brand === '__unknown__' ? t('unknownBrand') : brand}
                           </button>
                         ))}
                       </div>
@@ -475,7 +475,7 @@ export default function Collection() {
                 className={`w-full rounded-full border-orange-500/40 gap-1.5 ${showDiscovery ? 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600' : 'text-orange-400 hover:bg-orange-500/10 border-orange-500/40'}`}
               >
                 <span>✨</span>
-                {showDiscovery ? 'Collection globale' : 'Mode Découverte'}
+                {showDiscovery ? t('globalCollection') : t('discoverMode')}
               </Button>
               {!showDiscovery && <div className="flex gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -500,10 +500,10 @@ export default function Collection() {
                   <SelectValue placeholder="Trier..." />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a2e] border-white/10">
-                  <SelectItem value="newest" className="text-white text-sm">Nouveautés</SelectItem>
-                  <SelectItem value="popular" className="text-white text-sm">Populaires</SelectItem>
-                  <SelectItem value="pieces-asc" className="text-white text-sm">Pièces ↑</SelectItem>
-                  <SelectItem value="pieces-desc" className="text-white text-sm">Pièces ↓</SelectItem>
+                  <SelectItem value="newest" className="text-white text-sm">{t('sortNewest')}</SelectItem>
+                  <SelectItem value="popular" className="text-white text-sm">{t('sortPopular')}</SelectItem>
+                  <SelectItem value="pieces-asc" className="text-white text-sm">{t('piecesAsc')}</SelectItem>
+                  <SelectItem value="pieces-desc" className="text-white text-sm">{t('piecesDesc')}</SelectItem>
                 </SelectContent>
               </Select>
               </div>}
@@ -536,7 +536,7 @@ export default function Collection() {
           <div className="hidden lg:flex items-center justify-between mt-4">
             <div className="flex items-center gap-2 text-sm text-white/50">
               <Puzzle className="w-4 h-4" />
-              <span>Trier par:</span>
+              <span>{t('sortBy2')}</span>
             </div>
             <div className="flex items-center gap-2">
               <ReclassifyButton onComplete={() => refetch()} />
@@ -547,7 +547,7 @@ export default function Collection() {
                 className={`rounded-full border-orange-500/40 gap-1.5 ${showDiscovery ? 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600' : 'text-orange-400 hover:bg-orange-500/10'}`}
               >
                 <span>✨</span>
-                {showDiscovery ? 'Collection globale' : 'Découverte'}
+                {showDiscovery ? t('globalCollection') : t('discoverMode')}
               </Button>
               {!showDiscovery && (
                 <Button
@@ -555,7 +555,7 @@ export default function Collection() {
                   size="sm"
                   onClick={() => setSortBy('newest')}
                   className={`rounded-full ${sortBy === 'newest' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}
-                >Nouveautés</Button>
+                >{t('sortNewest')}</Button>
               )}
               {!showDiscovery && (
                 <Select value={sortBy} onValueChange={setSortBy}>
@@ -563,8 +563,8 @@ export default function Collection() {
                     <SelectValue placeholder="Plus..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#0a0a2e] border-white/10">
-                    <SelectItem value="pieces-asc" className="text-white text-sm">Pièces (croissant)</SelectItem>
-                    <SelectItem value="pieces-desc" className="text-white text-sm">Pièces (décroissant)</SelectItem>
+                    <SelectItem value="pieces-asc" className="text-white text-sm">{t('piecesAscFull')}</SelectItem>
+                    <SelectItem value="pieces-desc" className="text-white text-sm">{t('piecesDescFull')}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -579,7 +579,7 @@ export default function Collection() {
           <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white/80 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
-          <span className="text-white font-semibold text-sm">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
+          <span className="text-white font-semibold text-sm">{selectedIds.size} {selectedIds.size > 1 ? t('selectedPlural') : t('selected')}</span>
           <div className="w-px h-4 bg-white/30" />
           <button
             onClick={() => {
@@ -588,7 +588,7 @@ export default function Collection() {
             }}
             className="text-white/80 hover:text-white text-xs transition-colors"
           >
-            {selectedIds.size === sortedPuzzles.length ? 'Désélect.' : 'Tout'}
+            {selectedIds.size === sortedPuzzles.length ? t('deselectAll') : t('selectAll')}
           </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -597,15 +597,15 @@ export default function Collection() {
                 className="flex items-center gap-1 bg-white text-orange-500 font-semibold px-3 py-1 rounded-full text-sm disabled:opacity-50"
               >
                 {addingToCollection ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                Ajouter
+                {t('addToCollection')}
                 <ChevronDown className="w-3 h-3" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
               {[
                 { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
-                { status: 'inbox', label: 'Dans sa boîte', emoji: '📦' },
-                { status: 'done', label: 'Terminé', emoji: '🏆' },
+                { status: 'inbox', label: t('inBox'), emoji: '📦' },
+                { status: 'done', label: t('completed2'), emoji: '🏆' },
               ].map(({ status, label, emoji }) => (
                 <DropdownMenuItem
                   key={status}
@@ -654,8 +654,8 @@ export default function Collection() {
               {sortedPuzzles.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <Puzzle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/50">Aucun puzzle trouvé</p>
-                  <p className="text-white/30 text-sm mt-2">Soyez le premier à ajouter un puzzle à la communauté !</p>
+                  <p className="text-white/50">{t('noPuzzleFound')}</p>
+                  <p className="text-white/30 text-sm mt-2">{t('beFirstToAdd')}</p>
                 </div>
               ) : (
                 sortedPuzzles.map((puzzle, index) => (
@@ -727,6 +727,7 @@ export default function Collection() {
 
 
         function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection, ownedStatus }) {
+        const { t } = useLanguage();
         // Icons needed
         const Star = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>;
         const Archive = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>;
@@ -761,7 +762,7 @@ export default function Collection() {
               : 'bg-blue-500 border-blue-400 text-white'
           }`}>
             <span>{ownedStatus === 'done' ? '🏆' : ownedStatus === 'wishlist' ? '⭐' : '📦'}</span>
-            <span className="hidden lg:inline">{ownedStatus === 'done' ? 'Terminé' : ownedStatus === 'wishlist' ? 'Wishlist' : 'Ma boîte'}</span>
+            <span className="hidden lg:inline">{ownedStatus === 'done' ? t('completed2') : ownedStatus === 'wishlist' ? 'Wishlist' : t('myBox')}</span>
           </div>
         </div>
       )}
@@ -791,21 +792,21 @@ export default function Collection() {
                 className="text-white hover:bg-white/10 cursor-pointer gap-2"
               >
                 <Archive className="w-4 h-4 text-blue-400" />
-                Dans sa boîte
+                {t('inBox')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => { e.stopPropagation(); onAddToCollection('done'); }}
                 className="text-white hover:bg-white/10 cursor-pointer gap-2"
               >
                 <Trophy className="w-4 h-4 text-green-400" />
-                Terminé
+                {t('completed2')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => { e.stopPropagation(); onStartSelection(); }}
                 className="text-white/50 hover:bg-white/10 cursor-pointer gap-2 border-t border-white/10 mt-1 pt-1"
               >
                 <CheckSquare className="w-4 h-4 text-orange-400" />
-                Sélection multiple
+                {t('multipleSelect')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

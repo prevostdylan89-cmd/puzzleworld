@@ -109,7 +109,7 @@ export default function Home() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/20 text-orange-400 text-xs mb-3">
               <Sparkles className="w-3 h-3" />
-              <span>Nouveaux puzzles chaque jour</span>
+              <span>{t('newPuzzlesDaily')}</span>
             </div>
             <h1 className="text-2xl font-bold text-white leading-tight mb-1">
               <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">
@@ -131,8 +131,8 @@ export default function Home() {
                   <Scan className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-sm leading-tight">Scanner</p>
-                  <p className="text-white/75 text-[11px]">Ajouter un puzzle</p>
+                  <p className="text-white font-bold text-sm leading-tight">{t('scanPuzzle')}</p>
+                  <p className="text-white/75 text-[11px]">{t('addPuzzle')}</p>
                 </div>
               </motion.button>
 
@@ -147,8 +147,8 @@ export default function Home() {
                     <TrendingUp className="w-5 h-5 text-orange-400" />
                   </div>
                   <div>
-                    <p className="text-white font-bold text-sm leading-tight">Explorer</p>
-                    <p className="text-white/50 text-[11px]">Collection</p>
+                    <p className="text-white font-bold text-sm leading-tight">{t('explore')}</p>
+                    <p className="text-white/50 text-[11px]">{t('collection')}</p>
                   </div>
                 </motion.div>
               </Link>
@@ -164,13 +164,13 @@ export default function Home() {
                 <TrendingUp className="w-4 h-4 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white">Top 10 Puzzles</h2>
-                <p className="text-white/40 text-[10px]">Les plus appréciés</p>
+                <h2 className="text-base font-bold text-white">{t('topPuzzles')}</h2>
+                <p className="text-white/40 text-[10px]">{t('mostLiked')}</p>
               </div>
             </div>
             <Link to={createPageUrl('Collection')}>
               <span className="text-orange-400 text-xs font-medium flex items-center gap-0.5">
-                Voir tout <ChevronRight className="w-3.5 h-3.5" />
+                {t('seeAll')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </Link>
           </div>
@@ -182,7 +182,7 @@ export default function Home() {
               ))}
             </div>
           ) : topPuzzles.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">Aucun puzzle disponible</div>
+            <div className="text-center py-8 text-white/30 text-sm">{t('noPuzzleAvailable')}</div>
           ) : (
             <div className="flex gap-3 px-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
               {topPuzzles.map((puzzle, index) => (
@@ -234,13 +234,13 @@ export default function Home() {
                   <BookOpen className="w-4 h-4 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-white">Derniers articles</h2>
-                  <p className="text-white/40 text-[10px]">À lire absolument</p>
+                  <h2 className="text-base font-bold text-white">{t('latestArticles')}</h2>
+                  <p className="text-white/40 text-[10px]">{t('mustRead')}</p>
                 </div>
               </div>
               <Link to={createPageUrl('Blog')}>
                 <span className="text-blue-400 text-xs font-medium flex items-center gap-0.5">
-                  Voir tout <ChevronRight className="w-3.5 h-3.5" />
+                  {t('seeAll')} <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
             </div>
@@ -285,14 +285,14 @@ export default function Home() {
                 <Calendar className="w-4 h-4 text-purple-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white">Événements</h2>
-                <p className="text-white/40 text-[10px]">À venir</p>
+                <h2 className="text-base font-bold text-white">{t('eventsTitle')}</h2>
+                <p className="text-white/40 text-[10px]">{t('upcoming')}</p>
               </div>
             </div>
             {!eventsInMaintenance && (
               <Link to={createPageUrl('Events')}>
                 <span className="text-purple-400 text-xs font-medium flex items-center gap-0.5">
-                  Voir tout <ChevronRight className="w-3.5 h-3.5" />
+                  {t('seeAll')} <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
             )}
@@ -301,7 +301,7 @@ export default function Home() {
           {eventsInMaintenance ? (
             <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/10">
               <span className="text-3xl mb-2 block">🔧</span>
-              <p className="text-white/50 text-sm">Événements en maintenance</p>
+              <p className="text-white/50 text-sm">{t('eventsInMaintenance')}</p>
             </div>
           ) : loading ? (
             <div className="space-y-3">
@@ -310,7 +310,7 @@ export default function Home() {
               ))}
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">Aucun événement disponible</div>
+            <div className="text-center py-8 text-white/30 text-sm">{t('noEventAvailable')}</div>
           ) : (
             <div className="space-y-3">
               {events.slice(0, 3).map((event) => (
@@ -358,7 +358,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-6">
                 <Sparkles className="w-4 h-4" />
-                <span>Nouveaux puzzles ajoutés chaque jour</span>
+                <span>{t('newPuzzlesDailyLong')}</span>
               </div>
               <h1 className="text-6xl font-bold text-white leading-tight mb-4">
                 <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
@@ -383,8 +383,8 @@ export default function Home() {
                     <Scan className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-xl mb-2">Ajouter votre puzzle</h3>
-                    <p className="text-white/80 text-sm">Scannez le code-barres ou ajoutez manuellement</p>
+                    <h3 className="text-white font-bold text-xl mb-2">{t('addYourPuzzle')}</h3>
+                    <p className="text-white/80 text-sm">{t('scanOrAddManually')}</p>
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -397,8 +397,8 @@ export default function Home() {
                       <ChevronRight className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="text-white font-bold text-xl mb-2">Explorer la collection</h3>
-                      <p className="text-white/60 text-sm">Découvrez des milliers de puzzles</p>
+                      <h3 className="text-white font-bold text-xl mb-2">{t('exploreCollection')}</h3>
+                      <p className="text-white/60 text-sm">{t('discoverThousands')}</p>
                     </div>
                   </div>
                 </button>
@@ -415,13 +415,13 @@ export default function Home() {
                 <TrendingUp className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Top 10 Puzzles</h2>
-                <p className="text-white/40 text-xs">Les plus appréciés de la communauté</p>
+                <h2 className="text-xl font-bold text-white">{t('topPuzzles')}</h2>
+                <p className="text-white/40 text-xs">{t('mostLikedCommunity')}</p>
               </div>
             </div>
             <Link to={createPageUrl('Collection')}>
               <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 gap-1">
-                Voir tout <ChevronRight className="w-4 h-4" />
+                {t('seeAll')} <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -435,7 +435,7 @@ export default function Home() {
           ) : topPuzzles.length === 0 ? (
             <div className="text-center py-12 text-white/40">
               <Puzzle className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Aucun puzzle disponible</p>
+              <p>{t('noPuzzleAvailable')}</p>
             </div>
           ) : (
             <motion.div
@@ -488,20 +488,20 @@ export default function Home() {
                   <BookOpen className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Derniers articles</h2>
-                  <p className="text-white/40 text-xs">À lire absolument</p>
+                  <h2 className="text-xl font-bold text-white">{t('latestArticles')}</h2>
+                  <p className="text-white/40 text-xs">{t('mustRead')}</p>
                 </div>
               </div>
               <Link to={createPageUrl('Blog')}>
                 <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 gap-1">
-                  Voir tout <ChevronRight className="w-4 h-4" />
+                  {t('seeAll')} <ChevronRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
             {featuredArticles.length === 0 ? (
               <div className="text-center py-12 text-white/40">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Aucun article pour le moment</p>
+                <p>{t('noArticleYet')}</p>
               </div>
             ) : (
             <motion.div
@@ -548,14 +548,14 @@ export default function Home() {
                 <Calendar className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Événements à Venir</h2>
-                <p className="text-white/40 text-xs">Ne manquez rien de la communauté</p>
+                <h2 className="text-xl font-bold text-white">{t('upcomingEvents')}</h2>
+                <p className="text-white/40 text-xs">{t('dontMissAnything')}</p>
               </div>
             </div>
             {!eventsInMaintenance && (
               <Link to={createPageUrl('Events')}>
                 <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 gap-1">
-                  Voir tout <ChevronRight className="w-4 h-4" />
+                  {t('seeAll')} <ChevronRight className="w-4 h-4" />
                 </Button>
               </Link>
             )}
@@ -564,8 +564,8 @@ export default function Home() {
           {eventsInMaintenance ? (
             <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
               <span className="text-4xl mb-4 block">🔧</span>
-              <p className="text-white/60 font-medium">Les événements sont temporairement en maintenance.</p>
-              <p className="text-white/40 text-sm mt-1">Revenez bientôt !</p>
+              <p className="text-white/60 font-medium">{t('eventsMaintenanceLong')}</p>
+              <p className="text-white/40 text-sm mt-1">{t('comingSoon')}</p>
             </div>
           ) : loading ? (
             <div className="grid grid-cols-4 gap-4">
@@ -576,7 +576,7 @@ export default function Home() {
           ) : events.length === 0 ? (
             <div className="text-center py-12 text-white/40">
               <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Aucun événement disponible</p>
+              <p>{t('noEventAvailable')}</p>
             </div>
           ) : (
             <motion.div
