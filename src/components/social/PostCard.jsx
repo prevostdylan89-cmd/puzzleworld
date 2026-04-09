@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { useLanguage } from '@/components/LanguageContext';
 import CommentSection from './CommentSection';
 import UserProfileDialog from './UserProfileDialog';
 import UserBadge from '@/components/shared/UserBadge';
@@ -54,6 +55,7 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
 }
 
 export default function PostCard({ post, user, isFeatured = false }) {
+  const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
@@ -133,7 +135,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
 
   const handleLike = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour aimer les posts');
+      toast.error(t('loginToLike'));
       return;
     }
 
@@ -189,13 +191,13 @@ export default function PostCard({ post, user, isFeatured = false }) {
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
       console.error('Error toggling like:', error);
-      toast.error('Échec de la mise à jour du like');
+      toast.error(t('likeUpdateFailed'));
     }
   };
 
   const handleAddToWishlist = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour ajouter à la wishlist');
+      toast.error(t('loginToWishlist'));
       return;
     }
 
@@ -209,7 +211,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         if (existing.length > 0) {
           await base44.entities.UserPuzzle.delete(existing[0].id);
           setIsInWishlist(false);
-          toast.success('Retiré de votre wishlist');
+          toast.success(t('removedFromWishlist'));
           
           // Update wishlistCount in PuzzleCatalog
           if (post.puzzle_reference) {
@@ -232,7 +234,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
           status: 'wishlist'
         });
         setIsInWishlist(true);
-        toast.success('Ajouté à votre wishlist!');
+        toast.success(t('addedToWishlist'));
         
         // Update wishlistCount in PuzzleCatalog
         if (post.puzzle_reference) {
@@ -247,20 +249,20 @@ export default function PostCard({ post, user, isFeatured = false }) {
       }
     } catch (error) {
       console.error('Error managing wishlist:', error);
-      toast.error('Échec de la mise à jour de la wishlist');
+      toast.error(t('wishlistUpdateFailed'));
     }
   };
 
   const handleFollow = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour suivre des utilisateurs');
+      toast.error(t('loginToFollow'));
       return;
     }
 
     // Optimistic update
     const previousFollowing = isFollowing;
     setIsFollowing(!isFollowing);
-    toast.success(isFollowing ? 'Suivi retiré' : 'Vous suivez cet utilisateur');
+    toast.success(isFollowing ? t('unfollowed') : t('followedUser'));
 
     try {
       if (previousFollowing) {
@@ -281,13 +283,13 @@ export default function PostCard({ post, user, isFeatured = false }) {
       // Revert on error
       setIsFollowing(previousFollowing);
       console.error('Error toggling follow:', error);
-      toast.error('Échec de la mise à jour du suivi');
+      toast.error(t('followUpdateFailed'));
     }
   };
 
   const handlePuzzleDislike = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour disliker des puzzles');
+      toast.error(t('loginToDislikePuzzle'));
       return;
     }
 
@@ -305,7 +307,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         });
         if (dislikes.length > 0) {
           await base44.entities.UserPuzzle.delete(dislikes[0].id);
-          toast.success('Dislike retiré');
+          toast.success(t('dislikeRemoved'));
           
           // Update socialScore (+1 when removing dislike)
           if (post.puzzle_reference) {
@@ -331,7 +333,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
           notes: 'Non aimé'
         });
         
-        toast.success('Puzzle disliké');
+        toast.success(t('puzzleDisliked'));
         
         // Update socialScore (-1 for dislike)
         if (post.puzzle_reference) {
@@ -349,13 +351,13 @@ export default function PostCard({ post, user, isFeatured = false }) {
       // Revert on error
       setIsPuzzleDisliked(previousDisliked);
       console.error('Error toggling puzzle dislike:', error);
-      toast.error('Échec de la mise à jour');
+      toast.error(t('updateFailed'));
     }
   };
 
   const handlePuzzleLike = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour liker des puzzles');
+      toast.error(t('loginToLikePuzzle'));
       return;
     }
 
@@ -372,7 +374,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         });
         if (existing.length > 0) {
           await base44.entities.UserPuzzle.delete(existing[0].id);
-          toast.success('Puzzle retiré de votre wishlist');
+          toast.success(t('puzzleRemovedFromWishlist'));
           setIsInWishlist(false);
           
           // Update wishlistCount in PuzzleCatalog
@@ -397,7 +399,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
           status: 'wishlist'
         });
         
-        toast.success('✨ Puzzle ajouté à votre wishlist !');
+        toast.success(t('puzzleAddedToWishlist'));
         setIsInWishlist(true);
         
         // Update wishlistCount in PuzzleCatalog
@@ -415,7 +417,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
       // Revert on error
       setIsPuzzleLiked(previousLiked);
       console.error('Error toggling puzzle like:', error);
-      toast.error('Échec de la mise à jour');
+      toast.error(t('updateFailed'));
     }
   };
 
@@ -444,7 +446,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
       {isFeatured && (
         <div className="px-4 pt-3 flex items-center gap-1.5">
           <Flame className="w-3.5 h-3.5 text-orange-400" />
-          <span className="text-orange-400 text-xs font-semibold">Tendance</span>
+          <span className="text-orange-400 text-xs font-semibold">{t('trending')}</span>
         </div>
       )}
       {/* Header */}
@@ -463,7 +465,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Puzzle className="w-3 h-3 mr-1" />
-                Puzzle complété
+                {t('puzzleCompleted')}
               </Badge>
             )}
           </div>
@@ -483,12 +485,12 @@ export default function PostCard({ post, user, isFeatured = false }) {
             {isFollowing ? (
               <>
                 <UserCheck className="w-3 h-3 mr-1" />
-                Suivi
+                {t('following2')}
               </>
             ) : (
               <>
                 <UserPlus className="w-3 h-3 mr-1" />
-                Suivre
+                {t('follow2')}
               </>
             )}
           </Button>
@@ -515,14 +517,14 @@ export default function PostCard({ post, user, isFeatured = false }) {
                   <Puzzle className="w-4 h-4 text-orange-400" />
                   <p className="text-white font-medium text-sm">{post.puzzle_name}</p>
                   {post.puzzle_reference && (
-                    <span className="text-orange-400 text-xs">→ Voir détails</span>
+                    <span className="text-orange-400 text-xs">{t('viewDetails')}</span>
                   )}
                 </div>
                 <div className="space-y-0.5 text-xs text-white/60">
-                  {post.puzzle_brand && <p>Marque: {post.puzzle_brand}</p>}
-                  {post.puzzle_pieces && <p>Pièces: {post.puzzle_pieces}</p>}
-                  {post.puzzle_category && <p>Catégorie: {post.puzzle_category}</p>}
-                  {post.puzzle_reference && <p>Réf: {post.puzzle_reference}</p>}
+                  {post.puzzle_brand && <p>{t('puzzleBrandLabel')}{post.puzzle_brand}</p>}
+                  {post.puzzle_pieces && <p>{t('puzzlePiecesLabel')}{post.puzzle_pieces}</p>}
+                  {post.puzzle_category && <p>{t('puzzleCategoryLabel')}{post.puzzle_category}</p>}
+                  {post.puzzle_reference && <p>{t('puzzleRefLabel')}{post.puzzle_reference}</p>}
                 </div>
               </div>
             </div>
@@ -540,7 +542,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
                   }`}
                 >
                   <Heart className={`w-4 h-4 mr-1 ${isPuzzleLiked ? 'fill-green-400' : ''}`} />
-                  J'aime
+                  {t('iLike')}
                 </Button>
                 
                 <Button
@@ -553,7 +555,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
                   }`}
                 >
                   <ThumbsDown className={`w-4 h-4 mr-1 ${isPuzzleDisliked ? 'fill-red-400' : ''}`} />
-                  Pas aimé
+                  {t('notLiked')}
                 </Button>
                 
                 <Button

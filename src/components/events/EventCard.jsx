@@ -3,11 +3,15 @@ import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
+import { useLanguage } from '@/components/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 
 export default function EventCard({ event, onClick }) {
+  const { t, language } = useLanguage();
   const isFull = event.current_participants >= event.max_capacity;
   const eventDate = event.event_date ? new Date(event.event_date) : null;
+  const dateLocale = language === 'fr' ? fr : enUS;
 
   return (
     <motion.div
@@ -30,7 +34,7 @@ export default function EventCard({ event, onClick }) {
       {isFull && (
         <div className="absolute top-3 right-3">
           <Badge className="bg-red-500/90 text-white border-0">
-            Complet
+            {t('full')}
           </Badge>
         </div>
       )}
@@ -49,7 +53,7 @@ export default function EventCard({ event, onClick }) {
           {eventDate && (
             <div className="flex items-center gap-2 text-white/70">
               <Calendar className="w-4 h-4 text-orange-400" />
-              <span>{format(eventDate, 'dd MMMM yyyy', { locale: fr })}</span>
+              <span>{format(eventDate, 'dd MMMM yyyy', { locale: dateLocale })}</span>
               {event.event_time && <span>• {event.event_time}</span>}
             </div>
           )}
@@ -66,7 +70,7 @@ export default function EventCard({ event, onClick }) {
             <span className={`font-medium ${isFull ? 'text-red-400' : 'text-white'}`}>
               {event.current_participants} / {event.max_capacity}
             </span>
-            <span className="text-white/50 text-xs">participants</span>
+            <span className="text-white/50 text-xs">{t('participants')}</span>
           </div>
         </div>
       </div>

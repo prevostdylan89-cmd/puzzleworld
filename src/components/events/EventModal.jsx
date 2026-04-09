@@ -3,11 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Users, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
+import { useLanguage } from '@/components/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
 export default function EventModal({ event, onClose, onRegistrationChange }) {
+  const { t, language } = useLanguage();
   const [user, setUser] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,18 +44,18 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
 
   const handleRegister = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour vous inscrire');
+      toast.error(t('loginToRegister'));
       base44.auth.redirectToLogin();
       return;
     }
 
     if (isRegistered) {
-      toast.info('Vous êtes déjà inscrit à cet événement');
+      toast.info(t('alreadyRegistered'));
       return;
     }
 
     if (isFull) {
-      toast.error('Cet événement est complet');
+      toast.error(t('eventFull'));
       return;
     }
 
@@ -71,14 +74,14 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
       });
 
       setIsRegistered(true);
-      toast.success('Inscription confirmée ! 🎉');
+      toast.success(t('registrationConfirmed'));
       
       if (onRegistrationChange) {
         onRegistrationChange();
       }
     } catch (error) {
       console.error('Error registering:', error);
-      toast.error('Erreur lors de l\'inscription');
+      toast.error(t('registrationError'));
     } finally {
       setLoading(false);
     }
@@ -130,18 +133,18 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
                   }`}
                 >
                   {loading ? (
-                    'Inscription...'
+                    t('registering')
                   ) : isRegistered ? (
                     <>
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Déjà inscrit
+                      {t('alreadyRegisteredBtn')}
                     </>
                   ) : isFull ? (
-                    'Événement complet'
+                    t('eventFullBtn')
                   ) : !user ? (
-                    'Connectez-vous pour vous inscrire'
+                    t('loginToRegisterBtn')
                   ) : (
-                    'S\'inscrire'
+                    t('registerBtn')
                   )}
                 </Button>
               </div>
@@ -158,7 +161,7 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
                 <div className="flex items-center gap-3 text-white/80">
                   <Calendar className="w-5 h-5 text-orange-400" />
                   <span>
-                    {format(eventDate, 'EEEE dd MMMM yyyy', { locale: fr })}
+                    {format(eventDate, 'EEEE dd MMMM yyyy', { locale: language === 'fr' ? fr : enUS })}
                     {event.event_time && ` • ${event.event_time}`}
                   </span>
                 </div>
@@ -174,14 +177,14 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-orange-400" />
                 <span className={`font-medium ${isFull ? 'text-red-400' : 'text-white'}`}>
-                  {event.current_participants} / {event.max_capacity} participants
+                  {event.current_participants} / {event.max_capacity} {t('participants')}
                 </span>
               </div>
             </div>
 
             {/* Full Description */}
             <div className="prose prose-invert max-w-none">
-              <h3 className="text-lg font-semibold text-white mb-3">À propos de l'événement</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">{t('aboutEvent')}</h3>
               <p className="text-white/70 leading-relaxed whitespace-pre-wrap">
                 {event.full_description || event.short_description}
               </p>
@@ -193,7 +196,7 @@ export default function EventModal({ event, onClose, onRegistrationChange }) {
                 onClick={() => window.location.href = '/Events'}
                 className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
               >
-                Plus d'infos sur tous les événements
+                {t('moreInfoEvents')}
               </Button>
             </div>
           </div>

@@ -22,6 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { base44 } from '@/api/base44Client';
 import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import AchievementBadge from '@/components/shared/AchievementBadge';
 import WishlistSection from '@/components/profile/WishlistSection';
 import CollectionSection from '@/components/profile/CollectionSection';
@@ -37,7 +38,7 @@ import { Crown, Camera } from 'lucide-react';
 
 
 export default function Profile() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('collection');
@@ -218,7 +219,7 @@ export default function Profile() {
     : user.email.slice(0, 2).toUpperCase();
 
   const joinedDate = user.created_date 
-    ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true })
+    ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true, locale: language === 'fr' ? fr : enUS })
     : 'Recently';
 
   const currentXP = user?.xp || 0;
@@ -573,7 +574,7 @@ function MyEventsSection({ user }) {
 }
 
 function EventCard({ event, onUnregister }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const eventDate = event.event_date ? new Date(event.event_date) : null;
   const isPast = eventDate && eventDate < new Date();
@@ -630,7 +631,7 @@ function EventCard({ event, onUnregister }) {
           <div className="flex items-center gap-2 text-white/60 text-sm mb-3">
             <Calendar className="w-4 h-4 text-orange-400" />
             <span>
-              {format(eventDate, 'dd MMM yyyy', { locale: fr })}
+              {format(eventDate, 'dd MMM yyyy', { locale: language === 'fr' ? fr : enUS })}
               {event.event_time && ` • ${event.event_time}`}
             </span>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -39,6 +40,7 @@ function useScrollSafeDropdown() {
 }
 
 export default function CollectionSection({ user }) {
+  const { t } = useLanguage();
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -122,11 +124,11 @@ export default function CollectionSection({ user }) {
         <TabsList className="bg-white/5 border border-white/10">
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <Package className="w-4 h-4 mr-2" />
-            Boîte ({inboxPuzzles.length})
+            {t('inBox2')} ({inboxPuzzles.length})
           </TabsTrigger>
           <TabsTrigger value="completed" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <CheckCircle className="w-4 h-4 mr-2" />
-            Terminés ({completedPuzzles.length})
+            {t('completedTab')} ({completedPuzzles.length})
           </TabsTrigger>
         </TabsList>
 
@@ -139,7 +141,7 @@ export default function CollectionSection({ user }) {
               onClick={sortDropdown.handleClick}
             >
               <ArrowUpDown className="w-4 h-4 mr-2" />
-              Trier par
+              {t('sortByBtn')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
@@ -147,25 +149,25 @@ export default function CollectionSection({ user }) {
               onClick={() => { setSortBy('date-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
             >
-              Date (Plus récent)
+              {t('dateNewest')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('date-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
             >
-              Date (Plus ancien)
+              {t('dateOldest')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('pieces-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
             >
-              Pièces (Croissant)
+              {t('piecesAscSort')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('pieces-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
             >
-              Pièces (Décroissant)
+              {t('piecesDescSort')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -175,8 +177,8 @@ export default function CollectionSection({ user }) {
         {inboxPuzzles.length === 0 ? (
           <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
             <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/50">Aucun puzzle dans sa boîte</p>
-            <p className="text-white/30 text-sm mt-2">Scannez vos puzzles pour les ajouter ici</p>
+            <p className="text-white/50">{t('noInboxPuzzle')}</p>
+            <p className="text-white/30 text-sm mt-2">{t('scanToAdd')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -191,8 +193,8 @@ export default function CollectionSection({ user }) {
         {completedPuzzles.length === 0 ? (
           <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
             <CheckCircle className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/50">Aucun puzzle terminé</p>
-            <p className="text-white/30 text-sm mt-2">Complétez vos premiers puzzles pour les voir ici</p>
+            <p className="text-white/50">{t('noCompletedPuzzle')}</p>
+            <p className="text-white/30 text-sm mt-2">{t('completeFirstPuzzle')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -207,6 +209,7 @@ export default function CollectionSection({ user }) {
 }
 
 function UserPuzzleDetailModal({ open, onClose, puzzle }) {
+  const { t } = useLanguage();
   if (!puzzle) return null;
 
   const displayImage = (puzzle.status === 'done' && puzzle.progress_photo) ? puzzle.progress_photo : puzzle.image_url;
@@ -231,7 +234,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
           <div>
             <h2 className="text-xl font-bold text-white">{puzzle.puzzle_name}</h2>
             {puzzle.puzzle_brand && (
-              <p className="text-orange-400 font-semibold mt-1">par {puzzle.puzzle_brand}</p>
+              <p className="text-orange-400 font-semibold mt-1">{t('byBrand')}{puzzle.puzzle_brand}</p>
             )}
           </div>
 
@@ -239,17 +242,17 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
             {puzzle.puzzle_pieces && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
                 <span>🧩</span>
-                <span className="text-white font-semibold">{puzzle.puzzle_pieces} pièces</span>
+                <span className="text-white font-semibold">{puzzle.puzzle_pieces} {t('puzzlePiecesCount')}</span>
               </div>
             )}
             {puzzle.puzzle_reference && (
               <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
-                <span className="text-white/60 text-sm">Réf: {puzzle.puzzle_reference}</span>
+                <span className="text-white/60 text-sm">{t('puzzleRef')}{puzzle.puzzle_reference}</span>
               </div>
             )}
             <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
               <span className="text-white/60 text-sm capitalize">
-                {puzzle.status === 'inbox' ? '📦 Dans la boîte' : puzzle.status === 'done' ? '✅ Terminé' : puzzle.status}
+                {puzzle.status === 'inbox' ? t('inTheBox') : puzzle.status === 'done' ? t('completedStatus') : puzzle.status}
               </span>
             </div>
           </div>
@@ -261,10 +264,10 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
           )}
 
           {puzzle.start_date && (
-            <p className="text-white/50 text-sm">Commencé le : {new Date(puzzle.start_date).toLocaleDateString('fr-FR')}</p>
+            <p className="text-white/50 text-sm">{t('startedOn')}{new Date(puzzle.start_date).toLocaleDateString()}</p>
           )}
           {puzzle.end_date && (
-            <p className="text-white/50 text-sm">Terminé le : {new Date(puzzle.end_date).toLocaleDateString('fr-FR')}</p>
+            <p className="text-white/50 text-sm">{t('completedOn')}{new Date(puzzle.end_date).toLocaleDateString()}</p>
           )}
         </div>
       </DialogContent>
@@ -273,6 +276,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
 }
 
 function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
+  const { t } = useLanguage();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -285,10 +289,10 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.entities.UserPuzzle.update(puzzle.id, { progress_photo: file_url });
-      toast.success('📸 Photo ajoutée !');
+      toast.success(t('photoAdded'));
       if (onUpdate) onUpdate();
     } catch (err) {
-      toast.error('Erreur lors de l\'upload');
+      toast.error(t('uploadError'));
     } finally {
       setIsUploadingPhoto(false);
       e.target.value = '';
@@ -304,15 +308,15 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
       if (newStatus === 'done') {
         const user = await base44.auth.me();
         await base44.auth.updateMe({ xp: (user.xp || 0) + 100 });
-        toast.success('🎉 +100 XP ! Puzzle terminé !');
+        toast.success(t('xpGained'));
       } else if (newStatus === 'inbox') {
-        toast.success('Puzzle mis dans sa boîte !');
+        toast.success(t('puzzleBoxed'));
       } else if (newStatus === 'wishlist') {
-        toast.success('Puzzle mis en wishlist !');
+        toast.success(t('puzzleWishlisted'));
       }
       if (onUpdate) onUpdate();
     } catch (error) {
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('updateError'));
       onOptimisticMove(puzzle.id, puzzle.status);
     } finally {
       setIsUpdating(false);
@@ -321,26 +325,26 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
 
   const moveOptions = [
     { status: 'wishlist', label: '⭐ Wishlist', hidden: puzzle.status === 'wishlist' },
-    { status: 'inbox', label: '📦 Dans sa boîte', hidden: puzzle.status === 'inbox' },
-    { status: 'done', label: '🏆 Terminé', hidden: puzzle.status === 'done' },
+    { status: 'inbox', label: `📦 ${t('inBox2')}`, hidden: puzzle.status === 'inbox' },
+    { status: 'done', label: `🏆 ${t('completedTab')}`, hidden: puzzle.status === 'done' },
   ].filter(o => !o.hidden);
 
   const handleDelete = async () => {
     if (isUpdating) return;
     
-    if (!confirm('Êtes-vous sûr de vouloir retirer ce puzzle de votre collection ?')) {
+    if (!confirm(t('removeConfirm'))) {
       return;
     }
     
     setIsUpdating(true);
     try {
       await base44.entities.UserPuzzle.delete(puzzle.id);
-      toast.success('Puzzle retiré de votre collection');
+      toast.success(t('removeSuccess'));
       
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error deleting puzzle:', error);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('removeError'));
     } finally {
       setIsUpdating(false);
     }
@@ -386,7 +390,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
                 disabled={isUploadingPhoto}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                {isUploadingPhoto ? 'Upload...' : puzzle.progress_photo ? 'Changer ma photo' : 'Ajouter ma photo'}
+                {isUploadingPhoto ? 'Upload...' : puzzle.progress_photo ? t('changeMyPhoto') : t('addMyPhotoBtn')}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem 
@@ -394,7 +398,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
               className="text-red-400 cursor-pointer hover:bg-white/10"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Retirer de ma collection
+              {t('removeFromCollection')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -448,7 +452,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
             {puzzle.status === 'done' ? (
               <div className="flex flex-col items-center gap-2 text-white/30 hover:text-orange-400 transition-colors">
                 <ImagePlus className="w-10 h-10" />
-                <span className="text-xs">Ajouter ma photo</span>
+                <span className="text-xs">{t('addMyPhotoBtn')}</span>
               </div>
             ) : (
               <Puzzle className="w-12 h-12 text-white/20" />

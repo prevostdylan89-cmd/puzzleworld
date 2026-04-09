@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '@/components/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImagePlus, X, Puzzle, Send, Loader2, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 const PUZZLE_CATEGORIES = ['Nature', 'Art & Culture', 'Architecture', 'Abstract'];
 
 export default function CreatePostForm({ user, onPostCreated }) {
+  const { t } = useLanguage();
   const [content, setContent] = useState('');
   const [postType, setPostType] = useState('text'); // 'text', 'photo', 'puzzle'
   const [puzzleName, setPuzzleName] = useState('');
@@ -55,29 +57,29 @@ export default function CreatePostForm({ user, onPostCreated }) {
     setImageFile(null);
     setPostType('puzzle');
     setShowScanModal(false);
-    toast.success('Puzzle scanné ! Ajoutez maintenant votre photo personnelle 📸');
+    toast.success(t('puzzleScanned'));
   };
 
   const validatePost = () => {
     if (!content.trim() && postType === 'text') {
-      toast.error('Veuillez ajouter du contenu');
+      toast.error(t('noContent'));
       return false;
     }
 
     if (postType === 'photo' && !imageFile && !imagePreview) {
-      toast.error('Veuillez ajouter une photo');
+      toast.error(t('noPhoto'));
       return false;
     }
 
     if (postType === 'puzzle') {
       const errors = [];
-      if (!puzzleBrand) errors.push('Marque');
-      if (!puzzlePieces || puzzlePieces <= 0) errors.push('Nombre de pièces');
-      if (!puzzleReference) errors.push('Référence');
-      if (!imageFile && !imagePreview) errors.push('Votre photo personnelle du puzzle');
+      if (!puzzleBrand) errors.push(t('brand'));
+      if (!puzzlePieces || puzzlePieces <= 0) errors.push(t('pieces'));
+      if (!puzzleReference) errors.push('Ref');
+      if (!imageFile && !imagePreview) errors.push(t('addPersonalPhoto'));
 
       if (errors.length > 0) {
-        toast.error(`Champs manquants: ${errors.join(', ')}`);
+        toast.error(`${t('missingFields')}${errors.join(', ')}`);
         return false;
       }
     }
@@ -160,11 +162,11 @@ export default function CreatePostForm({ user, onPostCreated }) {
       setPuzzleData(null);
       removeImage();
       
-      toast.success('Post créé avec succès!');
+      toast.success(t('postCreated'));
       if (onPostCreated) onPostCreated();
     } catch (error) {
       console.error('Error creating post:', error);
-      toast.error('Échec de la création du post. Veuillez réessayer.');
+      toast.error(t('postFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -190,7 +192,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Partagez votre passion pour les puzzles..."
+            placeholder={t('sharePuzzlePassion')}
             className="bg-transparent border-none text-white placeholder:text-white/40 resize-none min-h-[80px] p-0 focus-visible:ring-0"
           />
 
@@ -243,7 +245,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
               className={`rounded-full ${postType === 'puzzle' ? 'bg-orange-500/20 text-orange-400' : 'text-white/60 hover:text-orange-400'}`}
             >
               <Scan className="w-4 h-4 mr-1" />
-              Scanner Puzzle
+              {t('scanPuzzleBtn')}
             </Button>
           </div>
 
@@ -259,7 +261,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-white font-medium text-sm flex items-center gap-2">
                       <Puzzle className="w-4 h-4 text-orange-400" />
-                      Puzzle scanné
+                      {t('scannedPuzzle')}
                     </h4>
                     <button
                       onClick={() => {
@@ -274,9 +276,9 @@ export default function CreatePostForm({ user, onPostCreated }) {
                   </div>
                   <div className="text-xs text-white/70 space-y-1">
                     <p><strong>{puzzleName}</strong></p>
-                    <p>Marque: {puzzleBrand}</p>
-                    <p>Pièces: {puzzlePieces}</p>
-                    <p>Réf: {puzzleReference}</p>
+                    <p>{t('puzzleBrandField')}{puzzleBrand}</p>
+                    <p>{t('puzzlePiecesField')}{puzzlePieces}</p>
+                    <p>{t('puzzleRefField')}{puzzleReference}</p>
                   </div>
                 </div>
 
@@ -285,7 +287,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
                   <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
                     <p className="text-blue-400 text-xs mb-2 flex items-center gap-2">
                       <ImagePlus className="w-4 h-4" />
-                      Ajoutez votre photo personnelle du puzzle terminé
+                      {t('addPersonalPhoto')}
                     </p>
                     <input
                       type="file"
@@ -303,7 +305,7 @@ export default function CreatePostForm({ user, onPostCreated }) {
                       >
                         <span>
                           <ImagePlus className="w-4 h-4 mr-2" />
-                          Ajouter ma photo
+                          {t('addMyPhoto')}
                         </span>
                       </Button>
                     </label>
@@ -322,11 +324,11 @@ export default function CreatePostForm({ user, onPostCreated }) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Publication...
+                  {t('publishingBtn')}
                 </>
               ) : (
                 <>
-                  Publier
+                  {t('publishBtn')}
                   <Send className="w-4 h-4 ml-2" />
                 </>
               )}
