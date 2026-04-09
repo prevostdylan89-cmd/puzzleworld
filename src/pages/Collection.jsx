@@ -175,7 +175,7 @@ const item = {
 };
 
 const DEFAULT_categoryFilters = [
-  { id: 'all', label: 'Tous', icon: '🌍' },
+  { id: 'all', label: 'All', icon: '🌍' },
 ];
 
 export default function Collection() {
@@ -191,7 +191,7 @@ export default function Collection() {
       if (data.length > 0) {
         const sorted = data.sort((a, b) => (a.order || 0) - (b.order || 0));
         setCategoryFilters([
-          { id: 'all', label: 'Tous', icon: '🌍' },
+          { id: 'all', label: t('all'), icon: '🌍' },
           ...sorted.map(c => ({ id: c.name, label: c.name, icon: c.icon }))
         ]);
       }
@@ -245,8 +245,8 @@ export default function Collection() {
           added++;
         }
       }
-      const statusLabels = { wishlist: 'wishlist', inbox: 'collection', done: 'terminés' };
-      if (added > 0) toast.success(`${added} puzzle${added > 1 ? 's' : ''} ajouté${added > 1 ? 's' : ''} en ${statusLabels[status] || 'collection'} !`);
+      const statusLabels = { wishlist: 'wishlist', inbox: t('inBox'), done: t('completed2') };
+      if (added > 0) toast.success(added > 1 ? t('addedToStatusPlural').replace('{count}', added).replace('{status}', statusLabels[status] || t('inBox')) : t('addedToStatus').replace('{count}', added).replace('{status}', statusLabels[status] || t('inBox')));
       else toast.info(t('alreadyInCollection'));
     } catch (e) {
       toast.error(t('addError'));
@@ -377,7 +377,7 @@ export default function Collection() {
                       <label className="text-sm text-white/70 mb-3 block">{t('pieceCount')}</label>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-white/50 mb-1.5 block">Minimum</label>
+                          <label className="text-xs text-white/50 mb-1.5 block">{t('minimum')}</label>
                           <Input
                             type="number"
                             value={minPieces}
@@ -388,7 +388,7 @@ export default function Collection() {
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-white/50 mb-1.5 block">Maximum</label>
+                          <label className="text-xs text-white/50 mb-1.5 block">{t('maximum')}</label>
                           <Input
                             type="number"
                             value={maxPieces}
@@ -481,10 +481,10 @@ export default function Collection() {
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
                   <SelectValue>
-                    {(() => {
-                      const cat = categoryFilters.find(c => c.id === selectedCategory);
-                      return cat ? `${cat.icon} ${cat.label}` : 'Catégorie';
-                    })()}
+                      {(() => {
+                        const cat = categoryFilters.find(c => c.id === selectedCategory);
+                        return cat ? `${cat.icon} ${cat.label}` : t('filters');
+                      })()}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a2e] border-white/10">
@@ -497,7 +497,7 @@ export default function Collection() {
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="flex-1 bg-white/5 border-white/10 text-white text-xs h-8">
-                  <SelectValue placeholder="Trier..." />
+                  <SelectValue placeholder={t('sortBy')} />
                 </SelectTrigger>
                 <SelectContent className="bg-[#0a0a2e] border-white/10">
                   <SelectItem value="newest" className="text-white text-sm">{t('sortNewest')}</SelectItem>
@@ -560,7 +560,7 @@ export default function Collection() {
               {!showDiscovery && (
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white text-sm h-8">
-                    <SelectValue placeholder="Plus..." />
+                    <SelectValue placeholder={t('more')} />
                   </SelectTrigger>
                   <SelectContent className="bg-[#0a0a2e] border-white/10">
                     <SelectItem value="pieces-asc" className="text-white text-sm">{t('piecesAscFull')}</SelectItem>

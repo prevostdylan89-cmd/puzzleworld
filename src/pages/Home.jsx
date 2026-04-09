@@ -22,7 +22,7 @@ const item = {
 };
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
@@ -335,7 +335,7 @@ export default function Home() {
                     <p className="text-white font-semibold text-sm line-clamp-2 mb-1.5 leading-tight">{event.title}</p>
                     <div className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-[10px] font-semibold w-fit">
                       <Calendar className="w-2.5 h-2.5" />
-                      {new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                      {new Date(event.event_date).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long' })}
                     </div>
                   </div>
                 </motion.div>
@@ -607,7 +607,7 @@ export default function Home() {
                     <p className="text-white font-bold text-sm line-clamp-2 mb-2">{event.title}</p>
                     <div className="inline-flex items-center gap-1.5 bg-purple-500/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
                       <Calendar className="w-3 h-3" />
-                      {new Date(event.event_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                      {new Date(event.event_date).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long' })}
                     </div>
                   </div>
                 </motion.div>

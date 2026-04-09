@@ -363,6 +363,15 @@ const translations = {
     noComments: 'Aucun commentaire pour le moment',
     search: 'Rechercher',
     close: 'Fermer',
+    more: 'Plus...',
+    move: 'Déplacer',
+    movedTo: 'Déplacé vers',
+    moveError: 'Erreur lors du déplacement',
+    removedFromWishlist: 'Retiré de la wishlist',
+    features: 'Caractéristiques :',
+    viewOnAmazon: 'Voir le produit sur Amazon',
+    amazonDisclaimer: 'En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats qualifiés',
+    loadError: 'Impossible de charger les détails',
   },
   en: {
     // Navigation
@@ -724,6 +733,15 @@ const translations = {
     noComments: 'No comments yet',
     search: 'Search',
     close: 'Close',
+    more: 'More...',
+    move: 'Move',
+    movedTo: 'Moved to',
+    moveError: 'Error while moving',
+    removedFromWishlist: 'Removed from wishlist',
+    features: 'Features:',
+    viewOnAmazon: 'View product on Amazon',
+    amazonDisclaimer: 'As an Amazon Associate, we earn from qualifying purchases',
+    loadError: 'Unable to load details',
   }
 };
 

@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/components/LanguageContext';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -96,13 +98,12 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
 
   const handleLike = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour liker ce puzzle');
+      toast.error(t('loginToLikePuzzle'));
       return;
     }
     
     try {
       if (isLiked) {
-        // Unlike
         const likes = await base44.entities.UserPuzzleLike.filter({
           puzzle_asin: puzzle.asin,
           created_by: user.email
@@ -110,33 +111,31 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         if (likes.length > 0) {
           await base44.entities.UserPuzzleLike.delete(likes[0].id);
           setIsLiked(false);
-          toast.success('Retiré de vos likes');
+          toast.success(t('dislikeRemoved'));
         }
       } else {
-        // Like
         await base44.entities.UserPuzzleLike.create({
           puzzle_asin: puzzle.asin,
           puzzle_name: puzzle.title,
           puzzle_brand: puzzle.brand
         });
         setIsLiked(true);
-        toast.success('Ajouté à vos likes ❤️');
+        toast.success(t('puzzleAddedToWishlist').replace('wishlist', 'likes'));
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      toast.error('Erreur lors du like');
+      toast.error(t('likeUpdateFailed'));
     }
   };
 
   const handleWishlist = async () => {
     if (!user) {
-      toast.error('Connectez-vous pour ajouter à votre wishlist');
+      toast.error(t('loginToWishlist'));
       return;
     }
     
     try {
       if (isWishlisted) {
-        // Remove from wishlist
         const wishlists = await base44.entities.Wishlist.filter({
           puzzle_name: puzzle.title,
           created_by: user.email
@@ -144,10 +143,9 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         if (wishlists.length > 0) {
           await base44.entities.Wishlist.delete(wishlists[0].id);
           setIsWishlisted(false);
-          toast.success('Retiré de votre wishlist');
+          toast.success(t('puzzleRemovedFromWishlist'));
         }
       } else {
-        // Add to wishlist
         await base44.entities.Wishlist.create({
           puzzle_name: puzzle.title,
           puzzle_brand: puzzle.brand,
@@ -156,11 +154,11 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
           priority: 'medium'
         });
         setIsWishlisted(true);
-        toast.success('Ajouté à votre wishlist ⭐');
+        toast.success(t('puzzleAddedToWishlist'));
       }
     } catch (error) {
       console.error('Error toggling wishlist:', error);
-      toast.error('Erreur lors de l\'ajout à la wishlist');
+      toast.error(t('wishlistUpdateFailed'));
     }
   };
 
@@ -201,7 +199,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 </h2>
                 {productData.brand && (
                   <p className="text-orange-400 font-semibold">
-                    par {productData.brand}
+                    {t('byBrand')}{productData.brand}
                   </p>
                 )}
               </div>
@@ -210,14 +208,14 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
               {puzzle.piece_count && (
                 <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg">
                   <span className="text-2xl">🧩</span>
-                  <span className="text-white font-semibold">{puzzle.piece_count} pièces</span>
+                  <span className="text-white font-semibold">{puzzle.piece_count} {t('puzzlePiecesCount')}</span>
                 </div>
               )}
 
               {/* Key Features */}
               {productData.feature_bullets && productData.feature_bullets.length > 0 && (
                 <div>
-                  <h3 className="text-white/70 font-semibold mb-3">Caractéristiques :</h3>
+                  <h3 className="text-white/70 font-semibold mb-3">{t('features')}</h3>
                   <ul className="space-y-2">
                     {productData.feature_bullets.slice(0, 5).map((bullet, index) => (
                       <li key={index} className="flex items-start gap-2 text-white/80 text-sm">
@@ -243,7 +241,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                   }`}
                 >
                   <Heart className={`w-5 h-5 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-                  {isLiked ? 'Liké' : 'Liker'}
+                  {isLiked ? t('iLike') : t('like')}
                 </Button>
                 
                 <Button
@@ -255,7 +253,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                       : 'border-white/20 text-white hover:bg-white/5'
                   }`}
                 >
-                  ⭐ {isWishlisted ? 'En wishlist' : 'Wishlist'}
+                  ⭐ {isWishlisted ? t('wishlist') : 'Wishlist'}
                 </Button>
               </div>
 
@@ -265,23 +263,23 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-semibold"
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
-                Voir le produit sur Amazon
+                {t('viewOnAmazon')}
               </Button>
 
               <p className="text-white/40 text-xs text-center">
-                En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats qualifiés
+                {t('amazonDisclaimer')}
               </p>
             </div>
           </>
         ) : (
           <div className="p-12 text-center">
-            <p className="text-white/60">Impossible de charger les détails</p>
+            <p className="text-white/60">{t('loadError')}</p>
             <Button
               onClick={onClose}
               variant="outline"
               className="mt-4 border-white/20 text-white hover:bg-white/5"
             >
-              Fermer
+              {t('close')}
             </Button>
           </div>
         )}

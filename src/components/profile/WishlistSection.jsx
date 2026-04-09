@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 import { Trash2, Edit3, ExternalLink, ArrowUpDown, MoveRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,7 @@ function useScrollSafeDropdown() {
 }
 
 export default function WishlistSection({ user }) {
+  const { t } = useLanguage();
   const [wishlist, setWishlist] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
@@ -129,11 +131,11 @@ export default function WishlistSection({ user }) {
         await base44.entities.Wishlist.delete(item.id);
       }
       setWishlist(wishlist.filter(w => w.id !== item.id));
-      const labels = { inbox: 'dans sa boîte 📦', done: 'terminés 🏆' };
-      toast.success(`Déplacé vers ${labels[newStatus]}`);
+      const labels = { inbox: `${t('inBox2')} 📦`, done: `${t('completedTab')} 🏆` };
+      toast.success(`${t('movedTo')} ${labels[newStatus]}`);
     } catch (error) {
       console.error('Error moving item:', error);
-      toast.error('Erreur lors du déplacement');
+      toast.error(t('moveError'));
     }
   };
 
@@ -145,10 +147,10 @@ export default function WishlistSection({ user }) {
         await base44.entities.Wishlist.delete(item.id);
       }
       setWishlist(wishlist.filter(w => w.id !== item.id));
-      toast.success('Retiré de la wishlist');
+      toast.success(t('removedFromWishlist'));
     } catch (error) {
       console.error('Error deleting item:', error);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('removeError'));
     }
   };
 
@@ -202,7 +204,7 @@ export default function WishlistSection({ user }) {
               onClick={sortDropdown.handleClick}
             >
               <ArrowUpDown className="w-4 h-4 mr-2" />
-              Trier par
+              {t('sortByBtn')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
@@ -210,25 +212,25 @@ export default function WishlistSection({ user }) {
               onClick={() => { setSortBy('date-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-desc' ? 'bg-orange-500/20' : ''}`}
             >
-              Date (Plus récent)
+              {t('dateNewest')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('date-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'date-asc' ? 'bg-orange-500/20' : ''}`}
             >
-              Date (Plus ancien)
+              {t('dateOldest')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('pieces-asc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-asc' ? 'bg-orange-500/20' : ''}`}
             >
-              Pièces (Croissant)
+              {t('piecesAscSort')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => { setSortBy('pieces-desc'); sortDropdown.setOpen(false); }}
               className={`text-white cursor-pointer hover:bg-white/10 ${sortBy === 'pieces-desc' ? 'bg-orange-500/20' : ''}`}
             >
-              Pièces (Décroissant)
+              {t('piecesDescSort')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -284,7 +286,7 @@ export default function WishlistSection({ user }) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoveRight className="w-3 h-3 mr-1" />
-                    Déplacer
+                    {t('move')}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
@@ -292,13 +294,13 @@ export default function WishlistSection({ user }) {
                     onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }}
                     className="text-white hover:bg-white/10 cursor-pointer"
                   >
-                    📦 Dans sa boîte
+                    📦 {t('inBox2')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }}
                     className="text-white hover:bg-white/10 cursor-pointer"
                   >
-                    🏆 Terminé
+                    🏆 {t('completedTab')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
