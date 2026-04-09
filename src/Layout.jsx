@@ -498,28 +498,22 @@ function LayoutContent({ children, currentPageName }) {
 
               {/* Menu Footer */}
               <div className="p-4 border-t border-white/10 space-y-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white">
-                      <Languages className="w-5 h-5" />
-                      <span className="text-sm font-medium">{language === 'fr' ? '🇫🇷 Français' : '🇬🇧 English'}</span>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
-                    <DropdownMenuItem 
-                      onClick={() => setLanguage('fr')}
-                      className={`text-white cursor-pointer ${language === 'fr' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
-                    >
-                      🇫🇷 Français
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setLanguage('en')}
-                      className={`text-white cursor-pointer ${language === 'en' ? 'bg-orange-500/20 text-orange-400' : 'hover:bg-white/10'}`}
-                    >
-                      🇬🇧 English
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setLanguage('fr')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors ${language === 'fr' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                  >
+                    <span>🇫🇷</span>
+                    <span className="text-sm font-medium">Français</span>
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-colors ${language === 'en' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                  >
+                    <span>🇬🇧</span>
+                    <span className="text-sm font-medium">English</span>
+                  </button>
+                </div>
 
                 {user && (
                   <button
