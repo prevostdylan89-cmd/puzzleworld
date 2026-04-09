@@ -372,6 +372,22 @@ const translations = {
     viewOnAmazon: 'Voir le produit sur Amazon',
     amazonDisclaimer: 'En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats qualifiés',
     loadError: 'Impossible de charger les détails',
+    // EditProfileDialog
+    editProfile: 'Modifier le profil',
+    profilePhoto: 'Photo de profil',
+    coverPhoto: 'Photo de couverture',
+    uploading: 'Upload en cours...',
+    chooseImage: 'Choisir une image',
+    chooseBanner: 'Choisir une bannière',
+    recommended: 'Recommandé',
+    profileUpdated: 'Profil mis à jour',
+    imageUploaded: 'Image uploadée !',
+    selectImageError: 'Veuillez sélectionner une image',
+    imageTooLarge: 'Image trop grande (max 5MB)',
+    // StatsModal
+    unlocked: 'Débloqué',
+    locked: 'Non débloqué',
+    emptyWishlist: 'Aucun puzzle en wishlist',
   },
   en: {
     // Navigation
@@ -742,6 +758,22 @@ const translations = {
     viewOnAmazon: 'View product on Amazon',
     amazonDisclaimer: 'As an Amazon Associate, we earn from qualifying purchases',
     loadError: 'Unable to load details',
+    // EditProfileDialog
+    editProfile: 'Edit profile',
+    profilePhoto: 'Profile photo',
+    coverPhoto: 'Cover photo',
+    uploading: 'Uploading...',
+    chooseImage: 'Choose an image',
+    chooseBanner: 'Choose a banner',
+    recommended: 'Recommended',
+    profileUpdated: 'Profile updated',
+    imageUploaded: 'Image uploaded!',
+    selectImageError: 'Please select an image',
+    imageTooLarge: 'Image too large (max 5MB)',
+    // StatsModal
+    unlocked: 'Unlocked',
+    locked: 'Locked',
+    emptyWishlist: 'No puzzles in wishlist',
   }
 };
 

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/LanguageContext';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function EditProfileDialog({ user, onUpdate }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
@@ -26,13 +28,12 @@ export default function EditProfileDialog({ user, onUpdate }) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image');
+      toast.error(t('selectImageError'));
       return;
     }
 
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image trop grande (max 5MB)');
+      toast.error(t('imageTooLarge'));
       return;
     }
 
@@ -40,10 +41,10 @@ export default function EditProfileDialog({ user, onUpdate }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setProfilePhoto(file_url);
-      toast.success('Image uploadée!');
+      toast.success(t('imageUploaded'));
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Erreur lors de l\'upload');
+      toast.error(t('uploadError'));
     } finally {
       setUploadingProfile(false);
     }
@@ -54,12 +55,12 @@ export default function EditProfileDialog({ user, onUpdate }) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image');
+      toast.error(t('selectImageError'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image trop grande (max 5MB)');
+      toast.error(t('imageTooLarge'));
       return;
     }
 
@@ -67,10 +68,10 @@ export default function EditProfileDialog({ user, onUpdate }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setCoverPhoto(file_url);
-      toast.success('Image uploadée!');
+      toast.success(t('imageUploaded'));
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Erreur lors de l\'upload');
+      toast.error(t('uploadError'));
     } finally {
       setUploadingCover(false);
     }
@@ -84,12 +85,12 @@ export default function EditProfileDialog({ user, onUpdate }) {
         cover_photo: coverPhoto
       });
       
-      toast.success('Profil mis à jour');
+      toast.success(t('profileUpdated'));
       setOpen(false);
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error(t('updateError'));
     } finally {
       setLoading(false);
     }
@@ -104,17 +105,17 @@ export default function EditProfileDialog({ user, onUpdate }) {
           className="border-white/20 text-white bg-transparent hover:bg-white/5"
         >
           <Camera className="w-4 h-4 mr-2" />
-          Modifier le profil
+          {t('editProfile')}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle className="text-white">Modifier le profil</DialogTitle>
+          <DialogTitle className="text-white">{t('editProfile')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {/* Profile Photo */}
           <div>
-            <label className="text-white/70 text-sm mb-2 block">Photo de profil</label>
+            <label className="text-white/70 text-sm mb-2 block">{t('profilePhoto')}</label>
             <div className="flex items-center gap-3">
               {profilePhoto && (
                 <img
@@ -141,12 +142,12 @@ export default function EditProfileDialog({ user, onUpdate }) {
                   {uploadingProfile ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Upload en cours...
+                      {t('uploading')}
                     </>
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      Choisir une image
+                      {t('chooseImage')}
                     </>
                   )}
                 </Button>
@@ -157,7 +158,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
 
           {/* Cover Photo */}
           <div>
-            <label className="text-white/70 text-sm mb-2 block">Photo de couverture</label>
+            <label className="text-white/70 text-sm mb-2 block">{t('coverPhoto')}</label>
             <div className="space-y-2">
               {coverPhoto && (
                 <img
@@ -183,16 +184,16 @@ export default function EditProfileDialog({ user, onUpdate }) {
                 {uploadingCover ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Upload en cours...
+                    {t('uploading')}
                   </>
                 ) : (
                   <>
                     <ImageIcon className="w-4 h-4 mr-2" />
-                    Choisir une bannière
+                    {t('chooseBanner')}
                   </>
                 )}
               </Button>
-              <p className="text-xs text-white/40">JPG, PNG - Max 5MB - Recommandé: 1200x400px</p>
+              <p className="text-xs text-white/40">JPG, PNG - Max 5MB - {t('recommended')}: 1200x400px</p>
             </div>
           </div>
           <Button
@@ -200,7 +201,7 @@ export default function EditProfileDialog({ user, onUpdate }) {
             disabled={loading}
             className="w-full bg-orange-500 hover:bg-orange-600"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enregistrer'}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save')}
           </Button>
         </div>
       </DialogContent>

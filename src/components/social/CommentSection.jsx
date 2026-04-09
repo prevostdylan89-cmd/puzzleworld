@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function CommentSection({ post, user, onCommentAdded }) {
+  const { t } = useLanguage();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function CommentSection({ post, user, onCommentAdded }) {
     e.preventDefault();
     
     if (!user) {
-      toast.error('Please log in to comment');
+      toast.error(t('logIn'));
       return;
     }
 
@@ -61,7 +63,7 @@ export default function CommentSection({ post, user, onCommentAdded }) {
       if (onCommentAdded) onCommentAdded();
     } catch (error) {
       console.error('Error creating comment:', error);
-      toast.error('Failed to post comment');
+      toast.error(t('postFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -86,7 +88,7 @@ export default function CommentSection({ post, user, onCommentAdded }) {
               <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
+                placeholder={t('addComment')}
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 disabled={isSubmitting}
               />
@@ -110,9 +112,9 @@ export default function CommentSection({ post, user, onCommentAdded }) {
       {/* Comments List */}
       <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
         {isLoading ? (
-          <p className="text-white/40 text-sm text-center py-4">Loading comments...</p>
+          <p className="text-white/40 text-sm text-center py-4">{t('loading')}</p>
         ) : comments.length === 0 ? (
-          <p className="text-white/40 text-sm text-center py-4">No comments yet. Be the first!</p>
+          <p className="text-white/40 text-sm text-center py-4">{t('noComments')}</p>
         ) : (
           <AnimatePresence>
             {comments.map((comment) => {

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
+import { useLanguage } from '@/components/LanguageContext';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 
 export function CompletedPuzzlesModal({ open, onClose, user }) {
+  const { t, language } = useLanguage();
   const [puzzles, setPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPieces, setTotalPieces] = useState(0);
@@ -45,7 +48,7 @@ export function CompletedPuzzlesModal({ open, onClose, user }) {
         <DialogHeader>
           <DialogTitle className="text-white text-2xl flex items-center gap-2">
             <Package className="w-6 h-6 text-green-400" />
-            Puzzles Complétés
+            {t('completedTab')}
           </DialogTitle>
         </DialogHeader>
 
@@ -59,18 +62,18 @@ export function CompletedPuzzlesModal({ open, onClose, user }) {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-3xl font-bold text-white">{puzzles.length}</div>
-                  <div className="text-white/60 text-sm">Puzzles terminés</div>
+                  <div className="text-white/60 text-sm">{t('completedTab')}</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-green-400">{totalPieces.toLocaleString()}</div>
-                  <div className="text-white/60 text-sm">Pièces complétées</div>
+                  <div className="text-white/60 text-sm">{t('piecesAssembled')}</div>
                 </div>
               </div>
             </div>
 
             {puzzles.length === 0 ? (
               <div className="text-center py-8 text-white/50">
-                Aucun puzzle complété
+                {t('noCompletedPuzzle')}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -87,11 +90,11 @@ export function CompletedPuzzlesModal({ open, onClose, user }) {
                       <div className="flex-1">
                         <h4 className="text-white font-semibold mb-1">{puzzle.puzzle_name}</h4>
                         <p className="text-white/50 text-sm">{puzzle.puzzle_brand}</p>
-                        <p className="text-orange-400 text-sm">{puzzle.puzzle_pieces} pièces</p>
+                        <p className="text-orange-400 text-sm">{puzzle.puzzle_pieces} {t('puzzlePiecesCount')}</p>
                         {puzzle.end_date && (
                           <p className="text-white/40 text-xs flex items-center gap-1 mt-1">
                             <Calendar className="w-3 h-3" />
-                            {format(new Date(puzzle.end_date), 'dd MMM yyyy', { locale: fr })}
+                            {format(new Date(puzzle.end_date), 'dd MMM yyyy', { locale: language === 'fr' ? fr : enUS })}
                           </p>
                         )}
                       </div>
@@ -108,6 +111,7 @@ export function CompletedPuzzlesModal({ open, onClose, user }) {
 }
 
 export function AchievementsModal({ open, onClose, user }) {
+  const { t } = useLanguage();
   const [achievements, setAchievements] = useState([]);
   const [userAchievements, setUserAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -142,7 +146,7 @@ export function AchievementsModal({ open, onClose, user }) {
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white text-2xl">
-            Succès ({userAchievements.length} / {achievements.length})
+            {t('achievements')} ({userAchievements.length} / {achievements.length})
           </DialogTitle>
         </DialogHeader>
 
@@ -154,7 +158,7 @@ export function AchievementsModal({ open, onClose, user }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {achievements.length === 0 ? (
               <div className="col-span-2 text-center py-8 text-white/50">
-                Aucun succès disponible
+                {t('noAchievements')}
               </div>
             ) : (
               achievements.map((achievement) => {
@@ -177,9 +181,9 @@ export function AchievementsModal({ open, onClose, user }) {
                         <p className="text-white/60 text-sm">{achievement.description}</p>
                         <div className="mt-2">
                           {unlocked ? (
-                            <span className="text-green-400 text-xs font-medium">✓ Débloqué</span>
+                            <span className="text-green-400 text-xs font-medium">✓ {t('unlocked')}</span>
                           ) : (
-                            <span className="text-white/40 text-xs">Non débloqué</span>
+                            <span className="text-white/40 text-xs">{t('locked')}</span>
                           )}
                         </div>
                       </div>
@@ -196,6 +200,7 @@ export function AchievementsModal({ open, onClose, user }) {
 }
 
 export function WishlistModal({ open, onClose, user }) {
+  const { t } = useLanguage();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -223,7 +228,7 @@ export function WishlistModal({ open, onClose, user }) {
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white text-2xl">
-            Ma Wishlist ({wishlist.length})
+            {t('wishlist')} ({wishlist.length})
           </DialogTitle>
         </DialogHeader>
 
@@ -233,7 +238,7 @@ export function WishlistModal({ open, onClose, user }) {
           </div>
         ) : wishlist.length === 0 ? (
           <div className="text-center py-8 text-white/50">
-            Aucun puzzle en wishlist
+            {t('emptyWishlist')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -250,7 +255,7 @@ export function WishlistModal({ open, onClose, user }) {
                   <div className="flex-1">
                     <h4 className="text-white font-semibold mb-1">{puzzle.puzzle_name}</h4>
                     <p className="text-white/50 text-sm">{puzzle.puzzle_brand}</p>
-                    <p className="text-pink-400 text-sm">{puzzle.puzzle_pieces} pièces</p>
+                    <p className="text-pink-400 text-sm">{puzzle.puzzle_pieces} {t('puzzlePiecesCount')}</p>
                   </div>
                 </div>
               </div>
