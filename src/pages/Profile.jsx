@@ -199,7 +199,7 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
         >
-          <h2 className="text-2xl font-bold text-white mb-4">Bienvenue sur PuzzleWorld</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">{t('welcomeProfile')}</h2>
           <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}
@@ -328,10 +328,10 @@ export default function Profile() {
                   {t('joined')} {joinedDate}
                 </span>
                 <span className="text-white/70">
-                  <span className="font-semibold text-white">{stats.followers}</span> Followers
+                  <span className="font-semibold text-white">{stats.followers}</span> {t('followers')}
                 </span>
                 <span className="text-white/70">
-                  <span className="font-semibold text-white">{stats.following}</span> Abonnements
+                  <span className="font-semibold text-white">{stats.following}</span> {t('followings')}
                 </span>
               </div>
             </div>
@@ -372,11 +372,11 @@ export default function Profile() {
                   <span className="text-white/40 text-sm">{stats.totalPieces.toLocaleString()}</span>
                 )}
               </div>
-              <p className="text-white/50 text-sm">pièces assemblées au total</p>
+              <p className="text-white/50 text-sm">{t('piecesAssembled')}</p>
             </div>
             <div className="text-right">
               <div className="text-orange-400 font-semibold text-sm">{stats.completed} puzzle{stats.completed > 1 ? 's' : ''}</div>
-              <div className="text-white/30 text-xs">terminés</div>
+              <div className="text-white/30 text-xs">{t('puzzlesCompletedLabel')}</div>
             </div>
           </motion.div>
 
@@ -413,8 +413,8 @@ export default function Profile() {
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
               <Puzzle className="w-4 h-4 shrink-0" />
-              <span className="ml-1.5 hidden sm:inline">Ma Collection</span>
-              <span className="ml-1.5 sm:hidden">Collection</span>
+              <span className="ml-1.5 hidden sm:inline">{t('myCollectionTab')}</span>
+              <span className="ml-1.5 sm:hidden">{t('collection')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="wishlist" 
@@ -428,8 +428,8 @@ export default function Profile() {
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
             >
               <span className="text-base shrink-0">🔒</span>
-              <span className="ml-1.5 hidden sm:inline">Perso</span>
-              <span className="ml-1.5 sm:hidden">Perso</span>
+              <span className="ml-1.5 hidden sm:inline">{t('personalTab')}</span>
+              <span className="ml-1.5 sm:hidden">{t('personalTab')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -458,7 +458,7 @@ export default function Profile() {
 
         {/* Delete Account Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-6">Paramètres du compte</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">{t('accountSettings')}</h2>
           <DeleteAccountSection />
         </div>
       </div>
@@ -523,7 +523,7 @@ function MyEventsSection({ user }) {
       <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
         <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
         <p className="text-white/50">{t('noEvents')}</p>
-        <p className="text-white/30 text-sm mt-2">Inscrivez-vous à des événements pour les voir ici</p>
+        <p className="text-white/30 text-sm mt-2">{t('registerForEventsHint')}</p>
       </div>
     );
   }
@@ -560,7 +560,7 @@ function MyEventsSection({ user }) {
       {/* Past Events */}
       {pastEvents.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-white/70 mb-4">Événements passés</h3>
+          <h3 className="text-lg font-semibold text-white/70 mb-4">{t('pastEventsLabel')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
             {pastEvents.map((event) => (
               <EventCard key={event.id} event={event} />
@@ -573,6 +573,7 @@ function MyEventsSection({ user }) {
 }
 
 function EventCard({ event, onUnregister }) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const eventDate = event.event_date ? new Date(event.event_date) : null;
   const isPast = eventDate && eventDate < new Date();
@@ -580,7 +581,7 @@ function EventCard({ event, onUnregister }) {
   const handleUnregister = async (e) => {
     e.stopPropagation();
     
-    if (!confirm('Voulez-vous vraiment vous désinscrire de cet événement ?')) {
+    if (!confirm(t('unregisterConfirm'))) {
       return;
     }
 
@@ -608,7 +609,7 @@ function EventCard({ event, onUnregister }) {
       }
     } catch (error) {
       console.error('Error unregistering:', error);
-      alert('Erreur lors de la désinscription');
+      alert(t('unregisterError'));
     } finally {
       setLoading(false);
     }
@@ -636,8 +637,8 @@ function EventCard({ event, onUnregister }) {
         )}
         {isPast ? (
           <span className="inline-block text-xs text-white/40 bg-white/5 px-2 py-1 rounded">
-            Terminé
-          </span>
+              {t('eventEnded')}
+            </span>
         ) : (
           <Button
             onClick={handleUnregister}
@@ -646,7 +647,7 @@ function EventCard({ event, onUnregister }) {
             variant="outline"
             className="w-full border-red-500/30 text-red-400 bg-transparent hover:bg-red-500/10 hover:text-red-300"
           >
-            {loading ? 'Désinscription...' : 'Se désinscrire'}
+            {loading ? t('unregistering') : t('unregisterFromEvent')}
           </Button>
         )}
       </div>

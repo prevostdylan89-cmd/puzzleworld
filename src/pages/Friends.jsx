@@ -105,7 +105,7 @@ export default function Friends() {
         }
       }
     } catch (error) {
-      toast.error('Erreur lors du chargement');
+      toast.error(t('loading'));
     } finally {
       setIsLoading(false);
     }
@@ -479,11 +479,11 @@ export default function Friends() {
                   </Avatar>
                   <div>
                     <p className="text-white font-medium">{request.addressee_name}</p>
-                    <p className="text-orange-400/70 text-xs">En attente de réponse</p>
+                    <p className="text-orange-400/70 text-xs">{t('pendingResponse')}</p>
                   </div>
                 </div>
                 <Button size="sm" variant="destructive" onClick={() => declineRequest(request.id)}>
-                  <UserX className="w-4 h-4 mr-1" /> Annuler
+                  <UserX className="w-4 h-4 mr-1" /> {t('cancel')}
                 </Button>
               </motion.div>
             ))
@@ -494,12 +494,12 @@ export default function Friends() {
         <TabsContent value="find" className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-            <Input placeholder="Rechercher par nom, pseudo ou code ami..."
+            <Input placeholder={t('searchByNameOrCode')}
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white/5 border-white/20 text-white" />
           </div>
           {searchQuery.trim().length < 2 && (
-            <div className="text-center py-8 text-white/40 text-sm">Tapez au moins 2 caractères pour rechercher</div>
+            <div className="text-center py-8 text-white/40 text-sm">{t('typeAtLeast2Chars')}</div>
           )}
           {filteredUsers.map((targetUser) => (
             <motion.div key={targetUser.email} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -516,12 +516,12 @@ export default function Friends() {
                 </div>
               </div>
               {isFriend(targetUser.email) ? (
-                <Button size="sm" variant="outline" disabled><UserCheck className="w-4 h-4 mr-2" />Ami</Button>
+                <Button size="sm" variant="outline" disabled><UserCheck className="w-4 h-4 mr-2" />{t('friend')}</Button>
               ) : hasPendingRequest(targetUser.email) ? (
-                <Button size="sm" variant="outline" disabled>En attente</Button>
+                <Button size="sm" variant="outline" disabled>{t('pending')}</Button>
               ) : (
                 <Button size="sm" className="bg-orange-500 hover:bg-orange-600" onClick={() => sendFriendRequest(targetUser)}>
-                  <UserPlus className="w-4 h-4 mr-2" />Ajouter
+                  <UserPlus className="w-4 h-4 mr-2" />{t('addFriend')}
                 </Button>
               )}
             </motion.div>

@@ -171,6 +171,25 @@ const translations = {
     puzzlesCompleted: 'terminés',
     followings: 'Abonnements',
     myCollection: 'Ma Collection',
+    followers: 'Abonnés',
+    followings: 'Abonnements',
+    // Events Page
+    eventsTitle: 'Événements',
+    eventsSubtitle: 'Rejoignez notre communauté lors d\'événements exclusifs',
+    sortEarliest: '📅 Du plus tôt au plus tard',
+    sortLatest: '📅 Du plus tard au plus tôt',
+    noEventsAvailable: 'Aucun événement disponible pour le moment',
+    noEventsComingSoon: 'Revenez bientôt pour découvrir nos prochains événements !',
+    // Profile hardcoded strings
+    piecesAssembled: 'pièces assemblées au total',
+    puzzlesCompletedLabel: 'terminés',
+    myCollectionTab: 'Ma Collection',
+    personalTab: 'Perso',
+    pastEventsLabel: 'Événements passés',
+    registerForEventsHint: 'Inscrivez-vous à des événements pour les voir ici',
+    eventEnded: 'Terminé',
+    unregisterConfirm: 'Voulez-vous vraiment vous désinscrire de cet événement ?',
+    unregisterError: 'Erreur lors de la désinscription',
     
     // Common
     loading: 'Chargement...',
@@ -354,6 +373,25 @@ const translations = {
     puzzlesCompleted: 'completed',
     followings: 'Following',
     myCollection: 'My Collection',
+    followers: 'Followers',
+    followings: 'Following',
+    // Events Page
+    eventsTitle: 'Events',
+    eventsSubtitle: 'Join our community at exclusive events',
+    sortEarliest: '📅 Earliest first',
+    sortLatest: '📅 Latest first',
+    noEventsAvailable: 'No events available at the moment',
+    noEventsComingSoon: 'Check back soon to discover our upcoming events!',
+    // Profile hardcoded strings
+    piecesAssembled: 'pieces assembled in total',
+    puzzlesCompletedLabel: 'completed',
+    myCollectionTab: 'My Collection',
+    personalTab: 'Personal',
+    pastEventsLabel: 'Past events',
+    registerForEventsHint: 'Register for events to see them here',
+    eventEnded: 'Ended',
+    unregisterConfirm: 'Are you sure you want to unregister from this event?',
+    unregisterError: 'Error during unregistration',
 
     // Common
     loading: 'Loading...',

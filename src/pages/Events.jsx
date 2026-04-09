@@ -68,20 +68,18 @@ export default function Events() {
           <div className="flex items-center justify-between gap-3 mb-2 flex-wrap gap-y-4">
             <div className="flex items-center gap-3">
               <Calendar className="w-8 h-8 text-orange-400" />
-              <h1 className="text-3xl font-bold text-white">Événements</h1>
+              <h1 className="text-3xl font-bold text-white">{t('eventsTitle')}</h1>
             </div>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
               className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 focus:outline-none"
             >
-              <option value="asc">📅 Du plus tôt au plus tard</option>
-              <option value="desc">📅 Du plus tard au plus tôt</option>
+              <option value="asc">{t('sortEarliest')}</option>
+              <option value="desc">{t('sortLatest')}</option>
             </select>
           </div>
-          <p className="text-white/60">
-            Rejoignez notre communauté lors d'événements exclusifs
-          </p>
+          <p className="text-white/60">{t('eventsSubtitle')}</p>
         </div>
       </div>
 
@@ -96,8 +94,8 @@ export default function Events() {
           ) : events.length === 0 ? (
             <div className="text-center py-20">
               <Calendar className="w-16 h-16 text-white/20 mx-auto mb-4" />
-              <p className="text-white/50 text-lg">Aucun événement disponible pour le moment</p>
-              <p className="text-white/40 text-sm mt-2">Revenez bientôt pour découvrir nos prochains événements !</p>
+              <p className="text-white/50 text-lg">{t('noEventsAvailable')}</p>
+              <p className="text-white/40 text-sm mt-2">{t('noEventsComingSoon')}</p>
             </div>
           ) : (
             <motion.div
