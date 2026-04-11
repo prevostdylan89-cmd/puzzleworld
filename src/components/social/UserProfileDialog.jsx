@@ -20,6 +20,13 @@ export default function UserProfileDialog({ userEmail, onClose }) {
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
 
   useEffect(() => {
+    setUser(null);
+    setLoading(true);
+    setStats({ completed: 0, achievements: 0, wishlist: 0, followers: 0, following: 0 });
+    setCompletedPuzzles([]);
+    setIsFollowing(false);
+    setIsFriend(false);
+    setFriendRequestPending(false);
     loadUserProfile();
   }, [userEmail]);
 
