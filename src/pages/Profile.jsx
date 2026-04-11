@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
@@ -39,6 +40,7 @@ import { Crown, Camera } from 'lucide-react';
 
 export default function Profile() {
   const { t, language } = useLanguage();
+  const { isGuest } = useAuth();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('collection');
@@ -192,7 +194,7 @@ export default function Profile() {
     );
   }
 
-  if (!user) {
+  if (!user || isGuest) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <motion.div
@@ -200,14 +202,17 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 text-center max-w-md"
         >
+          <div className="text-5xl mb-4">{isGuest ? '👤' : '🧩'}</div>
           <h2 className="text-2xl font-bold text-white mb-4">{t('welcomeProfile')}</h2>
-          <p className="text-white/60 mb-6">{t('logInToViewProfile')}</p>
+          <p className="text-white/60 mb-6">
+            {isGuest ? 'Créez un compte pour accéder à votre profil, suivre vos puzzles et bien plus encore !' : t('logInToViewProfile')}
+          </p>
           <Button 
             onClick={() => base44.auth.redirectToLogin()}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
           >
             <LogIn className="w-4 h-4 mr-2" />
-            {t('logIn')}
+            {isGuest ? 'Créer un compte / Se connecter' : t('logIn')}
           </Button>
         </motion.div>
       </div>

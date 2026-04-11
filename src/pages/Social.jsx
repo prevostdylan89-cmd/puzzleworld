@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import CreatePostForm from '@/components/social/CreatePostForm';
 import PostCard from '@/components/social/PostCard';
 import PullToRefresh from '@/components/shared/PullToRefresh';
@@ -19,6 +20,7 @@ import PullToRefresh from '@/components/shared/PullToRefresh';
 
 export default function Social() {
   const { t } = useLanguage();
+  const { isGuest } = useAuth();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState('trending');
@@ -170,22 +172,22 @@ export default function Social() {
       <div className="px-4 lg:px-8 py-6">
         <div className="max-w-4xl mx-auto">
           {/* Create Post */}
-          {user && (
+          {user && !isGuest && (
             <CreatePostForm user={user} onPostCreated={handlePostCreated} />
           )}
 
-          {!user && (
+          {(!user || isGuest) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 mb-6 text-center"
             >
-              <p className="text-white/80 mb-3">{t('logInToPost')}</p>
+              <p className="text-white/80 mb-3">{isGuest ? '🔒 Créez un compte pour publier et interagir avec la communauté' : t('logInToPost')}</p>
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full"
               >
-                {t('logIn')}
+                {isGuest ? 'Créer un compte / Se connecter' : t('logIn')}
               </Button>
             </motion.div>
           )}

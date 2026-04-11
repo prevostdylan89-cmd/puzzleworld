@@ -5,11 +5,13 @@ import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'luci
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/components/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const { t } = useLanguage();
+  const { isGuest, continueAsGuest } = useAuth();
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -258,13 +260,25 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
               </div>
 
               {/* CTA Button */}
-              <Button
-                onClick={() => window.open(getAffiliateLink(), '_blank')}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-semibold"
-              >
-                <ExternalLink className="w-5 h-5 mr-2" />
-                {t('viewOnAmazon')}
-              </Button>
+              {isGuest ? (
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => { continueAsGuest(); base44.auth.redirectToLogin(window.location.href); }}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-semibold"
+                  >
+                    🔒 Créer un compte pour voir sur Amazon
+                  </Button>
+                  <p className="text-white/40 text-xs text-center">Gratuit et rapide — connectez-vous avec Google</p>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => window.open(getAffiliateLink(), '_blank')}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-semibold"
+                >
+                  <ExternalLink className="w-5 h-5 mr-2" />
+                  {t('viewOnAmazon')}
+                </Button>
+              )}
 
               <p className="text-white/40 text-xs text-center">
                 {t('amazonDisclaimer')}
