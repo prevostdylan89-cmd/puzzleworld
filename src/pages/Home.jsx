@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan, Star, Puzzle, BookOpen } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
@@ -23,6 +24,7 @@ const item = {
 
 export default function Home() {
   const { t, language } = useLanguage();
+  const { isGuest } = useAuth();
   const [showScanModal, setShowScanModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
@@ -34,8 +36,27 @@ export default function Home() {
   const [eventsInMaintenance, setEventsInMaintenance] = useState(false);
 
   useEffect(() => {
-    Promise.all([loadTopPuzzles(), loadEvents(), loadPageSettings(), loadFeaturedArticles()]).finally(() => setLoading(false));
-  }, []);
+    if (isGuest) {
+      loadAllPublic();
+    } else {
+      Promise.all([loadTopPuzzles(), loadEvents(), loadPageSettings(), loadFeaturedArticles()]).finally(() => setLoading(false));
+    }
+  }, [isGuest]);
+
+  const loadAllPublic = async () => {
+    try {
+      const res = await base44.functions.invoke('publicData', { type: 'home' });
+      const d = res.data;
+      setTopPuzzles(d.topPuzzles || []);
+      setEvents(d.events || []);
+      setFeaturedArticles(d.featuredArticles || []);
+      setEventsInMaintenance(d.eventsInMaintenance || false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPageSettings = async () => {
     try {

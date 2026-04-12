@@ -70,33 +70,18 @@ export default function Social() {
     
     try {
       let postsList = [];
-      
-      if (activeTab === 'following' && user) {
-        // Get list of followed users
-        const follows = await base44.entities.Follow.filter({ follower_email: user.email });
-        const followingEmails = follows.map(f => f.following_email);
-        
-        if (followingEmails.length > 0) {
-          // Get all posts and filter by following
-          const allPosts = await base44.entities.Post.list('-created_date', 100);
-          postsList = allPosts.filter(post => followingEmails.includes(post.created_by));
-        }
-      } else {
-        let sortBy = '-created_date';
-        if (activeTab === 'trending') {
-          sortBy = '-likes_count';
-        }
-        postsList = await base44.entities.Post.list(sortBy, POSTS_PER_PAGE);
+
+      if (isGuest) {
+        // En mode invité: charger 10 posts via la fonction publique
+        const sortBy = activeTab === 'trending' ? '-likes_count' : '-created_date';
+        const res = await base44.functions.invoke('publicData', { type: 'posts', sort: sortBy, limit: 10 });
+        postsList = res.data.data || [];
+        setHasMore(false); // Pas d'infinite scroll pour les invités
+        setPosts(postsList);
+        return;
       }
       
-      setPosts(postsList);
-      setHasMore(activeTab !== 'following' && postsList.length === POSTS_PER_PAGE);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      if (activeTab === 'following' && user) {
 
   const loadMorePosts = async () => {
     if (isLoading || !hasMore || activeTab === 'following') return;
@@ -219,8 +204,20 @@ export default function Social() {
                       <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
                     </div>
                   )}
-                  {!hasMore && posts.length > 0 && (
+                  {!hasMore && posts.length > 0 && !isGuest && (
                     <p className="text-white/40 text-sm text-center">{t('youveReachedEnd')}</p>
+                  )}
+                  {isGuest && posts.length > 0 && (
+                    <div className="mt-4 p-5 bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-2xl text-center space-y-3">
+                      <p className="text-white font-semibold">🔓 Voir tous les posts de la communauté</p>
+                      <p className="text-white/50 text-sm">Créez un compte gratuit pour accéder à l'intégralité du fil, publier et interagir.</p>
+                      <Button
+                        onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full px-6"
+                      >
+                        Se connecter / Créer un compte
+                      </Button>
+                    </div>
                   )}
                 </div>
               </>
