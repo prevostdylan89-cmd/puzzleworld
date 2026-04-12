@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getCapturedLogs } from '@/lib/consoleCapture';
 import { Bug, X, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
@@ -34,13 +35,15 @@ export default function BugReportButton() {
         priority: 'normale',
       });
 
-      // Créer une issue GitHub
+      // Créer une issue GitHub avec les logs
+      const consoleLogs = getCapturedLogs();
       await base44.functions.invoke('createGithubIssue', {
         title: form.title,
         description: form.description,
         category: form.category,
         page: window.location.pathname,
         user_email: userEmail,
+        console_logs: consoleLogs,
       });
 
       setOpen(false);
