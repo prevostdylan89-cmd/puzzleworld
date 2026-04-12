@@ -1,22 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { 
-  TrendingUp,
-  Flame,
-  Clock,
-  Loader2
-} from 'lucide-react';
+import { Flame, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import CreatePostForm from '@/components/social/CreatePostForm';
 import PostCard from '@/components/social/PostCard';
-import PullToRefresh from '@/components/shared/PullToRefresh';
 
-
+const POSTS_PER_PAGE = 10;
 
 export default function Social() {
   const { t } = useLanguage();
@@ -28,15 +21,16 @@ export default function Social() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const observerTarget = useRef(null);
-  const POSTS_PER_PAGE = 10;
 
   useEffect(() => {
     loadUser();
-    loadInitialPosts();
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
-    // Setup intersection observer for infinite scroll
+    loadInitialPosts();
+  }, [activeTab, isGuest]);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
@@ -45,11 +39,7 @@ export default function Social() {
       },
       { threshold: 0.1 }
     );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
+    if (observerTarget.current) observer.observe(observerTarget.current);
     return () => observer.disconnect();
   }, [hasMore, isLoading, page]);
 
@@ -57,8 +47,8 @@ export default function Social() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
-    } catch (error) {
-      console.log('User not logged in');
+    } catch {
+      // not logged in
     }
   };
 
@@ -67,36 +57,49 @@ export default function Social() {
     setPosts([]);
     setPage(0);
     setHasMore(true);
-    
-    try {
-      let postsList = [];
 
+    try {
       if (isGuest) {
-        // En mode invité: charger 10 posts via la fonction publique
         const sortBy = activeTab === 'trending' ? '-likes_count' : '-created_date';
         const res = await base44.functions.invoke('publicData', { type: 'posts', sort: sortBy, limit: 10 });
-        postsList = res.data.data || [];
-        setHasMore(false); // Pas d'infinite scroll pour les invités
-        setPosts(postsList);
+        setPosts(res.data.data || []);
+        setHasMore(false);
         return;
       }
-      
+
       if (activeTab === 'following' && user) {
+        const follows = await base44.entities.Follow.filter({ follower_email: user.email });
+        const followingEmails = follows.map(f => f.following_email);
+        if (followingEmails.length === 0) {
+          setPosts([]);
+          setHasMore(false);
+          return;
+        }
+        const allPosts = await base44.entities.Post.list('-created_date', 50);
+        const filtered = allPosts.filter(p => followingEmails.includes(p.created_by));
+        setPosts(filtered);
+        setHasMore(false);
+        return;
+      }
+
+      const sortBy = activeTab === 'trending' ? '-likes_count' : '-created_date';
+      const postsList = await base44.entities.Post.list(sortBy, POSTS_PER_PAGE, 0);
+      setPosts(postsList);
+      setHasMore(postsList.length === POSTS_PER_PAGE);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const loadMorePosts = async () => {
     if (isLoading || !hasMore || activeTab === 'following') return;
-
     setIsLoading(true);
     const nextPage = page + 1;
-    
     try {
-      let sortBy = '-created_date';
-      if (activeTab === 'trending') {
-        sortBy = '-likes_count';
-      }
-      
+      const sortBy = activeTab === 'trending' ? '-likes_count' : '-created_date';
       const morePosts = await base44.entities.Post.list(sortBy, POSTS_PER_PAGE, nextPage * POSTS_PER_PAGE);
-      
       if (morePosts.length > 0) {
         setPosts(prev => [...prev, ...morePosts]);
         setPage(nextPage);
@@ -111,15 +114,7 @@ export default function Social() {
     }
   };
 
-  const handlePostCreated = () => {
-    loadInitialPosts();
-  };
-
-  const handleRefresh = async () => {
-    await loadInitialPosts();
-  };
-
-
+  const handlePostCreated = () => loadInitialPosts();
 
   return (
     <div className="min-h-screen">
@@ -129,24 +124,15 @@ export default function Social() {
           <h1 className="text-2xl font-bold text-white mb-4">{t('community')}</h1>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-white/5 border border-white/10">
-              <TabsTrigger 
-                value="trending" 
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-              >
+              <TabsTrigger value="trending" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
                 <Flame className="w-4 h-4 mr-2" />
                 {t('trending')}
               </TabsTrigger>
-              <TabsTrigger 
-                value="latest"
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-              >
+              <TabsTrigger value="latest" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
                 <Clock className="w-4 h-4 mr-2" />
                 {t('latest')}
               </TabsTrigger>
-              <TabsTrigger 
-                value="following"
-                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-              >
+              <TabsTrigger value="following" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
                 {t('following')}
               </TabsTrigger>
             </TabsList>
@@ -166,7 +152,7 @@ export default function Social() {
               className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4"
             >
               <p className="text-white/70 text-sm">🔒 Connectez-vous pour publier dans la communauté</p>
-              <Button 
+              <Button
                 onClick={() => base44.auth.redirectToLogin(window.location.href)}
                 size="sm"
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-full flex-shrink-0"
@@ -189,14 +175,14 @@ export default function Social() {
             ) : (
               <>
                 {posts.map((post, index) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post} 
+                  <PostCard
+                    key={post.id}
+                    post={post}
                     user={user}
                     isFeatured={activeTab === 'trending' && index < 3}
                   />
                 ))}
-                
+
                 {/* Infinite Scroll Trigger */}
                 <div ref={observerTarget} className="py-4">
                   {isLoading && (
