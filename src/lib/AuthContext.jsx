@@ -7,7 +7,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isGuest, setIsGuest] = useState(() => sessionStorage.getItem('guest_mode') === 'true');
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem('guest_mode') === 'true');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       // If user is now authenticated, clear guest mode
-      sessionStorage.removeItem('guest_mode');
+      localStorage.removeItem('guest_mode');
       setIsGuest(false);
       setIsLoadingAuth(false);
     } catch (error) {
@@ -102,12 +102,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const continueAsGuest = () => {
-    sessionStorage.setItem('guest_mode', 'true');
+    localStorage.setItem('guest_mode', 'true');
     setIsGuest(true);
   };
 
   const exitGuestMode = () => {
-    sessionStorage.removeItem('guest_mode');
+    localStorage.removeItem('guest_mode');
     setIsGuest(false);
   };
 
