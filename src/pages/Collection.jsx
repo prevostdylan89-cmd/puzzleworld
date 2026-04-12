@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
@@ -180,6 +181,7 @@ const DEFAULT_categoryFilters = [
 
 export default function Collection() {
   const { t } = useLanguage();
+  const { isGuest } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
@@ -187,16 +189,28 @@ export default function Collection() {
 
   // Load categories from DB
   useEffect(() => {
-    base44.entities.PuzzleCategory.list('order', 100).then(data => {
-      if (data.length > 0) {
-        const sorted = data.sort((a, b) => (a.order || 0) - (b.order || 0));
-        setCategoryFilters([
-          { id: 'all', label: t('all'), icon: '🌍' },
-          ...sorted.map(c => ({ id: c.name, label: c.name, icon: c.icon }))
-        ]);
-      }
-    }).catch(() => {});
-  }, []);
+    const loadCategories = async () => {
+      try {
+        let data;
+        if (isGuest) {
+          const res = await base44.functions.invoke('publicData', { type: 'categories' });
+          data = res.data.data || [];
+        } else {
+          data = await base44.entities.PuzzleCategory.list('order', 100);
+        }
+        if (data.length > 0) {
+          const sorted = data.sort((a, b) => (a.order || 0) - (b.order || 0));
+          setCategoryFilters([
+            { id: 'all', label: t('all'), icon: '🌍' },
+            ...sorted.map(c => ({ id: c.name, label: c.name, icon: c.icon }))
+          ]);
+        }
+      } catch {}
+    };
+    loadCategories();
+  }, [isGuest]);
+
+
   const [minPieces, setMinPieces] = useState('');
   const [maxPieces, setMaxPieces] = useState('');
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
@@ -255,8 +269,12 @@ export default function Collection() {
 
   // Fetch puzzles from global catalog
   const { data: globalPuzzles = [], isLoading, refetch } = useQuery({
-    queryKey: ['globalPuzzles'],
+    queryKey: ['globalPuzzles', isGuest],
     queryFn: async () => {
+      if (isGuest) {
+        const res = await base44.functions.invoke('publicData', { type: 'puzzles' });
+        return res.data.data || [];
+      }
       const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-created_date', 500);
       return puzzles;
     },

@@ -153,6 +153,7 @@ export default function Blog() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [user, setUser] = useState(null);
   const [filterCategory, setFilterCategory] = useState('all');
+  const isGuest = localStorage.getItem('guest_mode') === 'true';
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -172,10 +173,17 @@ export default function Blog() {
 
   const load = async () => {
     try {
-      const [data, cats] = await Promise.all([
-        base44.entities.BlogArticle.filter({ is_published: true }, '-created_date'),
-        base44.entities.BlogCategory.list('order'),
-      ]);
+      let data, cats;
+      if (isGuest) {
+        const res = await base44.functions.invoke('publicData', { type: 'articles' });
+        data = res.data.data || [];
+        cats = res.data.categories || [];
+      } else {
+        [data, cats] = await Promise.all([
+          base44.entities.BlogArticle.filter({ is_published: true }, '-created_date'),
+          base44.entities.BlogCategory.list('order'),
+        ]);
+      }
       setArticles(data);
       setCategories(cats);
     } catch {}
