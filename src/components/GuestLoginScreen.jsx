@@ -45,11 +45,6 @@ export default function GuestLoginScreen({ onContinueAsGuest }) {
         <p className="text-white/30 text-[11px] text-center -mt-1">
           🔒 Votre session sera mémorisée — pas besoin de vous reconnecter à chaque visite
         </p>
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
-          <p className="text-blue-300 text-xs text-center font-medium">
-            💡 Si tu t'es connecté avec Google la première fois, clique ci-dessus puis choisis <strong>"Continuer avec Google"</strong> — ne crée pas de nouveau compte.
-          </p>
-        </div>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
