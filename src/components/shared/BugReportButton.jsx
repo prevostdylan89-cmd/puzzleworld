@@ -33,6 +33,16 @@ export default function BugReportButton() {
         status: 'nouveau',
         priority: 'normale',
       });
+
+      // Créer une issue GitHub
+      await base44.functions.invoke('createGithubIssue', {
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        page: window.location.pathname,
+        user_email: userEmail,
+      });
+
       setOpen(false);
       setForm({ title: '', description: '', category: 'bug' });
     } catch (err) {
