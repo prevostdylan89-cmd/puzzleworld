@@ -11,7 +11,7 @@ const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const { t } = useLanguage();
-  const { isGuest } = useAuth();
+  const { isGuest } = useAuth(); // eslint-disable-line
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState(null);
@@ -262,32 +262,14 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
 
               {/* CTA Button */}
               <Button
-                onClick={() => isGuest ? setShowLoginPrompt(true) : window.open(getAffiliateLink(), '_blank')}
+                onClick={() => window.open(getAffiliateLink(), '_blank')}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-semibold"
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
                 {t('viewOnAmazon')}
               </Button>
 
-              {/* Login prompt for guests */}
-              {showLoginPrompt && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowLoginPrompt(false)}>
-                  <div className="bg-[#0a0a2e] border border-white/20 rounded-2xl p-8 max-w-sm mx-4 text-center space-y-4" onClick={e => e.stopPropagation()}>
-                    <div className="text-4xl">🔒</div>
-                    <h3 className="text-white font-bold text-xl">Connexion requise</h3>
-                    <p className="text-white/60 text-sm">Créez un compte gratuit pour accéder aux liens Amazon et profiter de toutes les fonctionnalités.</p>
-                    <Button
-                      onClick={() => base44.auth.redirectToLogin(window.location.href)}
-                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 font-semibold"
-                    >
-                      Se connecter / Créer un compte
-                    </Button>
-                    <button onClick={() => setShowLoginPrompt(false)} className="text-white/40 text-sm hover:text-white/60 transition-colors">
-                      Continuer en mode invité
-                    </button>
-                  </div>
-                </div>
-              )}
+
 
               <p className="text-white/40 text-xs text-center">
                 {t('amazonDisclaimer')}
