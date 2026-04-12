@@ -38,6 +38,7 @@ import FloatingChat from '@/components/messages/FloatingChat';
 import MaintenancePage from '@/components/shared/MaintenancePage';
 import UsernameGuard from '@/components/onboarding/UsernameGuard';
 import PullToRefresh from '@/components/shared/PullToRefresh';
+import BugReportButton from '@/components/shared/BugReportButton';
 import { useAuth } from '@/lib/AuthContext';
 
 function LayoutContent({ children, currentPageName }) {
@@ -674,6 +675,7 @@ function LayoutContent({ children, currentPageName }) {
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       <FloatingChat />
       <UsernameGuard />
+      <BugReportButton />
       </div>
       );
       }

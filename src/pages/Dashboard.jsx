@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -14,6 +14,7 @@ import DashboardOnline from '@/components/dashboard/sections/DashboardOnline';
 import DashboardPendingPuzzles from '@/components/dashboard/sections/DashboardPendingPuzzles';
 import DashboardPageVisibility from '@/components/dashboard/sections/DashboardPageVisibility';
 import DashboardBlog from '@/components/dashboard/sections/DashboardBlog';
+import DashboardBugReports from '@/components/dashboard/sections/DashboardBugReports';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
@@ -25,6 +26,7 @@ const SECTIONS = [
   { id: 'profile', label: 'Utilisateurs', icon: User, component: DashboardProfile },
   { id: 'visibility', label: 'Pages', icon: Eye, component: DashboardPageVisibility },
   { id: 'blog', label: 'Blog', icon: BookOpen, component: DashboardBlog },
+  { id: 'bugreports', label: 'Signalements', icon: Bug, component: DashboardBugReports },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
 ];
 

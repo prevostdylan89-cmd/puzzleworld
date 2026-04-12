@@ -1,0 +1,67 @@
+{
+  "name": "BugReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Titre court du probl\u00e8me"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description d\u00e9taill\u00e9e du probl\u00e8me"
+    },
+    "page": {
+      "type": "string",
+      "description": "Page sur laquelle le probl\u00e8me a \u00e9t\u00e9 rencontr\u00e9"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "suggestion",
+        "contenu",
+        "autre"
+      ],
+      "default": "bug",
+      "description": "Type de signalement"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "nouveau",
+        "en_cours",
+        "resolu",
+        "rejete"
+      ],
+      "default": "nouveau",
+      "description": "Statut du signalement"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "faible",
+        "normale",
+        "haute",
+        "critique"
+      ],
+      "default": "normale",
+      "description": "Priorit\u00e9"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email de l'utilisateur (optionnel)"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Navigateur/appareil"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notes internes admin"
+    }
+  },
+  "required": [
+    "title",
+    "description"
+  ]
+}
