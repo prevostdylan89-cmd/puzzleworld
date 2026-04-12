@@ -62,9 +62,6 @@ export default function GuestLoginScreen({ onContinueAsGuest }) {
           Continuer en mode invité
         </Button>
 
-        <p className="text-white/30 text-xs text-center">
-          ✅ Mode invité : accès complet au site. Seuls les liens Amazon nécessitent un compte.
-        </p>
       </div>
 
       {/* Features preview */}
