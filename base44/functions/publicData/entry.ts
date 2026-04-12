@@ -50,6 +50,11 @@ Deno.serve(async (req) => {
       return Response.json({ topPuzzles, events, featuredArticles: featuredArticles.sort((a,b) => a.position - b.position), eventsInMaintenance });
     }
 
+    if (type === 'pageSettings') {
+      const settings = await base44.asServiceRole.entities.PageSettings.list();
+      return Response.json({ data: settings });
+    }
+
     if (type === 'posts') {
       const { sort = '-likes_count', limit = 10, skip = 0 } = body;
       const posts = await base44.asServiceRole.entities.Post.list(sort, limit, skip);

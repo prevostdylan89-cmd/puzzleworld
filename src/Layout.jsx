@@ -52,7 +52,9 @@ function LayoutContent({ children, currentPageName }) {
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   useEffect(() => {
-    base44.entities.PageSettings.list().then(setPageSettings).catch(() => {});
+    base44.functions.invoke('publicData', { type: 'pageSettings' })
+      .then(res => setPageSettings(res.data?.data || []))
+      .catch(() => {});
   }, []);
   const [tabHistory, setTabHistory] = useState({
     Home: ['Home'],
