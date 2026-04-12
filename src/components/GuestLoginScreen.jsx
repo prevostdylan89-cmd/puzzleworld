@@ -5,6 +5,16 @@ import { base44 } from '@/api/base44Client';
 export default function GuestLoginScreen({ onContinueAsGuest }) {
   return (
     <div className="fixed inset-0 bg-[#000019] flex flex-col items-center justify-center p-6">
+      {/* Back arrow to guest mode */}
+      <button
+        onClick={onContinueAsGuest}
+        className="absolute top-6 left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Mode invité
+      </button>
       {/* Logo */}
       <div className="flex flex-col items-center mb-10">
         <div className="w-24 h-24 rounded-2xl overflow-hidden mb-4">

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/lib/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import { CheckCircle2, Package } from 'lucide-react';
 
 export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
+  const { isGuest } = useAuth();
   const [activeTab, setActiveTab] = useState('scanner');
   const [cameraReady, setCameraReady] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -542,6 +544,24 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           <DialogTitle className="text-white text-xl">Ajouter un Puzzle</DialogTitle>
         </DialogHeader>
 
+        {/* Guest mode block */}
+        {isGuest && (
+          <div className="py-8 flex flex-col items-center text-center space-y-4">
+            <span className="text-5xl">🔒</span>
+            <h3 className="text-white font-bold text-lg">Fonctionnalité réservée aux membres</h3>
+            <p className="text-white/50 text-sm">Créez un compte gratuit pour scanner et ajouter des puzzles à votre collection.</p>
+            <Button
+              onClick={() => base44.auth.redirectToLogin(window.location.href)}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-6"
+            >
+              Se connecter / Créer un compte
+            </Button>
+            <button onClick={onClose} className="text-white/30 text-sm hover:text-white/60 transition-colors">Fermer</button>
+          </div>
+        )}
+
+        {/* Main content — hidden for guests */}
+        {!isGuest && (<>
         {/* Message d'état (erreur, communauté, nouveau) — affiché quand pas de puzzleData visible */}
         {!puzzleData && !showSuccess && scanMessage && (
           <motion.div
@@ -1052,6 +1072,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             </motion.div>
           </div>
         )}
+        </>)}
       </DialogContent>
     </Dialog>
 
