@@ -38,9 +38,11 @@ import FloatingChat from '@/components/messages/FloatingChat';
 import MaintenancePage from '@/components/shared/MaintenancePage';
 import UsernameGuard from '@/components/onboarding/UsernameGuard';
 import PullToRefresh from '@/components/shared/PullToRefresh';
+import { useAuth } from '@/lib/AuthContext';
 
 function LayoutContent({ children, currentPageName }) {
   const [user, setUser] = useState(null);
+  const { exitGuestMode } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
@@ -343,8 +345,8 @@ function LayoutContent({ children, currentPageName }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
-                onClick={() => base44.auth.redirectToLogin()}
+              <Button
+                onClick={exitGuestMode}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl"
               >
                 {t('logIn')}
@@ -399,8 +401,8 @@ function LayoutContent({ children, currentPageName }) {
                 </div>
               </Link>
             ) : (
-              <Button 
-                onClick={() => base44.auth.redirectToLogin()}
+              <Button
+                onClick={exitGuestMode}
                 size="sm"
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-xs px-3 h-8"
               >
