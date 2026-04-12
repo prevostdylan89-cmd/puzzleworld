@@ -33,12 +33,8 @@ export default function BugReportButton() {
         status: 'nouveau',
         priority: 'normale',
       });
-      setSent(true);
-      setTimeout(() => {
-        setOpen(false);
-        setSent(false);
-        setForm({ title: '', description: '', category: 'bug' });
-      }, 2000);
+      setOpen(false);
+      setForm({ title: '', description: '', category: 'bug' });
     } catch (err) {
       console.error(err);
     } finally {
