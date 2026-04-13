@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Puzzle, Trophy, UserPlus, UserCheck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -7,43 +7,16 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/components/LanguageContext';
 
-const LEVELS = [
-  { level: 1, threshold: 0,   emoji: '🌱' },
-  { level: 2, threshold: 5,   emoji: '🔲' },
-  { level: 3, threshold: 15,  emoji: '🔍' },
-  { level: 4, threshold: 30,  emoji: '🧩' },
-  { level: 5, threshold: 60,  emoji: '🎨' },
-  { level: 6, threshold: 100, emoji: '🔓' },
-  { level: 7, threshold: 150, emoji: '⚡' },
-  { level: 8, threshold: 250, emoji: '💎' },
-  { level: 9, threshold: 400, emoji: '🏆' },
-  { level: 10, threshold: 600, emoji: '👑' },
-];
-
-function getLevelData(count) {
-  let current = LEVELS[0];
-  for (const lvl of LEVELS) {
-    if (count >= lvl.threshold) current = lvl;
-  }
-  return current;
-}
-
 export default function UserProfileDialog({ userEmail, authorName, onClose }) {
   const { t } = useLanguage();
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [displayName, setDisplayName] = useState(authorName || userEmail?.split('@')[0] || '');
-  const [friendCode, setFriendCode] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [stats, setStats] = useState({ completed: 0, achievements: 0, totalPieces: 0, scanCount: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    setDisplayName(authorName || userEmail?.split('@')[0] || '');
-    setProfilePhoto(null);
-    setFriendCode(null);
-    setStats({ completed: 0, achievements: 0, totalPieces: 0, scanCount: 0 });
+    setProfileData(null);
     setIsFollowing(false);
     loadData();
   }, [userEmail]);
@@ -53,31 +26,10 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
-      // Load public UserProfile (not restricted by security rules)
-      const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
-      const profile = profiles.find(p => p.email === userEmail);
-      if (profile) {
-        setDisplayName(profile.display_name || profile.full_name || authorName || userEmail.split('@')[0]);
-        setProfilePhoto(profile.profile_photo || null);
-        setFriendCode(profile.friend_code || null);
-      }
+      // Call backend function with service role to bypass RLS
+      const res = await base44.functions.invoke('getUserPublicStats', { targetEmail: userEmail });
+      setProfileData(res.data);
 
-      // Load stats (all public entity data)
-      const [completedPuzzles, achievements, catalogItems] = await Promise.all([
-        base44.entities.UserPuzzle.filter({ created_by: userEmail, status: 'done' }),
-        base44.entities.Achievement.filter({ created_by: userEmail }),
-        base44.entities.PuzzleCatalog.filter({ created_by: userEmail }),
-      ]);
-
-      const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
-      setStats({
-        completed: completedPuzzles.length,
-        achievements: achievements.length,
-        totalPieces,
-        scanCount: catalogItems.length,
-      });
-
-      // Check follow status
       if (loggedUser) {
         const followCheck = await base44.entities.Follow.filter({
           follower_email: loggedUser.email,
@@ -117,14 +69,11 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
     }
   };
 
-  const initials = displayName
-    ? displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : '??';
-
-  const levelData = getLevelData(stats.scanCount);
-  const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-
+  const displayName = profileData?.displayName || authorName || userEmail?.split('@')[0] || '??';
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const isOwnProfile = currentUser && currentUser.email === userEmail;
+
+  const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 
   return (
     <div
@@ -152,8 +101,8 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
           {/* Avatar + follow button */}
           <div className="flex items-end justify-between mb-3">
             <Avatar className="h-16 w-16 ring-4 ring-[#0a0a2e] border-2 border-orange-500/30 flex-shrink-0">
-              {profilePhoto ? (
-                <img src={profilePhoto} alt={displayName} className="w-full h-full object-cover" />
+              {profileData?.profilePhoto ? (
+                <img src={profileData.profilePhoto} alt={displayName} className="w-full h-full object-cover" />
               ) : (
                 <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xl">
                   {initials}
@@ -183,16 +132,21 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
           <div className="mb-4">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-bold text-white">{displayName}</h2>
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold">
-                {levelData.emoji} Niveau {levelData.level}
-              </span>
+              {profileData?.level && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold">
+                  {profileData.level.emoji} Niveau {profileData.level.level}
+                </span>
+              )}
             </div>
-            {friendCode && (
-              <p className="text-orange-400/60 text-xs mt-0.5 font-mono">@{friendCode}</p>
+            {profileData?.friendCode && (
+              <p className="text-orange-400/60 text-xs mt-0.5 font-mono">@{profileData.friendCode}</p>
+            )}
+            {profileData?.level && (
+              <p className="text-white/30 text-xs">{profileData.level.title}</p>
             )}
           </div>
 
-          {/* Stats grid */}
+          {/* Stats */}
           {loading ? (
             <div className="flex items-center justify-center py-6">
               <div className="w-6 h-6 border-2 border-white/20 border-t-orange-500 rounded-full animate-spin" />
@@ -201,17 +155,17 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white/5 rounded-xl p-3 text-center">
                 <Puzzle className="w-4 h-4 text-orange-400 mx-auto mb-1" />
-                <div className="text-lg font-bold text-white">{stats.completed}</div>
+                <div className="text-lg font-bold text-white">{profileData?.completed ?? 0}</div>
                 <div className="text-[11px] text-white/50">{t('completed')}</div>
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center">
                 <span className="text-lg block mb-1">🧩</span>
-                <div className="text-lg font-bold text-white">{formatPieces(stats.totalPieces)}</div>
+                <div className="text-lg font-bold text-white">{formatPieces(profileData?.totalPieces ?? 0)}</div>
                 <div className="text-[11px] text-white/50">Pièces posées</div>
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center col-span-2">
                 <Trophy className="w-4 h-4 text-orange-400 mx-auto mb-1" />
-                <div className="text-lg font-bold text-white">{stats.achievements}</div>
+                <div className="text-lg font-bold text-white">{profileData?.achievements ?? 0}</div>
                 <div className="text-[11px] text-white/50">{t('achievements')}</div>
               </div>
             </div>
