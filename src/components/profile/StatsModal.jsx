@@ -344,12 +344,20 @@ export function WishlistModal({ open, onClose, user }) {
 
   const loadWishlist = async () => {
     try {
-      const items = await base44.entities.Wishlist.filter({
-        created_by: user.email
-      });
-      setWishlist(items);
-    } catch (error) {
-      console.error('Error loading wishlist:', error);
+      const [oldItems, userPuzzleItems] = await Promise.all([
+        base44.entities.Wishlist.filter({ created_by: user.email }),
+        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
+      ]);
+      // Merge and dedup by puzzle_name
+      const seen = new Set();
+      const merged = [];
+      for (const item of [...userPuzzleItems.map(p => ({ ...p, puzzle_name: p.puzzle_name })), ...oldItems]) {
+        const key = item.puzzle_name?.toLowerCase().trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(item);
+      }
+      setWishlist(merged);
     } finally {
       setLoading(false);
     }

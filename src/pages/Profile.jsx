@@ -83,8 +83,18 @@ export default function Profile() {
       setStats(prev => ({ ...prev, completed: completedPuzzles.length, totalPieces }));
     });
     const unsubscribeWishlist = base44.entities.Wishlist.subscribe(async () => {
-      const wishlistItems = await base44.entities.Wishlist.filter({ created_by: user.email });
-      setStats(prev => ({ ...prev, wishlist: wishlistItems.length }));
+      const [old, upw] = await Promise.all([
+        base44.entities.Wishlist.filter({ created_by: user.email }),
+        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
+      ]);
+      const seen = new Set();
+      let count = 0;
+      for (const item of [...upw, ...old]) {
+        const key = item.puzzle_name?.toLowerCase().trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key); count++;
+      }
+      setStats(prev => ({ ...prev, wishlist: count }));
     });
     return () => {
       unsubscribeUserPuzzle();
@@ -101,13 +111,23 @@ export default function Profile() {
       await base44.functions.invoke('syncUserProfile', {});
       
       // Load stats
-      const [completedPuzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
+      const [completedPuzzles, userAchievements, oldWishlist, userPuzzleWishlist, followers, following] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
         base44.entities.Wishlist.filter({ created_by: currentUser.email }),
+        base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
         base44.entities.Follow.filter({ follower_email: currentUser.email })
       ]);
+      // Dedup wishlist by puzzle_name
+      const wishlistSeen = new Set();
+      const wishlistItems = [];
+      for (const item of [...userPuzzleWishlist, ...oldWishlist]) {
+        const key = item.puzzle_name?.toLowerCase().trim();
+        if (!key || wishlistSeen.has(key)) continue;
+        wishlistSeen.add(key);
+        wishlistItems.push(item);
+      }
 
       const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
 
