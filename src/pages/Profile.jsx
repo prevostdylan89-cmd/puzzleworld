@@ -33,6 +33,7 @@ import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/compo
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
+import BugReportModal from '@/components/shared/BugReportButton';
 import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
 import { Crown, Camera } from 'lucide-react';
 
@@ -57,6 +58,7 @@ export default function Profile() {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showWishlistModal, setShowWishlistModal] = useState(false);
   const [showBadgesModal, setShowBadgesModal] = useState(false);
+  const [showBugReport, setShowBugReport] = useState(false);
   const [currentBadge, setCurrentBadge] = useState(null);
 
   useEffect(() => {
@@ -462,8 +464,26 @@ export default function Profile() {
           <MyEventsSection user={user} />
         </div>
 
-        {/* Delete Account Section */}
+        {/* Bug Report Section */}
         <div className="mt-12">
+          <div className="bg-white/[0.03] border border-red-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <span>🐛</span> Signaler un problème
+              </h3>
+              <p className="text-white/50 text-sm mt-1">Un bug, une suggestion ou un contenu incorrect ? Faites-le nous savoir.</p>
+            </div>
+            <button
+              onClick={() => setShowBugReport(true)}
+              className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium transition-all flex-shrink-0"
+            >
+              Signaler
+            </button>
+          </div>
+        </div>
+
+        {/* Delete Account Section */}
+        <div className="mt-6">
           <h2 className="text-2xl font-bold text-white mb-6">{t('accountSettings')}</h2>
           <DeleteAccountSection />
         </div>
@@ -474,6 +494,7 @@ export default function Profile() {
       <AchievementsModal open={showAchievementsModal} onClose={() => setShowAchievementsModal(false)} user={user} />
       <WishlistModal open={showWishlistModal} onClose={() => setShowWishlistModal(false)} user={user} />
       <BadgesModal open={showBadgesModal} onClose={() => setShowBadgesModal(false)} user={user} />
+      <BugReportModal open={showBugReport} onClose={() => setShowBugReport(false)} />
     </div>
   );
 }

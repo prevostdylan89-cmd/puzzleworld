@@ -13,15 +13,14 @@ import {
   LogOut,
   Languages,
   Scan,
-  Sparkles,
   Settings,
-  MessageCircle,
   BookOpen,
   Menu,
   X as XIcon,
   Calendar,
   ArrowLeft,
-  Globe
+  Globe,
+  Bug
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ import FloatingChat from '@/components/messages/FloatingChat';
 import MaintenancePage from '@/components/shared/MaintenancePage';
 import UsernameGuard from '@/components/onboarding/UsernameGuard';
 import PullToRefresh from '@/components/shared/PullToRefresh';
-import BugReportButton from '@/components/shared/BugReportButton';
+import BugReportModal from '@/components/shared/BugReportButton';
 import { useAuth } from '@/lib/AuthContext';
 
 function LayoutContent({ children, currentPageName }) {
@@ -49,6 +48,7 @@ function LayoutContent({ children, currentPageName }) {
   const navigate = useNavigate();
   const [showScanModal, setShowScanModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showBugReport, setShowBugReport] = useState(false);
   const [pageSettings, setPageSettings] = useState([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
@@ -57,20 +57,19 @@ function LayoutContent({ children, currentPageName }) {
       .then(res => setPageSettings(res.data?.data || []))
       .catch(() => {});
   }, []);
+
   const [tabHistory, setTabHistory] = useState({
     Home: ['Home'],
     Social: ['Social'],
     Collection: ['Collection']
   });
 
-  // Bottom nav items (mobile only)
   const bottomNavItems = [
     { name: t('collection'), icon: Grid3X3, page: 'Collection' },
     { name: 'Scan', icon: Scan, page: 'scan', isScan: true },
     { name: t('profile'), icon: User, page: 'Profile' },
   ];
 
-  // Sidebar menu items (mobile drawer)
   const sidebarMenuItems = [
     { name: t('home'), icon: Home, page: 'Home' },
     { name: t('social'), icon: Globe, page: 'Social' },
@@ -81,7 +80,6 @@ function LayoutContent({ children, currentPageName }) {
     { name: 'Blog', icon: BookOpen, page: 'Blog' },
   ];
 
-  // Desktop nav items
   const desktopNavItems = [
     { name: t('home'), icon: Home, page: 'Home', hasHistory: true },
     { name: t('social'), icon: Globe, page: 'Social', hasHistory: true },
@@ -99,25 +97,15 @@ function LayoutContent({ children, currentPageName }) {
 
   const handleNavClick = (item) => {
     if (!item.hasHistory) return;
-    
     const currentTab = item.page;
     const history = tabHistory[currentTab] || [currentTab];
     const isCurrentTab = currentPageName === currentTab || history.includes(currentPageName);
-    
     if (isCurrentTab && currentPageName === history[history.length - 1]) {
-      // Clicked active tab at root - do nothing or scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (isCurrentTab) {
-      // Return to tab root
-      setTabHistory(prev => ({
-        ...prev,
-        [currentTab]: [currentTab]
-      }));
+      setTabHistory(prev => ({ ...prev, [currentTab]: [currentTab] }));
     } else {
-      // Switching to different tab - remember current page
-      const currentRootTab = Object.keys(tabHistory).find(tab => 
-        tabHistory[tab].includes(currentPageName)
-      );
+      const currentRootTab = Object.keys(tabHistory).find(tab => tabHistory[tab].includes(currentPageName));
       if (currentRootTab) {
         setTabHistory(prev => ({
           ...prev,
@@ -127,9 +115,7 @@ function LayoutContent({ children, currentPageName }) {
     }
   };
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+  useEffect(() => { loadUser(); }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -155,9 +141,7 @@ function LayoutContent({ children, currentPageName }) {
     }
   };
 
-  const handleLogout = () => {
-    base44.auth.logout();
-  };
+  const handleLogout = () => { base44.auth.logout(); };
 
   const userInitials = user?.full_name 
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -179,7 +163,6 @@ function LayoutContent({ children, currentPageName }) {
           --accent-foreground: 0 0% 100%;
           --border: 240 10% 15%;
         }
-
         @media (prefers-color-scheme: light) {
           :root {
             --background: 0 0% 100%;
@@ -193,46 +176,28 @@ function LayoutContent({ children, currentPageName }) {
             --border: 240 10% 90%;
           }
         }
-
         html, body {
           overscroll-behavior: none;
           -webkit-tap-highlight-color: transparent;
         }
-
         button, a, [role="button"], nav, header {
           user-select: none;
           -webkit-user-select: none;
           -webkit-touch-callout: none;
           -webkit-tap-highlight-color: transparent;
         }
-
         .select-text {
           user-select: text;
           -webkit-user-select: text;
         }
-
         * {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 107, 53, 0.3) transparent;
         }
-
-        *::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-
-        *::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        *::-webkit-scrollbar-thumb {
-          background: rgba(255, 107, 53, 0.3);
-          border-radius: 3px;
-        }
-
-        *::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 107, 53, 0.5);
-        }
+        *::-webkit-scrollbar { width: 6px; height: 6px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background: rgba(255, 107, 53, 0.3); border-radius: 3px; }
+        *::-webkit-scrollbar-thumb:hover { background: rgba(255, 107, 53, 0.5); }
       `}</style>
 
       {/* Desktop Header */}
@@ -289,6 +254,15 @@ function LayoutContent({ children, currentPageName }) {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
+            {/* Bug Report Button */}
+            <button
+              onClick={() => setShowBugReport(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium border border-red-500/20 hover:border-red-500/40"
+            >
+              <Bug className="w-3.5 h-3.5" />
+              Signaler
+            </button>
+
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -362,7 +336,6 @@ function LayoutContent({ children, currentPageName }) {
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
         <div className="flex items-center justify-between px-4 h-14">
-          {/* Hamburger ou Back arrow selon la page */}
           {['Home', 'Social', 'Collection', 'Profile', 'Events', 'Friends', 'Messages', 'OnlinePuzzles', 'Dashboard'].includes(currentPageName) ? (
             <button 
               onClick={() => setShowMobileMenu(true)}
@@ -520,12 +493,17 @@ function LayoutContent({ children, currentPageName }) {
                   </button>
                 </div>
 
+                <button
+                  onClick={() => { setShowBugReport(true); setShowMobileMenu(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
+                >
+                  <Bug className="w-5 h-5" />
+                  <span className="text-sm font-medium">Signaler un problème</span>
+                </button>
+
                 {user && (
                   <button
-                    onClick={() => {
-                      handleLogout();
-                      setShowMobileMenu(false);
-                    }}
+                    onClick={() => { handleLogout(); setShowMobileMenu(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
                   >
                     <LogOut className="w-5 h-5" />
@@ -568,7 +546,6 @@ function LayoutContent({ children, currentPageName }) {
               >
                 <item.icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
                 <span className="text-[10px] font-semibold">{item.name}</span>
-
               </Link>
             );
           })}
@@ -602,7 +579,6 @@ function LayoutContent({ children, currentPageName }) {
       <footer className="bg-[#0a0a2e] border-t border-white/[0.06] mt-12">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
@@ -615,14 +591,12 @@ function LayoutContent({ children, currentPageName }) {
                 <a href="https://www.instagram.com/puzzle__world__?igsh=NGI5cHJoOXpuZHQ5" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">📷</span>
                 </a>
-
                 <a href="https://www.tiktok.com/@puzzleworld58?_r=1&_t=ZN-93ubJQIrj3m" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">🎵</span>
                 </a>
               </div>
             </div>
 
-            {/* Explore */}
             <div>
               <h3 className="text-white font-semibold mb-4">Explore</h3>
               <ul className="space-y-2">
@@ -632,7 +606,6 @@ function LayoutContent({ children, currentPageName }) {
               </ul>
             </div>
 
-            {/* Support */}
             <div>
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
@@ -642,7 +615,6 @@ function LayoutContent({ children, currentPageName }) {
               </ul>
             </div>
 
-            {/* Placeholder for grid layout */}
             <div></div>
           </div>
 
@@ -675,10 +647,10 @@ function LayoutContent({ children, currentPageName }) {
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
       <FloatingChat />
       <UsernameGuard />
-      <BugReportButton />
-      </div>
-      );
-      }
+      <BugReportModal open={showBugReport} onClose={() => setShowBugReport(false)} />
+    </div>
+  );
+}
 
 export default function Layout({ children, currentPageName }) {
   return (
