@@ -1,103 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Calendar, Puzzle, Trophy, Heart, UserPlus, UserCheck, Users } from 'lucide-react';
+import { X, Puzzle, Trophy, UserPlus, UserCheck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
-import UserBadge from '@/components/shared/UserBadge';
 import { useLanguage } from '@/components/LanguageContext';
 
+const LEVELS = [
+  { level: 1,  title: 'Apprenti Curieux',       threshold: 0,   emoji: '🌱' },
+  { level: 2,  title: 'Trieur de Bordures',      threshold: 5,   emoji: '🔲' },
+  { level: 3,  title: 'Chercheur de Pièces',     threshold: 15,  emoji: '🔍' },
+  { level: 4,  title: 'Assembleur du Dimanche',  threshold: 30,  emoji: '🧩' },
+  { level: 5,  title: 'Expert des Couleurs',     threshold: 60,  emoji: '🎨' },
+  { level: 6,  title: 'Déchiffreur de Motifs',   threshold: 100, emoji: '🔓' },
+  { level: 7,  title: 'Maître de la Forme',      threshold: 150, emoji: '⚡' },
+  { level: 8,  title: 'Grand Collectionneur',    threshold: 250, emoji: '💎' },
+  { level: 9,  title: 'Légende du Puzzle',       threshold: 400, emoji: '🏆' },
+  { level: 10, title: 'Le Grand Architecte',     threshold: 600, emoji: '👑' },
+];
+
+function getLevelData(scanCount) {
+  let current = LEVELS[0];
+  for (const lvl of LEVELS) {
+    if (scanCount >= lvl.threshold) current = lvl;
+  }
+  return current;
+}
+
 export default function UserProfileDialog({ userEmail, onClose }) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [stats, setStats] = useState({ completed: 0, achievements: 0, wishlist: 0, followers: 0, following: 0 });
+  const [stats, setStats] = useState({ completed: 0, achievements: 0, totalPieces: 0, scanCount: 0 });
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isFriend, setIsFriend] = useState(false);
-  const [friendRequestPending, setFriendRequestPending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [completedPuzzles, setCompletedPuzzles] = useState([]);
 
   useEffect(() => {
     setUser(null);
     setLoading(true);
-    setStats({ completed: 0, achievements: 0, wishlist: 0, followers: 0, following: 0 });
-    setCompletedPuzzles([]);
-    setIsFollowing(false);
-    setIsFriend(false);
-    setFriendRequestPending(false);
     loadUserProfile();
   }, [userEmail]);
 
   const loadUserProfile = async () => {
     try {
-      // Get current user
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
-      // Try to get from UserProfile first (public data)
+      // Load user profile
       const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
-      let userData = profiles.find(p => p.email === userEmail) || null;
-
+      let userData = profiles[0] || null;
       if (!userData) {
-        // Fallback to User entity if profile not found
         const users = await base44.entities.User.filter({ email: userEmail });
-        userData = users.find(u => u.email === userEmail) || null;
+        userData = users[0] || null;
       } else {
-        // Fallback to User entity if profile not found
+        // Also try User entity for richer data
         const users = await base44.entities.User.filter({ email: userEmail });
-        const matchedUser = users.find(u => u.email === userEmail);
-        if (matchedUser) {
-          userData = matchedUser;
-        }
+        if (users[0]) userData = users[0];
       }
-      
+
       if (userData) {
         setUser(userData);
-        
-        // Load stats and puzzles
-        const [puzzles, userAchievements, wishlistItems, followers, following] = await Promise.all([
-          base44.entities.CompletedPuzzle.filter({ created_by: userEmail }),
+
+        const [completedPuzzles, achievements, catalogItems] = await Promise.all([
+          base44.entities.UserPuzzle.filter({ created_by: userEmail, status: 'done' }),
           base44.entities.Achievement.filter({ created_by: userEmail }),
-          base44.entities.Wishlist.filter({ created_by: userEmail }),
-          base44.entities.Follow.filter({ following_email: userEmail }),
-          base44.entities.Follow.filter({ follower_email: userEmail })
+          base44.entities.PuzzleCatalog.filter({ created_by: userEmail }),
         ]);
 
-        setCompletedPuzzles(puzzles);
+        const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
+
         setStats({
-          completed: puzzles.length,
-          achievements: userAchievements.length,
-          wishlist: wishlistItems.length,
-          followers: followers.length,
-          following: following.length
+          completed: completedPuzzles.length,
+          achievements: achievements.length,
+          totalPieces,
+          scanCount: catalogItems.length,
         });
 
-        // Check if following and friend status
         if (loggedUser) {
-          const [followCheck, friendships] = await Promise.all([
-            base44.entities.Follow.filter({
-              follower_email: loggedUser.email,
-              following_email: userEmail
-            }),
-            base44.entities.Friendship.filter({})
-          ]);
+          const followCheck = await base44.entities.Follow.filter({
+            follower_email: loggedUser.email,
+            following_email: userEmail,
+          });
           setIsFollowing(followCheck.length > 0);
-
-          // Check if already friends or has pending request
-          const friendship = friendships.find(f => 
-            (f.requester_email === loggedUser.email && f.addressee_email === userEmail) ||
-            (f.addressee_email === loggedUser.email && f.requester_email === userEmail)
-          );
-
-          if (friendship) {
-            setIsFriend(friendship.status === 'accepted');
-            setFriendRequestPending(friendship.status === 'pending');
-          }
         }
       }
     } catch (error) {
@@ -108,76 +93,45 @@ export default function UserProfileDialog({ userEmail, onClose }) {
   };
 
   const handleFollow = async () => {
-    if (!currentUser) {
-      toast.error(t('loginToFollow'));
-      return;
-    }
-
-    // Optimistic update
-    const previousFollowing = isFollowing;
-    const previousStats = stats;
+    if (!currentUser) { toast.error(t('loginToFollow')); return; }
+    const prev = isFollowing;
     setIsFollowing(!isFollowing);
-    setStats(prev => ({ 
-      ...prev, 
-      followers: isFollowing ? prev.followers - 1 : prev.followers + 1 
-    }));
     toast.success(isFollowing ? t('unfollowed') : t('followedUser'));
-
     try {
-      if (previousFollowing) {
+      if (prev) {
         const follows = await base44.entities.Follow.filter({
           follower_email: currentUser.email,
-          following_email: userEmail
+          following_email: userEmail,
         });
-        if (follows.length > 0) {
-          await base44.entities.Follow.delete(follows[0].id);
-        }
+        if (follows.length > 0) await base44.entities.Follow.delete(follows[0].id);
       } else {
         await base44.entities.Follow.create({
           follower_email: currentUser.email,
-          following_email: userEmail
+          following_email: userEmail,
         });
       }
-    } catch (error) {
-      // Revert on error
-      setIsFollowing(previousFollowing);
-      setStats(previousStats);
-      console.error('Error toggling follow:', error);
+    } catch {
+      setIsFollowing(prev);
       toast.error(t('followUpdateFailed'));
     }
   };
 
-  const handleSendFriendRequest = async () => {
-    if (!currentUser) {
-      toast.error(t('loginToFollow'));
-      return;
-    }
-
-    try {
-      await base44.entities.Friendship.create({
-        requester_email: currentUser.email,
-        requester_name: currentUser.full_name || currentUser.email,
-        addressee_email: userEmail,
-        addressee_name: user.full_name || user.email,
-        status: 'pending'
-      });
-      setFriendRequestPending(true);
-      toast.success(t('requestSent'));
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast.error(t('followUpdateFailed'));
-    }
-  };
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+        <div className="w-8 h-8 border-4 border-white/20 border-t-orange-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) return null;
 
-  const userInitials = user.full_name 
+  const userInitials = user.full_name
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user.email.slice(0, 2).toUpperCase();
 
-  const joinedDate = user.created_date 
-    ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true, locale: language === 'fr' ? fr : undefined })
-    : language === 'fr' ? 'Récemment' : 'Recently';
+  const levelData = getLevelData(stats.scanCount);
+  const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
@@ -186,11 +140,10 @@ export default function UserProfileDialog({ userEmail, onClose }) {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0a0a2e] border border-white/10 rounded-2xl w-full max-w-sm"
-        style={{ height: '420px' }}
+        className="bg-[#0a0a2e] border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden"
       >
         {/* Header banner */}
-        <div className="relative h-20 bg-gradient-to-br from-orange-500/20 to-purple-500/20 rounded-t-2xl flex-shrink-0">
+        <div className="relative h-20 bg-gradient-to-br from-orange-500/20 to-purple-500/20 rounded-t-2xl">
           <button
             onClick={onClose}
             className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
@@ -199,9 +152,8 @@ export default function UserProfileDialog({ userEmail, onClose }) {
           </button>
         </div>
 
-        {/* Content — fixed height, no scroll */}
         <div className="px-5 pb-5" style={{ marginTop: '-40px' }}>
-          {/* Avatar + actions row */}
+          {/* Avatar + follow button */}
           <div className="flex items-end justify-between mb-3">
             <Avatar className="h-16 w-16 ring-4 ring-[#0a0a2e] border-2 border-orange-500/30 flex-shrink-0">
               {user.profile_photo ? (
@@ -214,72 +166,50 @@ export default function UserProfileDialog({ userEmail, onClose }) {
             </Avatar>
 
             {currentUser && currentUser.email !== userEmail && (
-              <div className="flex gap-2 mb-1">
-                <Button
-                  onClick={handleFollow}
-                  size="sm"
-                  className={`rounded-lg text-xs h-8 ${
-                    isFollowing
-                      ? 'bg-white/10 text-white hover:bg-white/20'
-                      : 'bg-orange-500 hover:bg-orange-600 text-white'
-                  }`}
-                >
-                  {isFollowing ? <><UserCheck className="w-3 h-3 mr-1" />{t('following2')}</> : <><UserPlus className="w-3 h-3 mr-1" />{t('follow')}</>}
-                </Button>
-                {!isFriend && !friendRequestPending && (
-                  <Button size="sm" onClick={handleSendFriendRequest} className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs h-8">
-                    <Users className="w-3 h-3 mr-1" />{t('addFriend')}
-                  </Button>
-                )}
-                {friendRequestPending && (
-                  <Button size="sm" disabled className="rounded-lg bg-white/10 text-white/50 text-xs h-8">
-                    <Users className="w-3 h-3 mr-1" />{t('pending')}
-                  </Button>
-                )}
-                {isFriend && (
-                  <Button size="sm" disabled className="rounded-lg bg-green-500/20 text-green-400 text-xs h-8">
-                    <UserCheck className="w-3 h-3 mr-1" />{t('friend')}
-                  </Button>
-                )}
-              </div>
+              <Button
+                onClick={handleFollow}
+                size="sm"
+                className={`rounded-lg text-xs h-8 mb-1 ${
+                  isFollowing
+                    ? 'bg-white/10 text-white hover:bg-white/20'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
+              >
+                {isFollowing
+                  ? <><UserCheck className="w-3 h-3 mr-1" />{t('following2')}</>
+                  : <><UserPlus className="w-3 h-3 mr-1" />{t('follow')}</>
+                }
+              </Button>
             )}
           </div>
 
-          {/* Name & tag */}
-          <div className="mb-3">
-            <div className="flex items-center gap-2">
+          {/* Name + level badge */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-bold text-white">{user.full_name || user.email}</h2>
-              <UserBadge userEmail={userEmail} size="sm" showLabel={false} />
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold">
+                {levelData.emoji} Niveau {levelData.level}
+              </span>
             </div>
-            <p className="text-white/40 text-xs">@{user.email.split('@')[0]}</p>
-          </div>
-
-          {/* Followers row */}
-          <div className="flex items-center gap-4 text-xs text-white/50 mb-4">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-orange-400" />
-              {t('joined')} {joinedDate}
-            </span>
-            <span><span className="font-semibold text-white">{stats.followers}</span> {t('followers')}</span>
-            <span><span className="font-semibold text-white">{stats.following}</span> {t('followings')}</span>
+            <p className="text-white/40 text-xs mt-0.5">{levelData.title}</p>
           </div>
 
           {/* Stats grid */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="bg-white/5 rounded-xl p-3 text-center">
               <Puzzle className="w-4 h-4 text-orange-400 mx-auto mb-1" />
               <div className="text-lg font-bold text-white">{stats.completed}</div>
               <div className="text-[11px] text-white/50">{t('completed')}</div>
             </div>
             <div className="bg-white/5 rounded-xl p-3 text-center">
+              <span className="text-lg block mb-1">🧩</span>
+              <div className="text-lg font-bold text-white">{formatPieces(stats.totalPieces)}</div>
+              <div className="text-[11px] text-white/50">Pièces posées</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-3 text-center col-span-2">
               <Trophy className="w-4 h-4 text-orange-400 mx-auto mb-1" />
               <div className="text-lg font-bold text-white">{stats.achievements}</div>
               <div className="text-[11px] text-white/50">{t('achievements')}</div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <Heart className="w-4 h-4 text-orange-400 mx-auto mb-1" />
-              <div className="text-lg font-bold text-white">{stats.wishlist}</div>
-              <div className="text-[11px] text-white/50">{t('wishlist')}</div>
             </div>
           </div>
         </div>

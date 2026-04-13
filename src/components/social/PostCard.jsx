@@ -12,6 +12,7 @@ import { useLanguage } from '@/components/LanguageContext';
 import CommentSection from './CommentSection';
 import UserProfileDialog from './UserProfileDialog';
 import UserBadge from '@/components/shared/UserBadge';
+import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
@@ -461,7 +462,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
             >
               {post.author_name}
             </button>
-            <UserBadge userEmail={post.created_by} size="xs" showLabel={false} />
+            <UserLevelTag userEmail={post.created_by} />
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Puzzle className="w-3 h-3 mr-1" />
