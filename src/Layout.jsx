@@ -119,17 +119,17 @@ function LayoutContent({ children, currentPageName }) {
 
   useEffect(() => {
     if (!user) return;
-    const fetchUnread = async () => {
-      if (document.hidden) return;
-      try {
-        const unreadMsgs = await base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false });
-        const uniqueConvos = new Set(unreadMsgs.map(m => m.conversation_id));
-        setUnreadMessagesCount(uniqueConvos.size);
-      } catch {}
-    };
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 60000);
-    return () => clearInterval(interval);
+    // Initial fetch
+    base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false })
+      .then(msgs => setUnreadMessagesCount(new Set(msgs.map(m => m.conversation_id)).size))
+      .catch(() => {});
+    // Real-time subscription instead of polling
+    const unsub = base44.entities.DirectMessage.subscribe(() => {
+      base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false })
+        .then(msgs => setUnreadMessagesCount(new Set(msgs.map(m => m.conversation_id)).size))
+        .catch(() => {});
+    });
+    return () => unsub();
   }, [user]);
 
   const loadUser = async () => {

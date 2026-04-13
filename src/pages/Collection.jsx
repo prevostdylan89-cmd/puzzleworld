@@ -284,7 +284,7 @@ export default function Collection() {
       const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-created_date', 500);
       return puzzles;
     },
-    refetchInterval: 30000 // Auto-refresh every 30 seconds to sync with admin changes
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   useEffect(() => {
