@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/LanguageContext';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function DeleteAccountSection() {
+  const { t } = useLanguage();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -22,14 +24,14 @@ export default function DeleteAccountSection() {
       const user = await base44.auth.me();
       const userEmail = user.email;
 
-      toast.info('Suppression en cours...');
+      toast.info(t('deletionInProgress'));
 
       // Anonymize posts (GDPR compliance - keep content but remove identity)
       const userPosts = await base44.entities.Post.filter({ created_by: userEmail });
       for (const post of userPosts) {
         await base44.entities.Post.update(post.id, {
-          author_name: 'Utilisateur supprimé',
-          content: '[Contenu supprimé par l\'utilisateur]'
+          author_name: t('deletedUser'),
+          content: t('deletedContent')
         });
       }
 
@@ -82,7 +84,7 @@ export default function DeleteAccountSection() {
         await base44.entities.UserBadge.delete(badge.id);
       }
 
-      toast.success('Compte supprimé avec succès');
+      toast.success(t('accountDeleted'));
       
       // Logout and redirect
       setTimeout(() => {
@@ -90,7 +92,7 @@ export default function DeleteAccountSection() {
       }, 1000);
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast.error('Erreur lors de la suppression');
+      toast.error(t('deletionError'));
       setIsDeleting(false);
     }
   };
@@ -103,16 +105,16 @@ export default function DeleteAccountSection() {
             <AlertTriangle className="w-6 h-6 text-red-400" />
           </div>
           <div className="flex-1">
-            <h3 className="text-white font-semibold mb-2">Zone Danger</h3>
+            <h3 className="text-white font-semibold mb-2">{t('dangerZone')}</h3>
             <p className="text-white/60 text-sm mb-4">
-              La suppression de votre compte est irréversible. Toutes vos données (collection, posts, statistiques) seront définitivement effacées.
+              {t('deleteAccountDesc')}
             </p>
             <Button
               onClick={() => setShowConfirm(true)}
               variant="destructive"
               className="bg-red-500 hover:bg-red-600 text-white"
             >
-              Supprimer mon compte
+              {t('deleteAccount')}
             </Button>
           </div>
         </div>
@@ -123,23 +125,23 @@ export default function DeleteAccountSection() {
           <DialogHeader>
             <DialogTitle className="text-red-400 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5" />
-              Confirmer la suppression
+              {t('confirmDeletion')}
             </DialogTitle>
             <DialogDescription className="text-white/70">
-              Cette action est <span className="font-bold text-red-400">irréversible</span>.
+              {t('irreversibleAction')} <span className="font-bold text-red-400">{t('irreversibleWord')}</span>.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-              <p className="text-white/80 text-sm mb-3">Les données suivantes seront supprimées:</p>
+              <p className="text-white/80 text-sm mb-3">{t('dataToBeDeleted')}</p>
               <ul className="text-white/60 text-sm space-y-1">
-                <li>• Votre profil et informations personnelles</li>
-                <li>• Votre collection de puzzles</li>
-                <li>• Vos posts et commentaires (anonymisés)</li>
-                <li>• Vos likes et favoris</li>
-                <li>• Vos statistiques et badges</li>
-                <li>• Vos abonnements</li>
+                <li>• {t('profileData')}</li>
+                <li>• {t('puzzleCollectionData')}</li>
+                <li>• {t('postsCommentsData')}</li>
+                <li>• {t('likesData')}</li>
+                <li>• {t('statsData')}</li>
+                <li>• {t('subscriptionsData')}</li>
               </ul>
             </div>
 
@@ -150,7 +152,7 @@ export default function DeleteAccountSection() {
                 className="flex-1 border-white/20 text-white hover:bg-white/5"
                 disabled={isDeleting}
               >
-                Annuler
+                {t('cancel')}
               </Button>
               <Button
                 onClick={handleDeleteAccount}
@@ -160,10 +162,10 @@ export default function DeleteAccountSection() {
                 {isDeleting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Suppression...
+                    {t('deleting')}
                   </>
                 ) : (
-                  'Confirmer la suppression'
+                  t('confirmDelete')
                 )}
               </Button>
             </div>

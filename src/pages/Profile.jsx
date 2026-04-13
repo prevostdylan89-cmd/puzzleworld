@@ -35,7 +35,7 @@ import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
 import BugReportModal from '@/components/shared/BugReportButton';
 import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
-import { Crown, Camera } from 'lucide-react';
+import { Crown, Camera, TriangleAlert } from 'lucide-react';
 
 
 
@@ -469,16 +469,16 @@ export default function Profile() {
           <div className="bg-white/[0.03] border border-red-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-white font-semibold flex items-center gap-2">
-                <span>🐛</span> Signaler un problème
+                <TriangleAlert className="w-4 h-4 text-red-400" /> {t('reportIssue')}
               </h3>
-              <p className="text-white/50 text-sm mt-1">Un bug, une suggestion ou un contenu incorrect ? Faites-le nous savoir.</p>
+              <p className="text-white/50 text-sm mt-1">{t('reportIssueSubtitle')}</p>
             </div>
             <button
               onClick={() => setShowBugReport(true)}
               className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium transition-all flex-shrink-0"
-            >
-              Signaler
-            </button>
+              >
+              {t('report')}
+              </button>
           </div>
         </div>
 
