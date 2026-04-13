@@ -1,0 +1,82 @@
+{
+  "name": "Achievement",
+  "type": "object",
+  "properties": {
+    "achievement_type": {
+      "type": "string",
+      "enum": [
+        "premier_scan",
+        "main_a_la_pate",
+        "le_rituel",
+        "le_maniaque",
+        "collectionneur_serieux",
+        "conservateur",
+        "lencyclopedie",
+        "regularite",
+        "flash",
+        "oiseau_de_nuit",
+        "echauffement",
+        "le_standard",
+        "patience_de_moine",
+        "le_titan_puzzle",
+        "lolympe",
+        "petit_mais_costaud",
+        "poids_lourd",
+        "demi_millionnaire",
+        "geant_des_pieces",
+        "ami_des_betes",
+        "main_verte",
+        "citadin",
+        "magie_disney",
+        "esthete",
+        "loeil_noir",
+        "nostalgique",
+        "fan_de_pop",
+        "inclassable",
+        "touche_a_tout",
+        "le_specialiste",
+        "premier_contact",
+        "critique",
+        "curieux",
+        "coup_de_foudre",
+        "fan_de",
+        "populaire",
+        "leader_dopinion",
+        "bavard",
+        "juge_de_paix",
+        "ladepte_ravensburger",
+        "clementoni_fan",
+        "education_au_top",
+        "sans_frontieres",
+        "lexclusif",
+        "multi_marques",
+        "le_mur_du_son",
+        "le_sommet",
+        "anciennete",
+        "le_pilier",
+        "grand_maitre_du_puzzle"
+      ],
+      "description": "Type de succ\u00e8s"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titre du succ\u00e8s"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description du succ\u00e8s"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji ic\u00f4ne"
+    },
+    "color": {
+      "type": "string",
+      "description": "Couleur hex du badge"
+    }
+  },
+  "required": [
+    "achievement_type",
+    "title"
+  ]
+}
