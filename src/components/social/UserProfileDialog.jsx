@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import UserBadge from '@/components/shared/UserBadge';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function UserProfileDialog({ userEmail, onClose }) {
+  const { t, language } = useLanguage();
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [stats, setStats] = useState({ completed: 0, achievements: 0, wishlist: 0, followers: 0, following: 0 });
@@ -40,13 +43,16 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
       let userData = null;
       
-      if (profiles.length > 0) {
-        userData = profiles[0];
+      // Ensure the returned profile actually matches the requested email
+      const matchedProfile = profiles.find(p => p.email === userEmail);
+      if (matchedProfile) {
+        userData = matchedProfile;
       } else {
         // Fallback to User entity if profile not found
         const users = await base44.entities.User.filter({ email: userEmail });
-        if (users.length > 0) {
-          userData = users[0];
+        const matchedUser = users.find(u => u.email === userEmail);
+        if (matchedUser) {
+          userData = matchedUser;
         }
       }
       
@@ -103,7 +109,7 @@ export default function UserProfileDialog({ userEmail, onClose }) {
 
   const handleFollow = async () => {
     if (!currentUser) {
-      toast.error('Connectez-vous pour suivre des utilisateurs');
+      toast.error(t('loginToFollow'));
       return;
     }
 
@@ -115,7 +121,7 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       ...prev, 
       followers: isFollowing ? prev.followers - 1 : prev.followers + 1 
     }));
-    toast.success(isFollowing ? 'Suivi retiré' : 'Vous suivez cet utilisateur');
+    toast.success(isFollowing ? t('unfollowed') : t('followedUser'));
 
     try {
       if (previousFollowing) {
@@ -137,13 +143,13 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       setIsFollowing(previousFollowing);
       setStats(previousStats);
       console.error('Error toggling follow:', error);
-      toast.error('Échec de la mise à jour du suivi');
+      toast.error(t('followUpdateFailed'));
     }
   };
 
   const handleSendFriendRequest = async () => {
     if (!currentUser) {
-      toast.error('Connectez-vous pour ajouter des amis');
+      toast.error(t('loginToFollow'));
       return;
     }
 
@@ -156,10 +162,10 @@ export default function UserProfileDialog({ userEmail, onClose }) {
         status: 'pending'
       });
       setFriendRequestPending(true);
-      toast.success('Demande d\'ami envoyée');
+      toast.success(t('requestSent'));
     } catch (error) {
       console.error('Error sending friend request:', error);
-      toast.error('Erreur lors de l\'envoi de la demande');
+      toast.error(t('followUpdateFailed'));
     }
   };
 
@@ -170,8 +176,8 @@ export default function UserProfileDialog({ userEmail, onClose }) {
     : user.email.slice(0, 2).toUpperCase();
 
   const joinedDate = user.created_date 
-    ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true })
-    : 'Recently';
+    ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true, locale: language === 'fr' ? fr : undefined })
+    : language === 'fr' ? 'Récemment' : 'Recently';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
@@ -218,21 +224,21 @@ export default function UserProfileDialog({ userEmail, onClose }) {
                       : 'bg-orange-500 hover:bg-orange-600 text-white'
                   }`}
                 >
-                  {isFollowing ? <><UserCheck className="w-3 h-3 mr-1" />Suivi</> : <><UserPlus className="w-3 h-3 mr-1" />Suivre</>}
+                  {isFollowing ? <><UserCheck className="w-3 h-3 mr-1" />{t('following2')}</> : <><UserPlus className="w-3 h-3 mr-1" />{t('follow')}</>}
                 </Button>
                 {!isFriend && !friendRequestPending && (
                   <Button size="sm" onClick={handleSendFriendRequest} className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs h-8">
-                    <Users className="w-3 h-3 mr-1" />Ami
+                    <Users className="w-3 h-3 mr-1" />{t('addFriend')}
                   </Button>
                 )}
                 {friendRequestPending && (
                   <Button size="sm" disabled className="rounded-lg bg-white/10 text-white/50 text-xs h-8">
-                    <Users className="w-3 h-3 mr-1" />En attente
+                    <Users className="w-3 h-3 mr-1" />{t('pending')}
                   </Button>
                 )}
                 {isFriend && (
                   <Button size="sm" disabled className="rounded-lg bg-green-500/20 text-green-400 text-xs h-8">
-                    <UserCheck className="w-3 h-3 mr-1" />Amis
+                    <UserCheck className="w-3 h-3 mr-1" />{t('friend')}
                   </Button>
                 )}
               </div>
@@ -252,10 +258,10 @@ export default function UserProfileDialog({ userEmail, onClose }) {
           <div className="flex items-center gap-4 text-xs text-white/50 mb-4">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3 text-orange-400" />
-              Inscrit {joinedDate}
+              {t('joined')} {joinedDate}
             </span>
-            <span><span className="font-semibold text-white">{stats.followers}</span> Followers</span>
-            <span><span className="font-semibold text-white">{stats.following}</span> Abonnements</span>
+            <span><span className="font-semibold text-white">{stats.followers}</span> {t('followers')}</span>
+            <span><span className="font-semibold text-white">{stats.following}</span> {t('followings')}</span>
           </div>
 
           {/* Stats grid */}
@@ -263,17 +269,17 @@ export default function UserProfileDialog({ userEmail, onClose }) {
             <div className="bg-white/5 rounded-xl p-3 text-center">
               <Puzzle className="w-4 h-4 text-orange-400 mx-auto mb-1" />
               <div className="text-lg font-bold text-white">{stats.completed}</div>
-              <div className="text-[11px] text-white/50">Terminés</div>
+              <div className="text-[11px] text-white/50">{t('completed')}</div>
             </div>
             <div className="bg-white/5 rounded-xl p-3 text-center">
               <Trophy className="w-4 h-4 text-orange-400 mx-auto mb-1" />
               <div className="text-lg font-bold text-white">{stats.achievements}</div>
-              <div className="text-[11px] text-white/50">Succès</div>
+              <div className="text-[11px] text-white/50">{t('achievements')}</div>
             </div>
             <div className="bg-white/5 rounded-xl p-3 text-center">
               <Heart className="w-4 h-4 text-orange-400 mx-auto mb-1" />
               <div className="text-lg font-bold text-white">{stats.wishlist}</div>
-              <div className="text-[11px] text-white/50">Wishlist</div>
+              <div className="text-[11px] text-white/50">{t('wishlist')}</div>
             </div>
           </div>
         </div>
