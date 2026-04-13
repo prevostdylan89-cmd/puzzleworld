@@ -110,90 +110,222 @@ export function CompletedPuzzlesModal({ open, onClose, user }) {
   );
 }
 
+const ALL_ACHIEVEMENTS = [
+  // Scan & Collection
+  { type: 'premier_scan',           icon: '🔍', color: '#3B82F6', title: 'Premier Scan',           desc: 'Scanner ton tout premier puzzle', cat: 'Scan' },
+  { type: 'main_a_la_pate',         icon: '🤝', color: '#10B981', title: 'Main à la pâte',         desc: 'Ajouter 10 puzzles à la communauté', cat: 'Scan' },
+  { type: 'le_rituel',              icon: '🔄', color: '#8B5CF6', title: 'Le Rituel',              desc: 'Ajouter 50 puzzles à la communauté', cat: 'Scan' },
+  { type: 'le_maniaque',            icon: '😤', color: '#F59E0B', title: 'Le Maniaque',            desc: 'Ajouter 100 puzzles à la communauté', cat: 'Scan' },
+  { type: 'collectionneur_serieux', icon: '📦', color: '#EF4444', title: 'Collectionneur Sérieux', desc: 'Ajouter 200 puzzles à la communauté', cat: 'Scan' },
+  { type: 'conservateur',           icon: '🏛️', color: '#6366F1', title: 'Conservateur',           desc: 'Ajouter 400 puzzles à la communauté', cat: 'Scan' },
+  { type: 'lencyclopedie',          icon: '📚', color: '#14B8A6', title: "L'Encyclopédie",         desc: 'Atteindre 800 puzzles scannés', cat: 'Scan' },
+  // Temps
+  { type: 'regularite',    icon: '📅', color: '#F97316', title: 'Régularité',    desc: 'Se connecter 7 jours d\'affilée', cat: 'Temps' },
+  { type: 'flash',         icon: '⚡', color: '#FACC15', title: 'Flash',         desc: 'Scanner 5 puzzles en moins de 10 minutes', cat: 'Temps' },
+  { type: 'oiseau_de_nuit',icon: '🦉', color: '#818CF8', title: 'Oiseau de nuit',desc: 'Scanner un puzzle entre 2h et 4h du matin', cat: 'Temps' },
+  // Taille
+  { type: 'echauffement',      icon: '🏃', color: '#84CC16', title: 'Échauffement',       desc: 'Scanner un puzzle de 150 pièces', cat: 'Taille' },
+  { type: 'le_standard',       icon: '🧩', color: '#06B6D4', title: 'Le Standard',        desc: 'Scanner un puzzle de 1 000 pièces', cat: 'Taille' },
+  { type: 'patience_de_moine', icon: '🧘', color: '#7C3AED', title: 'Patience de Moine',  desc: 'Scanner un puzzle de 3 000 pièces', cat: 'Taille' },
+  { type: 'le_titan_puzzle',   icon: '🗿', color: '#DC2626', title: 'Le Titan',           desc: 'Scanner un puzzle de 5 000 pièces', cat: 'Taille' },
+  { type: 'lolympe',           icon: '🏔️', color: '#F59E0B', title: "L'Olympe",          desc: 'Scanner un puzzle de 10 000 pièces', cat: 'Taille' },
+  { type: 'petit_mais_costaud',icon: '💪', color: '#10B981', title: 'Petit mais costaud', desc: 'Avoir 20 puzzles complétés de moins de 500 pièces', cat: 'Taille' },
+  { type: 'poids_lourd',       icon: '🏋️', color: '#6366F1', title: 'Poids Lourd',       desc: 'Atteindre 50 000 pièces complétées cumulées', cat: 'Taille' },
+  { type: 'demi_millionnaire', icon: '💎', color: '#EAB308', title: 'Demi-Millionnaire',  desc: 'Atteindre 500 000 pièces complétées cumulées', cat: 'Taille' },
+  { type: 'geant_des_pieces',  icon: '🐘', color: '#8B5CF6', title: 'Géant des pièces',  desc: 'Avoir 5 puzzles de plus de 3 000 pièces complétés', cat: 'Taille' },
+  // Catégories
+  { type: 'ami_des_betes',  icon: '🐾', color: '#78716C', title: 'Ami des bêtes',  desc: '10 puzzles scannés dans la catégorie Animaux', cat: 'Catégories' },
+  { type: 'main_verte',     icon: '🌿', color: '#22C55E', title: 'Main Verte',     desc: '10 puzzles scannés dans la catégorie Nature', cat: 'Catégories' },
+  { type: 'citadin',        icon: '🏙️', color: '#64748B', title: 'Citadin',        desc: '10 puzzles scannés dans la catégorie Urbain', cat: 'Catégories' },
+  { type: 'magie_disney',   icon: '🏰', color: '#EC4899', title: 'Magie Disney',   desc: '10 puzzles scannés dans la catégorie Disney', cat: 'Catégories' },
+  { type: 'esthete',        icon: '🎨', color: '#F43F5E', title: 'Esthète',        desc: '10 puzzles scannés dans la catégorie Art', cat: 'Catégories' },
+  { type: 'loeil_noir',     icon: '🖤', color: '#6B7280', title: "L'œil Noir",    desc: '5 puzzles scannés dans la catégorie Monochrome', cat: 'Catégories' },
+  { type: 'nostalgique',    icon: '📼', color: '#D97706', title: 'Nostalgique',    desc: '10 puzzles scannés dans la catégorie Vintage', cat: 'Catégories' },
+  { type: 'fan_de_pop',     icon: '🎭', color: '#C026D3', title: 'Fan de Pop',     desc: '10 puzzles scannés dans la catégorie Pop Culture', cat: 'Catégories' },
+  { type: 'inclassable',    icon: '❓', color: '#0EA5E9', title: 'Inclassable',    desc: '10 puzzles scannés dans la catégorie Autres', cat: 'Catégories' },
+  { type: 'touche_a_tout',  icon: '🌐', color: '#059669', title: 'Touche-à-tout',  desc: 'Avoir au moins 1 puzzle dans chaque catégorie', cat: 'Catégories' },
+  { type: 'le_specialiste', icon: '🎯', color: '#7C3AED', title: 'Le Spécialiste', desc: '50 puzzles dans une seule et même catégorie', cat: 'Catégories' },
+  // Communauté
+  { type: 'premier_contact', icon: '💬', color: '#06B6D4', title: 'Premier Contact', desc: 'Laisser un commentaire sur un post', cat: 'Communauté' },
+  { type: 'critique',        icon: '⭐', color: '#F59E0B', title: 'Critique',        desc: 'Liker 10 puzzles différents', cat: 'Communauté' },
+  { type: 'curieux',         icon: '👀', color: '#8B5CF6', title: 'Curieux',         desc: 'Suivre 10 utilisateurs différents', cat: 'Communauté' },
+  { type: 'coup_de_foudre',  icon: '❤️', color: '#EF4444', title: 'Coup de Foudre', desc: 'Ajouter 20 puzzles en wishlist', cat: 'Communauté' },
+  { type: 'fan_de',          icon: '🌟', color: '#FACC15', title: 'Fan de...',       desc: 'Suivre ton premier utilisateur', cat: 'Communauté' },
+  { type: 'populaire',       icon: '📣', color: '#F97316', title: 'Populaire',       desc: 'Être suivi par 5 utilisateurs', cat: 'Communauté' },
+  { type: 'leader_dopinion', icon: '👑', color: '#EAB308', title: "Leader d'opinion",desc: 'Être suivi par 20 utilisateurs', cat: 'Communauté' },
+  { type: 'bavard',          icon: '🗣️', color: '#10B981', title: 'Bavard',          desc: 'Poster 50 commentaires au total', cat: 'Communauté' },
+  { type: 'juge_de_paix',    icon: '⚖️', color: '#6366F1', title: 'Juge de Paix',   desc: 'Liker 100 puzzles différents', cat: 'Communauté' },
+  // Marques
+  { type: 'ladepte_ravensburger', icon: '🔵', color: '#1D4ED8', title: "L'Adepte de Ravensburger", desc: '20 puzzles Ravensburger dans ta collection', cat: 'Marques' },
+  { type: 'clementoni_fan',       icon: '🟡', color: '#CA8A04', title: 'Clementoni Fan',           desc: '20 puzzles Clementoni dans ta collection', cat: 'Marques' },
+  { type: 'education_au_top',     icon: '🟠', color: '#EA580C', title: 'Education au Top',         desc: '20 puzzles Educa dans ta collection', cat: 'Marques' },
+  { type: 'sans_frontieres',      icon: '🌍', color: '#059669', title: 'Sans frontières',          desc: 'Avoir des puzzles de 5 marques différentes', cat: 'Marques' },
+  { type: 'lexclusif',            icon: '💫', color: '#7C3AED', title: "L'Exclusif",              desc: 'Être le seul sur le site à avoir scanné un modèle', cat: 'Marques' },
+  { type: 'multi_marques',        icon: '🏪', color: '#0EA5E9', title: 'Multi-marques',            desc: '10 marques différentes dans ta collection', cat: 'Marques' },
+  // Hauts Faits
+  { type: 'le_mur_du_son',          icon: '🚀', color: '#F97316', title: 'Le Mur du Son',          desc: 'Atteindre le Niveau 5', cat: 'Hauts Faits' },
+  { type: 'le_sommet',              icon: '🏔️', color: '#FACC15', title: 'Le Sommet',              desc: 'Atteindre le Niveau 10 (Le Grand Architecte)', cat: 'Hauts Faits' },
+  { type: 'anciennete',             icon: '⏳', color: '#6B7280', title: 'Ancienneté',             desc: 'Être inscrit depuis plus de 6 mois', cat: 'Hauts Faits' },
+  { type: 'le_pilier',              icon: '🏛️', color: '#DC2626', title: 'Le Pilier',              desc: 'Faire partie du Top 50 des contributeurs', cat: 'Hauts Faits' },
+  { type: 'grand_maitre_du_puzzle', icon: '🎖️', color: '#EAB308', title: 'Grand Maître du Puzzle', desc: 'Débloquer 40 succès sur les 50', cat: 'Hauts Faits' },
+];
+
+const CATEGORIES_ORDER = ['Scan', 'Temps', 'Taille', 'Catégories', 'Communauté', 'Marques', 'Hauts Faits'];
+
 export function AchievementsModal({ open, onClose, user }) {
-  const { t } = useLanguage();
-  const [achievements, setAchievements] = useState([]);
-  const [userAchievements, setUserAchievements] = useState([]);
+  const [unlockedTypes, setUnlockedTypes] = useState(new Set());
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('unlocked');
+  const [activeCategory, setActiveCategory] = useState('Tous');
 
   useEffect(() => {
     if (open && user) {
-      loadAchievements();
+      setLoading(true);
+      base44.entities.Achievement.filter({ created_by: user.email })
+        .then(items => setUnlockedTypes(new Set(items.map(a => a.achievement_type))))
+        .catch(() => {})
+        .finally(() => setLoading(false));
     }
   }, [open, user]);
 
-  const loadAchievements = async () => {
-    try {
-      const [allAchievements, userUnlocked] = await Promise.all([
-        base44.entities.Achievement.list(),
-        base44.entities.Achievement.filter({ created_by: user.email })
-      ]);
-      setAchievements(allAchievements);
-      setUserAchievements(userUnlocked);
-    } catch (error) {
-      console.error('Error loading achievements:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const unlockedList = ALL_ACHIEVEMENTS.filter(a => unlockedTypes.has(a.type));
+  const lockedList   = ALL_ACHIEVEMENTS.filter(a => !unlockedTypes.has(a.type));
 
-  const isUnlocked = (achievementId) => {
-    return userAchievements.some(ua => ua.achievement_type === achievementId);
-  };
+  const filterByCat = (list) =>
+    activeCategory === 'Tous' ? list : list.filter(a => a.cat === activeCategory);
+
+  const displayList = filterByCat(activeTab === 'unlocked' ? unlockedList : lockedList);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-white text-2xl">
-            {t('achievements')} ({userAchievements.length} / {achievements.length})
-          </DialogTitle>
-        </DialogHeader>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+      <DialogContent className="bg-[#080820] border-white/10 text-white max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col p-0">
+        {/* Header */}
+        <div className="px-5 pt-5 pb-3 border-b border-white/10 flex-shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-white text-xl flex items-center gap-2">
+              🏆 Succès
+            </DialogTitle>
+          </DialogHeader>
+          {/* Progress bar */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-white/60 text-sm">{unlockedList.length} / {ALL_ACHIEVEMENTS.length} débloqués</span>
+              <span className="text-orange-400 font-semibold text-sm">{Math.round((unlockedList.length / ALL_ACHIEVEMENTS.length) * 100)}%</span>
+            </div>
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full transition-all"
+                style={{ width: `${(unlockedList.length / ALL_ACHIEVEMENTS.length) * 100}%` }}
+              />
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.length === 0 ? (
-              <div className="col-span-2 text-center py-8 text-white/50">
-                {t('noAchievements')}
-              </div>
-            ) : (
-              achievements.map((achievement) => {
-                const unlocked = isUnlocked(achievement.achievement_type);
+          {/* Tabs débloqués / à débloquer */}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => setActiveTab('unlocked')}
+              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+                activeTab === 'unlocked'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10'
+              }`}
+            >
+              ✅ Obtenus ({unlockedList.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('locked')}
+              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+                activeTab === 'locked'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10'
+              }`}
+            >
+              🔒 À débloquer ({lockedList.length})
+            </button>
+          </div>
+        </div>
+
+        {/* Category filter */}
+        <div className="px-5 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-none border-b border-white/5">
+          {['Tous', ...CATEGORIES_ORDER].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium transition-all flex-shrink-0 ${
+                activeCategory === cat
+                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40'
+                  : 'bg-white/5 text-white/40 hover:text-white/70'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Achievement list */}
+        <div className="overflow-y-auto flex-1 px-5 py-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+            </div>
+          ) : displayList.length === 0 ? (
+            <div className="text-center py-16 text-white/30">
+              {activeTab === 'unlocked' ? 'Aucun succès débloqué dans cette catégorie.' : 'Tous les succès de cette catégorie sont débloqués ! 🎉'}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {displayList.map(achievement => {
+                const unlocked = unlockedTypes.has(achievement.type);
                 return (
                   <div
-                    key={achievement.id}
-                    className={`p-4 rounded-xl border transition-all ${
+                    key={achievement.type}
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                       unlocked
-                        ? 'bg-orange-500/10 border-orange-500/30'
-                        : 'bg-white/5 border-white/10 opacity-60'
+                        ? 'border-white/10 bg-white/5'
+                        : 'border-white/5 bg-white/[0.02] opacity-70'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className={`text-3xl ${unlocked ? '' : 'grayscale opacity-50'}`}>
-                        {achievement.icon || '🏆'}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-white font-semibold mb-1">{achievement.title}</h4>
-                        <p className="text-white/60 text-sm">{achievement.description}</p>
-                        <div className="mt-2">
-                          {unlocked ? (
-                            <span className="text-green-400 text-xs font-medium">✓ {t('unlocked')}</span>
-                          ) : (
-                            <span className="text-white/40 text-xs">{t('locked')}</span>
-                          )}
-                        </div>
-                      </div>
+                    {/* Icon badge */}
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                      style={{
+                        backgroundColor: unlocked ? `${achievement.color}22` : 'rgba(255,255,255,0.04)',
+                        border: `1.5px solid ${unlocked ? achievement.color + '55' : 'rgba(255,255,255,0.08)'}`
+                      }}
+                    >
+                      <span className={unlocked ? '' : 'grayscale opacity-40'}>{achievement.icon}</span>
                     </div>
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-white">{achievement.title}</span>
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                          style={{
+                            backgroundColor: unlocked ? `${achievement.color}22` : 'rgba(255,255,255,0.06)',
+                            color: unlocked ? achievement.color : 'rgba(255,255,255,0.3)'
+                          }}
+                        >
+                          {achievement.cat}
+                        </span>
+                      </div>
+                      <p className="text-white/40 text-xs mt-0.5 leading-snug">{achievement.desc}</p>
+                    </div>
+                    {/* Status */}
+                    {unlocked ? (
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <span className="text-green-400 text-xs">✓</span>
+                      </div>
+                    ) : (
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
+                        <span className="text-white/20 text-xs">🔒</span>
+                      </div>
+                    )}
                   </div>
                 );
-              })
-            )}
-          </div>
-        )}
+              })}
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

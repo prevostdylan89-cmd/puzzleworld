@@ -181,7 +181,7 @@ export default function CollectionSection({ user }) {
             <p className="text-white/30 text-sm mt-2">{t('scanToAdd')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
             {sortedInboxPuzzles.map((puzzle, index) => (
               <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
             ))}
@@ -197,7 +197,7 @@ export default function CollectionSection({ user }) {
             <p className="text-white/30 text-sm mt-2">{t('completeFirstPuzzle')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
             {sortedCompletedPuzzles.map((puzzle, index) => (
               <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
             ))}
