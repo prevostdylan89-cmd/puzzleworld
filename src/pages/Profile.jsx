@@ -54,6 +54,7 @@ export default function Profile() {
     totalPieces: 0
   });
   const [achievements, setAchievements] = useState([]);
+  const [scannedCount, setScannedCount] = useState(0);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showWishlistModal, setShowWishlistModal] = useState(false);
@@ -64,6 +65,14 @@ export default function Profile() {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  // Load scanned count (puzzles added to community catalog by this user)
+  useEffect(() => {
+    if (!user) return;
+    base44.entities.PuzzleCatalog.filter({ created_by: user.email })
+      .then(items => setScannedCount(items.length))
+      .catch(() => {});
+  }, [user]);
 
   // Abonnement temps réel aux changements de UserPuzzle et Wishlist
   useEffect(() => {
@@ -242,7 +251,7 @@ export default function Profile() {
     { level: 10, title: 'Le Grand Architecte',     threshold: 600, emoji: '👑' },
   ];
 
-  const completedCount = stats.completed;
+  const completedCount = scannedCount;
   let currentLevelData = LEVELS[0];
   let nextLevelData = LEVELS[1];
   for (let i = 0; i < LEVELS.length; i++) {
@@ -416,7 +425,7 @@ export default function Profile() {
                   </div>
                   {!isMaxLevel && (
                     <p className="text-white/40 text-xs mt-0.5">
-                      {puzzlesRemaining} puzzle{puzzlesRemaining > 1 ? 's' : ''} avant {nextLevelData.emoji} {nextLevelData.title}
+                      {puzzlesRemaining} scan{puzzlesRemaining > 1 ? 's' : ''} avant {nextLevelData.emoji} {nextLevelData.title}
                     </p>
                   )}
                   {isMaxLevel && (
@@ -425,7 +434,7 @@ export default function Profile() {
                 </div>
               </div>
               <span className="text-white/50 text-sm font-mono">
-                {completedCount} / {isMaxLevel ? completedCount : nextLevelData.threshold}
+                {completedCount} scan{completedCount > 1 ? 's' : ''} / {isMaxLevel ? completedCount : nextLevelData.threshold}
               </span>
             </div>
             <Progress 

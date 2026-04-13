@@ -27,14 +27,11 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
 
-    const { event, data, old_data } = payload;
+    const { event, data } = payload;
 
-    // Only care about UserPuzzle reaching status "done"
-    if (data?.status !== 'done') {
-      return Response.json({ skipped: true, reason: 'Not a completed puzzle' });
-    }
-    if (event?.type === 'update' && old_data?.status === 'done') {
-      return Response.json({ skipped: true, reason: 'Was already done' });
+    // Only fire when a new puzzle is added to the community catalog (created_by = scanner's email)
+    if (event?.type !== 'create') {
+      return Response.json({ skipped: true, reason: 'Not a create event' });
     }
 
     const userEmail = data.created_by;
@@ -42,42 +39,33 @@ Deno.serve(async (req) => {
       return Response.json({ skipped: true, reason: 'No user email' });
     }
 
-    // Count total completed puzzles for this user
-    const completed = await base44.asServiceRole.entities.UserPuzzle.filter({
+    // Count total puzzles added to the community catalog by this user
+    const addedPuzzles = await base44.asServiceRole.entities.PuzzleCatalog.filter({
       created_by: userEmail,
-      status: 'done',
     });
-    const completedCount = completed.length;
+    const scannedCount = addedPuzzles.length;
 
-    const newLevel = getLevelForCount(completedCount);
+    const newLevel = getLevelForCount(scannedCount);
 
     // Get or create UserLevel record
     const existing = await base44.asServiceRole.entities.UserLevel.filter({ created_by: userEmail });
 
     if (existing.length > 0) {
       const current = existing[0];
-      if (current.level === newLevel.level) {
-        // Update totals even if level didn't change
-        await base44.asServiceRole.entities.UserLevel.update(current.id, {
-          total_puzzles: completedCount,
-        });
-        return Response.json({ unchanged: true, level: newLevel.level });
-      }
-      // Level changed — update
       await base44.asServiceRole.entities.UserLevel.update(current.id, {
         level: newLevel.level,
         badge_name: newLevel.title,
-        total_puzzles: completedCount,
+        total_puzzles: scannedCount,
       });
     } else {
       await base44.asServiceRole.entities.UserLevel.create({
         level: newLevel.level,
         badge_name: newLevel.title,
-        total_puzzles: completedCount,
+        total_puzzles: scannedCount,
       });
     }
 
-    return Response.json({ success: true, userEmail, level: newLevel.level, title: newLevel.title, totalCompleted: completedCount });
+    return Response.json({ success: true, userEmail, level: newLevel.level, title: newLevel.title, totalScanned: scannedCount });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
