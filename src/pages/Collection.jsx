@@ -242,19 +242,28 @@ export default function Collection() {
       const user = await base44.auth.me();
       if (!user) { toast.error(t('loginToAdd')); return; }
       let added = 0;
+      const newMapEntries = {};
       for (const puzzle of puzzles) {
-        const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: puzzle.asin || puzzle.id });
+        const ref = puzzle.asin || puzzle.id;
+        const existing = await base44.entities.UserPuzzle.filter({ created_by: user.email, puzzle_reference: ref });
         if (existing.length === 0) {
           await base44.entities.UserPuzzle.create({
             puzzle_name: puzzle.title,
             puzzle_brand: puzzle.brand || '',
             puzzle_pieces: puzzle.piece_count || 0,
-            puzzle_reference: puzzle.asin || puzzle.id,
+            puzzle_reference: ref,
             image_url: puzzle.image_hd || '',
             status
           });
           added++;
+          // Track for immediate local update
+          newMapEntries[`ref:${ref}`] = status;
+          if (puzzle.title) newMapEntries[`name:${puzzle.title.toLowerCase().trim()}`] = status;
         }
+      }
+      // Immediately update the badge map so UI reflects the change without waiting for reload
+      if (Object.keys(newMapEntries).length > 0) {
+        setUserOwnedMap(prev => ({ ...prev, ...newMapEntries }));
       }
       const statusLabels = { wishlist: 'wishlist', inbox: t('inBox'), done: t('completed2') };
       if (added > 0) toast.success(added > 1 ? t('addedToStatusPlural').replace('{count}', added).replace('{status}', statusLabels[status] || t('inBox')) : t('addedToStatus').replace('{count}', added).replace('{status}', statusLabels[status] || t('inBox')));

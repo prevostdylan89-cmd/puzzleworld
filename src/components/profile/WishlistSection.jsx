@@ -45,62 +45,56 @@ export default function WishlistSection({ user }) {
 
   useEffect(() => {
     if (!user) return;
+    // Subscribe to real-time changes — when a UserPuzzle is created/updated/deleted, reload
+    const unsubUserPuzzle = base44.entities.UserPuzzle.subscribe((event) => {
+      // Only reload when the change affects wishlist items
+      if (event.type === 'create' && event.data?.status === 'wishlist') {
+        loadWishlist();
+      } else if (event.type === 'update' || event.type === 'delete') {
+        loadWishlist();
+      }
+    });
     const unsubWishlist = base44.entities.Wishlist.subscribe(() => loadWishlist());
-    const unsubUserPuzzle = base44.entities.UserPuzzle.subscribe(() => loadWishlist());
-    return () => { unsubWishlist(); unsubUserPuzzle(); };
+    return () => { unsubUserPuzzle(); unsubWishlist(); };
   }, [user]);
 
   const loadWishlist = async () => {
     if (!user) return;
     
     try {
-      // Load both old Wishlist entity AND UserPuzzle with status='wishlist'
-      const [oldWishlistItems, userPuzzleWishlist] = await Promise.all([
-        base44.entities.Wishlist.filter({ created_by: user.email }, '-created_date'),
+      // Load UserPuzzle wishlist items + legacy Wishlist entity in parallel
+      const [userPuzzleWishlist, oldWishlistItems] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }, '-created_date'),
+        base44.entities.Wishlist.filter({ created_by: user.email }, '-created_date'),
       ]);
-      
-      // Enrich UserPuzzle wishlist items with catalog data (for Amazon link)
-      const normalizedUserPuzzles = await Promise.all(userPuzzleWishlist.map(async (p) => {
-        let catalogData = null;
-        if (p.puzzle_reference) {
-          const results = await base44.entities.PuzzleCatalog.filter({ asin: p.puzzle_reference });
-          if (results.length > 0) catalogData = results[0];
-        }
-        if (!catalogData) {
-          const results = await base44.entities.PuzzleCatalog.filter({ title: p.puzzle_name });
-          if (results.length > 0) catalogData = results[0];
-        }
-        return {
-          id: p.id,
-          puzzle_name: p.puzzle_name,
-          puzzle_brand: p.puzzle_brand,
-          puzzle_pieces: p.puzzle_pieces,
-          image_url: p.image_url,
-          notes: p.notes || '',
-          priority: 'medium',
-          created_date: p.created_date,
-          _source: 'user_puzzle',
-          _raw: p,
-          catalogData,
-        };
+
+      // Normalize UserPuzzle items — no extra catalog fetch needed, data is already embedded
+      const normalizedUserPuzzles = userPuzzleWishlist.map((p) => ({
+        id: p.id,
+        puzzle_name: p.puzzle_name,
+        puzzle_brand: p.puzzle_brand,
+        puzzle_pieces: p.puzzle_pieces,
+        image_url: p.image_url,
+        notes: p.notes || '',
+        priority: 'medium',
+        created_date: p.created_date,
+        _source: 'user_puzzle',
+        _raw: p,
+        // Build a minimal catalogData for Amazon link if we have a reference
+        catalogData: p.puzzle_reference ? { asin: p.puzzle_reference } : null,
       }));
 
-      // Enrich old wishlist items with catalog data
-      const enrichedOld = [];
-      for (const item of oldWishlistItems) {
-        const catalogPuzzles = await base44.entities.PuzzleCatalog.filter({ title: item.puzzle_name });
-        enrichedOld.push({
-          ...item,
-          _source: 'wishlist',
-          catalogData: catalogPuzzles.length > 0 ? catalogPuzzles[0] : null
-        });
-      }
-      
-      // Merge, dedup by puzzle_name
+      // Legacy Wishlist items
+      const normalizedOld = oldWishlistItems.map((item) => ({
+        ...item,
+        _source: 'wishlist',
+        catalogData: null,
+      }));
+
+      // Merge and dedup by puzzle_name (UserPuzzle takes priority)
       const seen = new Set();
       const merged = [];
-      for (const item of [...normalizedUserPuzzles, ...enrichedOld]) {
+      for (const item of [...normalizedUserPuzzles, ...normalizedOld]) {
         const key = item.puzzle_name?.toLowerCase().trim();
         if (!key || seen.has(key)) continue;
         seen.add(key);
