@@ -340,8 +340,7 @@ export default function Collection() {
       case 'newest':
         return new Date(b.created_date) - new Date(a.created_date);
       case 'popular':
-        // Use socialScore instead of total_likes for popularity
-        return (b.socialScore || 0) - (a.socialScore || 0);
+        return (b.wishlistCount || 0) - (a.wishlistCount || 0);
       case 'pieces-asc':
         return (a.piece_count || 0) - (b.piece_count || 0);
       case 'pieces-desc':
@@ -838,10 +837,9 @@ export default function Collection() {
               <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
               <span>{puzzle.piece_count} pcs</span>
             </div>
-            {(puzzle.socialScore > 0 || puzzle.wishlistCount > 0) && (
+            {puzzle.wishlistCount > 0 && (
               <div className="flex items-center gap-2 mt-1 text-[10px]">
-                {puzzle.socialScore > 0 && <span className="text-green-400">❤️ {puzzle.socialScore}</span>}
-                {puzzle.wishlistCount > 0 && <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>}
+                <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>
               </div>
             )}
           </div>

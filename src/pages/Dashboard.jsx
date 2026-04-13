@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug, Trophy } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -15,9 +15,11 @@ import DashboardPendingPuzzles from '@/components/dashboard/sections/DashboardPe
 import DashboardPageVisibility from '@/components/dashboard/sections/DashboardPageVisibility';
 import DashboardBlog from '@/components/dashboard/sections/DashboardBlog';
 import DashboardBugReports from '@/components/dashboard/sections/DashboardBugReports';
+import DashboardTopPuzzles from '@/components/dashboard/sections/DashboardTopPuzzles';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
+  { id: 'toppuzzles', label: 'Top Puzzles', icon: Trophy, component: DashboardTopPuzzles },
   { id: 'mycollection', label: 'Ma Collection', icon: Grid3X3, component: DashboardMyCollection },
   { id: 'pending', label: 'En attente', icon: Grid3X3, component: DashboardPendingPuzzles },
   { id: 'social', label: 'Social', icon: Users, component: DashboardSocial },

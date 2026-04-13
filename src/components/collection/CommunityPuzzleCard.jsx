@@ -52,9 +52,9 @@ export default function CommunityPuzzleCard({ puzzle, showAffiliateLink = false 
             </div>
           )}
           
-          {(puzzle.total_likes > 0 || puzzle.total_superlikes > 0) && (
-            <div className="flex items-center gap-1 text-xs text-white/50 mb-2">
-              <span>❤️ {puzzle.total_likes + puzzle.total_superlikes}</span>
+          {puzzle.wishlistCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-orange-400/80 mb-2">
+              <span>⭐ {puzzle.wishlistCount}</span>
             </div>
           )}
           {showAffiliateLink && amazonAffiliateLink && (

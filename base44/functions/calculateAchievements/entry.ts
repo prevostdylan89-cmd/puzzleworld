@@ -120,7 +120,6 @@ Deno.serve(async (req) => {
       follows,
       followers,
       wishlistItems,
-      puzzleLikes,
       existingAchievements,
       userRecord,
       allCatalogForExclusif,
@@ -131,7 +130,6 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.Follow.filter({ follower_email: userEmail }),
       base44.asServiceRole.entities.Follow.filter({ following_email: userEmail }),
       base44.asServiceRole.entities.Wishlist.filter({ created_by: userEmail }),
-      base44.asServiceRole.entities.UserPuzzleLike.filter({ created_by: userEmail }).catch(() => []),
       base44.asServiceRole.entities.Achievement.filter({ created_by: userEmail }),
       base44.asServiceRole.entities.User.filter({ email: userEmail }).catch(() => []),
       base44.asServiceRole.entities.PuzzleCatalog.list('-created_date', 5000).catch(() => []),
@@ -270,14 +268,14 @@ Deno.serve(async (req) => {
 
     // Communauté
     check('premier_contact', comments.length >= 1);
-    check('critique', puzzleLikes.length >= 10);
+    check('critique', wishlistItems.length >= 10);
     check('curieux', follows.length >= 10);
     check('coup_de_foudre', wishlistItems.length >= 20);
     check('fan_de', follows.length >= 1);
     check('populaire', followers.length >= 5);
     check('leader_dopinion', followers.length >= 20);
     check('bavard', comments.length >= 50);
-    check('juge_de_paix', puzzleLikes.length >= 100);
+    check('juge_de_paix', wishlistItems.length >= 100);
 
     // Marques
     const brandMatch = (name) => allUserPuzzles.filter(p => (p.puzzle_brand || '').toLowerCase().includes(name.toLowerCase())).length;
