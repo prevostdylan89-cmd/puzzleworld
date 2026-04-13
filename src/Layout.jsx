@@ -76,7 +76,7 @@ function LayoutContent({ children, currentPageName }) {
     { name: 'Events', icon: Calendar, page: 'Events' },
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: t('profile'), icon: User, page: 'Profile' },
-    { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: t('friends'), icon: Users, page: 'Friends' },
     { name: 'Blog', icon: BookOpen, page: 'Blog' },
   ];
 
@@ -87,7 +87,7 @@ function LayoutContent({ children, currentPageName }) {
     { name: t('online'), icon: Gamepad2, page: 'OnlinePuzzles' },
     { name: 'Events', icon: Puzzle, page: 'Events' },
     { name: t('profile'), icon: User, page: 'Profile' },
-    { name: 'Amis', icon: Users, page: 'Friends' },
+    { name: t('friends'), icon: Users, page: 'Friends' },
     { name: 'Blog', icon: BookOpen, page: 'Blog' },
   ];
 
@@ -260,7 +260,7 @@ function LayoutContent({ children, currentPageName }) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium border border-red-500/20 hover:border-red-500/40"
             >
               <TriangleAlert className="w-3.5 h-3.5" />
-              Signaler
+              {t('report')}
             </button>
 
             {/* Language Selector */}
@@ -498,7 +498,7 @@ function LayoutContent({ children, currentPageName }) {
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
                 >
                   <TriangleAlert className="w-5 h-5" />
-                  <span className="text-sm font-medium">Signaler un problème</span>
+                  <span className="text-sm font-medium">{t('reportIssue')}</span>
                 </button>
 
                 {user && (
@@ -586,7 +586,7 @@ function LayoutContent({ children, currentPageName }) {
                 </div>
                 <span className="font-bold text-lg text-white">PuzzleWorld</span>
               </div>
-              <p className="text-white/50 text-sm">Votre communauté puzzle ultime</p>
+              <p className="text-white/50 text-sm">{t('footerTagline')}</p>
               <div className="flex gap-3">
                 <a href="https://www.instagram.com/puzzle__world__?igsh=NGI5cHJoOXpuZHQ5" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <span className="text-white/70">📷</span>
@@ -620,15 +620,15 @@ function LayoutContent({ children, currentPageName }) {
 
           <div className="pt-8 border-t border-white/[0.06]">
             <div className="text-center mb-4">
-              <p className="text-white/40 text-sm">© 2026 PuzzleWorld. Tous droits réservés.</p>
+              <p className="text-white/40 text-sm">{t('footerCopyright')}</p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/30">
               <Link to={createPageUrl('PrivacyPolicy')} className="hover:text-orange-400 transition-colors">
-                Politique de confidentialité
+                {t('privacyPolicyLabel')}
               </Link>
               <span>•</span>
               <Link to={createPageUrl('Terms')} className="hover:text-orange-400 transition-colors">
-                CGU
+                {t('termsLabel')}
               </Link>
               <span>•</span>
               <a href="mailto:questionpuzzleworld@outlook.fr" className="hover:text-orange-400 transition-colors">
@@ -637,7 +637,7 @@ function LayoutContent({ children, currentPageName }) {
             </div>
             <div className="text-center mt-4">
               <p className="text-xs text-white/30 italic">
-                En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats remplissant les conditions requises.
+                {t('amazonDisclaimer')}
               </p>
             </div>
           </div>

@@ -388,6 +388,13 @@ const translations = {
     unlocked: 'Débloqué',
     locked: 'Non débloqué',
     emptyWishlist: 'Aucun puzzle en wishlist',
+    // Layout
+    reportIssue: 'Signaler un problème',
+    report: 'Signaler',
+    footerTagline: 'Votre communauté puzzle ultime',
+    footerCopyright: '© 2026 PuzzleWorld. Tous droits réservés.',
+    privacyPolicyLabel: 'Politique de confidentialité',
+    termsLabel: 'CGU',
   },
   en: {
     // Navigation
@@ -774,6 +781,13 @@ const translations = {
     unlocked: 'Unlocked',
     locked: 'Locked',
     emptyWishlist: 'No puzzles in wishlist',
+    // Layout
+    reportIssue: 'Report an issue',
+    report: 'Report',
+    footerTagline: 'Your ultimate puzzle community',
+    footerCopyright: '© 2026 PuzzleWorld. All rights reserved.',
+    privacyPolicyLabel: 'Privacy Policy',
+    termsLabel: 'Terms',
   }
 };
 
