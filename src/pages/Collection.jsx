@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
@@ -19,12 +19,9 @@ import {
   X,
   Puzzle,
   Loader2,
-  MoreVertical,
   Plus,
   CheckSquare,
-  Square,
-  Check,
-  ShoppingBag
+  Check
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -746,119 +743,176 @@ export default function Collection() {
 
         function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection, ownedStatus }) {
         const { t } = useLanguage();
-        // Icons needed
-        const Star = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>;
-        const Archive = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>;
-        const Trophy = ({ className }) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>;
+        const [showContextMenu, setShowContextMenu] = useState(false);
+        const longPressTimer = React.useRef(null);
+        const didLongPress = React.useRef(false);
+
+        const handlePointerDown = (e) => {
+          didLongPress.current = false;
+          longPressTimer.current = setTimeout(() => {
+            didLongPress.current = true;
+            if (navigator.vibrate) navigator.vibrate(50);
+            if (selectionMode) {
+              // Already in selection mode: just toggle
+              onToggleSelect();
+            } else {
+              setShowContextMenu(true);
+            }
+          }, 500);
+        };
+
+        const handlePointerUp = () => {
+          clearTimeout(longPressTimer.current);
+        };
+
+        const handlePointerLeave = () => {
+          clearTimeout(longPressTimer.current);
+        };
+
+        const handleClick = (e) => {
+          if (didLongPress.current) {
+            didLongPress.current = false;
+            return; // don't fire click after long press
+          }
+          onClick(e);
+        };
+
         return (
+        <>
         <motion.div
-        variants={item}
-        onClick={onClick}
-        className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer active:scale-95 ${
-          isSelected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-white/[0.06] hover:border-orange-500/30'
-        }`}
+          variants={item}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
+          onClick={handleClick}
+          className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer select-none ${
+            isSelected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-white/[0.06] hover:border-orange-500/30'
+          }`}
+          style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
         >
-      {/* Selection checkbox overlay */}
-      {selectionMode && (
-        <div className="absolute top-2 left-2 z-10">
-          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-            isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
-          }`}>
-            {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-          </div>
-        </div>
-      )}
+          {/* Selection checkbox overlay */}
+          {selectionMode && (
+            <div className="absolute top-2 left-2 z-10">
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
+              }`}>
+                {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+              </div>
+            </div>
+          )}
 
-      {/* Owned badge */}
-      {ownedStatus && (
-        <div className="absolute top-2 left-2 z-10">
-          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
-            ownedStatus === 'done'
-              ? 'bg-green-500 border-green-400 text-white'
-              : ownedStatus === 'wishlist'
-              ? 'bg-yellow-500 border-yellow-400 text-white'
-              : 'bg-blue-500 border-blue-400 text-white'
-          }`}>
-            <span>{ownedStatus === 'done' ? '🏆' : ownedStatus === 'wishlist' ? '⭐' : '📦'}</span>
-            <span className="hidden lg:inline">{ownedStatus === 'done' ? t('completed2') : ownedStatus === 'wishlist' ? 'Wishlist' : t('myBox')}</span>
-          </div>
-        </div>
-      )}
+          {/* Owned badge */}
+          {ownedStatus && !selectionMode && (
+            <div className="absolute top-2 left-2 z-10">
+              <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
+                ownedStatus === 'done'
+                  ? 'bg-green-500 border-green-400 text-white'
+                  : ownedStatus === 'wishlist'
+                  ? 'bg-yellow-500 border-yellow-400 text-white'
+                  : 'bg-blue-500 border-blue-400 text-white'
+              }`}>
+                <span>{ownedStatus === 'done' ? '🏆' : ownedStatus === 'wishlist' ? '⭐' : '📦'}</span>
+                <span className="hidden lg:inline">{ownedStatus === 'done' ? t('completed2') : ownedStatus === 'wishlist' ? 'Wishlist' : t('myBox')}</span>
+              </div>
+            </div>
+          )}
 
-      {/* 3-dots menu (only when not in selection mode) */}
-      {!selectionMode && (
-        <div className="absolute top-1.5 right-1.5 z-10 opacity-100">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                onClick={(e) => e.stopPropagation()}
-                className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
-              >
-                <MoreVertical className="w-3.5 h-3.5 text-white" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 z-50 min-w-[190px]">
-              <DropdownMenuItem
-                onClick={(e) => { e.stopPropagation(); onAddToCollection('wishlist'); }}
-                className="text-white hover:bg-white/10 cursor-pointer gap-2"
-              >
-                <Star className="w-4 h-4 text-yellow-400" />
-                Wishlist
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => { e.stopPropagation(); onAddToCollection('inbox'); }}
-                className="text-white hover:bg-white/10 cursor-pointer gap-2"
-              >
-                <Archive className="w-4 h-4 text-blue-400" />
-                {t('inBox')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => { e.stopPropagation(); onAddToCollection('done'); }}
-                className="text-white hover:bg-white/10 cursor-pointer gap-2"
-              >
-                <Trophy className="w-4 h-4 text-green-400" />
-                {t('completed2')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => { e.stopPropagation(); onStartSelection(); }}
-                className="text-white/50 hover:bg-white/10 cursor-pointer gap-2 border-t border-white/10 mt-1 pt-1"
-              >
-                <CheckSquare className="w-4 h-4 text-orange-400" />
-                {t('multipleSelect')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
-      <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
-        {puzzle.image_hd ? (
-          <img
-            src={puzzle.image_hd}
-            alt={puzzle.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Puzzle className="w-8 h-8 text-white/20" />
+          <div className={`${variant === 'large' ? 'aspect-[4/3]' : 'aspect-[3/4]'} overflow-hidden bg-white/5`}>
+            {puzzle.image_hd ? (
+              <img
+                src={puzzle.image_hd}
+                alt={puzzle.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Puzzle className="w-8 h-8 text-white/20" />
+              </div>
+            )}
           </div>
+          <div className="p-2 lg:p-3">
+            <h3 className="text-white text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight">
+              {puzzle.title}
+            </h3>
+            <div className="flex items-center justify-between text-[10px] lg:text-xs text-white/40">
+              <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
+              <span>{puzzle.piece_count} pcs</span>
+            </div>
+            {(puzzle.socialScore > 0 || puzzle.wishlistCount > 0) && (
+              <div className="flex items-center gap-2 mt-1 text-[10px]">
+                {puzzle.socialScore > 0 && <span className="text-green-400">❤️ {puzzle.socialScore}</span>}
+                {puzzle.wishlistCount > 0 && <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>}
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Context menu (long press) */}
+        {showContextMenu && createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-[9998]"
+              onClick={() => setShowContextMenu(false)}
+            />
+            <div className="fixed inset-0 z-[9999] flex items-end justify-center pb-24 px-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="w-full max-w-sm bg-[#0a0a2e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
+              >
+                {/* Puzzle preview header */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+                  {puzzle.image_hd && (
+                    <img src={puzzle.image_hd} alt={puzzle.title} className="w-12 h-12 rounded-lg object-cover" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold line-clamp-1">{puzzle.title}</p>
+                    <p className="text-white/40 text-xs">{puzzle.brand} • {puzzle.piece_count} pcs</p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <button
+                  onClick={() => { onAddToCollection('wishlist'); setShowContextMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left"
+                >
+                  <span className="text-xl">⭐</span>
+                  <span className="text-white font-medium">Wishlist</span>
+                </button>
+                <button
+                  onClick={() => { onAddToCollection('inbox'); setShowContextMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
+                >
+                  <span className="text-xl">📦</span>
+                  <span className="text-white font-medium">{t('inBox')}</span>
+                </button>
+                <button
+                  onClick={() => { onAddToCollection('done'); setShowContextMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
+                >
+                  <span className="text-xl">🏆</span>
+                  <span className="text-white font-medium">{t('completed2')}</span>
+                </button>
+                <button
+                  onClick={() => { onStartSelection(); setShowContextMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
+                >
+                  <CheckSquare className="w-5 h-5 text-orange-400" />
+                  <span className="text-white font-medium">{t('multipleSelect')}</span>
+                </button>
+                <button
+                  onClick={() => setShowContextMenu(false)}
+                  className="w-full flex items-center justify-center px-4 py-3.5 border-t border-white/10 text-white/50 text-sm"
+                >
+                  {t('cancel')}
+                </button>
+              </motion.div>
+            </div>
+          </>,
+          document.body
         )}
-      </div>
-      <div className="p-2 lg:p-3">
-        <h3 className="text-white text-[11px] lg:text-sm font-semibold line-clamp-2 mb-0.5 leading-tight">
-          {puzzle.title}
-        </h3>
-        <div className="flex items-center justify-between text-[10px] lg:text-xs text-white/40">
-          <span className="truncate max-w-[60%]">{puzzle.brand || ''}</span>
-          <span>{puzzle.piece_count} pcs</span>
-        </div>
-        {(puzzle.socialScore > 0 || puzzle.wishlistCount > 0) && (
-          <div className="flex items-center gap-2 mt-1 text-[10px]">
-            {puzzle.socialScore > 0 && <span className="text-green-400">❤️ {puzzle.socialScore}</span>}
-            {puzzle.wishlistCount > 0 && <span className="text-orange-400">⭐ {puzzle.wishlistCount}</span>}
-          </div>
-        )}
-      </div>
-    </motion.div>
-    );
-    }
+        </>
+        );
+        }
