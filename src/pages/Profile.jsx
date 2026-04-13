@@ -229,22 +229,33 @@ export default function Profile() {
     ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true, locale: language === 'fr' ? fr : enUS })
     : 'Recently';
 
-  const currentXP = user?.xp || 0;
-  
-  const getLevelInfo = (xp) => {
-    if (xp < 500) return { level: 1, name: 'Novice', nextXP: 500 };
-    if (xp < 1500) return { level: 2, name: 'Assembleur', nextXP: 1500 };
-    if (xp < 3000) return { level: 3, name: 'Expert du Puzzle', nextXP: 3000 };
-    return { level: 3, name: 'Expert du Puzzle', nextXP: 3000 };
-  };
+  const LEVELS = [
+    { level: 1,  title: 'Apprenti Curieux',       threshold: 0,   emoji: '🌱' },
+    { level: 2,  title: 'Trieur de Bordures',      threshold: 5,   emoji: '🔲' },
+    { level: 3,  title: 'Chercheur de Pièces',     threshold: 15,  emoji: '🔍' },
+    { level: 4,  title: 'Assembleur du Dimanche',  threshold: 30,  emoji: '🧩' },
+    { level: 5,  title: 'Expert des Couleurs',     threshold: 60,  emoji: '🎨' },
+    { level: 6,  title: 'Déchiffreur de Motifs',   threshold: 100, emoji: '🔓' },
+    { level: 7,  title: 'Maître de la Forme',      threshold: 150, emoji: '⚡' },
+    { level: 8,  title: 'Grand Collectionneur',    threshold: 250, emoji: '💎' },
+    { level: 9,  title: 'Légende du Puzzle',       threshold: 400, emoji: '🏆' },
+    { level: 10, title: 'Le Grand Architecte',     threshold: 600, emoji: '👑' },
+  ];
 
-  const levelInfo = getLevelInfo(currentXP);
-  const levelProgress = {
-    current: levelInfo.level,
-    xp: currentXP,
-    nextLevelXp: levelInfo.nextXP,
-    title: levelInfo.name
-  };
+  const completedCount = stats.completed;
+  let currentLevelData = LEVELS[0];
+  let nextLevelData = LEVELS[1];
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (completedCount >= LEVELS[i].threshold) {
+      currentLevelData = LEVELS[i];
+      nextLevelData = LEVELS[i + 1] || null;
+    }
+  }
+  const isMaxLevel = !nextLevelData;
+  const progressMin = currentLevelData.threshold;
+  const progressMax = nextLevelData ? nextLevelData.threshold : currentLevelData.threshold;
+  const progressValue = isMaxLevel ? 100 : Math.round(((completedCount - progressMin) / (progressMax - progressMin)) * 100);
+  const puzzlesRemaining = nextLevelData ? nextLevelData.threshold - completedCount : 0;
 
   const statItems = [
     { label: t('completed'), value: stats.completed, icon: Puzzle, onClick: () => setShowCompletedModal(true) },
@@ -395,18 +406,31 @@ export default function Profile() {
             transition={{ delay: 0.4 }}
             className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <span className="text-orange-400 font-bold text-lg">{t('level')} {levelProgress.current}</span>
-                <span className="text-white/50 ml-2">{levelProgress.title}</span>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{currentLevelData.emoji}</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-orange-400 font-bold text-base">{t('level')} {currentLevelData.level}</span>
+                    <span className="text-white font-semibold text-base">{currentLevelData.title}</span>
+                  </div>
+                  {!isMaxLevel && (
+                    <p className="text-white/40 text-xs mt-0.5">
+                      {puzzlesRemaining} puzzle{puzzlesRemaining > 1 ? 's' : ''} avant {nextLevelData.emoji} {nextLevelData.title}
+                    </p>
+                  )}
+                  {isMaxLevel && (
+                    <p className="text-orange-400/70 text-xs mt-0.5">Niveau maximum atteint ! 🎉</p>
+                  )}
+                </div>
               </div>
-              <span className="text-white/50 text-sm">
-                {levelProgress.xp.toLocaleString()} / {levelProgress.nextLevelXp.toLocaleString()} XP
+              <span className="text-white/50 text-sm font-mono">
+                {completedCount} / {isMaxLevel ? completedCount : nextLevelData.threshold}
               </span>
             </div>
             <Progress 
-              value={(levelProgress.xp / levelProgress.nextLevelXp) * 100} 
-              className="h-2 bg-white/10"
+              value={progressValue}
+              className="h-2.5 bg-white/10 mt-3"
             />
           </motion.div>
         </div>

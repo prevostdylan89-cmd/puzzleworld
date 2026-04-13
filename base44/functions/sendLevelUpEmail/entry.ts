@@ -1,12 +1,29 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const LEVEL_EMOJIS = {
-  1: '🌱',
-  2: '⭐',
-  3: '🔥',
-  4: '💎',
-  5: '🏆',
-  6: '👑',
+  1:  '🌱',
+  2:  '🔲',
+  3:  '🔍',
+  4:  '🧩',
+  5:  '🎨',
+  6:  '🔓',
+  7:  '⚡',
+  8:  '💎',
+  9:  '🏆',
+  10: '👑',
+};
+
+const LEVEL_TITLES = {
+  1:  'Apprenti Curieux',
+  2:  'Trieur de Bordures',
+  3:  'Chercheur de Pièces',
+  4:  'Assembleur du Dimanche',
+  5:  'Expert des Couleurs',
+  6:  'Déchiffreur de Motifs',
+  7:  'Maître de la Forme',
+  8:  'Grand Collectionneur',
+  9:  'Légende du Puzzle',
+  10: 'Le Grand Architecte',
 };
 
 Deno.serve(async (req) => {
