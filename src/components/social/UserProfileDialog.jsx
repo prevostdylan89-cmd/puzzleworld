@@ -47,16 +47,17 @@ export default function UserProfileDialog({ userEmail, onClose }) {
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
-      // Load user profile
+      // Load user profile — always filter by email and verify match
       const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
-      let userData = profiles[0] || null;
+      let userData = profiles.find(p => p.email === userEmail) || null;
       if (!userData) {
         const users = await base44.entities.User.filter({ email: userEmail });
-        userData = users[0] || null;
+        userData = users.find(u => u.email === userEmail) || null;
       } else {
-        // Also try User entity for richer data
+        // Try to enrich with User entity data, but only if email matches
         const users = await base44.entities.User.filter({ email: userEmail });
-        if (users[0]) userData = users[0];
+        const matched = users.find(u => u.email === userEmail);
+        if (matched) userData = matched;
       }
 
       if (userData) {
