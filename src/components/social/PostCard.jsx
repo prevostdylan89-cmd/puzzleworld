@@ -650,7 +650,8 @@ export default function PostCard({ post, user, isFeatured = false }) {
       {/* User Profile Dialog — rendu via portail pour se superposer à toute la page */}
       {showUserProfile && createPortal(
         <UserProfileDialog 
-          userEmail={post.created_by} 
+          userEmail={post.created_by}
+          authorName={post.author_name}
           onClose={() => setShowUserProfile(false)} 
         />,
         document.body
