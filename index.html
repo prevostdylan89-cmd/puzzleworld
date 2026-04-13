@@ -8,7 +8,39 @@
     <title>PuzzleWorld</title>
 </head>
   <body style="background-color: #000019; margin: 0;">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Splash screen instantané -->
+      <div id="splash-screen" style="
+        position: fixed;
+        inset: 0;
+        background-color: #000019;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      ">
+        <img
+          src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/4bbfd7a69_JUSTELAPIECE.png"
+          alt="PuzzleWorld"
+          style="width: 100px; height: 100px; object-fit: contain;"
+        />
+        <p style="color: white; font-family: sans-serif; font-weight: bold; font-size: 22px; margin-top: 16px; letter-spacing: 1px;">PuzzleWorld</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Retire le splash screen une fois React monté
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.style.transition = 'opacity 0.4s ease';
+            splash.style.opacity = '0';
+            setTimeout(function() { splash.remove(); }, 400);
+          }
+        }, 300);
+      });
+    </script>
   </body>
 </html>
