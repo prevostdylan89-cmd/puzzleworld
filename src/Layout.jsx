@@ -20,7 +20,7 @@ import {
   Calendar,
   ArrowLeft,
   Globe,
-  Bug
+  TriangleAlert
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -259,7 +259,7 @@ function LayoutContent({ children, currentPageName }) {
               onClick={() => setShowBugReport(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium border border-red-500/20 hover:border-red-500/40"
             >
-              <Bug className="w-3.5 h-3.5" />
+              <TriangleAlert className="w-3.5 h-3.5" />
               Signaler
             </button>
 
@@ -497,7 +497,7 @@ function LayoutContent({ children, currentPageName }) {
                   onClick={() => { setShowBugReport(true); setShowMobileMenu(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors text-red-400"
                 >
-                  <Bug className="w-5 h-5" />
+                  <TriangleAlert className="w-5 h-5" />
                   <span className="text-sm font-medium">Signaler un problème</span>
                 </button>
 

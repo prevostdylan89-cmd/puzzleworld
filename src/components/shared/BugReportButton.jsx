@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getCapturedLogs } from '@/lib/consoleCapture';
-import { Bug, X, Send, Loader2 } from 'lucide-react';
+import { TriangleAlert, X, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -75,7 +75,7 @@ export default function BugReportModal({ open, onClose }) {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Bug className="w-5 h-5 text-red-400" />
+                <TriangleAlert className="w-5 h-5 text-red-400" />
                 <h3 className="font-semibold text-white">Signaler un problème</h3>
               </div>
               <button onClick={handleClose} className="text-white/40 hover:text-white transition-colors">
