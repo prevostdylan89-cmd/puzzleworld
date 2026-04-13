@@ -41,12 +41,12 @@ export default function UserProfileDialog({ userEmail, onClose }) {
 
       // Try to get from UserProfile first (public data)
       const profiles = await base44.entities.UserProfile.filter({ email: userEmail });
-      let userData = null;
-      
-      // Ensure the returned profile actually matches the requested email
-      const matchedProfile = profiles.find(p => p.email === userEmail);
-      if (matchedProfile) {
-        userData = matchedProfile;
+      let userData = profiles.find(p => p.email === userEmail) || null;
+
+      if (!userData) {
+        // Fallback to User entity if profile not found
+        const users = await base44.entities.User.filter({ email: userEmail });
+        userData = users.find(u => u.email === userEmail) || null;
       } else {
         // Fallback to User entity if profile not found
         const users = await base44.entities.User.filter({ email: userEmail });
