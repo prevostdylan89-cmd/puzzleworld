@@ -28,7 +28,7 @@ export default function Social() {
 
   useEffect(() => {
     loadInitialPosts();
-  }, [activeTab, isGuest]);
+  }, [activeTab, isGuest, user]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -67,7 +67,8 @@ export default function Social() {
         return;
       }
 
-      if (activeTab === 'following' && user) {
+      if (activeTab === 'following') {
+        if (!user) { setIsLoading(false); return; }
         const follows = await base44.entities.Follow.filter({ follower_email: user.email });
         const followingEmails = follows.map(f => f.following_email);
         if (followingEmails.length === 0) {

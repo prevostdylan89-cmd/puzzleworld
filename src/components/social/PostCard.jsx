@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, UserPlus, UserCheck, Puzzle, Bookmark, BookmarkCheck, ThumbsDown, Flame } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '@/components/LanguageContext';
 import CommentSection from './CommentSection';
-import UserProfileDialog from './UserProfileDialog';
+
 import UserBadge from '@/components/shared/UserBadge';
 import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
@@ -62,7 +62,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const [showComments, setShowComments] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showUserProfile, setShowUserProfile] = useState(false);
+
   const [isFollowing, setIsFollowing] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isPuzzleLiked, setIsPuzzleLiked] = useState(false);
@@ -452,16 +452,12 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => setShowUserProfile(true)} />
+        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => {}} />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <button 
-              onClick={() => setShowUserProfile(true)}
-              className="font-medium text-white hover:text-orange-400 transition-colors text-sm"
-            >
-              {post.author_name}
-            </button>
+            <span className="font-medium text-white text-sm">
+            </span>
             <UserLevelTag userEmail={post.created_by} />
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
@@ -647,15 +643,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         />
       )}
 
-      {/* User Profile Dialog — rendu via portail pour se superposer à toute la page */}
-      {showUserProfile && createPortal(
-        <UserProfileDialog 
-          userEmail={post.created_by}
-          authorName={post.author_name}
-          onClose={() => setShowUserProfile(false)} 
-        />,
-        document.body
-      )}
+
 
       {/* Puzzle Detail Dialog */}
       {showPuzzleDetail && post.puzzle_reference && (
