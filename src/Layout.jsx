@@ -334,7 +334,7 @@ function LayoutContent({ children, currentPageName }) {
       </header>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019]/95 backdrop-blur-xl border-b border-white/[0.06] z-50">
+      <header className="lg:hidden fixed top-0 left-0 right-0 bg-[#000019] backdrop-blur-xl border-b border-white/[0.06] z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center justify-between px-4 h-14">
           {['Home', 'Social', 'Collection', 'Profile', 'Events', 'Friends', 'Messages', 'OnlinePuzzles', 'Dashboard'].includes(currentPageName) ? (
             <button 
@@ -553,7 +553,7 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main id="pull-scroll-container" className="min-h-screen lg:pb-6 overflow-y-auto" style={{ paddingTop: '3.5rem', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
+      <main id="pull-scroll-container" className="min-h-screen lg:pb-6 overflow-y-auto" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))', paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
         <PullToRefresh>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
