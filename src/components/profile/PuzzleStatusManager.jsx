@@ -151,6 +151,14 @@ function PuzzleCard({ puzzle, onUpdate, readOnly }) {
   const [showActions, setShowActions] = useState(false);
   const [updating, setUpdating] = useState(false);
 
+  const getDifficultyLevel = (pieces) => {
+    if (!pieces) return 'unknown';
+    if (pieces <= 500) return 'easy';
+    if (pieces <= 1000) return 'medium';
+    if (pieces <= 2000) return 'hard';
+    return 'expert';
+  };
+
   const moveToStatus = async (newStatus) => {
     setUpdating(true);
     try {
@@ -169,6 +177,20 @@ function PuzzleCard({ puzzle, onUpdate, readOnly }) {
       }
 
       await base44.entities.UserPuzzle.update(puzzle.id, updateData);
+
+      // Track puzzle completion in Google Analytics via GTM
+      if (newStatus === 'done') {
+        const difficulty = getDifficultyLevel(puzzle.puzzle_pieces);
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'puzzle_completed',
+          puzzle_name: puzzle.puzzle_name,
+          puzzle_brand: puzzle.puzzle_brand || 'unknown',
+          puzzle_pieces: puzzle.puzzle_pieces,
+          difficulty_level: difficulty,
+        });
+      }
+
       toast.success('Statut mis à jour');
       onUpdate();
     } catch (error) {
