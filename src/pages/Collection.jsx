@@ -20,8 +20,7 @@ import {
   Puzzle,
   Loader2,
   Plus,
-  CheckSquare,
-  Check
+  MoreVertical
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -214,9 +213,6 @@ export default function Collection() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [addingToCollection, setAddingToCollection] = useState(false);
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [userOwnedMap, setUserOwnedMap] = useState({}); // { puzzle_reference: status }
 
@@ -596,60 +592,7 @@ export default function Collection() {
         </div>
       </div>
 
-      {/* Selection Mode Bar — portal to body to avoid transform stacking context */}
-      {selectionMode && createPortal(
-        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 bg-orange-500 shadow-xl shadow-orange-500/30 rounded-full px-3 py-2">
-          <button onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }} className="text-white/80 hover:text-white transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-          <span className="text-white font-semibold text-sm">{selectedIds.size} {selectedIds.size > 1 ? t('selectedPlural') : t('selected')}</span>
-          <div className="w-px h-4 bg-white/30" />
-          <button
-            onClick={() => {
-              if (selectedIds.size === sortedPuzzles.length) setSelectedIds(new Set());
-              else setSelectedIds(new Set(sortedPuzzles.map(p => p.id)));
-            }}
-            className="text-white/80 hover:text-white text-xs transition-colors"
-          >
-            {selectedIds.size === sortedPuzzles.length ? t('deselectAll') : t('selectAll')}
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                disabled={selectedIds.size === 0 || addingToCollection}
-                className="flex items-center gap-1 bg-white text-orange-500 font-semibold px-3 py-1 rounded-full text-sm disabled:opacity-50"
-              >
-                {addingToCollection ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                {t('addToCollection')}
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10 min-w-[180px]">
-              {[
-                { status: 'wishlist', label: 'Wishlist', emoji: '⭐' },
-                { status: 'inbox', label: t('inBox'), emoji: '📦' },
-                { status: 'done', label: t('completed2'), emoji: '🏆' },
-              ].map(({ status, label, emoji }) => (
-                <DropdownMenuItem
-                  key={status}
-                  onClick={async () => {
-                    setAddingToCollection(true);
-                    const puzzles = sortedPuzzles.filter(p => selectedIds.has(p.id));
-                    await addToMyCollection(puzzles, status);
-                    setAddingToCollection(false);
-                    setSelectionMode(false);
-                    setSelectedIds(new Set());
-                  }}
-                  className="text-white hover:bg-white/10 cursor-pointer gap-2"
-                >
-                  {emoji} {label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>,
-        document.body
-      )}
+
 
       {/* Discovery Section */}
       {showDiscovery && !isLoading && globalPuzzles.length > 0 && (
@@ -687,36 +630,16 @@ export default function Collection() {
                     puzzle={puzzle} 
                     index={index} 
                     variant={viewMode === 'large' ? 'large' : 'default'}
-                    selectionMode={selectionMode}
-                    isSelected={selectedIds.has(puzzle.id)}
                     ownedStatus={
                       userOwnedMap[`ref:${puzzle.asin}`] ||
                       userOwnedMap[`ref:${puzzle.id}`] ||
                       userOwnedMap[`name:${puzzle.title?.toLowerCase().trim()}`] ||
                       null
                     }
-                    onToggleSelect={() => {
-                      setSelectedIds(prev => {
-                        const next = new Set(prev);
-                        if (next.has(puzzle.id)) next.delete(puzzle.id);
-                        else next.add(puzzle.id);
-                        return next;
-                      });
-                    }}
                     onAddToCollection={(status) => addToMyCollection([puzzle], status)}
-                    onStartSelection={() => { setSelectionMode(true); setSelectedIds(new Set([puzzle.id])); }}
                     onClick={() => {
-                      if (selectionMode) {
-                        setSelectedIds(prev => {
-                          const next = new Set(prev);
-                          if (next.has(puzzle.id)) next.delete(puzzle.id);
-                          else next.add(puzzle.id);
-                          return next;
-                        });
-                      } else {
-                        setSelectedPuzzle(puzzle);
-                        setShowDetailModal(true);
-                      }
+                      setSelectedPuzzle(puzzle);
+                      setShowDetailModal(true);
                     }}
                   />
                 ))
@@ -749,68 +672,27 @@ export default function Collection() {
 }
 
 
-        function CommunityPuzzleCard({ puzzle, index, variant, onClick, selectionMode, isSelected, onToggleSelect, onAddToCollection, onStartSelection, ownedStatus }) {
+        function CommunityPuzzleCard({ puzzle, index, variant, onClick, onAddToCollection, ownedStatus }) {
         const { t } = useLanguage();
         const [showContextMenu, setShowContextMenu] = useState(false);
-        const longPressTimer = React.useRef(null);
-        const didLongPress = React.useRef(false);
-
-        const handlePointerDown = (e) => {
-          didLongPress.current = false;
-          longPressTimer.current = setTimeout(() => {
-            didLongPress.current = true;
-            if (navigator.vibrate) navigator.vibrate(50);
-            if (selectionMode) {
-              // Already in selection mode: just toggle
-              onToggleSelect();
-            } else {
-              setShowContextMenu(true);
-            }
-          }, 500);
-        };
-
-        const handlePointerUp = () => {
-          clearTimeout(longPressTimer.current);
-        };
-
-        const handlePointerLeave = () => {
-          clearTimeout(longPressTimer.current);
-        };
-
-        const handleClick = (e) => {
-          if (didLongPress.current) {
-            didLongPress.current = false;
-            return; // don't fire click after long press
-          }
-          onClick(e);
-        };
 
         return (
         <>
         <motion.div
           variants={item}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerLeave}
-          onClick={handleClick}
-          className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer select-none ${
-            isSelected ? 'border-orange-500 ring-2 ring-orange-500/50' : 'border-white/[0.06] hover:border-orange-500/30'
-          }`}
-          style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
+          onClick={onClick}
+          className="relative bg-white/[0.03] border border-white/[0.06] hover:border-orange-500/30 rounded-xl overflow-hidden transition-all group cursor-pointer"
         >
-          {/* Selection checkbox overlay */}
-          {selectionMode && (
-            <div className="absolute top-2 left-2 z-10">
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/60'
-              }`}>
-                {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-              </div>
-            </div>
-          )}
+          {/* 3 dots button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowContextMenu(true); }}
+            className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity active:opacity-100"
+          >
+            <MoreVertical className="w-3.5 h-3.5 text-white" />
+          </button>
 
           {/* Owned badge */}
-          {ownedStatus && !selectionMode && (
+          {ownedStatus && (
             <div className="absolute top-2 left-2 z-10">
               <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
                 ownedStatus === 'done'
@@ -854,7 +736,7 @@ export default function Collection() {
           </div>
         </motion.div>
 
-        {/* Context menu (long press) */}
+        {/* Context menu (3 dots) */}
         {showContextMenu && createPortal(
           <>
             <div
@@ -869,7 +751,6 @@ export default function Collection() {
                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                 className="w-full max-w-sm bg-[#0a0a2e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
               >
-                {/* Puzzle preview header */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
                   {puzzle.image_hd && (
                     <img src={puzzle.image_hd} alt={puzzle.title} className="w-12 h-12 rounded-lg object-cover" />
@@ -879,8 +760,6 @@ export default function Collection() {
                     <p className="text-white/40 text-xs">{puzzle.brand} • {puzzle.piece_count} pcs</p>
                   </div>
                 </div>
-
-                {/* Actions */}
                 <button
                   onClick={() => { onAddToCollection('wishlist'); setShowContextMenu(false); }}
                   className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left"
@@ -901,13 +780,6 @@ export default function Collection() {
                 >
                   <span className="text-xl">🏆</span>
                   <span className="text-white font-medium">{t('completed2')}</span>
-                </button>
-                <button
-                  onClick={() => { onStartSelection(); setShowContextMenu(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
-                >
-                  <CheckSquare className="w-5 h-5 text-orange-400" />
-                  <span className="text-white font-medium">{t('multipleSelect')}</span>
                 </button>
                 <button
                   onClick={() => setShowContextMenu(false)}
