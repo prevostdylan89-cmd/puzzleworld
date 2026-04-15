@@ -83,13 +83,13 @@ export default function Home() {
           .map(f => catalogMap[f.puzzle_catalog_id])
           .filter(Boolean);
         // If some weren't found in catalog, fill with featured cache data
-        const result = sorted.map(f => catalogMap[f.puzzle_catalog_id] || {
+        const result = sorted.map(f => catalogMap[f.puzzle_catalog_id] || (f.puzzle_catalog_id ? {
           id: f.puzzle_catalog_id,
           title: f.puzzle_title,
           image_hd: f.puzzle_image,
           asin: f.puzzle_asin,
-        });
-        setTopPuzzles(result.filter(Boolean));
+        } : null));
+        setTopPuzzles(result.filter(Boolean).filter(p => p.id));
       } else {
         // Fallback: top 10 puzzles by socialScore
         const puzzles = await base44.entities.PuzzleCatalog.filter({ status: 'active' }, '-socialScore', 10);
