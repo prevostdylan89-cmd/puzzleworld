@@ -252,7 +252,7 @@ export default function CollectionSection({ user }) {
 
       {/* Barre multi-sélection */}
       {isMultiSelect && (
-        <div className="fixed bottom-20 left-0 right-0 z-[9990] flex justify-center px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="fixed bottom-16 left-0 right-0 z-[9990] flex justify-center px-4 pb-2 lg:bottom-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
