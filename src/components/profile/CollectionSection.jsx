@@ -285,15 +285,55 @@ export default function CollectionSection({ user }) {
   );
 }
 
-function UserPuzzleDetailModal({ open, onClose, puzzle }) {
+function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate }) {
   const { t } = useLanguage();
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [localPhoto, setLocalPhoto] = useState(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (puzzle) setLocalPhoto(puzzle.progress_photo || null);
+  }, [puzzle]);
+
   if (!puzzle) return null;
 
-  const displayImage = (puzzle.status === 'done' && puzzle.progress_photo) ? puzzle.progress_photo : puzzle.image_url;
+  const displayImage = (puzzle.status === 'done' && localPhoto) ? localPhoto : puzzle.image_url;
+
+  const handleChangePhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.UserPuzzle.update(puzzle.id, { progress_photo: file_url });
+      setLocalPhoto(file_url);
+      toast.success(t('photoAdded'));
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      toast.error(t('uploadError'));
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    if (!confirm('Supprimer la photo personnelle et revenir à la photo originale ?')) return;
+    try {
+      await base44.entities.UserPuzzle.update(puzzle.id, { progress_photo: null });
+      setLocalPhoto(null);
+      toast.success('Photo supprimée');
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      toast.error(t('uploadError'));
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto p-0">
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleChangePhoto} />
+
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/70 transition-colors"
@@ -302,8 +342,31 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
         </button>
 
         {displayImage && (
-          <div className="w-full bg-white/5">
+          <div className="w-full bg-white/5 relative">
             <img src={displayImage} alt={puzzle.puzzle_name} className="w-full h-64 object-contain" />
+          </div>
+        )}
+
+        {/* Boutons photo pour puzzles terminés */}
+        {puzzle.status === 'done' && (
+          <div className="flex gap-2 px-6 pt-4">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingPhoto}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-medium hover:bg-orange-500/30 transition-colors disabled:opacity-50"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              {isUploadingPhoto ? 'Upload...' : localPhoto ? t('changeMyPhoto') : t('addMyPhotoBtn')}
+            </button>
+            {localPhoto && (
+              <button
+                onClick={handleDeletePhoto}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-500/30 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Supprimer la photo
+              </button>
+            )}
           </div>
         )}
 
@@ -429,7 +492,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
 
   return (
     <>
-    <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} />
+    <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} onUpdate={onUpdate} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
