@@ -440,11 +440,6 @@ export default function Home() {
                 <p className="text-white/40 text-xs">{t('mostLikedCommunity')}</p>
               </div>
             </div>
-            <Link to={createPageUrl('Collection')}>
-              <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 gap-1">
-                {t('seeAll')} <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Link>
           </div>
 
           {loading ? (
