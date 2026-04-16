@@ -191,11 +191,6 @@ export default function Home() {
                 <p className="text-white/40 text-[10px]">{t('mostLiked')}</p>
               </div>
             </div>
-            <Link to={createPageUrl('Collection')}>
-              <span className="text-orange-400 text-xs font-medium flex items-center gap-0.5">
-                {t('seeAll')} <ChevronRight className="w-3.5 h-3.5" />
-              </span>
-            </Link>
           </div>
 
           {loading ? (
