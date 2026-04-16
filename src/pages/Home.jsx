@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/components/LanguageContext';
-import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan, Star, Puzzle, BookOpen } from 'lucide-react';
+import { Sparkles, TrendingUp, Calendar, ChevronRight, Scan, Star, Puzzle, BookOpen, PlayCircle } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import ScanPuzzleModal from '@/components/scan/ScanPuzzleModal';
 import EventModal from '@/components/events/EventModal';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
 import ArticleModal from '@/components/home/ArticleModal';
+import OnboardingTutorial from '@/components/onboarding/OnboardingTutorial';
 import { base44 } from '@/api/base44Client';
 
 const container = {
@@ -26,6 +27,7 @@ export default function Home() {
   const { t, language } = useLanguage();
   const { isGuest } = useAuth();
   const [showScanModal, setShowScanModal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -632,6 +634,19 @@ export default function Home() {
           )}
         </section>
       </div>
+
+      {/* Bouton Revoir le tuto */}
+      <div className="px-4 lg:px-8 py-6 flex justify-center">
+        <button
+          onClick={() => setShowTutorial(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all text-sm"
+        >
+          <PlayCircle className="w-4 h-4" />
+          Revoir le tutoriel
+        </button>
+      </div>
+
+      <OnboardingTutorial open={showTutorial} onClose={() => setShowTutorial(false)} />
 
       <ScanPuzzleModal open={showScanModal} onClose={() => setShowScanModal(false)} />
 
