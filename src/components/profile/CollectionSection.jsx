@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
@@ -250,8 +251,7 @@ export default function CollectionSection({ user }) {
         )}
       </TabsContent>
 
-      {/* Barre multi-sélection */}
-      {isMultiSelect && (
+      {isMultiSelect && createPortal(
         <div className="fixed bottom-16 left-0 right-0 z-[9990] flex justify-center px-4 pb-2 lg:bottom-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -279,7 +279,8 @@ export default function CollectionSection({ user }) {
               <X className="w-4 h-4" />
             </button>
           </motion.div>
-        </div>
+        </div>,
+        document.body
       )}
     </Tabs>
   );
