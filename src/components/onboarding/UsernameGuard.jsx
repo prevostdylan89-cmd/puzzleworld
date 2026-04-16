@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import UsernameSetupModal from './UsernameSetupModal';
-import OnboardingTutorial from './OnboardingTutorial';
 
 export default function UsernameGuard() {
   const children = null;
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [needsUsername, setNeedsUsername] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -32,8 +32,7 @@ export default function UsernameGuard() {
   const handleComplete = (data) => {
     setNeedsUsername(false);
     setUser(prev => ({ ...prev, ...data }));
-    // Show tutorial right after username setup
-    setShowTutorial(true);
+    navigate('/Tutorial');
   };
 
   return (
@@ -42,7 +41,6 @@ export default function UsernameGuard() {
       {checked && needsUsername && user && (
         <UsernameSetupModal user={user} onComplete={handleComplete} />
       )}
-      <OnboardingTutorial open={showTutorial} onClose={() => setShowTutorial(false)} />
     </>
   );
 }

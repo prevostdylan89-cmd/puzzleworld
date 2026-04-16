@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import GuestLoginScreen from '@/components/GuestLoginScreen';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Blog from './pages/Blog';
+import Tutorial from './pages/Tutorial';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/Blog" element={<LayoutWrapper currentPageName="Blog"><Blog /></LayoutWrapper>} />
+      <Route path="/Tutorial" element={<Tutorial />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
