@@ -47,6 +47,8 @@ export default function CollectionSection({ user }) {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('date-desc');
   const sortDropdown = useScrollSafeDropdown();
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     loadPuzzles();
@@ -124,8 +126,33 @@ export default function CollectionSection({ user }) {
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
   const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
 
+  const handleMultiDelete = async () => {
+    if (!confirm(`Supprimer ${selectedIds.length} puzzle(s) de votre collection ?`)) return;
+    for (const id of selectedIds) {
+      await base44.entities.UserPuzzle.delete(id);
+    }
+    toast.success(`${selectedIds.length} puzzle(s) supprimé(s)`);
+    setIsMultiSelect(false);
+    setSelectedIds([]);
+    loadPuzzles();
+  };
+
+  const handleMultiMove = async (newStatus) => {
+    for (const id of selectedIds) {
+      await base44.entities.UserPuzzle.update(id, { status: newStatus });
+    }
+    toast.success(`${selectedIds.length} puzzle(s) déplacé(s)`);
+    setIsMultiSelect(false);
+    setSelectedIds([]);
+    loadPuzzles();
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
   return (
-    <Tabs defaultValue="inbox" className="w-full">
+    <Tabs defaultValue="inbox" className="w-full" onValueChange={() => { setIsMultiSelect(false); setSelectedIds([]); }}>
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <TabsList className="bg-white/5 border border-white/10">
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
@@ -187,9 +214,15 @@ export default function CollectionSection({ user }) {
             <p className="text-white/30 text-sm mt-2">{t('scanToAdd')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {sortedInboxPuzzles.map((puzzle, index) => (
-              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
+              <PuzzleCard
+                key={puzzle.id} puzzle={puzzle} index={index}
+                onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove}
+                isMultiSelect={isMultiSelect} isSelected={selectedIds.includes(puzzle.id)}
+                onToggleSelect={() => toggleSelect(puzzle.id)}
+                onEnterMultiSelect={() => { setIsMultiSelect(true); setSelectedIds([puzzle.id]); }}
+              />
             ))}
           </div>
         )}
@@ -203,13 +236,51 @@ export default function CollectionSection({ user }) {
             <p className="text-white/30 text-sm mt-2">{t('completeFirstPuzzle')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {sortedCompletedPuzzles.map((puzzle, index) => (
-              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
+              <PuzzleCard
+                key={puzzle.id} puzzle={puzzle} index={index}
+                onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove}
+                isMultiSelect={isMultiSelect} isSelected={selectedIds.includes(puzzle.id)}
+                onToggleSelect={() => toggleSelect(puzzle.id)}
+                onEnterMultiSelect={() => { setIsMultiSelect(true); setSelectedIds([puzzle.id]); }}
+              />
             ))}
           </div>
         )}
       </TabsContent>
+
+      {/* Barre multi-sélection */}
+      {isMultiSelect && (
+        <div className="fixed bottom-20 left-0 right-0 z-[9990] flex justify-center px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md bg-[#0d0d35] border border-white/15 rounded-2xl shadow-2xl flex items-center gap-2 px-3 py-2"
+          >
+            <span className="text-white/60 text-xs font-medium flex-shrink-0">
+              {selectedIds.length} sélectionné{selectedIds.length > 1 ? 's' : ''}
+            </span>
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto">
+              <button onClick={() => handleMultiMove('wishlist')} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-xs font-medium whitespace-nowrap">
+                <span>⭐</span> Wishlist
+              </button>
+              <button onClick={() => handleMultiMove('inbox')} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium whitespace-nowrap">
+                <span>📦</span> {t('inBox2')}
+              </button>
+              <button onClick={() => handleMultiMove('done')} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-medium whitespace-nowrap">
+                <span>🏆</span> {t('completedTab')}
+              </button>
+              <button onClick={handleMultiDelete} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-medium whitespace-nowrap">
+                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+              </button>
+            </div>
+            <button onClick={() => { setIsMultiSelect(false); setSelectedIds([]); }} className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        </div>
+      )}
     </Tabs>
   );
 }
@@ -281,7 +352,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle }) {
   );
 }
 
-function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
+function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, isSelected, onToggleSelect, onEnterMultiSelect }) {
   const { t } = useLanguage();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -363,20 +434,28 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      onClick={() => setShowDetail(true)}
-      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative cursor-pointer"
+      onClick={() => isMultiSelect ? onToggleSelect() : setShowDetail(true)}
+      className={`bg-white/[0.03] backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative cursor-pointer ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/40' : 'border-white/[0.06]'}`}
     >
+      {/* Checkbox multi-select */}
+      {isMultiSelect && (
+        <div className={`absolute top-1.5 left-1.5 z-20 w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/50'}`}>
+          {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+        </div>
+      )}
+
       {/* Menu d'actions */}
-      <div className="absolute top-2 right-2 z-10" onClick={e => e.stopPropagation()}>
+      {!isMultiSelect && (
+      <div className="absolute top-1.5 right-1.5 z-10" onClick={e => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white opacity-100 transition-opacity"
+              className="h-7 w-7 bg-black/50 hover:bg-black/70 text-white opacity-100 transition-opacity"
               disabled={isUpdating}
             >
-              <MoreVertical className="w-4 h-4" />
+              <MoreVertical className="w-3.5 h-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
@@ -399,6 +478,12 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
                 {isUploadingPhoto ? 'Upload...' : puzzle.progress_photo ? t('changeMyPhoto') : t('addMyPhotoBtn')}
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem
+              onClick={() => onEnterMultiSelect()}
+              className="text-blue-400 cursor-pointer hover:bg-white/10"
+            >
+              ☑️ Sélection multiple
+            </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={handleDelete}
               className="text-red-400 cursor-pointer hover:bg-white/10"
@@ -409,6 +494,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      )}
 
       <input
         ref={fileInputRef}
@@ -418,7 +504,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
         onChange={handleCompletionPhotoUpload}
       />
 
-      <div className="aspect-square overflow-hidden bg-white/5 relative">
+      <div className="aspect-[3/4] overflow-hidden bg-white/5 relative">
         {/* For done puzzles: show completion photo if available, then puzzle image */}
         {(puzzle.status === 'done' && puzzle.progress_photo) ? (
           <>
@@ -465,12 +551,12 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
           </div>
         )}
       </div>
-      <div className="p-3">
-        <h3 className="text-white text-sm font-semibold line-clamp-2 mb-1">
+      <div className="p-2">
+        <h3 className="text-white text-[11px] font-semibold line-clamp-2 mb-0.5 leading-tight">
           {puzzle.puzzle_name}
         </h3>
-        <div className="flex items-center justify-between text-xs text-white/50">
-          <span>{puzzle.puzzle_brand}</span>
+        <div className="flex items-center justify-between text-[10px] text-white/40">
+          <span className="truncate max-w-[60%]">{puzzle.puzzle_brand}</span>
           <span>{puzzle.puzzle_pieces} pcs</span>
         </div>
       </div>
