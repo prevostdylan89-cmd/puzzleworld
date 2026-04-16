@@ -183,6 +183,10 @@ export default function Collection() {
   const [viewMode, setViewMode] = useState('grid');
   const [categoryFilters, setCategoryFilters] = useState(DEFAULT_categoryFilters);
 
+  // Multi-select state (lifted here so bar is fixed to page)
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+
   // Load categories from DB
   useEffect(() => {
     const loadCategories = async () => {
@@ -637,9 +641,27 @@ export default function Collection() {
                       null
                     }
                     onAddToCollection={(status) => addToMyCollection([puzzle], status)}
+                    isMultiSelect={isMultiSelect}
+                    isSelected={selectedIds.includes(puzzle.id)}
+                    onToggleSelect={() => {
+                      setSelectedIds(prev =>
+                        prev.includes(puzzle.id)
+                          ? prev.filter(id => id !== puzzle.id)
+                          : [...prev, puzzle.id]
+                      );
+                    }}
+                    onEnterMultiSelect={() => { setIsMultiSelect(true); setSelectedIds([puzzle.id]); }}
                     onClick={() => {
-                      setSelectedPuzzle(puzzle);
-                      setShowDetailModal(true);
+                      if (isMultiSelect) {
+                        setSelectedIds(prev =>
+                          prev.includes(puzzle.id)
+                            ? prev.filter(id => id !== puzzle.id)
+                            : [...prev, puzzle.id]
+                        );
+                      } else {
+                        setSelectedPuzzle(puzzle);
+                        setShowDetailModal(true);
+                      }
                     }}
                   />
                 ))
@@ -667,12 +689,67 @@ export default function Collection() {
         onClose={() => setShowDetailModal(false)}
         puzzle={selectedPuzzle}
       />
+
+      {/* Floating multi-select bar */}
+      {isMultiSelect && createPortal(
+        <div className="fixed bottom-20 left-0 right-0 z-[9990] flex justify-center px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="w-full max-w-md bg-[#0d0d35] border border-white/15 rounded-2xl shadow-2xl flex items-center gap-2 px-3 py-2"
+          >
+            <span className="text-white/60 text-xs font-medium flex-shrink-0">
+              {selectedIds.length} sélectionné{selectedIds.length > 1 ? 's' : ''}
+            </span>
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto">
+              <button
+                onClick={() => {
+                  const selected = sortedPuzzles.filter(p => selectedIds.includes(p.id));
+                  addToMyCollection(selected, 'wishlist');
+                  setIsMultiSelect(false); setSelectedIds([]);
+                }}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-xs font-medium whitespace-nowrap"
+              >
+                <span>⭐</span> Wishlist
+              </button>
+              <button
+                onClick={() => {
+                  const selected = sortedPuzzles.filter(p => selectedIds.includes(p.id));
+                  addToMyCollection(selected, 'inbox');
+                  setIsMultiSelect(false); setSelectedIds([]);
+                }}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium whitespace-nowrap"
+              >
+                <span>📦</span> {t('inBox')}
+              </button>
+              <button
+                onClick={() => {
+                  const selected = sortedPuzzles.filter(p => selectedIds.includes(p.id));
+                  addToMyCollection(selected, 'done');
+                  setIsMultiSelect(false); setSelectedIds([]);
+                }}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-medium whitespace-nowrap"
+              >
+                <span>🏆</span> {t('completed2')}
+              </button>
+            </div>
+            <button
+              onClick={() => { setIsMultiSelect(false); setSelectedIds([]); }}
+              className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
 
 
-        function CommunityPuzzleCard({ puzzle, index, variant, onClick, onAddToCollection, ownedStatus }) {
+        function CommunityPuzzleCard({ puzzle, index, variant, onClick, onAddToCollection, ownedStatus, isMultiSelect, isSelected, onToggleSelect, onEnterMultiSelect }) {
         const { t } = useLanguage();
         const [showContextMenu, setShowContextMenu] = useState(false);
 
@@ -681,18 +758,33 @@ export default function Collection() {
         <motion.div
           variants={item}
           onClick={onClick}
-          className="relative bg-white/[0.03] border border-white/[0.06] hover:border-orange-500/30 rounded-xl overflow-hidden transition-all group cursor-pointer"
+          className={`relative bg-white/[0.03] border rounded-xl overflow-hidden transition-all group cursor-pointer ${
+            isSelected
+              ? 'border-orange-500 ring-2 ring-orange-500/40'
+              : 'border-white/[0.06] hover:border-orange-500/30'
+          }`}
         >
-          {/* 3 dots button */}
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowContextMenu(true); }}
-            className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity active:opacity-100"
-          >
-            <MoreVertical className="w-3.5 h-3.5 text-white" />
-          </button>
+          {/* Multi-select checkbox overlay */}
+          {isMultiSelect && (
+            <div className={`absolute top-1.5 left-1.5 z-20 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+              isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/50'
+            }`}>
+              {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+            </div>
+          )}
+
+          {/* 3 dots button — always visible on mobile, hover on desktop */}
+          {!isMultiSelect && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowContextMenu(true); }}
+              className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+            >
+              <MoreVertical className="w-3.5 h-3.5 text-white" />
+            </button>
+          )}
 
           {/* Owned badge */}
-          {ownedStatus && (
+          {ownedStatus && !isMultiSelect && (
             <div className="absolute top-2 left-2 z-10">
               <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-lg backdrop-blur-sm border ${
                 ownedStatus === 'done'
@@ -736,57 +828,58 @@ export default function Collection() {
           </div>
         </motion.div>
 
-        {/* Context menu (3 dots) */}
+        {/* Context menu (3 dots) — compact bottom sheet */}
         {showContextMenu && createPortal(
           <>
-            <div
-              className="fixed inset-0 z-[9998]"
-              onClick={() => setShowContextMenu(false)}
-            />
-            <div className="fixed inset-0 z-[9999] flex items-end justify-center pb-24 px-4 pointer-events-none">
+            <div className="fixed inset-0 z-[9998]" onClick={() => setShowContextMenu(false)} />
+            <div className="fixed bottom-20 left-0 right-0 z-[9999] flex justify-center px-4">
               <motion.div
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="w-full max-w-sm bg-[#0a0a2e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                className="w-full max-w-sm bg-[#0d0d35] border border-white/15 rounded-2xl overflow-hidden shadow-2xl"
               >
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+                {/* Compact puzzle header */}
+                <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-white/10">
                   {puzzle.image_hd && (
-                    <img src={puzzle.image_hd} alt={puzzle.title} className="w-12 h-12 rounded-lg object-cover" />
+                    <img src={puzzle.image_hd} alt={puzzle.title} className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-semibold line-clamp-1">{puzzle.title}</p>
-                    <p className="text-white/40 text-xs">{puzzle.brand} • {puzzle.piece_count} pcs</p>
-                  </div>
+                  <p className="text-white text-xs font-semibold line-clamp-1 flex-1">{puzzle.title}</p>
+                  <button onClick={() => setShowContextMenu(false)} className="w-5 h-5 flex items-center justify-center text-white/40">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => { onAddToCollection('wishlist'); setShowContextMenu(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left"
-                >
-                  <span className="text-xl">⭐</span>
-                  <span className="text-white font-medium">Wishlist</span>
-                </button>
-                <button
-                  onClick={() => { onAddToCollection('inbox'); setShowContextMenu(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
-                >
-                  <span className="text-xl">📦</span>
-                  <span className="text-white font-medium">{t('inBox')}</span>
-                </button>
-                <button
-                  onClick={() => { onAddToCollection('done'); setShowContextMenu(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 transition-colors text-left border-t border-white/[0.06]"
-                >
-                  <span className="text-xl">🏆</span>
-                  <span className="text-white font-medium">{t('completed2')}</span>
-                </button>
-                <button
-                  onClick={() => setShowContextMenu(false)}
-                  className="w-full flex items-center justify-center px-4 py-3.5 border-t border-white/10 text-white/50 text-sm"
-                >
-                  {t('cancel')}
-                </button>
+                {/* Action row */}
+                <div className="flex items-center divide-x divide-white/10">
+                  <button
+                    onClick={() => { onAddToCollection('wishlist'); setShowContextMenu(false); }}
+                    className="flex-1 flex flex-col items-center gap-1 py-3 hover:bg-white/5 transition-colors"
+                  >
+                    <span className="text-lg">⭐</span>
+                    <span className="text-white/70 text-[10px]">Wishlist</span>
+                  </button>
+                  <button
+                    onClick={() => { onAddToCollection('inbox'); setShowContextMenu(false); }}
+                    className="flex-1 flex flex-col items-center gap-1 py-3 hover:bg-white/5 transition-colors"
+                  >
+                    <span className="text-lg">📦</span>
+                    <span className="text-white/70 text-[10px]">{t('inBox')}</span>
+                  </button>
+                  <button
+                    onClick={() => { onAddToCollection('done'); setShowContextMenu(false); }}
+                    className="flex-1 flex flex-col items-center gap-1 py-3 hover:bg-white/5 transition-colors"
+                  >
+                    <span className="text-lg">🏆</span>
+                    <span className="text-white/70 text-[10px]">{t('completed2')}</span>
+                  </button>
+                  <button
+                    onClick={() => { setShowContextMenu(false); onEnterMultiSelect(); }}
+                    className="flex-1 flex flex-col items-center gap-1 py-3 hover:bg-white/5 transition-colors"
+                  >
+                    <span className="text-lg">☑️</span>
+                    <span className="text-white/70 text-[10px]">Sélection</span>
+                  </button>
+                </div>
               </motion.div>
             </div>
           </>,
