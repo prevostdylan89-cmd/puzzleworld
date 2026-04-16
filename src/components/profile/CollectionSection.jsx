@@ -128,10 +128,6 @@ export default function CollectionSection({ user }) {
     <Tabs defaultValue="inbox" className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <TabsList className="bg-white/5 border border-white/10">
-          <TabsTrigger value="wishlist" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-            <span className="mr-1.5">⭐</span>
-            Wishlist ({wishlistPuzzles.length})
-          </TabsTrigger>
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <Package className="w-4 h-4 mr-2" />
             {t('inBox2')} ({inboxPuzzles.length})
@@ -182,22 +178,6 @@ export default function CollectionSection({ user }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <TabsContent value="wishlist">
-        {wishlistPuzzles.length === 0 ? (
-          <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
-            <span className="text-4xl block mb-4">⭐</span>
-            <p className="text-white/50">Aucun puzzle en wishlist</p>
-            <p className="text-white/30 text-sm mt-2">Ajoutez des puzzles depuis la collection communautaire</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
-            {sortedWishlistPuzzles.map((puzzle, index) => (
-              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
-            ))}
-          </div>
-        )}
-      </TabsContent>
 
       <TabsContent value="inbox">
         {inboxPuzzles.length === 0 ? (
@@ -393,7 +373,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white opacity-100 transition-opacity"
               disabled={isUpdating}
             >
               <MoreVertical className="w-4 h-4" />
@@ -460,12 +440,11 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove }) {
             />
             {puzzle.status === 'done' && (
               <div
-                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                className="absolute bottom-1 left-1 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
               >
-                <div className="flex flex-col items-center gap-1 text-white">
-                  <ImagePlus className="w-8 h-8" />
-                  <span className="text-xs font-medium">Ma photo</span>
+                <div className="w-6 h-6 rounded-full bg-orange-500/90 flex items-center justify-center shadow-lg">
+                  <ImagePlus className="w-3.5 h-3.5 text-white" />
                 </div>
               </div>
             )}

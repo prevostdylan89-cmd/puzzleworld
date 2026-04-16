@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { Trash2, Edit3, ExternalLink, ArrowUpDown, MoveRight } from 'lucide-react';
+import { Trash2, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import PuzzleDetailModal from '@/components/collection/PuzzleDetailModal';
@@ -230,100 +229,55 @@ export default function WishlistSection({ user }) {
         </DropdownMenu>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3">
         {sortedWishlist.map((item, index) => (
         <motion.div
           key={item.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer"
+          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer relative"
           onClick={() => item.catalogData && setSelectedPuzzle(item.catalogData)}
         >
-          {item.image_url && (
-            <div className="aspect-video overflow-hidden">
-              <img
-                src={item.image_url}
-                alt={item.puzzle_name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-            </div>
-          )}
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h4 className="text-white font-semibold mb-1">{item.puzzle_name}</h4>
-                {item.puzzle_brand && (
-                  <p className="text-white/50 text-sm">{item.puzzle_brand}</p>
+          {/* 3-dot menu */}
+          <div className="absolute top-1.5 right-1.5 z-10" onClick={e => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="2" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                  📦 {t('inBox2')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                  🏆 {t('completedTab')}
+                </DropdownMenuItem>
+                {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); const link = item.catalogData.amazon_link || `https://www.amazon.fr/dp/${item.catalogData.asin}?tag=MON_PUZZLE_ID-21`; window.open(link, '_blank'); }} className="text-yellow-400 hover:bg-white/10 cursor-pointer">
+                    🛒 Amazon
+                  </DropdownMenuItem>
                 )}
-              </div>
-              <Badge className={priorityColors[item.priority || 'medium']}>
-                {item.priority || 'medium'}
-              </Badge>
-            </div>
-            
-            {item.puzzle_pieces > 0 && (
-              <p className="text-white/40 text-xs mb-2">{item.puzzle_pieces} pieces</p>
-            )}
-            
-            {item.notes && (
-              <p className="text-white/60 text-sm mb-3 line-clamp-2">{item.notes}</p>
-            )}
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(item); }} className="text-red-400 hover:bg-white/10 cursor-pointer">
+                  <Trash2 className="w-3 h-3 mr-1" /> {t('removeFromCollection')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-            <div className="flex gap-2 flex-wrap">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-white/20 text-white/70 hover:bg-white/5"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoveRight className="w-3 h-3 mr-1" />
-                    {t('move')}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-[#0a0a2e] border-white/10">
-                  <DropdownMenuItem
-                    onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }}
-                    className="text-white hover:bg-white/10 cursor-pointer"
-                  >
-                    📦 {t('inBox2')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }}
-                    className="text-white hover:bg-white/10 cursor-pointer"
-                  >
-                    🏆 {t('completedTab')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
-                <Button
-                  size="sm"
-                  className="flex-1 bg-[#FF9900] hover:bg-[#e68900] text-black font-semibold"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const link = item.catalogData.amazon_link || `https://www.amazon.fr/dp/${item.catalogData.asin}?tag=MON_PUZZLE_ID-21`;
-                    window.open(link, '_blank');
-                  }}
-                >
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Amazon
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(item);
-                }}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            </div>
+          <div className="aspect-[3/4] overflow-hidden bg-white/5">
+            {item.image_url ? (
+              <img src={item.image_url} alt={item.puzzle_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white/20 text-2xl">⭐</div>
+            )}
+          </div>
+          <div className="p-2">
+            <h4 className="text-white text-[11px] font-semibold line-clamp-2 leading-tight">{item.puzzle_name}</h4>
+            {item.puzzle_pieces > 0 && (
+              <p className="text-white/40 text-[10px] mt-0.5">{item.puzzle_pieces} pcs</p>
+            )}
           </div>
         </motion.div>
         ))}
