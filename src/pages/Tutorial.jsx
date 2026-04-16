@@ -22,28 +22,30 @@ const slides = [
         </div>
 
         {/* Simulated bottom nav */}
-        <div className="absolute bottom-0 left-0 right-0 h-14 bg-[#000019]/95 border-t border-white/10 flex items-center justify-around px-4">
-          <div className="flex flex-col items-center gap-0.5">
+        <div className="absolute bottom-0 left-0 right-0 h-14 bg-[#000019]/95 border-t border-white/10 flex items-center px-4">
+          <div className="flex-1 flex justify-center flex-col items-center gap-0.5">
             <Grid3X3 className="w-4 h-4 text-white/40" />
             <span className="text-[8px] text-white/40">Collection</span>
           </div>
 
-          {/* Scan button - highlighted */}
-          <div className="relative -mt-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/40 ring-2 ring-orange-400 ring-offset-2 ring-offset-[#000019]">
-              <Scan className="w-5 h-5 text-white" />
+          {/* Scan button - highlighted - perfectly centered */}
+          <div className="flex-1 flex justify-center">
+            <div className="relative -mt-4" id="scan-btn-tuto">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/40 ring-2 ring-orange-400 ring-offset-2 ring-offset-[#000019]">
+                <Scan className="w-5 h-5 text-white" />
+              </div>
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[7px] text-orange-400 whitespace-nowrap font-bold">Scan</span>
             </div>
-            <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[7px] text-orange-400 whitespace-nowrap font-bold">Scan</span>
           </div>
 
-          <div className="flex flex-col items-center gap-0.5">
+          <div className="flex-1 flex justify-center flex-col items-center gap-0.5">
             <div className="w-4 h-4 rounded-full bg-white/20" />
             <span className="text-[8px] text-white/40">Profil</span>
           </div>
         </div>
 
-        {/* Arrow + annotation */}
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+        {/* Arrow + annotation — centered on Scan button */}
+        <div className="absolute bottom-16 left-0 right-0 flex flex-col items-center gap-1">
           <div className="flex flex-col items-center">
             <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl text-center leading-tight shadow-lg max-w-[160px]">
               Appuyez ici pour scanner le code-barres de votre puzzle !
@@ -126,9 +128,7 @@ const slides = [
             {[
               { emoji: '⭐', label: 'Wishlist', count: '12 puzzles', color: 'bg-yellow-500/20 border-yellow-500/30' },
               { emoji: '📦', label: 'Dans ma boite', count: '5 puzzles', color: 'bg-blue-500/20 border-blue-500/30' },
-              { emoji: '🔄', label: 'En cours', count: '2 puzzles', color: 'bg-purple-500/20 border-purple-500/30' },
               { emoji: '🏆', label: 'Terminés', count: '28 puzzles', color: 'bg-green-500/20 border-green-500/30' },
-              { emoji: '🪦', label: 'Cimetière', count: '3 puzzles', color: 'bg-gray-500/20 border-gray-500/30' },
             ].map((s, i) => (
               <div key={i} className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 ${s.color}`}>
                 <span className="text-sm">{s.emoji}</span>
@@ -145,7 +145,7 @@ const slides = [
         </div>
       </div>
     ),
-    description: 'Organisez vos puzzles par statut : Wishlist, Dans ma boite, En cours, Terminés, ou Cimetière. Retrouvez toute votre collection dans votre profil personnel.',
+    description: 'Organisez vos puzzles par statut : Wishlist, Dans ma boite, ou Terminés. Retrouvez toute votre collection dans votre profil personnel.',
   },
 ];
 

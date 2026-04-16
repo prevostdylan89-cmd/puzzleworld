@@ -41,6 +41,7 @@ function useScrollSafeDropdown() {
 
 export default function CollectionSection({ user }) {
   const { t } = useLanguage();
+  const [wishlistPuzzles, setWishlistPuzzles] = useState([]);
   const [inboxPuzzles, setInboxPuzzles] = useState([]);
   const [completedPuzzles, setCompletedPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,11 +64,13 @@ export default function CollectionSection({ user }) {
 
   const loadPuzzles = async () => {
     try {
-      const [inbox, completed] = await Promise.all([
+      const [wishlist, inbox, completed] = await Promise.all([
+        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'inbox' }),
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' }),
       ]);
 
+      setWishlistPuzzles(wishlist);
       setInboxPuzzles(inbox);
       setCompletedPuzzles(completed);
     } catch (error) {
@@ -103,18 +106,21 @@ export default function CollectionSection({ user }) {
   }
 
   const handleOptimisticMove = (puzzleId, newStatus) => {
-    const allPuzzles = [...inboxPuzzles, ...completedPuzzles];
+    const allPuzzles = [...wishlistPuzzles, ...inboxPuzzles, ...completedPuzzles];
     const puzzle = allPuzzles.find(p => p.id === puzzleId);
     if (!puzzle) return;
 
+    setWishlistPuzzles(prev => prev.filter(p => p.id !== puzzleId));
     setInboxPuzzles(prev => prev.filter(p => p.id !== puzzleId));
     setCompletedPuzzles(prev => prev.filter(p => p.id !== puzzleId));
 
     const updated = { ...puzzle, status: newStatus };
     if (newStatus === 'done') setCompletedPuzzles(prev => [...prev, updated]);
     else if (newStatus === 'inbox') setInboxPuzzles(prev => [...prev, updated]);
+    else if (newStatus === 'wishlist') setWishlistPuzzles(prev => [...prev, updated]);
   };
 
+  const sortedWishlistPuzzles = getSortedPuzzles(wishlistPuzzles);
   const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
   const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
 
@@ -122,6 +128,10 @@ export default function CollectionSection({ user }) {
     <Tabs defaultValue="inbox" className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <TabsList className="bg-white/5 border border-white/10">
+          <TabsTrigger value="wishlist" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+            <span className="mr-1.5">⭐</span>
+            Wishlist ({wishlistPuzzles.length})
+          </TabsTrigger>
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
             <Package className="w-4 h-4 mr-2" />
             {t('inBox2')} ({inboxPuzzles.length})
@@ -172,6 +182,22 @@ export default function CollectionSection({ user }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <TabsContent value="wishlist">
+        {wishlistPuzzles.length === 0 ? (
+          <div className="text-center py-12 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl">
+            <span className="text-4xl block mb-4">⭐</span>
+            <p className="text-white/50">Aucun puzzle en wishlist</p>
+            <p className="text-white/30 text-sm mt-2">Ajoutez des puzzles depuis la collection communautaire</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
+            {sortedWishlistPuzzles.map((puzzle, index) => (
+              <PuzzleCard key={puzzle.id} puzzle={puzzle} index={index} onUpdate={loadPuzzles} onOptimisticMove={handleOptimisticMove} />
+            ))}
+          </div>
+        )}
+      </TabsContent>
 
       <TabsContent value="inbox">
         {inboxPuzzles.length === 0 ? (
