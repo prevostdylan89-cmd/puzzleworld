@@ -123,11 +123,14 @@ function LayoutContent({ children, currentPageName }) {
     base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false })
       .then(msgs => setUnreadMessagesCount(new Set(msgs.map(m => m.conversation_id)).size))
       .catch(() => {});
-    // Real-time subscription instead of polling
-    const unsub = base44.entities.DirectMessage.subscribe(() => {
-      base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false })
-        .then(msgs => setUnreadMessagesCount(new Set(msgs.map(m => m.conversation_id)).size))
-        .catch(() => {});
+    // Real-time subscription for updates
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      // Only re-fetch on create/update events to avoid unnecessary calls
+      if (event.type === 'create' || event.type === 'update') {
+        base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false })
+          .then(msgs => setUnreadMessagesCount(new Set(msgs.map(m => m.conversation_id)).size))
+          .catch(() => {});
+      }
     });
     return () => unsub();
   }, [user]);

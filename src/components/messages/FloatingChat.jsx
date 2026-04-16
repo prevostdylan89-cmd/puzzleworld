@@ -33,8 +33,13 @@ export default function FloatingChat() {
   useEffect(() => {
     if (!user) return;
     
-    const interval = setInterval(checkNewMessages, 3000);
-    return () => clearInterval(interval);
+    // Use real-time subscription instead of polling
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.type === 'create' || event.type === 'update') {
+        loadConversations(user, previousUnreadTotal, soundEnabled);
+      }
+    });
+    return () => unsub();
   }, [user, previousUnreadTotal, soundEnabled]);
 
   const loadUser = async () => {
@@ -47,7 +52,7 @@ export default function FloatingChat() {
     }
   };
 
-  const loadConversations = async (currentUser) => {
+  const loadConversations = async (currentUser, prevUnread, sound) => {
     try {
       // Get all messages involving the user
       const allMessages = await base44.entities.DirectMessage.list('-created_date', 100);
@@ -94,67 +99,6 @@ export default function FloatingChat() {
       setUnreadCounts(counts);
     } catch (error) {
       console.error('Error loading conversations:', error);
-    }
-  };
-
-  const checkNewMessages = async () => {
-    if (!user) return;
-    
-    try {
-      // Get all messages involving the user
-      const allMessages = await base44.entities.DirectMessage.list('-created_date', 100);
-      const userMessages = allMessages.filter(
-        m => m.sender_email === user.email || m.receiver_email === user.email
-      );
-
-      // Group by conversation partner
-      const conversationMap = {};
-      userMessages.forEach(msg => {
-        const partnerEmail = msg.sender_email === user.email ? msg.receiver_email : msg.sender_email;
-        const partnerName = msg.sender_email === user.email ? msg.receiver_name : msg.sender_name;
-        
-        if (!conversationMap[partnerEmail]) {
-          conversationMap[partnerEmail] = {
-            email: partnerEmail,
-            name: partnerName,
-            lastMessage: msg.message,
-            lastMessageDate: msg.created_date,
-            unreadCount: 0
-          };
-        }
-        
-        // Count unread messages
-        if (msg.receiver_email === user.email && !msg.is_read) {
-          conversationMap[partnerEmail].unreadCount++;
-        }
-      });
-
-      // Convert to array and sort by last message date
-      const conversationsList = Object.values(conversationMap).sort(
-        (a, b) => new Date(b.lastMessageDate) - new Date(a.lastMessageDate)
-      );
-
-      setConversations(conversationsList);
-      
-      // Update unread counts
-      const counts = {};
-      conversationsList.forEach(conv => {
-        if (conv.unreadCount > 0) {
-          counts[conv.email] = conv.unreadCount;
-        }
-      });
-      
-      const currentUnreadTotal = Object.values(counts).reduce((sum, count) => sum + count, 0);
-      
-      // Play sound if new unread messages
-      if (currentUnreadTotal > previousUnreadTotal && previousUnreadTotal > 0 && soundEnabled) {
-        notificationSound.current?.play().catch(() => {});
-      }
-      
-      setUnreadCounts(counts);
-      setPreviousUnreadTotal(currentUnreadTotal);
-    } catch (error) {
-      console.error('Error checking new messages:', error);
     }
   };
 
@@ -274,8 +218,13 @@ function ChatWindow({ friend, user, onClose, unreadCount }) {
 
   useEffect(() => {
     loadMessages();
-    const interval = setInterval(loadMessages, 2000);
-    return () => clearInterval(interval);
+    // Use real-time subscription instead of polling
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.type === 'create' || event.type === 'update') {
+        loadMessages();
+      }
+    });
+    return () => unsub();
   }, [friend.email]);
 
   useEffect(() => {
