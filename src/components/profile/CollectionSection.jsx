@@ -275,8 +275,8 @@ export default function CollectionSection({ user }) {
                 <Trash2 className="w-3.5 h-3.5" /> Supprimer
               </button>
             </div>
-            <button onClick={() => { setIsMultiSelect(false); setSelectedIds([]); }} className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => { setIsMultiSelect(false); setSelectedIds([]); }} className="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/30 transition-colors">
+              <X className="w-4 h-4" />
             </button>
           </motion.div>
         </div>
