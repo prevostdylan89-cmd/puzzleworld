@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { Trash2, ArrowUpDown } from 'lucide-react';
+import { Trash2, ArrowUpDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
@@ -37,6 +37,8 @@ export default function WishlistSection({ user }) {
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
   const sortDropdown = useScrollSafeDropdown();
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
     loadWishlist();
@@ -183,6 +185,43 @@ export default function WishlistSection({ user }) {
     );
   }
 
+  const handleMultiDelete = async () => {
+    if (!confirm(`Supprimer ${selectedIds.length} puzzle(s) de votre wishlist ?`)) return;
+    for (const id of selectedIds) {
+      const item = wishlist.find(w => w.id === id);
+      if (!item) continue;
+      if (item._source === 'user_puzzle') await base44.entities.UserPuzzle.delete(id);
+      else await base44.entities.Wishlist.delete(id);
+    }
+    toast.success(`${selectedIds.length} puzzle(s) supprimé(s)`);
+    setIsMultiSelect(false);
+    setSelectedIds([]);
+    loadWishlist();
+  };
+
+  const handleMultiMove = async (newStatus) => {
+    for (const id of selectedIds) {
+      const item = wishlist.find(w => w.id === id);
+      if (!item) continue;
+      if (item._source === 'user_puzzle') {
+        await base44.entities.UserPuzzle.update(id, { status: newStatus });
+      } else {
+        await base44.entities.UserPuzzle.create({
+          puzzle_name: item.puzzle_name, puzzle_brand: item.puzzle_brand || '',
+          puzzle_pieces: item.puzzle_pieces || 0, image_url: item.image_url || '', status: newStatus,
+        });
+        await base44.entities.Wishlist.delete(id);
+      }
+    }
+    const labels = { inbox: `${t('inBox2')} 📦`, done: `${t('completedTab')} 🏆` };
+    toast.success(`${selectedIds.length} puzzle(s) → ${labels[newStatus]}`);
+    setIsMultiSelect(false);
+    setSelectedIds([]);
+    loadWishlist();
+  };
+
+  const toggleSelect = (id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+
   const sortedWishlist = getSortedWishlist(wishlist);
 
   return (
@@ -230,58 +269,102 @@ export default function WishlistSection({ user }) {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        {sortedWishlist.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-          className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer relative"
-          onClick={() => item.catalogData && setSelectedPuzzle(item.catalogData)}
-        >
-          {/* 3-dot menu */}
-          <div className="absolute top-1.5 right-1.5 z-10" onClick={e => e.stopPropagation()}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="2" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }} className="text-white hover:bg-white/10 cursor-pointer">
-                  📦 {t('inBox2')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }} className="text-white hover:bg-white/10 cursor-pointer">
-                  🏆 {t('completedTab')}
-                </DropdownMenuItem>
-                {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); const link = item.catalogData.amazon_link || `https://www.amazon.fr/dp/${item.catalogData.asin}?tag=MON_PUZZLE_ID-21`; window.open(link, '_blank'); }} className="text-yellow-400 hover:bg-white/10 cursor-pointer">
-                    🛒 Amazon
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(item); }} className="text-red-400 hover:bg-white/10 cursor-pointer">
-                  <Trash2 className="w-3 h-3 mr-1" /> {t('removeFromCollection')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        {sortedWishlist.map((item, index) => {
+          const isSelected = selectedIds.includes(item.id);
+          return (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`bg-white/[0.03] backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer relative ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/40' : 'border-white/[0.06]'}`}
+              onClick={() => isMultiSelect ? toggleSelect(item.id) : (item.catalogData && setSelectedPuzzle(item.catalogData))}
+            >
+              {/* Checkbox multi-select */}
+              {isMultiSelect && (
+                <div className={`absolute top-1.5 left-1.5 z-20 w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-orange-500 border-orange-500' : 'bg-black/40 border-white/50'}`}>
+                  {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+                </div>
+              )}
 
-          <div className="aspect-[3/4] overflow-hidden bg-white/5">
-            {item.image_url ? (
-              <img src={item.image_url} alt={item.puzzle_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white/20 text-2xl">⭐</div>
-            )}
-          </div>
-          <div className="p-2">
-            <h4 className="text-white text-[11px] font-semibold line-clamp-2 leading-tight">{item.puzzle_name}</h4>
-            {item.puzzle_pieces > 0 && (
-              <p className="text-white/40 text-[10px] mt-0.5">{item.puzzle_pieces} pcs</p>
-            )}
-          </div>
-        </motion.div>
-        ))}
+              {/* 3-dot menu */}
+              {!isMultiSelect && (
+                <div className="absolute top-1.5 right-1.5 z-10" onClick={e => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="2" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="6" cy="10" r="1.2"/></svg>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-[#0a0a2e] border-white/10">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'inbox'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                        📦 {t('inBox2')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMove(item, 'done'); }} className="text-white hover:bg-white/10 cursor-pointer">
+                        🏆 {t('completedTab')}
+                      </DropdownMenuItem>
+                      {(item.catalogData?.amazon_link || item.catalogData?.asin) && (
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); const link = item.catalogData.amazon_link || `https://www.amazon.fr/dp/${item.catalogData.asin}?tag=MON_PUZZLE_ID-21`; window.open(link, '_blank'); }} className="text-yellow-400 hover:bg-white/10 cursor-pointer">
+                          🛒 Amazon
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsMultiSelect(true); setSelectedIds([item.id]); }} className="text-blue-400 hover:bg-white/10 cursor-pointer">
+                        ☑️ Sélection multiple
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(item); }} className="text-red-400 hover:bg-white/10 cursor-pointer">
+                        <Trash2 className="w-3 h-3 mr-1" /> {t('removeFromCollection')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+
+              <div className="aspect-[3/4] overflow-hidden bg-white/5">
+                {item.image_url ? (
+                  <img src={item.image_url} alt={item.puzzle_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white/20 text-2xl">⭐</div>
+                )}
+              </div>
+              <div className="p-2">
+                <h4 className="text-white text-[11px] font-semibold line-clamp-2 leading-tight">{item.puzzle_name}</h4>
+                {item.puzzle_pieces > 0 && (
+                  <p className="text-white/40 text-[10px] mt-0.5">{item.puzzle_pieces} pcs</p>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
+
+      {/* Barre multi-sélection */}
+      {isMultiSelect && (
+        <div className="fixed bottom-20 left-0 right-0 z-[9990] flex justify-center px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md bg-[#0d0d35] border border-white/15 rounded-2xl shadow-2xl flex items-center gap-2 px-3 py-2"
+          >
+            <span className="text-white/60 text-xs font-medium flex-shrink-0">
+              {selectedIds.length} sélectionné{selectedIds.length > 1 ? 's' : ''}
+            </span>
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto">
+              <button onClick={() => handleMultiMove('inbox')} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium whitespace-nowrap">
+                <span>📦</span> {t('inBox2')}
+              </button>
+              <button onClick={() => handleMultiMove('done')} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-medium whitespace-nowrap">
+                <span>🏆</span> {t('completedTab')}
+              </button>
+              <button onClick={handleMultiDelete} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-medium whitespace-nowrap">
+                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+              </button>
+            </div>
+            <button onClick={() => { setIsMultiSelect(false); setSelectedIds([]); }} className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {selectedPuzzle && (
         <PuzzleDetailModal
