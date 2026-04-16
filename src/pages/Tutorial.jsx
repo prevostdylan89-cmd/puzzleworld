@@ -10,7 +10,7 @@ const slides = [
     title: 'Scannez vos puzzles',
     subtitle: 'Ajoutez vos puzzles en un clin d\'œil',
     content: (
-      <div className="relative w-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
+      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-purple-500/10" />
 
         {/* Simulated header */}
@@ -62,7 +62,7 @@ const slides = [
     title: 'Explorez la Collection',
     subtitle: 'Des milliers de puzzles référencés',
     content: (
-      <div className="relative w-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
+      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10">
         <div className="absolute inset-0 bg-[#000019]" />
 
         {/* Header */}
@@ -116,7 +116,7 @@ const slides = [
     title: 'Gérez votre collection',
     subtitle: 'Suivez l\'avancement de chaque puzzle',
     content: (
-      <div className="relative w-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10" style={{ aspectRatio: '9/16', maxHeight: 360 }}>
+      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#0a0a1e] border border-white/10">
         <div className="absolute inset-0 bg-[#000019]" />
 
         {/* Statuts */}
@@ -173,103 +173,109 @@ export default function Tutorial() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000019] flex flex-col items-center justify-center p-4" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div
+      className="bg-[#000019] flex flex-col items-center justify-center px-4"
+      style={{
+        height: '100dvh',
+        paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+      }}
+    >
       {/* Logo top */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+      <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+        <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0">
           <img src="https://media.base44.com/images/public/69637ed7a7bc12860b6763ca/4bbfd7a69_JUSTELAPIECE.png" alt="PuzzleWorld" className="w-full h-full object-contain" />
         </div>
-        <span className="text-white font-bold text-lg">PuzzleWorld</span>
+        <span className="text-white font-bold text-base">PuzzleWorld</span>
       </div>
 
-      <div className="w-full max-w-sm">
-        {/* Card */}
-        <div className="bg-[#0a0a2e] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <div>
-              <div className="flex gap-1.5 mb-2">
-                {slides.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      i === currentSlide ? 'bg-orange-500 w-6' : i < currentSlide ? 'bg-orange-500/40 w-3' : 'bg-white/20 w-3'
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="text-orange-400 text-xs font-semibold">{slide.subtitle}</p>
-              <h2 className="text-white text-xl font-bold">{slide.title}</h2>
+      {/* Card — takes remaining space, no overflow */}
+      <div className="w-full max-w-sm flex-1 min-h-0 flex flex-col bg-[#0a0a2e] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
+          <div>
+            <div className="flex gap-1.5 mb-1.5">
+              {slides.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i === currentSlide ? 'bg-orange-500 w-6' : i < currentSlide ? 'bg-orange-500/40 w-3' : 'bg-white/20 w-3'
+                  }`}
+                />
+              ))}
             </div>
-            <button
-              onClick={handleClose}
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors flex-shrink-0"
+            <p className="text-orange-400 text-xs font-semibold">{slide.subtitle}</p>
+            <h2 className="text-white text-lg font-bold leading-tight">{slide.title}</h2>
+          </div>
+          <button
+            onClick={handleClose}
+            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors flex-shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Illustration — flex-1 so it fills available space */}
+        <div className="px-5 flex-1 min-h-0">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.25 }}
+              className="h-full"
             >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+              {slide.content}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-          {/* Illustration */}
-          <div className="px-5">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.25 }}
-              >
-                {slide.content}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+        {/* Description */}
+        <div className="px-5 pt-3 pb-2 flex-shrink-0">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-white/60 text-xs leading-relaxed"
+            >
+              {slide.description}
+            </motion.p>
+          </AnimatePresence>
+        </div>
 
-          {/* Description */}
-          <div className="px-5 py-4">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={currentSlide}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-white/60 text-sm leading-relaxed"
-              >
-                {slide.description}
-              </motion.p>
-            </AnimatePresence>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center gap-3 px-5 pb-6">
-            {currentSlide > 0 ? (
-              <Button
-                onClick={handlePrev}
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/5"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleClose}
-                variant="ghost"
-                className="text-white/40 hover:text-white/60 text-sm"
-              >
-                Passer
-              </Button>
-            )}
-
+        {/* Navigation */}
+        <div className="flex items-center gap-3 px-5 pb-5 flex-shrink-0">
+          {currentSlide > 0 ? (
             <Button
-              onClick={handleNext}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
+              onClick={handlePrev}
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/5"
             >
-              {isLast ? (
-                <><Check className="w-4 h-4 mr-2" /> C'est parti !</>
-              ) : (
-                <>Suivant <ChevronRight className="w-4 h-4 ml-1" /></>
-              )}
+              <ChevronLeft className="w-4 h-4" />
             </Button>
-          </div>
+          ) : (
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              className="text-white/40 hover:text-white/60 text-sm"
+            >
+              Passer
+            </Button>
+          )}
+
+          <Button
+            onClick={handleNext}
+            className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold"
+          >
+            {isLast ? (
+              <><Check className="w-4 h-4 mr-2" /> C'est parti !</>
+            ) : (
+              <>Suivant <ChevronRight className="w-4 h-4 ml-1" /></>
+            )}
+          </Button>
         </div>
       </div>
     </div>
