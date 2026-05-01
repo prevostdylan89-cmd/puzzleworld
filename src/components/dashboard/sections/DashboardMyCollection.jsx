@@ -87,6 +87,10 @@ export default function DashboardMyCollection() {
         const aNo = !a.category_tag ? 1 : 0;
         const bNo = !b.category_tag ? 1 : 0;
         return bNo - aNo;
+      } else if (sortBy === 'no_ean') {
+        const aNo = !a.ean ? 1 : 0;
+        const bNo = !b.ean ? 1 : 0;
+        return bNo - aNo;
       }
       return 0; // date order (default from API)
     });
@@ -162,6 +166,7 @@ export default function DashboardMyCollection() {
               <option value="pieces_desc">Pièces (décroissant)</option>
               <option value="missing_pieces">❌ Pièces manquantes</option>
               <option value="no_category">🏷️ Sans catégorie</option>
+              <option value="no_ean">📦 Sans EAN</option>
             </select>
           </div>
 
@@ -182,13 +187,18 @@ export default function DashboardMyCollection() {
                 className="w-16 h-16 object-cover rounded"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="text-white font-medium text-sm line-clamp-1">{puzzle.title}</h4>
-                <p className="text-white/50 text-xs">
-                  {puzzle.brand} • {puzzle.piece_count} pièces • {puzzle.category_tag}
-                </p>
-                <p className="text-orange-400 text-xs mt-1">
-                  ❤️ {puzzle.total_likes + puzzle.total_superlikes} likes
-                </p>
+              <h4 className="text-white font-medium text-sm line-clamp-1">{puzzle.title}</h4>
+              <p className="text-white/50 text-xs">
+                {puzzle.brand} • {puzzle.piece_count} pièces • {puzzle.category_tag}
+              </p>
+              <p className="text-orange-400 text-xs mt-1">
+                ❤️ {puzzle.total_likes + puzzle.total_superlikes} likes
+                {puzzle.ean ? (
+                  <span className="ml-2 text-green-400">📦 EAN: {puzzle.ean}</span>
+                ) : (
+                  <span className="ml-2 text-red-400/70">⚠️ EAN manquant</span>
+                )}
+              </p>
               </div>
               <div className="flex gap-2">
                 <Button
