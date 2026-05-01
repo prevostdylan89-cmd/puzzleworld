@@ -33,6 +33,7 @@ import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/compo
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
+import CollectionImportSection from '@/components/profile/CollectionImportSection';
 import BugReportModal from '@/components/shared/BugReportButton';
 import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
 import { Crown, Camera, TriangleAlert } from 'lucide-react';
@@ -517,8 +518,13 @@ export default function Profile() {
           <MyEventsSection user={user} />
         </div>
 
-        {/* Bug Report Section */}
+        {/* Import Collection Section */}
         <div className="mt-12">
+          <CollectionImportSection user={user} onImportDone={loadUserData} />
+        </div>
+
+        {/* Bug Report Section */}
+        <div className="mt-6">
           <div className="bg-white/[0.03] border border-red-500/20 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-white font-semibold flex items-center gap-2">
