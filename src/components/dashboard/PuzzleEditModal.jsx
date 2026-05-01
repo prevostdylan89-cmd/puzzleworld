@@ -193,8 +193,8 @@ export default function PuzzleEditModal({ open, onClose, puzzle, onUpdate }) {
               </p>
             )}
             {formData.amazon_link && (
-              <a href={formData.amazon_link} target="_blank" rel="noopener noreferrer" className="text-orange-400 text-xs mt-1 block hover:underline truncate">
-                ↗ {formData.amazon_link}
+              <a href={formData.amazon_link} target="_blank" rel="noopener noreferrer" className="text-orange-400 text-xs mt-1 block hover:underline truncate max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                ↗ {formData.amazon_link.length > 50 ? formData.amazon_link.slice(0, 50) + '...' : formData.amazon_link}
               </a>
             )}
           </div>
