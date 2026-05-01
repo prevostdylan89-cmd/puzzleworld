@@ -78,26 +78,37 @@ export default function Profile() {
   // Abonnement temps réel aux changements de UserPuzzle et Wishlist
   useEffect(() => {
     if (!user) return;
-    const unsubscribeUserPuzzle = base44.entities.UserPuzzle.subscribe(async () => {
-      const completedPuzzles = await base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' });
-      const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
-      setStats(prev => ({ ...prev, completed: completedPuzzles.length, totalPieces }));
+    let puzzleDebounceTimer = null;
+    let wishlistDebounceTimer = null;
+
+    const unsubscribeUserPuzzle = base44.entities.UserPuzzle.subscribe(() => {
+      clearTimeout(puzzleDebounceTimer);
+      puzzleDebounceTimer = setTimeout(async () => {
+        const completedPuzzles = await base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' });
+        const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
+        setStats(prev => ({ ...prev, completed: completedPuzzles.length, totalPieces }));
+      }, 2000);
     });
-    const unsubscribeWishlist = base44.entities.Wishlist.subscribe(async () => {
-      const [old, upw] = await Promise.all([
-        base44.entities.Wishlist.filter({ created_by: user.email }),
-        base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
-      ]);
-      const seen = new Set();
-      let count = 0;
-      for (const item of [...upw, ...old]) {
-        const key = item.puzzle_name?.toLowerCase().trim();
-        if (!key || seen.has(key)) continue;
-        seen.add(key); count++;
-      }
-      setStats(prev => ({ ...prev, wishlist: count }));
+    const unsubscribeWishlist = base44.entities.Wishlist.subscribe(() => {
+      clearTimeout(wishlistDebounceTimer);
+      wishlistDebounceTimer = setTimeout(async () => {
+        const [old, upw] = await Promise.all([
+          base44.entities.Wishlist.filter({ created_by: user.email }),
+          base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
+        ]);
+        const seen = new Set();
+        let count = 0;
+        for (const item of [...upw, ...old]) {
+          const key = item.puzzle_name?.toLowerCase().trim();
+          if (!key || seen.has(key)) continue;
+          seen.add(key); count++;
+        }
+        setStats(prev => ({ ...prev, wishlist: count }));
+      }, 2000);
     });
     return () => {
+      clearTimeout(puzzleDebounceTimer);
+      clearTimeout(wishlistDebounceTimer);
       unsubscribeUserPuzzle();
       unsubscribeWishlist();
     };
