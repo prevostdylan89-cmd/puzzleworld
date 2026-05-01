@@ -129,10 +129,16 @@ export default function CollectionSection({ user }) {
 
   const handleMultiDelete = async () => {
     if (!confirm(`Supprimer ${selectedIds.length} puzzle(s) de votre collection ?`)) return;
+    let deleted = 0;
     for (const id of selectedIds) {
-      await base44.entities.UserPuzzle.delete(id);
+      try {
+        await base44.entities.UserPuzzle.delete(id);
+        deleted++;
+      } catch (e) {
+        // Already deleted or not found, skip silently
+      }
     }
-    toast.success(`${selectedIds.length} puzzle(s) supprimé(s)`);
+    toast.success(`${deleted} puzzle(s) supprimé(s)`);
     setIsMultiSelect(false);
     setSelectedIds([]);
     loadPuzzles();
