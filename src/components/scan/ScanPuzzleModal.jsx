@@ -9,6 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
+import { useScanCredits } from '@/hooks/useScanCredits';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,13 @@ import { CheckCircle2, Package } from 'lucide-react';
 export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipCollectionAdd = false }) {
   const queryClient = useQueryClient();
   const { isGuest } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    if (!isGuest) base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, [isGuest]);
+
+  const { remaining, isLimitReached, consumeCredit, loading: creditsLoading, getResetInfo, DAILY_LIMIT } = useScanCredits(currentUser);
   const [activeTab, setActiveTab] = useState('scanner');
   const [cameraReady, setCameraReady] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -301,7 +309,20 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       console.error('Error checking catalog:', err);
     }
 
-    // ÉTAPE 3 : Puzzle inconnu → appel Rainforest via backend
+    // ÉTAPE 3 : Puzzle inconnu → vérifier les crédits puis appel Rainforest
+    if (isLimitReached) {
+      const { dateStr, timeStr } = getResetInfo();
+      setScanMessage({
+        type: 'limit',
+        text: `⏳ Limite journalière atteinte (${DAILY_LIMIT} scans/jour). Vos crédits se rechargent le ${dateStr} à ${timeStr}.`
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Consommer un crédit avant l'appel API
+    await consumeCredit();
+
     try {
       let response;
       try {
@@ -572,11 +593,31 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 ? 'bg-red-500/10 border-red-500/30 text-red-300'
                 : scanMessage.type === 'community'
                 ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                : scanMessage.type === 'limit'
+                ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
                 : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
             }`}
           >
             {scanMessage.text}
           </motion.div>
+        )}
+
+        {/* Compteur de crédits restants */}
+        {!isGuest && !creditsLoading && !showSuccess && (
+          <div className={`flex items-center justify-center gap-2 text-xs rounded-lg px-3 py-2 ${
+            remaining === 0
+              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+              : remaining <= 2
+              ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+              : 'bg-white/5 text-white/40 border border-white/10'
+          }`}>
+            <span>🔍</span>
+            <span>
+              {remaining === 0
+                ? `Limite atteinte — ${DAILY_LIMIT} scans utilisés aujourd'hui`
+                : `${remaining} scan${remaining > 1 ? 's' : ''} API restant${remaining > 1 ? 's' : ''} aujourd'hui`}
+            </span>
+          </div>
         )}
 
         {!puzzleData && !showSuccess && (
