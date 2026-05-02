@@ -10,29 +10,30 @@ import { useAuth } from '@/lib/AuthContext';
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 function ImageZoomOverlay({ src, alt, onClose }) {
-  const [lensPos, setLensPos] = useState(null);
+  const [mouse, setMouse] = useState(null);
   const imgRef = useRef(null);
-  const LENS_SIZE = 160;
+  const LENS = 120; // taille du carré de sélection
   const ZOOM = 3;
 
   const handleMouseMove = useCallback((e) => {
     const img = imgRef.current;
     if (!img) return;
     const rect = img.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-      setLensPos(null);
-      return;
-    }
-    setLensPos({ x, y, w: rect.width, h: rect.height });
+    const x = Math.min(Math.max(e.clientX - rect.left, LENS / 2), rect.width - LENS / 2);
+    const y = Math.min(Math.max(e.clientY - rect.top, LENS / 2), rect.height - LENS / 2);
+    setMouse({ x, y, w: rect.width, h: rect.height });
   }, []);
 
-  const handleMouseLeave = useCallback(() => setLensPos(null), []);
+  const handleMouseLeave = useCallback(() => setMouse(null), []);
+
+  const zoomedW = mouse ? mouse.w * ZOOM : 0;
+  const zoomedH = mouse ? mouse.h * ZOOM : 0;
+  const bgX = mouse ? -(mouse.x * ZOOM - LENS * ZOOM / 2) : 0;
+  const bgY = mouse ? -(mouse.y * ZOOM - LENS * ZOOM / 2) : 0;
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
       onClick={onClose}
     >
       <button
@@ -41,34 +42,51 @@ function ImageZoomOverlay({ src, alt, onClose }) {
       >
         <X className="w-6 h-6 text-white" />
       </button>
+
       <div
-        className="relative select-none"
-        style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+        className="flex items-center gap-6 p-4"
         onClick={e => e.stopPropagation()}
       >
-        <img
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          className="max-w-full max-h-[90vh] object-contain block"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          draggable={false}
-          style={{ cursor: 'crosshair' }}
-        />
-        {lensPos && (
+        {/* Image principale avec carré de sélection */}
+        <div className="relative select-none flex-shrink-0">
+          <img
+            ref={imgRef}
+            src={src}
+            alt={alt}
+            className="block object-contain"
+            style={{ width: '50vmin', height: '50vmin', cursor: mouse ? 'crosshair' : 'default' }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            draggable={false}
+          />
+          {mouse && (
+            <div
+              style={{
+                position: 'absolute',
+                left: mouse.x - LENS / 2,
+                top: mouse.y - LENS / 2,
+                width: LENS,
+                height: LENS,
+                border: '2px solid rgba(255,165,0,0.8)',
+                backgroundColor: 'rgba(255,165,0,0.15)',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+        </div>
+
+        {/* Panneau zoomé façon Amazon */}
+        {mouse && (
           <div
             style={{
-              position: 'absolute',
-              left: lensPos.x - LENS_SIZE / 2,
-              top: lensPos.y - LENS_SIZE / 2,
-              width: LENS_SIZE,
-              height: LENS_SIZE,
-              borderRadius: '50%',
-              border: '2px solid rgba(255,255,255,0.6)',
-              boxShadow: '0 0 0 4px rgba(0,0,0,0.4)',
+              width: LENS * ZOOM,
+              height: LENS * ZOOM,
               overflow: 'hidden',
-              pointerEvents: 'none',
+              position: 'relative',
+              border: '2px solid rgba(255,255,255,0.2)',
+              borderRadius: 8,
+              flexShrink: 0,
+              backgroundColor: '#000',
             }}
           >
             <img
@@ -76,10 +94,10 @@ function ImageZoomOverlay({ src, alt, onClose }) {
               alt=""
               style={{
                 position: 'absolute',
-                width: lensPos.w * ZOOM,
-                height: lensPos.h * ZOOM,
-                left: -(lensPos.x * ZOOM - LENS_SIZE / 2),
-                top: -(lensPos.y * ZOOM - LENS_SIZE / 2),
+                width: zoomedW,
+                height: zoomedH,
+                left: bgX,
+                top: bgY,
                 maxWidth: 'none',
               }}
               draggable={false}
