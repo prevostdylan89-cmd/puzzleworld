@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
@@ -8,6 +8,88 @@ import { useLanguage } from '@/components/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
+
+function ImageZoomOverlay({ src, alt, onClose }) {
+  const [lensPos, setLensPos] = useState(null);
+  const imgRef = useRef(null);
+  const LENS_SIZE = 160;
+  const ZOOM = 3;
+
+  const handleMouseMove = useCallback((e) => {
+    const img = imgRef.current;
+    if (!img) return;
+    const rect = img.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+      setLensPos(null);
+      return;
+    }
+    setLensPos({ x, y, w: rect.width, h: rect.height });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => setLensPos(null), []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <button
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors z-10"
+        onClick={onClose}
+      >
+        <X className="w-6 h-6 text-white" />
+      </button>
+      <div
+        className="relative select-none"
+        style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          className="max-w-full max-h-[90vh] object-contain block"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          draggable={false}
+          style={{ cursor: 'crosshair' }}
+        />
+        {lensPos && (
+          <div
+            style={{
+              position: 'absolute',
+              left: lensPos.x - LENS_SIZE / 2,
+              top: lensPos.y - LENS_SIZE / 2,
+              width: LENS_SIZE,
+              height: LENS_SIZE,
+              borderRadius: '50%',
+              border: '2px solid rgba(255,255,255,0.6)',
+              boxShadow: '0 0 0 4px rgba(0,0,0,0.4)',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            <img
+              src={src}
+              alt=""
+              style={{
+                position: 'absolute',
+                width: lensPos.w * ZOOM,
+                height: lensPos.h * ZOOM,
+                left: -(lensPos.x * ZOOM - LENS_SIZE / 2),
+                top: -(lensPos.y * ZOOM - LENS_SIZE / 2),
+                maxWidth: 'none',
+              }}
+              draggable={false}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const { t } = useLanguage();
@@ -199,23 +281,11 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
 
             {/* Image Zoom Overlay */}
             {showImageZoom && (
-              <div
-                className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
-                onClick={() => setShowImageZoom(false)}
-              >
-                <button
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-                  onClick={() => setShowImageZoom(false)}
-                >
-                  <X className="w-6 h-6 text-white" />
-                </button>
-                <img
-                  src={productData.main_image?.link || puzzle.image_hd}
-                  alt={productData.title}
-                  className="max-w-full max-h-full object-contain"
-                  onClick={e => e.stopPropagation()}
-                />
-              </div>
+              <ImageZoomOverlay
+                src={productData.main_image?.link || puzzle.image_hd}
+                alt={productData.title}
+                onClose={() => setShowImageZoom(false)}
+              />
             )}
 
             {/* Content Section */}
