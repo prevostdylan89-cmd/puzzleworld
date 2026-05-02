@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Loader2, Barcode, Edit, Star, Image as ImageIcon, Check, Edit2 } from 'lucide-react';
 import ManualAddPuzzleModal from './ManualAddPuzzleModal';
+import PersonalPuzzleAddModal from './PersonalPuzzleAddModal';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,6 +53,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [puzzleConfirmed, setPuzzleConfirmed] = useState(false);
   const [showNotMyPuzzle, setShowNotMyPuzzle] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [showPersonalModal, setShowPersonalModal] = useState(false);
   const [pendingBatch, setPendingBatch] = useState([]);
   const [showAddAnother, setShowAddAnother] = useState(false);
   
@@ -833,6 +835,23 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             </>
             )}
 
+          {/* Encadré puzzle personnalisé */}
+          {!puzzleData && !showSuccess && !skipCollectionAdd && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setShowPersonalModal(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all group"
+              >
+                <span className="text-2xl">🧩</span>
+                <div className="text-left">
+                  <p className="text-purple-300 text-sm font-medium group-hover:text-purple-200">Ajouter un puzzle personnalisé</p>
+                  <p className="text-white/30 text-xs">Non scannable · Visible uniquement dans votre collection</p>
+                </div>
+              </button>
+            </div>
+          )}
+
         {puzzleData && !showSuccess && !skipCollectionAdd && (
           <div className="space-y-4">
             {/* Image */}
@@ -1125,6 +1144,15 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         prefillBarcode={barcode}
       />
     )}
+
+    <PersonalPuzzleAddModal
+      open={showPersonalModal}
+      onClose={() => setShowPersonalModal(false)}
+      onAdded={() => {
+        queryClient.invalidateQueries({ queryKey: ['userPuzzles'] });
+        handleClose();
+      }}
+    />
     </div>
   );
 }
