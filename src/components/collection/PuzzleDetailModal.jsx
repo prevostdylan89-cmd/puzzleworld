@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
@@ -12,7 +13,7 @@ const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 function ImageZoomOverlay({ src, alt, onClose }) {
   const [mouse, setMouse] = useState(null);
   const imgRef = useRef(null);
-  const LENS = 120; // taille du carré de sélection
+  const LENS = 150;
   const ZOOM = 3;
 
   const handleMouseMove = useCallback((e) => {
@@ -26,39 +27,48 @@ function ImageZoomOverlay({ src, alt, onClose }) {
 
   const handleMouseLeave = useCallback(() => setMouse(null), []);
 
+  const ZOOM_PANEL = LENS * ZOOM;
   const zoomedW = mouse ? mouse.w * ZOOM : 0;
   const zoomedH = mouse ? mouse.h * ZOOM : 0;
-  const bgX = mouse ? -(mouse.x * ZOOM - LENS * ZOOM / 2) : 0;
-  const bgY = mouse ? -(mouse.y * ZOOM - LENS * ZOOM / 2) : 0;
+  const bgX = mouse ? -(mouse.x * ZOOM - ZOOM_PANEL / 2) : 0;
+  const bgY = mouse ? -(mouse.y * ZOOM - ZOOM_PANEL / 2) : 0;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center"
       onClick={onClose}
     >
       <button
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors z-10"
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
         onClick={onClose}
       >
         <X className="w-6 h-6 text-white" />
       </button>
 
       <div
-        className="flex items-center gap-6 p-4"
+        className="flex items-center gap-8"
+        style={{ padding: '2rem', maxWidth: '100vw', maxHeight: '100vh' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Image principale avec carré de sélection */}
+        {/* Image principale grande - prend tout l'espace disponible */}
         <div className="relative select-none flex-shrink-0">
           <img
             ref={imgRef}
             src={src}
             alt={alt}
-            className="block object-contain"
-            style={{ width: '50vmin', height: '50vmin', cursor: mouse ? 'crosshair' : 'default' }}
+            draggable={false}
+            style={{
+              width: mouse ? '55vh' : '80vh',
+              height: mouse ? '55vh' : '80vh',
+              objectFit: 'contain',
+              cursor: 'crosshair',
+              display: 'block',
+              transition: 'width 0.15s, height 0.15s',
+            }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            draggable={false}
           />
+          {/* Carré de sélection */}
           {mouse && (
             <div
               style={{
@@ -67,31 +77,32 @@ function ImageZoomOverlay({ src, alt, onClose }) {
                 top: mouse.y - LENS / 2,
                 width: LENS,
                 height: LENS,
-                border: '2px solid rgba(255,165,0,0.8)',
-                backgroundColor: 'rgba(255,165,0,0.15)',
+                border: '2px solid rgba(255,165,0,0.9)',
+                backgroundColor: 'rgba(255,165,0,0.12)',
                 pointerEvents: 'none',
               }}
             />
           )}
         </div>
 
-        {/* Panneau zoomé façon Amazon */}
+        {/* Panneau zoomé */}
         {mouse && (
           <div
             style={{
-              width: LENS * ZOOM,
-              height: LENS * ZOOM,
+              width: ZOOM_PANEL,
+              height: ZOOM_PANEL,
               overflow: 'hidden',
-              position: 'relative',
-              border: '2px solid rgba(255,255,255,0.2)',
-              borderRadius: 8,
               flexShrink: 0,
+              border: '2px solid rgba(255,255,255,0.15)',
+              borderRadius: 12,
               backgroundColor: '#000',
+              position: 'relative',
             }}
           >
             <img
               src={src}
               alt=""
+              draggable={false}
               style={{
                 position: 'absolute',
                 width: zoomedW,
@@ -99,13 +110,20 @@ function ImageZoomOverlay({ src, alt, onClose }) {
                 left: bgX,
                 top: bgY,
                 maxWidth: 'none',
+                objectFit: 'contain',
               }}
-              draggable={false}
             />
           </div>
         )}
+
+        {!mouse && (
+          <p className="text-white/40 text-sm absolute bottom-8 left-1/2 -translate-x-1/2">
+            Survolez l'image pour zoomer
+          </p>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
