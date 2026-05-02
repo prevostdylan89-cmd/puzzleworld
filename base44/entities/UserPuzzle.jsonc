@@ -1,0 +1,84 @@
+{
+  "name": "UserPuzzle",
+  "type": "object",
+  "properties": {
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces"
+    },
+    "puzzle_reference": {
+      "type": "string",
+      "description": "Reference or SKU"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Puzzle image URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "wishlist",
+        "inbox",
+        "in_progress",
+        "done",
+        "cemetery"
+      ],
+      "default": "wishlist",
+      "description": "Current status of the puzzle"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when puzzle was started"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when puzzle was completed"
+    },
+    "progress_photo": {
+      "type": "string",
+      "description": "Photo of current progress"
+    },
+    "cemetery_type": {
+      "type": "string",
+      "enum": [
+        "sold",
+        "traded"
+      ],
+      "description": "Type of removal from collection"
+    },
+    "cemetery_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when moved to cemetery"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Note personnelle de 1 \u00e0 5 \u00e9toiles"
+    },
+    "user_category_id": {
+      "type": "string",
+      "description": "ID de la cat\u00e9gorie personnelle de l'utilisateur"
+    }
+  },
+  "required": [
+    "puzzle_name",
+    "puzzle_pieces",
+    "status"
+  ]
+}

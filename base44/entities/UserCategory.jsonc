@@ -1,0 +1,23 @@
+{
+  "name": "UserCategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom de la cat\u00e9gorie personnelle"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji ic\u00f4ne de la cat\u00e9gorie",
+      "default": "\ud83e\udde9"
+    },
+    "color": {
+      "type": "string",
+      "description": "Couleur hex de la cat\u00e9gorie",
+      "default": "#f97316"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -3,7 +3,9 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag } from 'lucide-react';
+import StarRating from '@/components/shared/StarRating';
+import UserCategoriesManager from '@/components/profile/UserCategoriesManager';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -50,6 +52,9 @@ export default function CollectionSection({ user }) {
   const sortDropdown = useScrollSafeDropdown();
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filterCategoryId, setFilterCategoryId] = useState(null);
+  const [showCategoriesManager, setShowCategoriesManager] = useState(false);
 
   useEffect(() => {
     loadPuzzles();
@@ -67,20 +72,29 @@ export default function CollectionSection({ user }) {
 
   const loadPuzzles = async () => {
     try {
-      const [wishlist, inbox, completed] = await Promise.all([
+      const [wishlist, inbox, completed, cats] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'wishlist' }),
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'inbox' }),
         base44.entities.UserPuzzle.filter({ created_by: user.email, status: 'done' }),
+        base44.entities.UserCategory.filter({ created_by: user.email }),
       ]);
 
       setWishlistPuzzles(wishlist);
       setInboxPuzzles(inbox);
       setCompletedPuzzles(completed);
+      setCategories(cats);
     } catch (error) {
       console.error('Error loading puzzles:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getFilteredAndSorted = (puzzles) => {
+    let list = filterCategoryId
+      ? puzzles.filter(p => p.user_category_id === filterCategoryId)
+      : puzzles;
+    return getSortedPuzzles(list);
   };
 
   const getSortedPuzzles = (puzzles) => {
@@ -123,9 +137,9 @@ export default function CollectionSection({ user }) {
     else if (newStatus === 'wishlist') setWishlistPuzzles(prev => [...prev, updated]);
   };
 
-  const sortedWishlistPuzzles = getSortedPuzzles(wishlistPuzzles);
-  const sortedInboxPuzzles = getSortedPuzzles(inboxPuzzles);
-  const sortedCompletedPuzzles = getSortedPuzzles(completedPuzzles);
+  const sortedWishlistPuzzles = getFilteredAndSorted(wishlistPuzzles);
+  const sortedInboxPuzzles = getFilteredAndSorted(inboxPuzzles);
+  const sortedCompletedPuzzles = getFilteredAndSorted(completedPuzzles);
 
   const handleMultiDelete = async () => {
     if (!confirm(`Supprimer ${selectedIds.length} puzzle(s) de votre collection ?`)) return;
@@ -160,6 +174,47 @@ export default function CollectionSection({ user }) {
 
   return (
     <Tabs defaultValue="inbox" className="w-full" onValueChange={() => { setIsMultiSelect(false); setSelectedIds([]); }}>
+      {/* Catégories personnelles */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setShowCategoriesManager(v => !v)}
+            className="flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 border border-orange-500/30 rounded-full px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 transition-all"
+          >
+            <Tag className="w-3 h-3" /> Mes catégories
+          </button>
+          {categories.length > 0 && (
+            <>
+              <button
+                onClick={() => setFilterCategoryId(null)}
+                className={`text-xs rounded-full px-2.5 py-1 border transition-all ${!filterCategoryId ? 'bg-white/15 border-white/30 text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white'}`}
+              >
+                Tous
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilterCategoryId(filterCategoryId === cat.id ? null : cat.id)}
+                  className={`flex items-center gap-1 text-xs rounded-full px-2.5 py-1 border transition-all`}
+                  style={{
+                    borderColor: filterCategoryId === cat.id ? cat.color : `${cat.color}40`,
+                    backgroundColor: filterCategoryId === cat.id ? `${cat.color}30` : `${cat.color}10`,
+                    color: cat.color,
+                  }}
+                >
+                  {cat.icon} {cat.name}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+        {showCategoriesManager && (
+          <div className="mt-3 bg-white/[0.03] border border-white/10 rounded-xl p-4">
+            <UserCategoriesManager user={user} onCategoriesChange={setCategories} />
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <TabsList className="bg-white/5 border border-white/10">
           <TabsTrigger value="inbox" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
@@ -229,6 +284,7 @@ export default function CollectionSection({ user }) {
                 isMultiSelect={isMultiSelect} isSelected={selectedIds.includes(puzzle.id)}
                 onToggleSelect={() => toggleSelect(puzzle.id)}
                 onEnterMultiSelect={() => { setIsMultiSelect(true); setSelectedIds([puzzle.id]); }}
+                categories={categories}
               />
             ))}
           </div>
@@ -251,6 +307,7 @@ export default function CollectionSection({ user }) {
                 isMultiSelect={isMultiSelect} isSelected={selectedIds.includes(puzzle.id)}
                 onToggleSelect={() => toggleSelect(puzzle.id)}
                 onEnterMultiSelect={() => { setIsMultiSelect(true); setSelectedIds([puzzle.id]); }}
+                categories={categories}
               />
             ))}
           </div>
@@ -292,15 +349,34 @@ export default function CollectionSection({ user }) {
   );
 }
 
-function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate }) {
+function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [] }) {
   const { t } = useLanguage();
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [localPhoto, setLocalPhoto] = useState(null);
+  const [localRating, setLocalRating] = useState(0);
+  const [localCategoryId, setLocalCategoryId] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (puzzle) setLocalPhoto(puzzle.progress_photo || null);
+    if (puzzle) {
+      setLocalPhoto(puzzle.progress_photo || null);
+      setLocalRating(puzzle.rating || 0);
+      setLocalCategoryId(puzzle.user_category_id || null);
+    }
   }, [puzzle]);
+
+  const handleRatingChange = async (newRating) => {
+    setLocalRating(newRating);
+    await base44.entities.UserPuzzle.update(puzzle.id, { rating: newRating || null });
+    if (onUpdate) onUpdate();
+  };
+
+  const handleCategoryChange = async (catId) => {
+    const newCatId = catId === localCategoryId ? null : catId;
+    setLocalCategoryId(newCatId);
+    await base44.entities.UserPuzzle.update(puzzle.id, { user_category_id: newCatId });
+    if (onUpdate) onUpdate();
+  };
 
   if (!puzzle) return null;
 
@@ -404,6 +480,37 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate }) {
             </div>
           </div>
 
+          {/* Note ⭐ */}
+          <div className="bg-white/5 rounded-lg p-4 space-y-2">
+            <p className="text-white/50 text-xs">Ma note</p>
+            <StarRating value={localRating} onChange={handleRatingChange} size="md" />
+            {localRating === 0 && <p className="text-white/30 text-xs">Pas encore noté</p>}
+          </div>
+
+          {/* Catégorie personnelle */}
+          {categories.length > 0 && (
+            <div className="bg-white/5 rounded-lg p-4 space-y-2">
+              <p className="text-white/50 text-xs flex items-center gap-1"><Tag className="w-3 h-3" /> Catégorie personnelle</p>
+              <div className="flex flex-wrap gap-2">
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategoryChange(cat.id)}
+                    className="flex items-center gap-1 text-xs rounded-full px-2.5 py-1 border transition-all"
+                    style={{
+                      borderColor: localCategoryId === cat.id ? cat.color : `${cat.color}40`,
+                      backgroundColor: localCategoryId === cat.id ? `${cat.color}30` : `${cat.color}10`,
+                      color: cat.color,
+                    }}
+                  >
+                    {cat.icon} {cat.name}
+                    {localCategoryId === cat.id && ' ✓'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {puzzle.notes && (
             <div className="bg-white/5 rounded-lg p-4">
               <p className="text-white/70 text-sm">{puzzle.notes}</p>
@@ -422,7 +529,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate }) {
   );
 }
 
-function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, isSelected, onToggleSelect, onEnterMultiSelect }) {
+function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, isSelected, onToggleSelect, onEnterMultiSelect, categories }) {
   const { t } = useLanguage();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
@@ -499,7 +606,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
 
   return (
     <>
-    <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} onUpdate={onUpdate} />
+    <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} onUpdate={onUpdate} categories={categories} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -629,6 +736,15 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
           <span className="truncate max-w-[60%]">{puzzle.puzzle_brand}</span>
           <span>{puzzle.puzzle_pieces} pcs</span>
         </div>
+        {puzzle.rating > 0 && (
+          <div className="flex gap-0.5 mt-1">
+            {[1,2,3,4,5].map(s => (
+              <svg key={s} className="w-2.5 h-2.5" viewBox="0 0 24 24" fill={s <= puzzle.rating ? '#f59e0b' : 'none'} stroke={s <= puzzle.rating ? '#f59e0b' : '#6b7280'} strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
     </>

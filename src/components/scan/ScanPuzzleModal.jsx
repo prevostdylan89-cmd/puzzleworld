@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import StarRating from '@/components/shared/StarRating';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle2, Package } from 'lucide-react';
@@ -58,6 +59,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [showPersonalModal, setShowPersonalModal] = useState(false);
   const [pendingBatch, setPendingBatch] = useState([]);
   const [showAddAnother, setShowAddAnother] = useState(false);
+  const [scanRating, setScanRating] = useState(0);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -441,7 +443,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     }
 
     // Ajouter au lot en attente
-    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus }];
+    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus, rating: scanRating || null }];
     setPendingBatch(newBatch);
 
     if (finalize) {
@@ -456,7 +458,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const saveBatch = async (batch) => {
     try {
       setLoading(true);
-      for (const { puzzleData: pd, selectedStatus: status } of batch) {
+      for (const { puzzleData: pd, selectedStatus: status, rating } of batch) {
         let catalogPuzzleId = pd.catalog_id || null;
         if (!catalogPuzzleId && pd.isPending) {
           const newEntry = await base44.entities.PuzzleCatalog.create({
@@ -483,6 +485,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           puzzle_reference: refCode,
           catalog_puzzle_id: catalogPuzzleId,
           status,
+          rating: rating || null,
         });
 
         if (catalogPuzzleId) {
@@ -543,6 +546,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setShowAddAnother(false);
     setEditingPieces(false);
     setEditedPieces('');
+    setScanRating(0);
     setCameraReady(false);
     setScanning(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
@@ -1029,6 +1033,16 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 transition={{ duration: 0.3 }}
                 className="space-y-4"
               >
+                {/* Note ⭐ */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <label className="text-sm text-white/70 mb-3 block">Ma note pour ce puzzle (optionnel)</label>
+                  <StarRating value={scanRating} onChange={setScanRating} size="lg" />
+                  {scanRating > 0 && (
+                    <p className="text-white/40 text-xs mt-2">
+                      {['', 'Pas aimé 😕', 'Bof 😐', 'Bien 🙂', 'Très bien 😊', 'Excellent ! 🤩'][scanRating]}
+                    </p>
+                  )}
+                </div>
                 <div>
                   <label className="text-sm text-white/70 mb-3 block">Où voulez-vous ajouter ce puzzle ?</label>
                   <div className="grid grid-cols-2 gap-3">
