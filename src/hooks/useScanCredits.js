@@ -8,6 +8,9 @@ export function useScanCredits(user) {
   const [resetDate, setResetDate] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Admins ont des scans illimités
+  const isAdmin = user?.role === 'admin';
+
   // Today's date key in Paris timezone
   const getTodayKey = () => {
     return new Date().toLocaleDateString('fr-CA', { timeZone: 'Europe/Paris' }); // YYYY-MM-DD
@@ -59,8 +62,8 @@ export function useScanCredits(user) {
     return newUsed;
   };
 
-  const remaining = Math.max(0, DAILY_LIMIT - creditsUsed);
-  const isLimitReached = creditsUsed >= DAILY_LIMIT;
+  const remaining = isAdmin ? 999 : Math.max(0, DAILY_LIMIT - creditsUsed);
+  const isLimitReached = isAdmin ? false : creditsUsed >= DAILY_LIMIT;
 
   // Compute reset time display
   const getResetInfo = () => {

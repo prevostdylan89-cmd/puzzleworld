@@ -141,7 +141,41 @@ Deno.serve(async (req) => {
     }
 
     // Support both product endpoint (product) and search endpoint (search_results)
-    const product = rfData?.product || rfData?.search_results?.[0] || null;
+    let product = rfData?.product || rfData?.search_results?.[0] || null;
+
+    // FALLBACK : Si Rainforest ne trouve rien, essayer UPCitemdb (base mondiale, gratuit)
+    if (!product) {
+      try {
+        console.log('Rainforest: no result, trying UPCitemdb fallback...');
+        const upcResp = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${ean}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (upcResp.ok) {
+          const upcData = await upcResp.json();
+          const upcItem = upcData?.items?.[0];
+          if (upcItem) {
+            // Normaliser au même format que le produit Rainforest
+            product = {
+              title: upcItem.title || upcItem.description || '',
+              brand: upcItem.brand || '',
+              description: upcItem.description || '',
+              feature_bullets: upcItem.features || [],
+              image: upcItem.images?.[0] || '',
+              images: (upcItem.images || []).map(img => ({ link: img })),
+              categories: [],
+              asin: null,
+              price: null,
+              rating: null,
+              ratings_total: 0,
+            };
+            console.log('UPCitemdb found:', upcItem.title);
+          }
+        }
+      } catch (upcErr) {
+        console.error('UPCitemdb fallback error:', upcErr);
+      }
+    }
+
     if (!product) {
       return Response.json({ error: 'Produit non trouvé sur Amazon pour cet EAN' }, { status: 404 });
     }
