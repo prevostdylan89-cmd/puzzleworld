@@ -18,6 +18,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [user, setUser] = useState(null);
+  const [showImageZoom, setShowImageZoom] = useState(false);
 
   useEffect(() => {
     if (open && puzzle) {
@@ -185,13 +186,37 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
         ) : productData ? (
           <>
             {/* Image Section */}
-            <div className="relative w-full bg-white/5">
+            <div className="relative w-full bg-white/5 cursor-zoom-in" onClick={() => setShowImageZoom(true)}>
               <img
                 src={productData.main_image?.link || puzzle.image_hd}
                 alt={productData.title}
                 className="w-full h-80 object-contain"
               />
+              <div className="absolute bottom-2 right-2 bg-black/50 rounded-full px-2 py-1 text-xs text-white/70 flex items-center gap-1">
+                <span>🔍</span> Agrandir
+              </div>
             </div>
+
+            {/* Image Zoom Overlay */}
+            {showImageZoom && (
+              <div
+                className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
+                onClick={() => setShowImageZoom(false)}
+              >
+                <button
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                  onClick={() => setShowImageZoom(false)}
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+                <img
+                  src={productData.main_image?.link || puzzle.image_hd}
+                  alt={productData.title}
+                  className="max-w-full max-h-full object-contain"
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
+            )}
 
             {/* Content Section */}
             <div className="p-6 space-y-6">
