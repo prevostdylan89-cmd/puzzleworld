@@ -209,7 +209,19 @@ Deno.serve(async (req) => {
     // VALIDATION : Vérifier que le produit est bien un puzzle
     const titleLower = (rawTitle || '').toLowerCase();
     const categoriesStr = (product.categories || []).map(c => c.name || c).join(' ').toLowerCase();
-    const isPuzzle = titleLower.includes('puzzle') || categoriesStr.includes('puzzle');
+    const brandLower = (brand || '').toLowerCase();
+    const PUZZLE_BRANDS = [
+      'ravensburger', 'clementoni', 'nathan', 'jumbo', 'schmidt', 'educa',
+      'trefl', 'heye', 'cobble hill', 'bluebird', 'castorland', 'djeco',
+      'larsen', 'step puzzle', 'sunsout', 'masterpieces', 'springbok',
+      'anatolian', 'grafika', 'eurographics', 'pomegranate', 'gibsons',
+      'wentworth', 'falcon', 'wasgij', 'piatnik', 'ricordi', 'king',
+      'magnolia', 'd-toys', 'buffalo games', 'galison',
+    ];
+    const isPuzzle =
+      titleLower.includes('puzzle') ||
+      categoriesStr.includes('puzzle') ||
+      PUZZLE_BRANDS.some(pb => brandLower.includes(pb) || titleLower.includes(pb));
 
     if (!isPuzzle) {
       return Response.json({
