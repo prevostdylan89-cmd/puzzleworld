@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
@@ -10,41 +10,9 @@ import { useAuth } from '@/lib/AuthContext';
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 function ImageZoomOverlay({ src, alt, onClose }) {
-  const [mouse, setMouse] = useState(null);
-  const imgRef = useRef(null);
-  const ZOOM = 4;
-  const PREVIEW_SIZE = 320;
-
-  const handleMouseMove = useCallback((e) => {
-    const img = imgRef.current;
-    if (!img) return;
-    const rect = img.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-      setMouse(null);
-      return;
-    }
-    setMouse({ x, y, w: rect.width, h: rect.height, clientX: e.clientX, clientY: e.clientY });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => setMouse(null), []);
-
-  const getZoomedBg = () => {
-    if (!mouse) return {};
-    const xPct = (mouse.x / mouse.w) * 100;
-    const yPct = (mouse.y / mouse.h) * 100;
-    return {
-      backgroundImage: `url(${src})`,
-      backgroundSize: `${mouse.w * ZOOM}px ${mouse.h * ZOOM}px`,
-      backgroundPosition: `${xPct}% ${yPct}%`,
-      backgroundRepeat: 'no-repeat',
-    };
-  };
-
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center cursor-zoom-out"
       onClick={onClose}
     >
       <button
@@ -53,59 +21,13 @@ function ImageZoomOverlay({ src, alt, onClose }) {
       >
         <X className="w-6 h-6 text-white" />
       </button>
-
-      {/* Main image */}
-      <div
-        className="relative select-none"
-        style={{ maxWidth: '80vw', maxHeight: '85vh' }}
+      <img
+        src={src}
+        alt={alt}
+        style={{ maxWidth: '95vw', maxHeight: '95vh', objectFit: 'contain' }}
         onClick={e => e.stopPropagation()}
-      >
-        <img
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          className="max-w-full max-h-[85vh] object-contain block"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          draggable={false}
-          style={{ cursor: 'crosshair' }}
-        />
-
-        {/* Zoom lens square on the image */}
-        {mouse && (
-          <div
-            style={{
-              position: 'absolute',
-              left: mouse.x - 60,
-              top: mouse.y - 60,
-              width: 120,
-              height: 120,
-              border: '2px solid rgba(255, 165, 0, 0.8)',
-              pointerEvents: 'none',
-              boxShadow: '0 0 0 9999px rgba(0,0,0,0.25)',
-            }}
-          />
-        )}
-
-        {/* Zoomed preview: centered below the cursor */}
-        {mouse && (
-          <div
-            style={{
-              position: 'fixed',
-              left: mouse.clientX - PREVIEW_SIZE / 2,
-              top: mouse.clientY + 30,
-              width: PREVIEW_SIZE,
-              height: PREVIEW_SIZE,
-              ...getZoomedBg(),
-              border: '2px solid rgba(255,255,255,0.3)',
-              borderRadius: 8,
-              pointerEvents: 'none',
-              zIndex: 10001,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
-            }}
-          />
-        )}
-      </div>
+        draggable={false}
+      />
     </div>
   );
 }
