@@ -33,10 +33,19 @@ function ImageZoomOverlay({ src, alt, onClose }) {
   const bgX = mouse ? -(mouse.x * ZOOM - ZOOM_PANEL / 2) : 0;
   const bgY = mouse ? -(mouse.y * ZOOM - ZOOM_PANEL / 2) : 0;
 
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
   return createPortal(
     <div
       className="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center"
       onClick={onClose}
+      onMouseDown={e => e.stopPropagation()}
+      onPointerDown={e => e.stopPropagation()}
+      onKeyDown={e => e.stopPropagation()}
     >
       <button
         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
