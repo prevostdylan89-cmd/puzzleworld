@@ -7,18 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 
-const STATUSES = [
-  { value: 'wishlist', label: '⭐ Wishlist' },
-  { value: 'inbox', label: '📦 Je l\'ai chez moi' },
-  { value: 'done', label: '🏆 Terminé' },
-];
-
 export default function PersonalPuzzleAddModal({ open, onClose, onAdded }) {
   const [form, setForm] = useState({ name: '', brand: '', pieces: '' });
   const [imagePreview, setImagePreview] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState('inbox');
   const [submitting, setSubmitting] = useState(false);
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -41,14 +34,11 @@ export default function PersonalPuzzleAddModal({ open, onClose, onAdded }) {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      // Ajout UNIQUEMENT dans la collection personnelle, jamais dans PuzzleCatalog
-      await base44.entities.UserPuzzle.create({
-        puzzle_name: form.name || 'Puzzle personnalisé',
-        puzzle_brand: form.brand || '',
-        puzzle_pieces: form.pieces ? parseInt(form.pieces) : 0,
-        image_url: imageUrl || '',
-        status: selectedStatus,
-        notes: '📌 Puzzle personnalisé',
+      // Ajout UNIQUEMENT dans la collection personnelle (PersonalPuzzle), jamais dans PuzzleCatalog ni UserPuzzle
+      await base44.entities.PersonalPuzzle.create({
+        name: form.name || 'Puzzle personnalisé',
+        piece_count: form.pieces ? parseInt(form.pieces) : null,
+        image_url: imageUrl || null,
       });
 
       toast.success('✅ Puzzle ajouté à votre collection !');
@@ -65,7 +55,6 @@ export default function PersonalPuzzleAddModal({ open, onClose, onAdded }) {
     setForm({ name: '', brand: '', pieces: '' });
     setImagePreview('');
     setImageUrl('');
-    setSelectedStatus('inbox');
     onClose();
   };
 
@@ -138,27 +127,6 @@ export default function PersonalPuzzleAddModal({ open, onClose, onAdded }) {
                 onChange={(e) => update('pieces', e.target.value)}
                 className="bg-white/5 border-white/10 text-white"
               />
-            </div>
-          </div>
-
-          {/* Statut */}
-          <div>
-            <label className="text-white/70 text-sm mb-2 block">Où ajouter ce puzzle ?</label>
-            <div className="grid grid-cols-3 gap-2">
-              {STATUSES.map(s => (
-                <button
-                  key={s.value}
-                  type="button"
-                  onClick={() => setSelectedStatus(s.value)}
-                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs font-medium transition-all ${
-                    selectedStatus === s.value
-                      ? 'border-orange-500 bg-orange-500/20 text-orange-400'
-                      : 'border-white/10 bg-white/5 text-white/60 hover:border-white/30'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
             </div>
           </div>
 
