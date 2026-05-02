@@ -52,6 +52,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [scanMessage, setScanMessage] = useState(null); // { type: 'error'|'community'|'pending'|'new', text: '' }
   const [puzzleConfirmed, setPuzzleConfirmed] = useState(false);
   const [showNotMyPuzzle, setShowNotMyPuzzle] = useState(false);
+  const [editingPieces, setEditingPieces] = useState(false);
+  const [editedPieces, setEditedPieces] = useState('');
   const [showManualModal, setShowManualModal] = useState(false);
   const [showPersonalModal, setShowPersonalModal] = useState(false);
   const [pendingBatch, setPendingBatch] = useState([]);
@@ -137,6 +139,16 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       } catch (err) {
         console.error('Error stopping scanner:', err);
       }
+    }
+    // Corriger le zoom anormal causé par html5-qrcode sur mobile
+    document.body.style.transform = '';
+    document.body.style.zoom = '';
+    document.documentElement.style.transform = '';
+    document.documentElement.style.zoom = '';
+    // Forcer le viewport à sa valeur initiale
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     }
   };
 
@@ -517,6 +529,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   };
 
   const handleReset = () => {
+    stopScanner();
     setPuzzleData(null);
     setShowSuccess(false);
     setSelectedStatus('');
@@ -528,6 +541,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setPuzzleConfirmed(false);
     setShowNotMyPuzzle(false);
     setShowAddAnother(false);
+    setEditingPieces(false);
+    setEditedPieces('');
+    setCameraReady(false);
+    setScanning(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
   };
 
@@ -905,8 +922,43 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 <p className="text-white text-sm">{puzzleData.brand || 'Non renseigné'}</p>
               </div>
               <div className="rounded-lg bg-white/5 border border-white/10 p-3">
-                <label className="text-white/50 text-xs mb-1 block">Nombre de pièces</label>
-                <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-white/50 text-xs">Nombre de pièces</label>
+                  {!editingPieces && (
+                    <button
+                      onClick={() => { setEditingPieces(true); setEditedPieces(String(puzzleData.pieces || '')); }}
+                      className="text-orange-400 text-xs hover:text-orange-300 flex items-center gap-1"
+                    >
+                      <Edit2 className="w-3 h-3" /> Modifier
+                    </button>
+                  )}
+                </div>
+                {editingPieces ? (
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      type="number"
+                      value={editedPieces}
+                      onChange={(e) => setEditedPieces(e.target.value)}
+                      className="bg-white/10 border-white/20 text-white h-8 text-sm"
+                      autoFocus
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const val = parseInt(editedPieces);
+                        if (val > 0) {
+                          setPuzzleData(prev => ({ ...prev, pieces: val, piece_count: val }));
+                        }
+                        setEditingPieces(false);
+                      }}
+                      className="bg-orange-500 hover:bg-orange-600 h-8 px-3"
+                    >
+                      <Check className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-white text-sm">{puzzleData.pieces ? `${puzzleData.pieces} pièces` : 'Non renseigné'}</p>
+                )}
               </div>
               {puzzleData.dimensions && (
                 <div className="rounded-lg bg-white/5 border border-white/10 p-3">
