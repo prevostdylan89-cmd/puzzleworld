@@ -10,10 +10,10 @@ import { useAuth } from '@/lib/AuthContext';
 const AFFILIATE_TAG = 'MON_PUZZLE_ID-21';
 
 function ImageZoomOverlay({ src, alt, onClose }) {
-  const [cursor, setCursor] = useState(null);
+  const [mouse, setMouse] = useState(null);
   const imgRef = useRef(null);
-  const ZOOM = 3;
-  const PREVIEW_SIZE = 400;
+  const ZOOM = 4;
+  const PREVIEW_SIZE = 320;
 
   const handleMouseMove = useCallback((e) => {
     const img = imgRef.current;
@@ -22,32 +22,21 @@ function ImageZoomOverlay({ src, alt, onClose }) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-      setCursor(null);
+      setMouse(null);
       return;
     }
-    setCursor({ x, y, w: rect.width, h: rect.height, rectLeft: rect.left, rectTop: rect.top });
+    setMouse({ x, y, w: rect.width, h: rect.height, clientX: e.clientX, clientY: e.clientY });
   }, []);
 
-  const handleMouseLeave = useCallback(() => setCursor(null), []);
+  const handleMouseLeave = useCallback(() => setMouse(null), []);
 
-  // Position the preview box: prefer right side, fallback to left
-  const getPreviewStyle = () => {
-    if (!cursor) return {};
-    const spaceRight = window.innerWidth - (cursor.rectLeft + cursor.w);
-    const left = spaceRight > PREVIEW_SIZE + 20
-      ? cursor.rectLeft + cursor.w + 16
-      : cursor.rectLeft - PREVIEW_SIZE - 16;
-    const top = Math.max(8, Math.min(cursor.rectTop, window.innerHeight - PREVIEW_SIZE - 8));
-    return { left, top, width: PREVIEW_SIZE, height: PREVIEW_SIZE };
-  };
-
-  const getBgPos = () => {
-    if (!cursor) return {};
-    const xPct = (cursor.x / cursor.w) * 100;
-    const yPct = (cursor.y / cursor.h) * 100;
+  const getZoomedBg = () => {
+    if (!mouse) return {};
+    const xPct = (mouse.x / mouse.w) * 100;
+    const yPct = (mouse.y / mouse.h) * 100;
     return {
       backgroundImage: `url(${src})`,
-      backgroundSize: `${cursor.w * ZOOM}px ${cursor.h * ZOOM}px`,
+      backgroundSize: `${mouse.w * ZOOM}px ${mouse.h * ZOOM}px`,
       backgroundPosition: `${xPct}% ${yPct}%`,
       backgroundRepeat: 'no-repeat',
     };
@@ -68,51 +57,55 @@ function ImageZoomOverlay({ src, alt, onClose }) {
       {/* Main image */}
       <div
         className="relative select-none"
-        style={{ maxWidth: '45vw', maxHeight: '90vh' }}
+        style={{ maxWidth: '80vw', maxHeight: '85vh' }}
         onClick={e => e.stopPropagation()}
       >
         <img
           ref={imgRef}
           src={src}
           alt={alt}
-          className="max-w-full max-h-[90vh] object-contain block"
+          className="max-w-full max-h-[85vh] object-contain block"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           draggable={false}
-          style={{ cursor: cursor ? 'crosshair' : 'default' }}
+          style={{ cursor: 'crosshair' }}
         />
-        {/* Crosshair indicator on hover */}
-        {cursor && (
+
+        {/* Zoom lens square on the image */}
+        {mouse && (
           <div
             style={{
               position: 'absolute',
-              left: cursor.x - 40,
-              top: cursor.y - 40,
-              width: 80,
-              height: 80,
-              border: '2px solid rgba(255,165,0,0.7)',
+              left: mouse.x - 60,
+              top: mouse.y - 60,
+              width: 120,
+              height: 120,
+              border: '2px solid rgba(255, 165, 0, 0.8)',
               pointerEvents: 'none',
-              boxShadow: '0 0 0 9999px rgba(0,0,0,0.15)',
+              boxShadow: '0 0 0 9999px rgba(0,0,0,0.25)',
+            }}
+          />
+        )}
+
+        {/* Zoomed preview: centered below the cursor */}
+        {mouse && (
+          <div
+            style={{
+              position: 'fixed',
+              left: mouse.clientX - PREVIEW_SIZE / 2,
+              top: mouse.clientY + 30,
+              width: PREVIEW_SIZE,
+              height: PREVIEW_SIZE,
+              ...getZoomedBg(),
+              border: '2px solid rgba(255,255,255,0.3)',
+              borderRadius: 8,
+              pointerEvents: 'none',
+              zIndex: 10001,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
             }}
           />
         )}
       </div>
-
-      {/* Zoom preview panel */}
-      {cursor && (
-        <div
-          style={{
-            position: 'fixed',
-            ...getPreviewStyle(),
-            ...getBgPos(),
-            border: '2px solid rgba(255,255,255,0.2)',
-            borderRadius: 8,
-            pointerEvents: 'none',
-            zIndex: 10000,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-          }}
-        />
-      )}
     </div>
   );
 }
