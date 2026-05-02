@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 
-const THRESHOLD = 120;
+const THRESHOLD = 120;       // Distance nécessaire pour déclencher le refresh
+const MIN_PULL_START = 50;   // Mouvement minimum avant d'activer le pull (évite les faux déclenchements)
+const MAX_ANGLE = 35;        // Angle max en degrés par rapport à vertical (évite les glissements horizontaux)
 
 export default function PullToRefresh({ children }) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const startYRef = useRef(null);
+  const startXRef = useRef(null);
   const isPullingRef = useRef(false);
   const pullDistanceRef = useRef(0);
   const isRefreshingRef = useRef(false);
@@ -31,48 +34,61 @@ export default function PullToRefresh({ children }) {
     };
 
     const onTouchStart = (e) => {
-      // Only allow pull-to-refresh if scroll container is at very top AND not inside a scrollable child
-      if (el.scrollTop <= 0 && !isRefreshingRef.current && !isInsideScrollableChild(e.target)) {
-        startYRef.current = e.touches[0].clientY;
-        isPullingRef.current = false; // Don't start pull yet, wait for significant downward movement
-      } else {
+      // Strict : le container doit être exactement à 0 ET pas en train de refresh
+      if (el.scrollTop !== 0 || isRefreshingRef.current || isInsideScrollableChild(e.target)) {
         startYRef.current = null;
+        startXRef.current = null;
         isPullingRef.current = false;
+        return;
       }
+      startYRef.current = e.touches[0].clientY;
+      startXRef.current = e.touches[0].clientX;
+      isPullingRef.current = false;
     };
-
-    const MIN_PULL_START = 15; // Minimum px before activating pull mode
 
     const onTouchMove = (e) => {
       if (startYRef.current === null) return;
 
-      // If container scrolled down, cancel everything
+      // Si l'utilisateur a scrollé entre temps, annuler
       if (el.scrollTop > 0) {
         isPullingRef.current = false;
         pullDistanceRef.current = 0;
         setPullDistance(0);
         startYRef.current = null;
+        startXRef.current = null;
         return;
       }
 
       const dy = e.touches[0].clientY - startYRef.current;
+      const dx = e.touches[0].clientX - startXRef.current;
 
+      // Mouvement vers le haut → annuler
       if (dy <= 0) {
-        // Scrolling up — cancel pull
-        isPullingRef.current = false;
-        pullDistanceRef.current = 0;
-        setPullDistance(0);
+        if (isPullingRef.current) {
+          isPullingRef.current = false;
+          pullDistanceRef.current = 0;
+          setPullDistance(0);
+        }
         return;
       }
 
-      // Activate pull only after intentional downward gesture
+      // Vérifier l'angle du geste : si trop horizontal, ne pas activer
+      const angle = Math.abs(Math.atan2(Math.abs(dx), dy) * (180 / Math.PI));
+      if (!isPullingRef.current && angle > MAX_ANGLE) {
+        // Geste trop horizontal → annuler complètement
+        startYRef.current = null;
+        startXRef.current = null;
+        return;
+      }
+
+      // Activer le pull seulement après un geste intentionnel vers le bas
       if (!isPullingRef.current && dy > MIN_PULL_START) {
         isPullingRef.current = true;
       }
 
       if (isPullingRef.current) {
         e.preventDefault();
-        const dist = Math.min(dy * 0.4, THRESHOLD + 20);
+        const dist = Math.min(dy * 0.35, THRESHOLD + 20);
         pullDistanceRef.current = dist;
         setPullDistance(dist);
       }
@@ -93,6 +109,7 @@ export default function PullToRefresh({ children }) {
       }
 
       startYRef.current = null;
+      startXRef.current = null;
       isPullingRef.current = false;
       pullDistanceRef.current = 0;
     };
@@ -108,7 +125,7 @@ export default function PullToRefresh({ children }) {
       el.removeEventListener('touchend', onTouchEnd);
       el.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, []); // Empty deps — use refs to avoid stale closures
+  }, []);
 
   const progress = Math.min(pullDistance / THRESHOLD, 1);
   const triggered = pullDistance >= THRESHOLD;
