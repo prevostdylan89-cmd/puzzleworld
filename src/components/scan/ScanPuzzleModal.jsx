@@ -322,9 +322,6 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       return;
     }
 
-    // Consommer un crédit avant l'appel API
-    await consumeCredit();
-
     try {
       let response;
       try {
@@ -365,7 +362,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         return;
       }
 
-      // ÉTAPE 4 : Puzzle trouvé → pas de message ici, il sera affiché après validation
+      // ÉTAPE 4 : Puzzle trouvé → consommer un crédit maintenant seulement
+      await consumeCredit();
+
       const puzzleInfo = {
         catalog_id: result.catalog_id,
         name: result.title,

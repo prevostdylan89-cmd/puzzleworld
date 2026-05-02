@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 
-const DAILY_LIMIT = 5;
+const DAILY_LIMIT = 10;
 
 export function useScanCredits(user) {
   const [creditsUsed, setCreditsUsed] = useState(0);
