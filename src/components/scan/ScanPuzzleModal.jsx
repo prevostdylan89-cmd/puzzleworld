@@ -286,17 +286,32 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
       }
     }
 
-    // ÉTAPE 2 : Vérification dans la base catalogue (avant d'appeler Rainforest)
+    // ÉTAPE 2 : Vérification dans la base catalogue par EAN ET par ASIN (avant d'appeler Rainforest)
     try {
-      const existingInCatalog = await base44.entities.PuzzleCatalog.filter({ ean: code });
-      if (existingInCatalog.length > 0) {
-        const catalogPuzzle = existingInCatalog[0];
-        const isCommunity = catalogPuzzle.status === 'active';
+      // Chercher par EAN d'abord, puis par ASIN si rien trouvé
+      let catalogResults = await base44.entities.PuzzleCatalog.filter({ ean: code });
+      if (catalogResults.length === 0) {
+        // Le code scanné pourrait être un ASIN (10 caractères alphanumériques commençant par B)
+        catalogResults = await base44.entities.PuzzleCatalog.filter({ asin: code });
+      }
+
+      if (catalogResults.length > 0) {
+        const catalogPuzzle = catalogResults[0];
+
+        // Si le puzzle est en attente de validation, on stoppe ICI sans appel API
+        if (catalogPuzzle.status === 'pending') {
+          setScanMessage({
+            type: 'pending',
+            text: '🕐 Ce puzzle est déjà dans notre base de données, mais il est en cours de validation par notre équipe. Nous faisons le maximum pour le mettre en ligne rapidement !'
+          });
+          setLoading(false);
+          return; // ← Pas d'appel API Rainforest
+        }
+
+        // Puzzle actif dans le catalogue communautaire
         setScanMessage({
           type: 'community',
-          text: isCommunity
-            ? '✨ Super ! Ce puzzle fait déjà partie de la collection communautaire.'
-            : '🕐 Ce puzzle est déjà connu mais en attente de validation par notre équipe.'
+          text: '✨ Super ! Ce puzzle fait déjà partie de la collection communautaire.'
         });
         setExistingPuzzle(catalogPuzzle);
         const puzzleInfo = {
@@ -617,6 +632,8 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                 ? 'bg-green-500/10 border-green-500/30 text-green-300'
                 : scanMessage.type === 'limit'
                 ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
+                : scanMessage.type === 'pending'
+                ? 'bg-blue-500/10 border-blue-500/30 text-blue-300'
                 : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
             }`}
           >
@@ -642,7 +659,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           </div>
         )}
 
-        {!puzzleData && !showSuccess && (
+        {!puzzleData && !showSuccess && scanMessage?.type !== 'pending' && (
           <>
             {isMobile ? (
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -856,7 +873,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
             )}
 
           {/* Encadré puzzle personnalisé */}
-          {!puzzleData && !showSuccess && !skipCollectionAdd && (
+          {!puzzleData && !showSuccess && !skipCollectionAdd && scanMessage?.type !== 'pending' && (
             <div className="mt-4">
               <button
                 type="button"
