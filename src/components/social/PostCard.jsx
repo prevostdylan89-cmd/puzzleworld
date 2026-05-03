@@ -17,34 +17,7 @@ import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable
 import UserProfileDialog from './UserProfileDialog';
 import UserBadgeDisplay from './UserBadgeDisplay';
 import AuthorLevelBadge from './AuthorLevelBadge';
-
-function PostAuthorAvatar({ authorEmail, authorInitials }) {
-  const [profilePhoto, setProfilePhoto] = useState(null);
-
-  useEffect(() => {
-    if (!authorEmail) return;
-    
-    base44.entities.UserProfile.filter({ email: authorEmail })
-      .then(profiles => {
-        if (profiles.length > 0 && profiles[0].profile_photo) {
-          setProfilePhoto(profiles[0].profile_photo);
-        }
-      })
-      .catch(() => {});
-  }, [authorEmail]);
-
-  return (
-    <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 flex-shrink-0">
-      {profilePhoto ? (
-        <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-white text-sm font-medium">
-          {authorInitials}
-        </div>
-      )}
-    </div>
-  );
-}
+import PostAuthorAvatar from './PostAuthorAvatar';
 
 export default function PostCard({ post, user, isFeatured = false }) {
   const { t } = useLanguage();
