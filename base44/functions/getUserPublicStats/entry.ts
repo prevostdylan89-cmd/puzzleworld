@@ -31,12 +31,13 @@ Deno.serve(async (req) => {
     }
 
     // Use service role to bypass RLS and read other users' public stats
-    const [completedPuzzles, achievements, catalogItems, profiles, wishlistItems] = await Promise.all([
+    const [completedPuzzles, achievements, catalogItems, profiles, wishlistItems, users] = await Promise.all([
       base44.asServiceRole.entities.UserPuzzle.filter({ created_by: targetEmail, status: 'done' }),
       base44.asServiceRole.entities.Achievement.filter({ created_by: targetEmail }),
       base44.asServiceRole.entities.PuzzleCatalog.filter({ created_by: targetEmail }),
       base44.asServiceRole.entities.UserProfile.filter({ email: targetEmail }),
       base44.asServiceRole.entities.UserPuzzle.filter({ created_by: targetEmail, status: 'wishlist' }),
+      base44.asServiceRole.entities.User.filter({ email: targetEmail }),
     ]);
 
     const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
@@ -44,12 +45,19 @@ Deno.serve(async (req) => {
     const levelData = getLevelData(scanCount);
 
     const profile = profiles.find(p => p.email === targetEmail);
+    const userRecord = users.find(u => u.email === targetEmail);
+
+    // Prioritize UserProfile data, then fall back to User entity
+    const profilePhoto = profile?.profile_photo || userRecord?.profile_photo || null;
+    const displayName = profile?.display_name || profile?.full_name || userRecord?.full_name || userRecord?.username || targetEmail.split('@')[0] || null;
+    const badgeIcon = profile?.current_badge_icon || userRecord?.current_badge_icon || null;
+    const friendCode = profile?.friend_code || userRecord?.friend_code || null;
 
     return Response.json({
-      displayName: profile?.display_name || profile?.full_name || targetEmail.split('@')[0] || null,
-      profilePhoto: profile?.profile_photo || null,
-      badgeIcon: profile?.current_badge_icon || null,
-      friendCode: profile?.friend_code || null,
+      displayName,
+      profilePhoto,
+      badgeIcon,
+      friendCode,
       completed: completedPuzzles.length,
       achievements: achievements.length,
       totalPieces,
