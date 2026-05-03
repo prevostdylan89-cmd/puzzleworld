@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import WishlistPuzzleModal from '@/components/profile/WishlistPuzzleModal';
 import { motion } from 'framer-motion';
 import { X, Calendar, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -398,6 +399,7 @@ export function WishlistModal({ open, onClose, user }) {
   const { t } = useLanguage();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     if (open && user) {
@@ -417,6 +419,7 @@ export function WishlistModal({ open, onClose, user }) {
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -436,7 +439,11 @@ export function WishlistModal({ open, onClose, user }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {wishlist.map((puzzle) => (
-              <div key={puzzle.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-pink-500/30 transition-all">
+              <div
+                key={puzzle.id}
+                onClick={() => setSelectedItem(puzzle)}
+                className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-pink-500/30 transition-all cursor-pointer hover:bg-white/10"
+              >
                 <div className="flex gap-3">
                   {puzzle.image_url ? (
                     <img src={puzzle.image_url} alt={puzzle.puzzle_name} className="w-20 h-20 rounded-lg object-cover" />
@@ -457,5 +464,14 @@ export function WishlistModal({ open, onClose, user }) {
         )}
       </DialogContent>
     </Dialog>
+
+    {selectedItem && (
+      <WishlistPuzzleModal
+        open={!!selectedItem}
+        onClose={() => setSelectedItem(null)}
+        item={selectedItem}
+      />
+    )}
+    </>
   );
 }
