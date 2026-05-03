@@ -71,20 +71,51 @@ export default function WishlistSection({ user }) {
       ]);
 
       // Normalize UserPuzzle items — no extra catalog fetch needed, data is already embedded
-      const normalizedUserPuzzles = userPuzzleWishlist.map((p) => ({
-        id: p.id,
-        puzzle_name: p.puzzle_name,
-        puzzle_brand: p.puzzle_brand,
-        puzzle_pieces: p.puzzle_pieces,
-        image_url: p.image_url,
-        notes: p.notes || '',
-        priority: 'medium',
-        created_date: p.created_date,
-        _source: 'user_puzzle',
-        _raw: p,
-        // Build a minimal catalogData for Amazon link if we have a reference
-        catalogData: p.puzzle_reference ? { asin: p.puzzle_reference } : null,
-      }));
+      // Fetch catalog data for puzzles that have a catalog_puzzle_id
+      const catalogIds = userPuzzleWishlist
+        .map(p => p.catalog_puzzle_id)
+        .filter(Boolean);
+      
+      let catalogMap = {};
+      if (catalogIds.length > 0) {
+        try {
+          const catalogEntries = await Promise.all(
+            catalogIds.map(id => base44.entities.PuzzleCatalog.filter({ id }))
+          );
+          catalogEntries.forEach(entries => {
+            if (entries.length > 0) catalogMap[entries[0].id] = entries[0];
+          });
+        } catch (e) {}
+      }
+
+      const normalizedUserPuzzles = userPuzzleWishlist.map((p) => {
+        const catalog = p.catalog_puzzle_id ? catalogMap[p.catalog_puzzle_id] : null;
+        return {
+          id: p.id,
+          puzzle_name: p.puzzle_name,
+          puzzle_brand: p.puzzle_brand,
+          puzzle_pieces: p.puzzle_pieces,
+          image_url: p.image_url,
+          notes: p.notes || '',
+          priority: 'medium',
+          created_date: p.created_date,
+          _source: 'user_puzzle',
+          _raw: p,
+          // Use full catalog data if available, otherwise build minimal from puzzle reference
+          catalogData: catalog || (p.puzzle_reference ? {
+            title: p.puzzle_name,
+            brand: p.puzzle_brand,
+            piece_count: p.puzzle_pieces,
+            image_hd: p.image_url,
+            asin: p.puzzle_reference,
+          } : {
+            title: p.puzzle_name,
+            brand: p.puzzle_brand,
+            piece_count: p.puzzle_pieces,
+            image_hd: p.image_url,
+          }),
+        };
+      });
 
       // Legacy Wishlist items
       const normalizedOld = oldWishlistItems.map((item) => ({
@@ -279,7 +310,7 @@ export default function WishlistSection({ user }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               className={`bg-white/[0.03] backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer relative ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/40' : 'border-white/[0.06]'}`}
-              onClick={() => isMultiSelect ? toggleSelect(item.id) : (item.catalogData && setSelectedPuzzle(item.catalogData))}
+              onClick={() => isMultiSelect ? toggleSelect(item.id) : setSelectedPuzzle(item.catalogData || { title: item.puzzle_name, brand: item.puzzle_brand, piece_count: item.puzzle_pieces, image_hd: item.image_url })}
             >
               {/* Checkbox multi-select */}
               {isMultiSelect && (
