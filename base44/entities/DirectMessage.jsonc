@@ -1,0 +1,69 @@
+{
+  "name": "DirectMessage",
+  "type": "object",
+  "properties": {
+    "sender_email": {
+      "type": "string",
+      "description": "Email de l'exp\u00e9diteur"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Nom de l'exp\u00e9diteur"
+    },
+    "receiver_email": {
+      "type": "string",
+      "description": "Email du destinataire"
+    },
+    "receiver_name": {
+      "type": "string",
+      "description": "Nom du destinataire"
+    },
+    "message": {
+      "type": "string",
+      "description": "Contenu du message"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Message lu ou non"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "ID unique pour la conversation (emails tri\u00e9s alphab\u00e9tiquement)"
+    }
+  },
+  "required": [
+    "sender_email",
+    "receiver_email",
+    "message",
+    "conversation_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "data.receiver_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.receiver_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
