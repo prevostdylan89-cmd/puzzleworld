@@ -20,22 +20,17 @@ import AuthorLevelBadge from './AuthorLevelBadge';
 
 function PostAuthorAvatar({ authorEmail, authorInitials }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authorEmail) {
-      setLoading(false);
-      return;
-    }
+    if (!authorEmail) return;
     
     base44.entities.UserProfile.filter({ email: authorEmail })
       .then(profiles => {
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
         }
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {});
   }, [authorEmail]);
 
   return (
