@@ -16,6 +16,7 @@ import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
 import UserProfileDialog from './UserProfileDialog';
 import UserBadgeDisplay from './UserBadgeDisplay';
+import AuthorLevelBadge from './AuthorLevelBadge';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -528,8 +529,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
             <span className="font-medium text-white text-sm">
               {authorProfile?.display_name || authorProfile?.full_name || post.author_name || post.created_by?.split('@')[0] || ''}
             </span>
-            {post.created_by && <UserBadgeDisplay userEmail={post.created_by} />}
-            <UserLevelTag userEmail={post.created_by} />
+            {post.created_by && <AuthorLevelBadge userEmail={post.created_by} />}
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                 <Puzzle className="w-3 h-3 mr-1" />
