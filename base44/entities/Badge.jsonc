@@ -1,0 +1,62 @@
+{
+  "name": "Badge",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Badge name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Badge description"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon identifier"
+    },
+    "color": {
+      "type": "string",
+      "description": "Badge color"
+    },
+    "requirement_type": {
+      "type": "string",
+      "enum": [
+        "puzzles_completed",
+        "pieces_completed",
+        "speed_record"
+      ],
+      "description": "Type of requirement"
+    },
+    "requirement_value": {
+      "type": "number",
+      "description": "Value needed to unlock"
+    },
+    "level": {
+      "type": "number",
+      "description": "Badge level (1-6)"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "level"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
