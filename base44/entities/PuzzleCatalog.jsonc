@@ -105,11 +105,9 @@
   ],
   "rls": {
     "create": {},
-    "read": {
+    "read": {},
+    "update": {
       "$or": [
-        {
-          "data.status": "active"
-        },
         {
           "created_by": "{{user.email}}"
         },
@@ -120,15 +118,17 @@
         }
       ]
     },
-    "update": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
