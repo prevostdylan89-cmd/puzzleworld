@@ -75,20 +75,9 @@ export default function Profile() {
   // Load scanned count (puzzles added to community catalog by this user)
   useEffect(() => {
     if (!user) return;
-    
-    // Initial load
     base44.entities.PuzzleCatalog.filter({ created_by: user.email })
       .then(items => setScannedCount(items.length))
       .catch(() => {});
-
-    // Real-time subscription to PuzzleCatalog changes
-    const unsubscribe = base44.entities.PuzzleCatalog.subscribe((event) => {
-      base44.entities.PuzzleCatalog.filter({ created_by: user.email })
-        .then(items => setScannedCount(items.length))
-        .catch(() => {});
-    });
-
-    return () => unsubscribe();
   }, [user]);
 
   // Abonnement temps réel aux changements de UserPuzzle et Wishlist
