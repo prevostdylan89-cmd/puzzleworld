@@ -1,0 +1,31 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "User role"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Pseudo choisi par l'utilisateur lors de l'inscription"
+    },
+    "profile_photo": {
+      "type": "string",
+      "description": "URL de la photo de profil"
+    },
+    "cover_photo": {
+      "type": "string",
+      "description": "URL de la photo de couverture"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Biographie de l'utilisateur"
+    }
+  }
+}
