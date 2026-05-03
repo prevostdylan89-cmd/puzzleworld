@@ -19,21 +19,34 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
   useEffect(() => {
     if (!comment.created_by) return;
     
-    // Fetch profile photo from UserProfile entity directly
-    base44.entities.UserProfile.filter({ email: comment.created_by })
-      .then(profiles => {
+    // Fetch profile photo by display_name first, then fallback to email
+    const fetchPhoto = async () => {
+      try {
+        // Search by display_name (the pseudo)
+        let profiles = await base44.entities.UserProfile.filter({ display_name: comment.author_name });
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
+          if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
+          return;
+        }
+        // Fallback: search by email
+        profiles = await base44.entities.UserProfile.filter({ email: comment.created_by });
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
           if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
         }
-      })
-      .catch(() => {});
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+      }
+    };
+
+    fetchPhoto();
     
     // Check admin status
     base44.entities.User.filter({ email: comment.created_by })
       .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
       .catch(() => {});
-  }, [comment.created_by]);
+  }, [comment.created_by, comment.author_name]);
 
   return (
     <motion.div
