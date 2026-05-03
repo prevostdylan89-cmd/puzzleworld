@@ -16,7 +16,7 @@ import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
 import UserProfileDialog from './UserProfileDialog';
 
-function PostAuthorAvatar({ authorEmail, authorInitials, onClick, onProfileLoaded }) {
+function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
@@ -37,17 +37,15 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick, onProfileLoade
   }, [authorEmail]);
 
   return (
-    <button onClick={onClick}>
-      <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 cursor-pointer hover:ring-orange-500/40 transition-all">
-        {profilePhoto ? (
-          <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
-        ) : (
-          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
-            {authorInitials}
-          </AvatarFallback>
-        )}
-      </Avatar>
-    </button>
+    <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
+      {profilePhoto ? (
+        <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
+      ) : (
+        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+          {authorInitials}
+        </AvatarFallback>
+      )}
+    </Avatar>
   );
 }
 
@@ -496,7 +494,6 @@ export default function PostCard({ post, user, isFeatured = false }) {
         <PostAuthorAvatar
           authorEmail={post.created_by}
           authorInitials={authorInitials}
-          onClick={() => setShowAuthorProfile(true)}
           onProfileLoaded={setAuthorProfile}
         />
 
@@ -722,14 +719,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         />
       )}
 
-      {/* Author Profile Dialog */}
-      {showAuthorProfile && (
-        <UserProfileDialog
-          userEmail={post.created_by}
-          authorName={authorProfile?.display_name || authorProfile?.full_name || post.author_name}
-          onClose={() => setShowAuthorProfile(false)}
-        />
-      )}
+
     </motion.div>
   );
 }
