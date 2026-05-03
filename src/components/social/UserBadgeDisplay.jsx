@@ -19,8 +19,8 @@ export default function UserBadgeDisplay({ userEmail }) {
   if (!badge) return null;
 
   return (
-    <span className="text-[11px] font-semibold text-orange-400">
-      {badge.icon} {badge.label}
+    <span title={badge.label} className="text-base leading-none">
+      {badge.icon}
     </span>
   );
 }
