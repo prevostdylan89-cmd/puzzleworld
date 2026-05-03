@@ -33,6 +33,7 @@ import { CompletedPuzzlesModal, AchievementsModal, WishlistModal, CollectionModa
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
+import LevelsProgressModal from '@/components/profile/LevelsProgressModal';
 import CollectionImportSection from '@/components/profile/CollectionImportSection';
 import BugReportModal from '@/components/shared/BugReportButton';
 import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
@@ -65,6 +66,7 @@ export default function Profile() {
   const [showBugReport, setShowBugReport] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [currentBadge, setCurrentBadge] = useState(null);
+  const [showLevelsModal, setShowLevelsModal] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -404,11 +406,12 @@ export default function Profile() {
           </motion.div>
 
           {/* Level Progress */}
-           <motion.div
+           <motion.button
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.4 }}
-             className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
+             onClick={() => setShowLevelsModal(true)}
+             className="w-full bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6 hover:border-orange-500/30 transition-colors text-left"
            >
              <div className="flex items-center justify-between mb-3">
                <div className="flex items-center gap-3">
@@ -436,7 +439,7 @@ export default function Profile() {
                value={progressValue}
                className="h-2.5 bg-white/10"
              />
-           </motion.div>
+           </motion.button>
         </div>
       </div>
 
@@ -541,6 +544,7 @@ export default function Profile() {
       <CollectionModal open={showCollectionModal} onClose={() => setShowCollectionModal(false)} user={user} />
       <BadgesModal open={showBadgesModal} onClose={() => setShowBadgesModal(false)} user={user} />
       <BugReportModal open={showBugReport} onClose={() => setShowBugReport(false)} />
+      <LevelsProgressModal open={showLevelsModal} onClose={() => setShowLevelsModal(false)} currentScans={newScansCount} currentLevel={currentLevel} />
     </div>
   );
 }
