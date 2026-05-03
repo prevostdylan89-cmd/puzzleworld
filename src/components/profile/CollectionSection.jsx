@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag, Zap } from 'lucide-react';
+import AddSpeedRecordInline from '@/components/profile/AddSpeedRecordInline';
 import StarRating from '@/components/shared/StarRating';
 import UserCategoriesManager from '@/components/profile/UserCategoriesManager';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -534,6 +535,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [showSpeedRecord, setShowSpeedRecord] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleCompletionPhotoUpload = async (e) => {
@@ -607,6 +609,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
   return (
     <>
     <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} onUpdate={onUpdate} categories={categories} />
+    <AddSpeedRecordInline open={showSpeedRecord} onClose={() => setShowSpeedRecord(false)} puzzle={puzzle} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -646,6 +649,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
               </DropdownMenuItem>
             ))}
             {puzzle.status === 'done' && (
+              <>
               <DropdownMenuItem
                 onClick={() => fileInputRef.current?.click()}
                 className="text-orange-400 cursor-pointer hover:bg-white/10"
@@ -654,6 +658,14 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
                 <Camera className="w-4 h-4 mr-2" />
                 {isUploadingPhoto ? 'Upload...' : puzzle.progress_photo ? t('changeMyPhoto') : t('addMyPhotoBtn')}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowSpeedRecord(true)}
+                className="text-yellow-400 cursor-pointer hover:bg-white/10"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Ajouter un record ⚡
+              </DropdownMenuItem>
+              </>
             )}
             <DropdownMenuItem
               onClick={() => onEnterMultiSelect()}
