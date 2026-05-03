@@ -20,61 +20,26 @@ import AuthorLevelBadge from './AuthorLevelBadge';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authorEmail) {
-      setLoading(false);
-      return;
-    }
+    if (!authorEmail) return;
     
-    setLoading(true);
-    
-    // Fetch from both User and UserProfile entities
-    Promise.all([
-      base44.entities.User.filter({ email: authorEmail }),
-      base44.entities.UserProfile.filter({ email: authorEmail })
-    ])
-      .then(([users, profiles]) => {
-        const user = users.length > 0 ? users[0] : null;
-        const profile = profiles.length > 0 ? profiles[0] : null;
-        
-        // Photo is at root level of profile, not in data
-        const photo = user?.data?.profile_photo || profile?.profile_photo;
-        const displayName = profile?.data?.display_name || user?.data?.display_name;
-        
-        console.log('PostAuthorAvatar debug:', { authorEmail, photo, profile, user });
-        
-        if (photo) {
-          setProfilePhoto(photo);
+    // Fetch profile photo from UserProfile entity directly (same as CommentSection)
+    base44.entities.UserProfile.filter({ email: authorEmail })
+      .then(profiles => {
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
+          if (profiles[0].display_name) {
+            onProfileLoaded?.({
+              display_name: profiles[0].display_name,
+              full_name: profiles[0].full_name,
+              profile_photo: profiles[0].profile_photo,
+            });
+          }
         }
-        
-        onProfileLoaded?.({
-          display_name: displayName,
-          full_name: profile?.data?.full_name || user?.full_name,
-          profile_photo: photo,
-        });
       })
-      .catch(err => console.error('Photo load failed for:', authorEmail, err))
-      .finally(() => setLoading(false));
-    
-    // Real-time subscription for updates
-    const unsubscribe = base44.entities.User.subscribe((event) => {
-      if (event.data?.email === authorEmail) {
-        const photo = event.data?.profile_photo;
-        if (photo) {
-          setProfilePhoto(photo);
-          onProfileLoaded?.({
-            display_name: event.data.display_name,
-            full_name: event.data.full_name,
-            profile_photo: photo,
-          });
-        }
-      }
-    });
-    
-    return () => unsubscribe();
-  }, [authorEmail]);
+      .catch(() => {});
+  }, [authorEmail, onProfileLoaded]);
 
   return (
     <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
