@@ -125,8 +125,8 @@ export default function Profile() {
       // Sync user profile to UserProfile entity
       await base44.functions.invoke('syncUserProfile', {});
       
-      // Sync user level based on scanned puzzles
-      await base44.functions.invoke('syncUserLevels', { userEmail: currentUser.email });
+      // Update user level based on scanned puzzles
+      await base44.functions.invoke('updateUserLevelFromScans', { userEmail: currentUser.email });
       
       // Load stats
       const [completedPuzzles, userAchievements, oldWishlist, userPuzzleWishlist, followers, following, allUserPuzzles] = await Promise.all([
@@ -162,8 +162,19 @@ export default function Profile() {
 
       setAchievements(userAchievements);
       
-      // Load and initialize badges
-      await initializeBadges(currentUser, completedPuzzles.length);
+      // Load current badge from the database
+      const userBadges = await base44.entities.UserBadge.filter({
+        created_by: currentUser.email,
+        is_active: true,
+      });
+      
+      if (userBadges.length > 0) {
+        const activeBadge = userBadges[0];
+        const badges = await base44.entities.Badge.filter({ name: activeBadge.badge_name });
+        if (badges.length > 0) {
+          setCurrentBadge(badges[0]);
+        }
+      }
     } catch (error) {
       console.log('User not logged in');
     } finally {
@@ -171,71 +182,7 @@ export default function Profile() {
     }
   };
 
-  const initializeBadges = async (currentUser, completedCount) => {
-    try {
-      // Load all system badges
-      let allBadges = await base44.entities.Badge.list();
-      
-      // If no badges exist, create default ones
-      if (allBadges.length === 0) {
-        const defaultBadges = [
-          { name: 'Novice', description: 'Bienvenue ! Commencez votre aventure puzzle', icon: '🧩', color: '#94a3b8', requirement_type: 'puzzles_completed', requirement_value: 0, level: 1 },
-          { name: 'Amateur', description: 'Complétez 5 puzzles', icon: '🎯', color: '#60a5fa', requirement_type: 'puzzles_completed', requirement_value: 5, level: 2 },
-          { name: 'Passionné', description: 'Complétez 15 puzzles', icon: '⭐', color: '#fbbf24', requirement_type: 'puzzles_completed', requirement_value: 15, level: 3 },
-          { name: 'Expert', description: 'Complétez 30 puzzles', icon: '💎', color: '#a78bfa', requirement_type: 'puzzles_completed', requirement_value: 30, level: 4 },
-          { name: 'Maître', description: 'Complétez 50 puzzles', icon: '👑', color: '#f97316', requirement_type: 'puzzles_completed', requirement_value: 50, level: 5 },
-          { name: 'Légende', description: 'Complétez 100 puzzles', icon: '🏆', color: '#ef4444', requirement_type: 'puzzles_completed', requirement_value: 100, level: 6 }
-        ];
 
-        for (const badge of defaultBadges) {
-          await base44.entities.Badge.create(badge);
-        }
-        
-        allBadges = await base44.entities.Badge.list();
-      }
-
-      // Find which badge user should have based on completed puzzles
-      const sortedBadges = allBadges
-        .filter(b => b.requirement_type === 'puzzles_completed')
-        .sort((a, b) => b.requirement_value - a.requirement_value);
-
-      const earnedBadge = sortedBadges.find(b => completedCount >= b.requirement_value) || sortedBadges[sortedBadges.length - 1];
-
-      if (earnedBadge) {
-        // Check if user already has this badge
-        const userBadges = await base44.entities.UserBadge.filter({
-          created_by: currentUser.email
-        });
-
-        const hasBadge = userBadges.some(ub => ub.badge_id === earnedBadge.id);
-
-        if (!hasBadge) {
-          // Deactivate all other badges
-          for (const ub of userBadges) {
-            await base44.entities.UserBadge.update(ub.id, { is_active: false });
-          }
-          
-          // Create and activate the earned badge
-          await base44.entities.UserBadge.create({
-            badge_id: earnedBadge.id,
-            badge_name: earnedBadge.name,
-            is_active: true
-          });
-        } else {
-          // Make sure the correct badge is active
-          for (const ub of userBadges) {
-            await base44.entities.UserBadge.update(ub.id, {
-              is_active: ub.badge_id === earnedBadge.id
-            });
-          }
-        }
-
-        setCurrentBadge(earnedBadge);
-      }
-    } catch (error) {
-      console.error('Error initializing badges:', error);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -278,33 +225,36 @@ export default function Profile() {
     ? formatDistanceToNow(new Date(user.created_date), { addSuffix: true, locale: language === 'fr' ? fr : enUS })
     : 'Recently';
 
-  const LEVELS = [
-    { level: 1,  title: 'Apprenti Curieux',       threshold: 0,   emoji: '🌱' },
-    { level: 2,  title: 'Trieur de Bordures',      threshold: 5,   emoji: '🔲' },
-    { level: 3,  title: 'Chercheur de Pièces',     threshold: 15,  emoji: '🔍' },
-    { level: 4,  title: 'Assembleur du Dimanche',  threshold: 30,  emoji: '🧩' },
-    { level: 5,  title: 'Expert des Couleurs',     threshold: 60,  emoji: '🎨' },
-    { level: 6,  title: 'Déchiffreur de Motifs',   threshold: 100, emoji: '🔓' },
-    { level: 7,  title: 'Maître de la Forme',      threshold: 150, emoji: '⚡' },
-    { level: 8,  title: 'Grand Collectionneur',    threshold: 250, emoji: '💎' },
-    { level: 9,  title: 'Légende du Puzzle',       threshold: 400, emoji: '🏆' },
-    { level: 10, title: 'Le Grand Architecte',     threshold: 600, emoji: '👑' },
+  // Badge-based levels with scan thresholds
+  const BADGE_LEVELS = [
+    { level: 1, badgeName: 'Novice', threshold: 1, nextThreshold: 10 },
+    { level: 2, badgeName: 'Débutant', threshold: 10, nextThreshold: 20 },
+    { level: 3, badgeName: 'Apprenti', threshold: 20, nextThreshold: 35 },
+    { level: 4, badgeName: 'Passionné', threshold: 35, nextThreshold: 50 },
+    { level: 5, badgeName: 'Expert', threshold: 50, nextThreshold: 75 },
+    { level: 6, badgeName: 'Maître', threshold: 75, nextThreshold: 100 },
+    { level: 7, badgeName: 'Champion', threshold: 100, nextThreshold: 150 },
+    { level: 8, badgeName: 'Légende', threshold: 150, nextThreshold: 250 },
+    { level: 9, badgeName: 'Mythique', threshold: 250, nextThreshold: 400 },
+    { level: 10, badgeName: 'Divin', threshold: 400, nextThreshold: null },
   ];
 
-  const completedCount = scannedCount;
-  let currentLevelData = LEVELS[0];
-  let nextLevelData = LEVELS[1];
-  for (let i = 0; i < LEVELS.length; i++) {
-    if (completedCount >= LEVELS[i].threshold) {
-      currentLevelData = LEVELS[i];
-      nextLevelData = LEVELS[i + 1] || null;
+  const newScansCount = scannedCount;
+  let currentLevel = BADGE_LEVELS[0];
+  let nextLevel = BADGE_LEVELS[1];
+  
+  for (let i = 0; i < BADGE_LEVELS.length; i++) {
+    if (newScansCount >= BADGE_LEVELS[i].threshold) {
+      currentLevel = BADGE_LEVELS[i];
+      nextLevel = BADGE_LEVELS[i + 1] || null;
     }
   }
-  const isMaxLevel = !nextLevelData;
-  const progressMin = currentLevelData.threshold;
-  const progressMax = nextLevelData ? nextLevelData.threshold : currentLevelData.threshold;
-  const progressValue = isMaxLevel ? 100 : Math.round(((completedCount - progressMin) / (progressMax - progressMin)) * 100);
-  const puzzlesRemaining = nextLevelData ? nextLevelData.threshold - completedCount : 0;
+  
+  const isMaxLevel = !nextLevel;
+  const progressMin = currentLevel.threshold;
+  const progressMax = nextLevel ? nextLevel.threshold : currentLevel.threshold;
+  const progressValue = isMaxLevel ? 100 : Math.round(((newScansCount - progressMin) / (progressMax - progressMin)) * 100);
+  const scansRemaining = nextLevel ? nextLevel.threshold - newScansCount : 0;
 
   const statItems = [
     { label: t('completed'), value: stats.completed, icon: Puzzle, onClick: () => setShowCompletedModal(true) },
@@ -454,39 +404,39 @@ export default function Profile() {
           </motion.div>
 
           {/* Level Progress */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{currentLevelData.emoji}</span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-orange-400 font-bold text-base">{t('level')} {currentLevelData.level}</span>
-                    <span className="text-white font-semibold text-base">{currentLevelData.title}</span>
-                  </div>
-                  {!isMaxLevel && (
-                    <p className="text-white/40 text-xs mt-0.5">
-                      {puzzlesRemaining} scan{puzzlesRemaining > 1 ? 's' : ''} avant {nextLevelData.emoji} {nextLevelData.title}
-                    </p>
-                  )}
-                  {isMaxLevel && (
-                    <p className="text-orange-400/70 text-xs mt-0.5">Niveau maximum atteint ! 🎉</p>
-                  )}
-                </div>
-              </div>
-              <span className="text-white/50 text-sm font-mono">
-                {completedCount} scan{completedCount > 1 ? 's' : ''} / {isMaxLevel ? completedCount : nextLevelData.threshold}
-              </span>
-            </div>
-            <Progress 
-              value={progressValue}
-              className="h-2.5 bg-white/10 mt-3"
-            />
-          </motion.div>
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.4 }}
+             className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-white/[0.06] rounded-2xl p-5 mt-6"
+           >
+             <div className="flex items-center justify-between mb-3">
+               <div className="flex items-center gap-3">
+                 <div className="text-3xl">{currentBadge?.icon || '🧩'}</div>
+                 <div>
+                   <div className="flex items-center gap-2">
+                     <span className="text-orange-400 font-bold text-base">{t('level')} {currentLevel.level}</span>
+                     <span className="text-white font-semibold text-base">{currentLevel.badgeName}</span>
+                   </div>
+                   {!isMaxLevel && (
+                     <p className="text-white/40 text-xs mt-0.5">
+                       {scansRemaining} scan{scansRemaining > 1 ? 's' : ''} pour {nextLevel.badgeName}
+                     </p>
+                   )}
+                   {isMaxLevel && (
+                     <p className="text-orange-400/70 text-xs mt-0.5">Niveau maximum atteint ! 🎉</p>
+                   )}
+                 </div>
+               </div>
+               <span className="text-white/50 text-sm font-mono">
+                 {newScansCount} scan{newScansCount > 1 ? 's' : ''} / {isMaxLevel ? newScansCount : nextLevel.threshold}
+               </span>
+             </div>
+             <Progress 
+               value={progressValue}
+               className="h-2.5 bg-white/10"
+             />
+           </motion.div>
         </div>
       </div>
 
