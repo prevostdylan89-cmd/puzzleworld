@@ -1,0 +1,41 @@
+{
+  "name": "BlogCategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom de la cat\u00e9gorie"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Ordre d'affichage sur la page blog"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Cat\u00e9gorie mise en avant (\u00e0 la une)"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
