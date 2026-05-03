@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart } from 'lucide-react';
+import { ExternalLink, Loader2, X, ShoppingCart, CheckCircle, Heart, Plus, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/components/LanguageContext';
@@ -42,6 +42,7 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [user, setUser] = useState(null);
   const [showImageZoom, setShowImageZoom] = useState(false);
+  const [addingStatus, setAddingStatus] = useState(null);
 
   useEffect(() => {
     if (open && puzzle) {
@@ -189,6 +190,29 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
     }
   };
 
+  const handleAddToCollection = async (status) => {
+    if (!user) {
+      toast.error(t('loginToAdd'));
+      return;
+    }
+    setAddingStatus(status);
+    try {
+      await base44.entities.UserPuzzle.create({
+        puzzle_name: puzzle.title,
+        puzzle_brand: puzzle.brand,
+        puzzle_pieces: puzzle.piece_count,
+        image_url: puzzle.image_hd,
+        puzzle_reference: puzzle.asin || puzzle.ean,
+        status,
+        end_date: status === 'done' ? new Date().toISOString().split('T')[0] : undefined,
+      });
+      toast.success(status === 'inbox' ? '📦 Ajouté dans "À faire" !' : '✅ Ajouté dans "Terminé" !');
+    } catch (error) {
+      toast.error(t('addError'));
+    }
+    setAddingStatus(null);
+  };
+
   if (!puzzle) return null;
 
   return (
@@ -267,6 +291,31 @@ export default function PuzzleDetailModal({ open, onClose, puzzle }) {
               )}
 
 
+
+              {/* Add to Collection Buttons */}
+              <div>
+                <p className="text-white/50 text-xs mb-2 font-medium uppercase tracking-wide">Ajouter à ma collection</p>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleAddToCollection('inbox')}
+                    disabled={addingStatus !== null}
+                    variant="outline"
+                    className="flex-1 h-11 border-2 border-blue-500/40 text-blue-300 hover:bg-blue-500/20 hover:border-blue-500"
+                  >
+                    {addingStatus === 'inbox' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                    À faire
+                  </Button>
+                  <Button
+                    onClick={() => handleAddToCollection('done')}
+                    disabled={addingStatus !== null}
+                    variant="outline"
+                    className="flex-1 h-11 border-2 border-green-500/40 text-green-300 hover:bg-green-500/20 hover:border-green-500"
+                  >
+                    {addingStatus === 'done' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trophy className="w-4 h-4 mr-2" />}
+                    Terminé
+                  </Button>
+                </div>
+              </div>
 
               {/* Like & Wishlist Buttons */}
               <div className="flex gap-3">
