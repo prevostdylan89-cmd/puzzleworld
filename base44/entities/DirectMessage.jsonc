@@ -39,36 +39,31 @@
     "conversation_id"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "$or": [
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
         },
         {
-          "receiver_email": "{{user.email}}"
+          "data.receiver_email": "{{user.email}}"
         }
       ]
     },
     "update": {
       "$or": [
         {
-          "sender_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "receiver_email": "{{user.email}}"
+          "data.receiver_email": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "sender_email": "{{user.email}}"
-        },
-        {
-          "receiver_email": "{{user.email}}"
-        }
-      ]
+      "created_by": "{{user.email}}"
     }
   }
 }
