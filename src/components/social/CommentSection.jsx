@@ -17,25 +17,15 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
   const [displayName, setDisplayName] = useState(comment.author_name);
 
   useEffect(() => {
-    if (!comment.created_by) return;
+    if (!comment.author_name) return;
     
-    // Fetch profile photo by email first (most reliable), then display_name
+    // Fetch profile photo by searching display_name with the pseudo (author_name)
     const fetchPhoto = async () => {
       try {
-        // Search by email first (most reliable identifier)
-        let profiles = await base44.entities.UserProfile.filter({ email: comment.created_by });
-        if (profiles.length > 0) {
-          if (profiles[0].profile_photo) {
-            setProfilePhoto(profiles[0].profile_photo);
-          }
-          if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
-          return;
-        }
-        // Fallback: search by display_name (the pseudo)
-        profiles = await base44.entities.UserProfile.filter({ display_name: comment.author_name });
+        // Search by display_name (the pseudo from the comment)
+        const profiles = await base44.entities.UserProfile.filter({ display_name: comment.author_name });
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
-          if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
         }
       } catch (error) {
         console.error('Error fetching profile photo:', error);
@@ -45,10 +35,12 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
     fetchPhoto();
     
     // Check admin status
-    base44.entities.User.filter({ email: comment.created_by })
-      .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
-      .catch(() => {});
-  }, [comment.created_by, comment.author_name]);
+    if (comment.created_by) {
+      base44.entities.User.filter({ email: comment.created_by })
+        .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
+        .catch(() => {});
+    }
+  }, [comment.author_name, comment.created_by]);
 
   return (
     <motion.div
