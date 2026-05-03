@@ -1,0 +1,63 @@
+{
+  "name": "SpeedRecord",
+  "type": "object",
+  "properties": {
+    "puzzle_id": {
+      "type": "string",
+      "description": "ID of the UserPuzzle"
+    },
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Puzzle image URL"
+    },
+    "category_tag": {
+      "type": "string",
+      "description": "Category of the puzzle"
+    },
+    "hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Hours part of the record"
+    },
+    "minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Minutes part of the record"
+    },
+    "seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Seconds part of the record"
+    },
+    "total_seconds": {
+      "type": "number",
+      "description": "Total time in seconds for sorting"
+    },
+    "record_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the record"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about this run"
+    }
+  },
+  "required": [
+    "puzzle_name",
+    "puzzle_pieces",
+    "total_seconds"
+  ]
+}

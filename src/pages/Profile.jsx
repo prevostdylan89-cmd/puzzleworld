@@ -36,7 +36,8 @@ import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
 import CollectionImportSection from '@/components/profile/CollectionImportSection';
 import BugReportModal from '@/components/shared/BugReportButton';
 import PersonalPuzzleSection from '@/components/profile/PersonalPuzzleSection';
-import { Crown, Camera, TriangleAlert } from 'lucide-react';
+import SpeedPuzzleSection from '@/components/profile/SpeedPuzzleSection';
+import { Crown, Camera, TriangleAlert, Zap } from 'lucide-react';
 
 
 
@@ -509,6 +510,14 @@ export default function Profile() {
               <span className="ml-1.5 hidden sm:inline">{t('personalTab')}</span>
               <span className="ml-1.5 sm:hidden">{t('personalTab')}</span>
             </TabsTrigger>
+            <TabsTrigger 
+              value="speed" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white flex-1 text-xs sm:text-sm"
+            >
+              <Zap className="w-4 h-4 shrink-0" />
+              <span className="ml-1.5 hidden sm:inline">Speed</span>
+              <span className="ml-1.5 sm:hidden">⚡</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="collection" className="mt-6">
@@ -521,6 +530,10 @@ export default function Profile() {
 
           <TabsContent value="personal" className="mt-6">
             <PersonalPuzzleSection user={user} />
+          </TabsContent>
+
+          <TabsContent value="speed" className="mt-6">
+            <SpeedPuzzleSection user={user} />
           </TabsContent>
 
         </Tabs>

@@ -63,6 +63,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [userPhoto, setUserPhoto] = useState(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const userPhotoInputRef = useRef(null);
+  const [speedHours, setSpeedHours] = useState('');
+  const [speedMinutes, setSpeedMinutes] = useState('');
+  const [speedSeconds, setSpeedSeconds] = useState('');
+  const [showSpeedInput, setShowSpeedInput] = useState(false);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -487,7 +491,14 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     }
 
     // Ajouter au lot en attente
-    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus, rating: scanRating || null, userPhoto: userPhoto || null }];
+    const speedTotal = (parseInt(speedHours)||0)*3600 + (parseInt(speedMinutes)||0)*60 + (parseInt(speedSeconds)||0);
+    const newBatch = [...pendingBatch, { 
+      puzzleData: { ...puzzleData }, 
+      selectedStatus, 
+      rating: scanRating || null, 
+      userPhoto: userPhoto || null,
+      speedRecord: speedTotal > 0 ? { hours: parseInt(speedHours)||0, minutes: parseInt(speedMinutes)||0, seconds: parseInt(speedSeconds)||0, total_seconds: speedTotal } : null
+    }];
     setPendingBatch(newBatch);
 
     if (finalize) {
@@ -502,7 +513,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const saveBatch = async (batch) => {
     try {
       setLoading(true);
-      for (const { puzzleData: pd, selectedStatus: status, rating, userPhoto: photo } of batch) {
+      for (const { puzzleData: pd, selectedStatus: status, rating, userPhoto: photo, speedRecord } of batch) {
         let catalogPuzzleId = pd.catalog_id || null;
         if (!catalogPuzzleId && pd.isPending) {
           const newEntry = await base44.entities.PuzzleCatalog.create({
@@ -521,7 +532,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         }
         const refCode = pd.ean || pd.asin || pd.sku || barcode;
 
-        await base44.entities.UserPuzzle.create({
+        const newUserPuzzle = await base44.entities.UserPuzzle.create({
           puzzle_name: pd.name || pd.title || '',
           puzzle_brand: pd.brand || '',
           puzzle_pieces: pd.pieces || pd.piece_count || 0,
@@ -532,6 +543,23 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           rating: rating || null,
           progress_photo: photo || null,
         });
+
+        // Save speed record if provided
+        if (speedRecord) {
+          await base44.entities.SpeedRecord.create({
+            puzzle_id: newUserPuzzle.id,
+            puzzle_name: pd.name || pd.title || '',
+            puzzle_brand: pd.brand || '',
+            puzzle_pieces: pd.pieces || pd.piece_count || 0,
+            image_url: pd.image || pd.image_hd || '',
+            category_tag: pd.category_tag || '',
+            hours: speedRecord.hours,
+            minutes: speedRecord.minutes,
+            seconds: speedRecord.seconds,
+            total_seconds: speedRecord.total_seconds,
+            record_date: new Date().toISOString().split('T')[0],
+          });
+        }
 
         if (catalogPuzzleId) {
           const catalogEntries = await base44.entities.PuzzleCatalog.filter({ id: catalogPuzzleId });
@@ -573,6 +601,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setPendingBatch([]);
     setShowAddAnother(false);
     setUserPhoto(null);
+    setSpeedHours('');
+    setSpeedMinutes('');
+    setSpeedSeconds('');
+    setShowSpeedInput(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
   };
@@ -594,6 +626,10 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setEditedPieces('');
     setScanRating(0);
     setUserPhoto(null);
+    setSpeedHours('');
+    setSpeedMinutes('');
+    setSpeedSeconds('');
+    setShowSpeedInput(false);
     setCameraReady(false);
     setScanning(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
@@ -1130,6 +1166,43 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                     </button>
                   )}
                   <p className="text-white/30 text-xs mt-2">Votre photo personnelle · L'image officielle sera choisie par l'admin</p>
+                </div>
+
+                {/* ⚡ Temps record (optionnel) */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowSpeedInput(!showSpeedInput)}
+                    className="w-full flex items-center justify-between"
+                  >
+                    <label className="text-sm text-white/70 cursor-pointer flex items-center gap-2">
+                      <span className="text-orange-400">⚡</span> Temps record (optionnel)
+                    </label>
+                    <span className="text-white/30 text-xs">{showSpeedInput ? '▲ Masquer' : '▼ Ajouter'}</span>
+                  </button>
+                  {showSpeedInput && (
+                    <div className="mt-3 flex gap-2 items-center">
+                      <div className="flex-1">
+                        <Input type="number" placeholder="0" min="0" value={speedHours} onChange={e => setSpeedHours(e.target.value)} className="bg-white/10 border-white/20 text-white text-center h-9" />
+                        <p className="text-white/30 text-[10px] text-center mt-0.5">h</p>
+                      </div>
+                      <span className="text-white/30 font-bold mb-3">:</span>
+                      <div className="flex-1">
+                        <Input type="number" placeholder="0" min="0" max="59" value={speedMinutes} onChange={e => setSpeedMinutes(e.target.value)} className="bg-white/10 border-white/20 text-white text-center h-9" />
+                        <p className="text-white/30 text-[10px] text-center mt-0.5">min</p>
+                      </div>
+                      <span className="text-white/30 font-bold mb-3">:</span>
+                      <div className="flex-1">
+                        <Input type="number" placeholder="0" min="0" max="59" value={speedSeconds} onChange={e => setSpeedSeconds(e.target.value)} className="bg-white/10 border-white/20 text-white text-center h-9" />
+                        <p className="text-white/30 text-[10px] text-center mt-0.5">sec</p>
+                      </div>
+                    </div>
+                  )}
+                  {showSpeedInput && (parseInt(speedHours)||parseInt(speedMinutes)||parseInt(speedSeconds)) ? (
+                    <p className="text-orange-400 text-sm text-center mt-2 font-mono">
+                      ⚡ {(() => { const t = (parseInt(speedHours)||0)*3600+(parseInt(speedMinutes)||0)*60+(parseInt(speedSeconds)||0); const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),s=t%60; return h>0?`${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`:m>0?`${m}m ${String(s).padStart(2,'0')}s`:`${s}s`; })()}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div>
