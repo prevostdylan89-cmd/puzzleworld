@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Badge } from '@/components/ui/badge';
 
 export default function UserBadgeDisplay({ userEmail }) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -8,22 +7,14 @@ export default function UserBadgeDisplay({ userEmail }) {
   useEffect(() => {
     if (!userEmail) return;
 
-    base44.entities.User.filter({ email: userEmail })
-      .then(users => {
-        if (users.length > 0 && users[0].role === 'admin') {
+    // Call a backend function to safely check admin status
+    base44.functions.invoke('checkUserRole', { email: userEmail })
+      .then(res => {
+        if (res.data?.isAdmin) {
           setIsAdmin(true);
         }
       })
-      .catch(error => console.log('Error fetching user:', error));
-
-    // Subscribe to real-time updates
-    const unsubscribe = base44.entities.User.subscribe((event) => {
-      if (event.data?.email === userEmail && event.data?.role === 'admin') {
-        setIsAdmin(true);
-      }
-    });
-
-    return () => unsubscribe();
+      .catch(error => console.log('Error checking user role:', error));
   }, [userEmail]);
 
   if (!isAdmin) return null;
