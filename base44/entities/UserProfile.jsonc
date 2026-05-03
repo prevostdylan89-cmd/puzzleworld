@@ -45,22 +45,10 @@
     "email"
   ],
   "rls": {
-    "create": {},
-    "read": {
-      "$or": [
-        {
-          "data.is_public": true
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+    "create": {
+      "created_by": "{{user.email}}"
     },
+    "read": {},
     "update": {
       "created_by": "{{user.email}}"
     },
