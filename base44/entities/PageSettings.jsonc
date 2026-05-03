@@ -1,0 +1,46 @@
+{
+  "name": "PageSettings",
+  "type": "object",
+  "properties": {
+    "page_name": {
+      "type": "string",
+      "description": "Nom technique de la page"
+    },
+    "label": {
+      "type": "string",
+      "description": "Nom affich\u00e9 de la page"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Page visible ou en maintenance"
+    },
+    "maintenance_message": {
+      "type": "string",
+      "default": "Cette page est temporairement en maintenance. Revenez bient\u00f4t !",
+      "description": "Message affich\u00e9 lors de la maintenance"
+    }
+  },
+  "required": [
+    "page_name",
+    "label"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
