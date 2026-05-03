@@ -1,0 +1,54 @@
+{
+  "name": "FeaturedArticle",
+  "type": "object",
+  "properties": {
+    "article_id": {
+      "type": "string",
+      "description": "ID de l'article BlogArticle"
+    },
+    "position": {
+      "type": "number",
+      "description": "Position 1-5",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "article_title": {
+      "type": "string",
+      "description": "Titre de l'article (cache)"
+    },
+    "article_image": {
+      "type": "string",
+      "description": "Image de couverture (cache)"
+    },
+    "article_category": {
+      "type": "string",
+      "description": "Cat\u00e9gorie (cache)"
+    },
+    "article_slug": {
+      "type": "string",
+      "description": "Slug (cache)"
+    }
+  },
+  "required": [
+    "article_id",
+    "position"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
