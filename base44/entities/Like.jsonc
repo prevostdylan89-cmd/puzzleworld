@@ -16,13 +16,15 @@
     "user_id"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {},
     "update": {
-      "user_id": "{{user.id}}"
+      "created_by": "{{user.email}}"
     },
     "delete": {
-      "user_id": "{{user.id}}"
+      "created_by": "{{user.email}}"
     }
   }
 }
