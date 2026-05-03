@@ -80,10 +80,29 @@ export default function EditProfileDialog({ user, onUpdate }) {
   const handleSave = async () => {
     setLoading(true);
     try {
+      const currentUser = await base44.auth.me();
+      
+      // Update User entity
       await base44.auth.updateMe({
         profile_photo: profilePhoto,
         cover_photo: coverPhoto
       });
+      
+      // Update UserProfile entity
+      const userProfiles = await base44.entities.UserProfile.filter({
+        email: currentUser.email
+      });
+      
+      if (userProfiles.length > 0) {
+        await base44.entities.UserProfile.update(userProfiles[0].id, {
+          profile_photo: profilePhoto
+        });
+      } else {
+        await base44.entities.UserProfile.create({
+          email: currentUser.email,
+          profile_photo: profilePhoto
+        });
+      }
       
       toast.success(t('profileUpdated'));
       setOpen(false);
