@@ -1,0 +1,50 @@
+{
+  "name": "FeaturedPuzzle",
+  "type": "object",
+  "properties": {
+    "puzzle_catalog_id": {
+      "type": "string",
+      "description": "ID du puzzle dans PuzzleCatalog"
+    },
+    "position": {
+      "type": "number",
+      "description": "Position dans le top 10 (1-10)",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "puzzle_asin": {
+      "type": "string",
+      "description": "ASIN du puzzle pour r\u00e9f\u00e9rence"
+    },
+    "puzzle_title": {
+      "type": "string",
+      "description": "Titre du puzzle (cache)"
+    },
+    "puzzle_image": {
+      "type": "string",
+      "description": "Image du puzzle (cache)"
+    }
+  },
+  "required": [
+    "puzzle_catalog_id",
+    "position"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
