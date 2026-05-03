@@ -9,9 +9,16 @@ export default function PostAuthorAvatar({ authorEmail, authorInitials }) {
 
     const fetchPhoto = async () => {
       try {
-        const profile = await base44.entities.UserProfile.filter({ email: authorEmail });
-        if (profile.length > 0 && profile[0].profile_photo) {
-          setProfilePhoto(profile[0].profile_photo);
+        // Try by email first
+        let profiles = await base44.entities.UserProfile.filter({ email: authorEmail });
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
+          return;
+        }
+        // Fallback: try by display_name (using authorEmail as possible display_name)
+        profiles = await base44.entities.UserProfile.filter({ display_name: authorEmail });
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
         }
       } catch (error) {
         console.error('Error fetching profile photo:', error);
