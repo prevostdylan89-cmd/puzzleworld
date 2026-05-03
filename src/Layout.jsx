@@ -38,6 +38,7 @@ import MaintenancePage from '@/components/shared/MaintenancePage';
 import UsernameGuard from '@/components/onboarding/UsernameGuard';
 import PullToRefresh from '@/components/shared/PullToRefresh';
 import BugReportModal from '@/components/shared/BugReportButton';
+import FriendRequestNotification from '@/components/notifications/FriendRequestNotification';
 import { useAuth } from '@/lib/AuthContext';
 
 function LayoutContent({ children, currentPageName }) {
@@ -651,6 +652,7 @@ function LayoutContent({ children, currentPageName }) {
       <FloatingChat />
       <UsernameGuard />
       <BugReportModal open={showBugReport} onClose={() => setShowBugReport(false)} />
+      <FriendRequestNotification />
     </div>
   );
 }
