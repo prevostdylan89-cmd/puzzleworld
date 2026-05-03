@@ -13,9 +13,21 @@ import UserProfileDialog from './UserProfileDialog';
 function CommentItem({ comment, commentInitials, timeAgo }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [displayName, setDisplayName] = useState(comment.author_name);
 
   useEffect(() => {
     if (!comment.created_by) return;
+    base44.functions.invoke('getUserPublicStats', { targetEmail: comment.created_by })
+      .then(res => {
+        const data = res.data;
+        if (data) {
+          setProfilePhoto(data.profilePhoto || null);
+          if (data.displayName) setDisplayName(data.displayName);
+          // Check admin via User entity separately isn't needed here as we check role
+        }
+      })
+      .catch(() => {});
     base44.entities.User.filter({ email: comment.created_by })
       .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
       .catch(() => {});
@@ -30,9 +42,13 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
     >
       <button onClick={() => comment.created_by && setShowProfile(true)}>
         <Avatar className="h-8 w-8 ring-2 ring-purple-500/20 cursor-pointer hover:ring-purple-500/40 transition-all">
-          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
-            {commentInitials}
-          </AvatarFallback>
+          {profilePhoto ? (
+            <img src={profilePhoto} alt={displayName} className="w-full h-full object-cover" />
+          ) : (
+            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
+              {commentInitials}
+            </AvatarFallback>
+          )}
         </Avatar>
       </button>
       {showProfile && comment.created_by && (
@@ -45,7 +61,7 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
       <div className="flex-1">
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <p className="text-white/90 font-medium text-sm">{comment.author_name}</p>
+            <p className="text-white/90 font-medium text-sm">{displayName}</p>
             {isAdmin && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-bold whitespace-nowrap">
                 👑 Admin

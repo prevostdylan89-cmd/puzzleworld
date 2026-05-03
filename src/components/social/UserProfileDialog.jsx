@@ -175,6 +175,9 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
           <div className="mb-4">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-bold text-white">{displayName}</h2>
+              {profileData?.badgeIcon && (
+                <span className="text-lg">{profileData.badgeIcon}</span>
+              )}
               {profileData?.level && (
                 <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold">
                   {profileData.level.emoji} Niveau {profileData.level.level}

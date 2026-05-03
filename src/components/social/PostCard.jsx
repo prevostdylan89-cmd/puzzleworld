@@ -16,36 +16,32 @@ import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
 import UserProfileDialog from './UserProfileDialog';
 
-function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
-  const [authorUser, setAuthorUser] = useState(null);
+function PostAuthorAvatar({ authorEmail, authorInitials, onClick, onProfileLoaded }) {
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
-    loadAuthorUser();
-  }, [authorEmail]);
-
-  const loadAuthorUser = async () => {
-    try {
-      // Try UserProfile first (public data)
-      const profiles = await base44.entities.UserProfile.filter({ email: authorEmail });
-      if (profiles.length > 0) {
-        setAuthorUser(profiles[0]);
-      } else {
-        // Fallback to User entity
-        const users = await base44.entities.User.filter({ email: authorEmail });
-        if (users.length > 0) {
-          setAuthorUser(users[0]);
+    if (!authorEmail) return;
+    // Use service-role backed function to bypass RLS
+    base44.functions.invoke('getUserPublicStats', { targetEmail: authorEmail })
+      .then(res => {
+        const data = res.data;
+        if (data) {
+          setProfilePhoto(data.profilePhoto || null);
+          onProfileLoaded?.({
+            display_name: data.displayName,
+            full_name: data.displayName,
+            profile_photo: data.profilePhoto,
+          });
         }
-      }
-    } catch (error) {
-      console.error('Error loading author:', error);
-    }
-  };
+      })
+      .catch(() => {});
+  }, [authorEmail]);
 
   return (
     <button onClick={onClick}>
       <Avatar className="h-10 w-10 ring-2 ring-orange-500/20 cursor-pointer hover:ring-orange-500/40 transition-all">
-        {authorUser?.profile_photo ? (
-          <img src={authorUser.profile_photo} alt={authorEmail} className="w-full h-full object-cover" />
+        {profilePhoto ? (
+          <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
         ) : (
           <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
             {authorInitials}
@@ -71,6 +67,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [showPuzzleDetail, setShowPuzzleDetail] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showAuthorProfile, setShowAuthorProfile] = useState(false);
+  const [authorProfile, setAuthorProfile] = useState(null);
 
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
@@ -454,11 +451,17 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => setShowAuthorProfile(true)} />
+        <PostAuthorAvatar
+          authorEmail={post.created_by}
+          authorInitials={authorInitials}
+          onClick={() => setShowAuthorProfile(true)}
+          onProfileLoaded={setAuthorProfile}
+        />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
+              {authorProfile?.display_name || authorProfile?.full_name || post.author_name || post.created_by?.split('@')[0] || ''}
             </span>
             <UserLevelTag userEmail={post.created_by} />
             {post.is_completion_post && (
@@ -659,7 +662,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
       {showAuthorProfile && (
         <UserProfileDialog
           userEmail={post.created_by}
-          authorName={post.author_name}
+          authorName={authorProfile?.display_name || authorProfile?.full_name || post.author_name}
           onClose={() => setShowAuthorProfile(false)}
         />
       )}

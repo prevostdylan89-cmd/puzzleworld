@@ -46,8 +46,9 @@ Deno.serve(async (req) => {
     const profile = profiles.find(p => p.email === targetEmail);
 
     return Response.json({
-      displayName: profile?.display_name || profile?.full_name || null,
+      displayName: profile?.display_name || profile?.full_name || targetEmail.split('@')[0] || null,
       profilePhoto: profile?.profile_photo || null,
+      badgeIcon: profile?.current_badge_icon || null,
       friendCode: profile?.friend_code || null,
       completed: completedPuzzles.length,
       achievements: achievements.length,
