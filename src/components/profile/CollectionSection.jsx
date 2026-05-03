@@ -356,6 +356,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
   const [localPhoto, setLocalPhoto] = useState(null);
   const [localRating, setLocalRating] = useState(0);
   const [localCategoryId, setLocalCategoryId] = useState(null);
+  const [showSpeedRecord, setShowSpeedRecord] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -382,6 +383,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
   if (!puzzle) return null;
 
   const displayImage = (puzzle.status === 'done' && localPhoto) ? localPhoto : puzzle.image_url;
+
 
   const handleChangePhoto = async (e) => {
     const file = e.target.files?.[0];
@@ -414,6 +416,8 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
   };
 
   return (
+    <>
+    <AddSpeedRecordInline open={showSpeedRecord} onClose={() => setShowSpeedRecord(false)} puzzle={puzzle} />
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto p-0">
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleChangePhoto} />
@@ -488,6 +492,15 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
             {localRating === 0 && <p className="text-white/30 text-xs">Pas encore noté</p>}
           </div>
 
+          {/* Record ⚡ */}
+          <button
+            onClick={() => setShowSpeedRecord(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm font-medium hover:bg-yellow-500/20 transition-colors"
+          >
+            <Zap className="w-4 h-4" />
+            Ajouter un record ⚡
+          </button>
+
           {/* Catégorie personnelle */}
           {categories.length > 0 && (
             <div className="bg-white/5 rounded-lg p-4 space-y-2">
@@ -527,6 +540,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
 
