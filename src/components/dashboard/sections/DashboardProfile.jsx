@@ -16,7 +16,23 @@ export default function DashboardProfile() {
     setLoading(true);
     try {
       const allUsers = await base44.entities.User.list('-created_date', 100);
-      setUsers(allUsers);
+      
+      // Enrich users with display_name from UserProfile
+      const enrichedUsers = await Promise.all(
+        allUsers.map(async (user) => {
+          try {
+            const profiles = await base44.entities.UserProfile.filter({ email: user.email });
+            if (profiles.length > 0 && profiles[0].display_name) {
+              return { ...user, display_name: profiles[0].display_name };
+            }
+          } catch (error) {
+            console.log('Could not fetch profile for:', user.email);
+          }
+          return user;
+        })
+      );
+      
+      setUsers(enrichedUsers);
     } catch (error) {
       console.error('Error loading users:', error);
       toast.error('Erreur de chargement');
@@ -67,7 +83,7 @@ export default function DashboardProfile() {
                   {user.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-white font-medium">{user.full_name || user.email}</p>
+                  <p className="text-white font-medium">{user.display_name || user.full_name || user.email}</p>
                   <p className="text-white/50 text-sm">{user.email}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded ${
