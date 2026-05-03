@@ -27,6 +27,11 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
+      if (!userEmail) {
+        console.error('UserProfileDialog: userEmail is missing');
+        return;
+      }
+
       // Call backend function with service role to bypass RLS
       const res = await base44.functions.invoke('getUserPublicStats', { targetEmail: userEmail });
       setProfileData(res.data);

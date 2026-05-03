@@ -68,6 +68,10 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [showAuthorProfile, setShowAuthorProfile] = useState(false);
   const [authorProfile, setAuthorProfile] = useState(null);
 
+  useEffect(() => {
+    if (!post.created_by) console.warn('PostCard: post.created_by is missing', post);
+  }, [post.created_by]);
+
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
   const showPuzzleActions = !isOwnPost && isCompletionPost && user;
