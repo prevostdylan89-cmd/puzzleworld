@@ -20,30 +20,40 @@ import AuthorLevelBadge from './AuthorLevelBadge';
 
 function PostAuthorAvatar({ authorEmail, authorInitials }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authorEmail) return;
+    if (!authorEmail) {
+      setLoading(false);
+      return;
+    }
     
-    // Fetch profile photo from UserProfile entity directly
     base44.entities.UserProfile.filter({ email: authorEmail })
       .then(profiles => {
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
         }
+        setLoading(false);
       })
-      .catch(() => {});
+      .catch(() => setLoading(false));
   }, [authorEmail]);
 
+  if (loading) {
+    return (
+      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 animate-pulse" />
+    );
+  }
+
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
+    <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600">
       {profilePhoto ? (
         <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
       ) : (
-        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
+        <div className="w-full h-full flex items-center justify-center text-white text-sm font-medium">
           {authorInitials}
-        </AvatarFallback>
+        </div>
       )}
-    </Avatar>
+    </div>
   );
 }
 
