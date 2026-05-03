@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug, Trophy, Shield } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug, Trophy, Shield, Award } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -17,6 +17,7 @@ import DashboardBlog from '@/components/dashboard/sections/DashboardBlog';
 import DashboardBugReports from '@/components/dashboard/sections/DashboardBugReports';
 import DashboardTopPuzzles from '@/components/dashboard/sections/DashboardTopPuzzles';
 import DashboardModeration from '@/components/dashboard/sections/DashboardModeration';
+import DashboardBadges from '@/components/dashboard/sections/DashboardBadges';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
@@ -31,6 +32,7 @@ const SECTIONS = [
   { id: 'blog', label: 'Blog', icon: BookOpen, component: DashboardBlog },
   { id: 'bugreports', label: 'Signalements', icon: Bug, component: DashboardBugReports },
   { id: 'moderation', label: 'Modération IA', icon: Shield, component: DashboardModeration },
+  { id: 'badges', label: 'Badges', icon: Award, component: DashboardBadges },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
 ];
 
