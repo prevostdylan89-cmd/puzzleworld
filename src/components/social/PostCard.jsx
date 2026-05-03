@@ -67,6 +67,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showAuthorProfile, setShowAuthorProfile] = useState(false);
   const [authorProfile, setAuthorProfile] = useState(null);
+  const [friendStatus, setFriendStatus] = useState('none'); // 'none' | 'pending' | 'friend'
 
   useEffect(() => {
     if (!post.created_by) console.warn('PostCard: post.created_by is missing', post);
@@ -80,6 +81,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
     if (user) {
       checkIfLiked();
       checkIfFollowing();
+      checkFriendStatus();
       if (showPuzzleActions) {
         checkIfInWishlist();
         checkIfPuzzleLiked();
@@ -87,6 +89,23 @@ export default function PostCard({ post, user, isFeatured = false }) {
       }
     }
   }, [post.id, user?.email]);
+
+  const checkFriendStatus = async () => {
+    if (!user || isOwnPost) return;
+    const sentCheck = await base44.entities.Friendship.filter({
+      requester_email: user.email,
+      addressee_email: post.created_by
+    });
+    const receivedCheck = await base44.entities.Friendship.filter({
+      requester_email: post.created_by,
+      addressee_email: user.email
+    });
+    if (sentCheck.length > 0) {
+      setFriendStatus(sentCheck[0].status === 'accepted' ? 'friend' : 'pending');
+    } else if (receivedCheck.length > 0) {
+      setFriendStatus(receivedCheck[0].status === 'accepted' ? 'friend' : 'received');
+    }
+  };
 
   const checkIfLiked = async () => {
     if (!user) return;
@@ -290,6 +309,26 @@ export default function PostCard({ post, user, isFeatured = false }) {
     }
   };
 
+  const handleAddFriend = async () => {
+    if (!user) {
+      toast.error(t('loginToFollow'));
+      return;
+    }
+    if (friendStatus !== 'none') return;
+    try {
+      await base44.entities.Friendship.create({
+        requester_email: user.email,
+        addressee_email: post.created_by,
+        status: 'pending',
+      });
+      setFriendStatus('pending');
+      toast.success('Demande d\'ami envoyée !');
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast.error('Erreur lors de l\'envoi de la demande');
+    }
+  };
+
   const handlePuzzleDislike = async () => {
     if (!user) {
       toast.error(t('loginToDislikePuzzle'));
@@ -477,28 +516,50 @@ export default function PostCard({ post, user, isFeatured = false }) {
           <p className="text-white/40 text-xs">{timeAgo}</p>
         </div>
         {user && !isOwnPost && (
-          <Button 
-            onClick={handleFollow}
-            size="sm"
-            variant={isFollowing ? "outline" : "default"}
-            className={`rounded-full text-xs h-7 px-3 ${
-              isFollowing 
-                ? 'border-orange-500/30 text-orange-400 hover:bg-orange-500/10' 
-                : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
-            }`}
-          >
-            {isFollowing ? (
-              <>
-                <UserCheck className="w-3 h-3 mr-1" />
-                {t('following2')}
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-3 h-3 mr-1" />
-                {t('follow2')}
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={handleFollow}
+              size="sm"
+              variant={isFollowing ? "outline" : "default"}
+              className={`rounded-full text-xs h-7 px-3 ${
+                isFollowing 
+                  ? 'border-orange-500/30 text-orange-400 hover:bg-orange-500/10' 
+                  : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
+              }`}
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="w-3 h-3 mr-1" />
+                  {t('following2')}
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3 h-3 mr-1" />
+                  {t('follow2')}
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              onClick={handleAddFriend}
+              size="sm"
+              disabled={friendStatus !== 'none'}
+              variant="outline"
+              className={`rounded-full text-xs h-7 px-3 ${
+                friendStatus === 'friend'
+                  ? 'border-green-500/30 text-green-400'
+                  : friendStatus === 'pending'
+                  ? 'border-white/20 text-white/50'
+                  : 'border-white/20 text-white/70 hover:text-white hover:border-white/40'
+              }`}
+            >
+              {friendStatus === 'friend' 
+                ? 'Amis' 
+                : friendStatus === 'pending' 
+                ? 'En attente' 
+                : 'Ajouter'}
+            </Button>
+          </div>
         )}
       </div>
 

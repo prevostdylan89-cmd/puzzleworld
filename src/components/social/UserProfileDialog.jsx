@@ -24,8 +24,6 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
 
   const loadData = async () => {
     try {
-      console.log('[UserProfileDialog] Loading with userEmail:', userEmail);
-      
       const loggedUser = await base44.auth.me().catch(() => null);
       setCurrentUser(loggedUser);
 
@@ -36,9 +34,7 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
       }
 
       // Call backend function with service role to bypass RLS
-      console.log('[UserProfileDialog] Calling getUserPublicStats with:', userEmail);
       const res = await base44.functions.invoke('getUserPublicStats', { targetEmail: userEmail });
-      console.log('[UserProfileDialog] Response:', res.data);
       setProfileData(res.data);
 
       if (loggedUser) {
