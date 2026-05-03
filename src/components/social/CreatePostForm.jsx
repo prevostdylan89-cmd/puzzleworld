@@ -194,11 +194,9 @@ export default function CreatePostForm({ user, onPostCreated }) {
       className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 mb-6"
     >
       <div className="flex gap-3">
-        <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
-          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm">
-            {userInitials}
-          </AvatarFallback>
-        </Avatar>
+        <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden flex-shrink-0">
+          <img src="https://base44.app/api/apps/69637ed7a7bc12860b6763ca/files/mp/public/69637ed7a7bc12860b6763ca/8181d7739_photoprofil.png" alt="profile" className="w-full h-full object-cover" />
+        </div>
         <div className="flex-1">
           <Textarea
             value={content}
