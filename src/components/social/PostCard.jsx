@@ -43,6 +43,8 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         const photo = user?.data?.profile_photo || profile?.profile_photo;
         const displayName = profile?.data?.display_name || user?.data?.display_name;
         
+        console.log('PostAuthorAvatar debug:', { authorEmail, photo, profile, user });
+        
         if (photo) {
           setProfilePhoto(photo);
         }
@@ -53,7 +55,7 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
           profile_photo: photo,
         });
       })
-      .catch(err => console.log('Photo load failed for:', authorEmail, err))
+      .catch(err => console.error('Photo load failed for:', authorEmail, err))
       .finally(() => setLoading(false));
     
     // Real-time subscription for updates
