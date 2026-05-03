@@ -1159,6 +1159,30 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                       <span className="text-3xl">📦</span>
                       <span className="text-sm font-medium">Je l'ai chez moi</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('in_progress')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'in_progress'
+                          ? 'border-orange-500 bg-orange-500/20 text-orange-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-orange-500/50 hover:bg-orange-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">🧩</span>
+                      <span className="text-sm font-medium">En cours</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStatus('done')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedStatus === 'done'
+                          ? 'border-green-500 bg-green-500/20 text-green-400'
+                          : 'border-white/10 bg-white/5 text-white/70 hover:border-green-500/50 hover:bg-green-500/10'
+                      }`}
+                    >
+                      <span className="text-3xl">✅</span>
+                      <span className="text-sm font-medium">Terminé</span>
+                    </button>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -1213,7 +1237,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs font-medium truncate">{item.puzzleData.name || item.puzzleData.title}</p>
-                    <p className="text-white/40 text-xs">{item.selectedStatus === 'wishlist' ? '⭐ Wishlist' : item.selectedStatus === 'inbox' ? '📦 Collection' : '🏆 Terminé'}</p>
+                    <p className="text-white/40 text-xs">{item.selectedStatus === 'wishlist' ? '⭐ Wishlist' : item.selectedStatus === 'inbox' ? '📦 J\'ai chez moi' : item.selectedStatus === 'in_progress' ? '🧩 En cours' : '✅ Terminé'}</p>
                   </div>
                 </div>
               ))}
