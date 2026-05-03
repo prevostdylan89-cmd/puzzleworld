@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Plus, Puzzle, Trash2, Loader2, ImagePlus, X } from 'lucide-react';
+import { Plus, Puzzle, Trash2, Loader2, ImagePlus, X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import AddSpeedRecordInline from '@/components/profile/AddSpeedRecordInline';
 
 export default function PersonalPuzzleSection({ user }) {
   const [puzzles, setPuzzles] = useState([]);
@@ -72,6 +73,7 @@ export default function PersonalPuzzleSection({ user }) {
 
 function PersonalPuzzleCard({ puzzle, index, onUpdate }) {
   const [deleting, setDeleting] = useState(false);
+  const [showSpeedRecord, setShowSpeedRecord] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm('Supprimer ce puzzle personnel ?')) return;
@@ -87,14 +89,25 @@ function PersonalPuzzleCard({ puzzle, index, onUpdate }) {
     }
   };
 
+  const speedPuzzle = { id: puzzle.id, puzzle_name: puzzle.name, puzzle_brand: '', puzzle_pieces: puzzle.piece_count, image_url: puzzle.image_url };
+
   return (
+    <>
+    <AddSpeedRecordInline open={showSpeedRecord} onClose={() => setShowSpeedRecord(false)} puzzle={speedPuzzle} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-xl overflow-hidden hover:border-orange-500/30 transition-all group relative"
     >
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+        <button
+          onClick={() => setShowSpeedRecord(true)}
+          className="w-7 h-7 bg-yellow-500/80 hover:bg-yellow-500 rounded-full flex items-center justify-center transition-colors"
+          title="Ajouter un record"
+        >
+          <Zap className="w-3.5 h-3.5 text-white" />
+        </button>
         <button
           onClick={handleDelete}
           disabled={deleting}
@@ -123,6 +136,7 @@ function PersonalPuzzleCard({ puzzle, index, onUpdate }) {
         <span className="text-white/40 text-xs">{puzzle.piece_count} pcs</span>
       </div>
     </motion.div>
+    </>
   );
 }
 

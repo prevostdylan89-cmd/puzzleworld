@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
-import { Trash2, ArrowUpDown, X } from 'lucide-react';
+import { Trash2, ArrowUpDown, X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import WishlistPuzzleModal from '@/components/profile/WishlistPuzzleModal';
+import AddSpeedRecordInline from '@/components/profile/AddSpeedRecordInline';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ export default function WishlistSection({ user }) {
   const [wishlist, setWishlist] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [speedRecordPuzzle, setSpeedRecordPuzzle] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
   const sortDropdown = useScrollSafeDropdown();
   const [isMultiSelect, setIsMultiSelect] = useState(false);
@@ -340,6 +342,9 @@ export default function WishlistSection({ user }) {
                           🛒 Amazon
                         </DropdownMenuItem>
                       )}
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSpeedRecordPuzzle({ id: item.id, puzzle_name: item.puzzle_name, puzzle_brand: item.puzzle_brand, puzzle_pieces: item.puzzle_pieces, image_url: item.image_url }); }} className="text-yellow-400 hover:bg-white/10 cursor-pointer">
+                        <Zap className="w-3 h-3 mr-1" /> Ajouter un record ⚡
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsMultiSelect(true); setSelectedIds([item.id]); }} className="text-blue-400 hover:bg-white/10 cursor-pointer">
                         ☑️ Sélection multiple
                       </DropdownMenuItem>
@@ -405,6 +410,11 @@ export default function WishlistSection({ user }) {
           item={selectedPuzzle}
         />
       )}
+      <AddSpeedRecordInline
+        open={!!speedRecordPuzzle}
+        onClose={() => setSpeedRecordPuzzle(null)}
+        puzzle={speedRecordPuzzle}
+      />
     </>
   );
 }
