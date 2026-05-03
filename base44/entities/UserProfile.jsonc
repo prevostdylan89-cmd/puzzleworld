@@ -27,6 +27,14 @@
       "type": "string",
       "description": "URL de la photo de profil"
     },
+    "cover_photo": {
+      "type": "string",
+      "description": "URL de la photo de couverture"
+    },
+    "badge_category": {
+      "type": "string",
+      "description": "Cat\u00e9gorie du badge"
+    },
     "bio": {
       "type": "string",
       "description": "Biographie de l'utilisateur"
@@ -43,29 +51,5 @@
   },
   "required": [
     "email"
-  ],
-  "rls": {
-    "create": {},
-    "read": {
-      "$or": [
-        {
-          "data.is_public": true
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "update": {
-      "created_by": "{{user.email}}"
-    },
-    "delete": {
-      "created_by": "{{user.email}}"
-    }
-  }
+  ]
 }
