@@ -1,0 +1,68 @@
+{
+  "name": "TrendMetric",
+  "type": "object",
+  "properties": {
+    "metric_type": {
+      "type": "string",
+      "enum": [
+        "piece_count",
+        "theme",
+        "brand",
+        "category"
+      ],
+      "description": "Type of metric"
+    },
+    "metric_value": {
+      "type": "string",
+      "description": "Value being tracked"
+    },
+    "period": {
+      "type": "string",
+      "format": "date",
+      "description": "Period (month)"
+    },
+    "count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of occurrences"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "added_to_collection",
+        "started",
+        "completed",
+        "timed"
+      ],
+      "description": "Type of action tracked"
+    }
+  },
+  "required": [
+    "metric_type",
+    "metric_value",
+    "period",
+    "action_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
