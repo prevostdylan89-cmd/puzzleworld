@@ -8,39 +8,29 @@ export default function UserBadgeDisplay({ userEmail }) {
   useEffect(() => {
     if (!userEmail) return;
 
-    const fetchAndSubscribe = async () => {
-      try {
-        const users = await base44.entities.User.filter({ email: userEmail });
+    base44.entities.User.filter({ email: userEmail })
+      .then(users => {
         if (users.length > 0 && users[0].role === 'admin') {
           setIsAdmin(true);
         }
-      } catch (error) {
-        console.log('Error fetching user:', error);
+      })
+      .catch(error => console.log('Error fetching user:', error));
+
+    // Subscribe to real-time updates
+    const unsubscribe = base44.entities.User.subscribe((event) => {
+      if (event.data?.email === userEmail && event.data?.role === 'admin') {
+        setIsAdmin(true);
       }
+    });
 
-      // Subscribe to real-time updates
-      const unsubscribe = base44.entities.User.subscribe((event) => {
-        if (event.data?.email === userEmail && event.data?.role === 'admin') {
-          setIsAdmin(true);
-        }
-      });
-
-      return unsubscribe;
-    };
-
-    let unsubscribe;
-    fetchAndSubscribe().then(unsub => { unsubscribe = unsub; });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    return () => unsubscribe();
   }, [userEmail]);
 
   if (!isAdmin) return null;
 
   return (
-    <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-bold px-1.5 py-0.5 whitespace-nowrap">
+    <span className="flex items-center gap-0.5 px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-bold whitespace-nowrap">
       👑 Admin
-    </Badge>
+    </span>
   );
 }
