@@ -47,6 +47,10 @@ Deno.serve(async (req) => {
 
     const newLevel = getLevelForCount(scannedCount);
 
+    // Get badge from Badge table for this level
+    const badges = await base44.asServiceRole.entities.Badge.filter({ level: newLevel.level });
+    const badge = badges.length > 0 ? badges[0] : null;
+
     // Get or create UserLevel record
     const existing = await base44.asServiceRole.entities.UserLevel.filter({ created_by: userEmail });
 
@@ -56,12 +60,14 @@ Deno.serve(async (req) => {
         level: newLevel.level,
         badge_name: newLevel.title,
         total_puzzles: scannedCount,
+        current_badge_icon: badge?.icon || newLevel.emoji,
       });
     } else {
       await base44.asServiceRole.entities.UserLevel.create({
         level: newLevel.level,
         badge_name: newLevel.title,
         total_puzzles: scannedCount,
+        current_badge_icon: badge?.icon || newLevel.emoji,
       });
     }
 

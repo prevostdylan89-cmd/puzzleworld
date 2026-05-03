@@ -26,19 +26,15 @@ Deno.serve(async (req) => {
     const userLevels = await base44.asServiceRole.entities.UserLevel.filter({ created_by: email });
     if (userLevels.length > 0) {
       const level = userLevels[0];
-      const badgeEmojis = {
-        'Novice': '🌱',
-        'Amateur': '⭐',
-        'Passionné': '🔥',
-        'Expert': '💎',
-        'Maître': '👑',
-        'Légende': '⚡'
-      };
+      
+      // Get badge from Badge table
+      const badges = await base44.asServiceRole.entities.Badge.filter({ level: level.level });
+      const badge = badges.length > 0 ? badges[0] : null;
       
       return Response.json({ 
         badge: { 
-          icon: badgeEmojis[level.badge_name] || '📍',
-          label: level.badge_name 
+          icon: badge?.icon || level.current_badge_icon || '📍',
+          label: badge?.name || level.badge_name 
         } 
       });
     }
