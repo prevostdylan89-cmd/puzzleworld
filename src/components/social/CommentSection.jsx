@@ -8,9 +8,11 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '@/components/LanguageContext';
+import UserProfileDialog from './UserProfileDialog';
 
 function CommentItem({ comment, commentInitials, timeAgo }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (!comment.created_by) return;
@@ -26,11 +28,20 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
       exit={{ opacity: 0, y: -10 }}
       className="flex gap-3"
     >
-      <Avatar className="h-8 w-8 ring-2 ring-purple-500/20">
-        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
-          {commentInitials}
-        </AvatarFallback>
-      </Avatar>
+      <button onClick={() => comment.created_by && setShowProfile(true)}>
+        <Avatar className="h-8 w-8 ring-2 ring-purple-500/20 cursor-pointer hover:ring-purple-500/40 transition-all">
+          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
+            {commentInitials}
+          </AvatarFallback>
+        </Avatar>
+      </button>
+      {showProfile && comment.created_by && (
+        <UserProfileDialog
+          userEmail={comment.created_by}
+          authorName={comment.author_name}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
       <div className="flex-1">
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1 flex-wrap">

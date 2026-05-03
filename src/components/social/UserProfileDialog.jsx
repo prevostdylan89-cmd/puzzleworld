@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Puzzle, Trophy, UserPlus, UserCheck } from 'lucide-react';
+import { X, Puzzle, Trophy, UserPlus, UserCheck, Users } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
@@ -12,6 +12,7 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
   const [profileData, setProfileData] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [friendStatus, setFriendStatus] = useState('none'); // 'none' | 'pending' | 'friend'
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,16 +32,39 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
       setProfileData(res.data);
 
       if (loggedUser) {
-        const followCheck = await base44.entities.Follow.filter({
-          follower_email: loggedUser.email,
-          following_email: userEmail,
-        });
+        const [followCheck, sentCheck, receivedCheck] = await Promise.all([
+          base44.entities.Follow.filter({ follower_email: loggedUser.email, following_email: userEmail }),
+          base44.entities.Friendship.filter({ requester_email: loggedUser.email, addressee_email: userEmail }),
+          base44.entities.Friendship.filter({ requester_email: userEmail, addressee_email: loggedUser.email }),
+        ]);
         setIsFollowing(followCheck.length > 0);
+        if (sentCheck.length > 0) {
+          setFriendStatus(sentCheck[0].status === 'accepted' ? 'friend' : 'pending');
+        } else if (receivedCheck.length > 0) {
+          setFriendStatus(receivedCheck[0].status === 'accepted' ? 'friend' : 'received');
+        }
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddFriend = async (e) => {
+    e.stopPropagation();
+    if (!currentUser) { toast.error(t('loginToFollow')); return; }
+    if (friendStatus !== 'none') return;
+    try {
+      await base44.entities.Friendship.create({
+        requester_email: currentUser.email,
+        addressee_email: userEmail,
+        status: 'pending',
+      });
+      setFriendStatus('pending');
+      toast.success('Demande d\'ami envoyée !');
+    } catch {
+      toast.error('Erreur lors de l\'envoi de la demande');
     }
   };
 
@@ -111,20 +135,39 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
             </Avatar>
 
             {!isOwnProfile && (
-              <Button
-                onClick={handleFollow}
-                size="sm"
-                className={`rounded-lg text-xs h-8 mb-1 ${
-                  isFollowing
-                    ? 'bg-white/10 text-white hover:bg-white/20'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                }`}
-              >
-                {isFollowing
-                  ? <><UserCheck className="w-3 h-3 mr-1" />{t('following2')}</>
-                  : <><UserPlus className="w-3 h-3 mr-1" />{t('follow')}</>
-                }
-              </Button>
+              <div className="flex items-center gap-2 mb-1">
+                <Button
+                  onClick={handleFollow}
+                  size="sm"
+                  className={`rounded-lg text-xs h-8 ${
+                    isFollowing
+                      ? 'bg-white/10 text-white hover:bg-white/20'
+                      : 'bg-orange-500 hover:bg-orange-600 text-white'
+                  }`}
+                >
+                  {isFollowing
+                    ? <><UserCheck className="w-3 h-3 mr-1" />{t('following2')}</>
+                    : <><UserPlus className="w-3 h-3 mr-1" />{t('follow')}</>
+                  }
+                </Button>
+                <Button
+                  onClick={handleAddFriend}
+                  size="sm"
+                  disabled={friendStatus !== 'none'}
+                  className={`rounded-lg text-xs h-8 ${
+                    friendStatus === 'friend'
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : friendStatus === 'pending'
+                      ? 'bg-white/10 text-white/50'
+                      : friendStatus === 'received'
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  <Users className="w-3 h-3 mr-1" />
+                  {friendStatus === 'friend' ? 'Amis' : friendStatus === 'pending' ? 'En attente' : friendStatus === 'received' ? 'Reçue' : 'Ajouter'}
+                </Button>
+              </div>
             )}
           </div>
 
@@ -163,10 +206,15 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
                 <div className="text-lg font-bold text-white">{formatPieces(profileData?.totalPieces ?? 0)}</div>
                 <div className="text-[11px] text-white/50">Pièces posées</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center col-span-2">
+              <div className="bg-white/5 rounded-xl p-3 text-center">
                 <Trophy className="w-4 h-4 text-orange-400 mx-auto mb-1" />
                 <div className="text-lg font-bold text-white">{profileData?.achievements ?? 0}</div>
                 <div className="text-[11px] text-white/50">{t('achievements')}</div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-3 text-center">
+                <span className="text-lg block mb-1">❤️</span>
+                <div className="text-lg font-bold text-white">{profileData?.wishlist ?? 0}</div>
+                <div className="text-[11px] text-white/50">{t('wishlist')}</div>
               </div>
             </div>
           )}

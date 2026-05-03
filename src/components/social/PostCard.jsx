@@ -14,6 +14,7 @@ import CommentSection from './CommentSection';
 import UserBadge from '@/components/shared/UserBadge';
 import UserLevelTag from '@/components/shared/UserLevelTag';
 import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable';
+import UserProfileDialog from './UserProfileDialog';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onClick }) {
   const [authorUser, setAuthorUser] = useState(null);
@@ -69,6 +70,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [isPuzzleDisliked, setIsPuzzleDisliked] = useState(false);
   const [showPuzzleDetail, setShowPuzzleDetail] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showAuthorProfile, setShowAuthorProfile] = useState(false);
 
   const isOwnPost = user && post.created_by === user.email;
   const isCompletionPost = post.is_completion_post && post.puzzle_name && post.puzzle_reference;
@@ -452,7 +454,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => {}} />
+        <PostAuthorAvatar authorEmail={post.created_by} authorInitials={authorInitials} onClick={() => setShowAuthorProfile(true)} />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -650,6 +652,15 @@ export default function PostCard({ post, user, isFeatured = false }) {
         <PuzzleDetailClickable
           puzzleReference={post.puzzle_reference}
           onClose={() => setShowPuzzleDetail(false)}
+        />
+      )}
+
+      {/* Author Profile Dialog */}
+      {showAuthorProfile && (
+        <UserProfileDialog
+          userEmail={post.created_by}
+          authorName={post.author_name}
+          onClose={() => setShowAuthorProfile(false)}
         />
       )}
     </motion.div>
