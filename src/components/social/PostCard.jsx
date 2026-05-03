@@ -39,18 +39,18 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         const user = users.length > 0 ? users[0] : null;
         const profile = profiles.length > 0 ? profiles[0] : null;
         
-        // Prioritize UserProfile.display_name (existing), fallback to User.display_name
-        const displayName = profile?.display_name || user?.display_name;
-        const profilePhoto = profile?.profile_photo;
+        // Get photo from User data first, then UserProfile
+        const photo = user?.data?.profile_photo || profile?.profile_photo;
+        const displayName = profile?.display_name || user?.data?.display_name || user?.display_name;
         
-        if (profilePhoto) {
-          setProfilePhoto(profilePhoto);
+        if (photo) {
+          setProfilePhoto(photo);
         }
         
         onProfileLoaded?.({
           display_name: displayName,
-          full_name: profile?.full_name,
-          profile_photo: profilePhoto,
+          full_name: profile?.full_name || user?.full_name,
+          profile_photo: photo,
         });
       })
       .catch(err => console.log('Photo load failed for:', authorEmail, err))
@@ -58,12 +58,16 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
     
     // Real-time subscription for updates
     const unsubscribe = base44.entities.User.subscribe((event) => {
-      if (event.data?.email === authorEmail && event.data?.display_name) {
-        onProfileLoaded?.({
-          display_name: event.data.display_name,
-          full_name: event.data.full_name,
-          profile_photo: event.data.profile_photo,
-        });
+      if (event.data?.email === authorEmail) {
+        const photo = event.data?.profile_photo;
+        if (photo) {
+          setProfilePhoto(photo);
+          onProfileLoaded?.({
+            display_name: event.data.display_name,
+            full_name: event.data.full_name,
+            profile_photo: photo,
+          });
+        }
       }
     });
     
