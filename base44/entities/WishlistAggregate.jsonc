@@ -1,0 +1,58 @@
+{
+  "name": "WishlistAggregate",
+  "type": "object",
+  "properties": {
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces"
+    },
+    "total_wishlists": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of users who wishlisted"
+    },
+    "is_out_of_stock": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether puzzle is out of stock"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update time"
+    }
+  },
+  "required": [
+    "puzzle_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
