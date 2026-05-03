@@ -38,7 +38,9 @@
     "puzzle_pieces"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "created_by": "{{user.email}}"
     },
