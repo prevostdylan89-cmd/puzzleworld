@@ -67,12 +67,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'EAN invalide (13 chiffres requis)' }, { status: 400 });
     }
 
-    // ÉTAPE 1 : Recherche par EAN dans le catalogue
+    // ÉTAPE 1 : Recherche par EAN dans le catalogue (actif ET en attente)
     const byEan = await base44.entities.PuzzleCatalog.filter({ ean });
     if (byEan.length > 0) {
       const p = byEan[0];
+      // Si le puzzle est en attente de validation, on bloque l'appel Rainforest
+      if (p.status === 'pending') {
+        return Response.json({
+          source: 'catalog_pending',
+          status: 'pending',
+          catalog_id: p.id,
+          title: p.title,
+          brand: p.brand,
+          piece_count: p.piece_count,
+          image_hd: p.image_hd,
+          ean: p.ean,
+        });
+      }
       return Response.json({
         source: 'catalog_ean',
+        status: 'active',
         catalog_id: p.id,
         asin: p.asin,
         ean: p.ean,
@@ -219,13 +233,27 @@ Deno.serve(async (req) => {
     if (asin) {
       const byAsin = await base44.entities.PuzzleCatalog.filter({ asin });
       if (byAsin.length > 0) {
-        // Mettre à jour l'EAN manquant
         const existing = byAsin[0];
+        // Mettre à jour l'EAN manquant
         if (!existing.ean) {
           await base44.entities.PuzzleCatalog.update(existing.id, { ean });
         }
+        // Bloquer si en attente
+        if (existing.status === 'pending') {
+          return Response.json({
+            source: 'catalog_pending',
+            status: 'pending',
+            catalog_id: existing.id,
+            title: existing.title,
+            brand: existing.brand,
+            piece_count: existing.piece_count,
+            image_hd: existing.image_hd,
+            ean,
+          });
+        }
         return Response.json({
           source: 'catalog_asin',
+          status: 'active',
           catalog_id: existing.id,
           asin: existing.asin,
           ean,

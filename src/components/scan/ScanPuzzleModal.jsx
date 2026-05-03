@@ -391,6 +391,16 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
         return;
       }
 
+      // Puzzle trouvé dans le catalogue mais en attente (détecté via ASIN après appel Rainforest)
+      if (result.status === 'pending' || result.source === 'catalog_pending') {
+        setScanMessage({
+          type: 'pending',
+          text: '🕐 Ce puzzle est déjà dans notre base de données, mais il est en cours de validation par notre équipe. Nous faisons le maximum pour le mettre en ligne rapidement !'
+        });
+        setLoading(false);
+        return;
+      }
+
       // ÉTAPE 4 : Puzzle trouvé → consommer un crédit maintenant seulement
       await consumeCredit();
 
