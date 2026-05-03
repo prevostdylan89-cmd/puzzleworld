@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, Trash2, Eye, MessageSquare, Loader2 } from 'lucide-react';
+import { Users, Trash2, Eye, MessageSquare, Loader2, Heart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -18,6 +18,9 @@ export default function DashboardSocial() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingPost, setDeletingPost] = useState(null);
+  const [likesPost, setLikesPost] = useState(null);
+  const [likes, setLikes] = useState([]);
+  const [loadingLikes, setLoadingLikes] = useState(false);
 
   useEffect(() => {
     loadPosts();
@@ -47,6 +50,19 @@ export default function DashboardSocial() {
     } catch (error) {
       console.error('Error deleting post:', error);
       toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleViewLikes = async (post) => {
+    setLikesPost(post);
+    setLoadingLikes(true);
+    try {
+      const postLikes = await base44.entities.Like.filter({ post_id: post.id });
+      setLikes(postLikes);
+    } catch (e) {
+      toast.error('Erreur chargement des likes');
+    } finally {
+      setLoadingLikes(false);
     }
   };
 
@@ -84,10 +100,13 @@ export default function DashboardSocial() {
                   </div>
                   <p className="text-white text-sm mb-3 line-clamp-2">{post.content}</p>
                   <div className="flex items-center gap-4 text-xs text-white/50">
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
+                    <button
+                      onClick={() => handleViewLikes(post)}
+                      className="flex items-center gap-1 hover:text-orange-400 transition-colors"
+                    >
+                      <Heart className="w-3 h-3" />
                       {post.likes_count || 0} likes
-                    </span>
+                    </button>
                     <span className="flex items-center gap-1">
                       <MessageSquare className="w-3 h-3" />
                       {post.comments_count || 0} commentaires
@@ -107,6 +126,39 @@ export default function DashboardSocial() {
           ))}
         </div>
       </div>
+
+      {/* Likes Modal */}
+      {likesPost && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setLikesPost(null)}>
+          <div className="bg-[#0a0a2e] border border-white/10 rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                <Heart className="w-5 h-5 text-red-400" />
+                Likes — {likesPost.author_name}
+              </h3>
+              <button onClick={() => setLikesPost(null)} className="text-white/50 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-white/50 text-xs mb-4 line-clamp-2">{likesPost.content}</p>
+            {loadingLikes ? (
+              <div className="flex justify-center py-6"><Loader2 className="w-6 h-6 text-orange-400 animate-spin" /></div>
+            ) : likes.length === 0 ? (
+              <p className="text-white/40 text-center py-6">Aucun like</p>
+            ) : (
+              <div className="space-y-2">
+                {likes.map((like) => (
+                  <div key={like.id} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
+                    <Heart className="w-4 h-4 text-red-400 flex-shrink-0" />
+                    <span className="text-white/80 text-sm">{like.user_id}</span>
+                    <span className="text-white/30 text-xs ml-auto">{new Date(like.created_date).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingPost} onOpenChange={() => setDeletingPost(null)}>
