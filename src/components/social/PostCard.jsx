@@ -18,22 +18,31 @@ import UserProfileDialog from './UserProfileDialog';
 
 function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authorEmail) return;
+    if (!authorEmail) {
+      setLoading(false);
+      return;
+    }
     
+    setLoading(true);
     base44.entities.UserProfile.filter({ email: authorEmail })
       .then(profiles => {
-        if (profiles.length > 0 && profiles[0].profile_photo) {
-          setProfilePhoto(profiles[0].profile_photo);
+        if (profiles.length > 0) {
+          const profile = profiles[0];
+          if (profile.profile_photo) {
+            setProfilePhoto(profile.profile_photo);
+          }
           onProfileLoaded?.({
-            display_name: profiles[0].display_name,
-            full_name: profiles[0].full_name,
-            profile_photo: profiles[0].profile_photo,
+            display_name: profile.display_name,
+            full_name: profile.full_name,
+            profile_photo: profile.profile_photo,
           });
         }
       })
-      .catch(err => console.log('Photo load failed for:', authorEmail, err));
+      .catch(err => console.log('Photo load failed for:', authorEmail, err))
+      .finally(() => setLoading(false));
   }, [authorEmail]);
 
   return (
