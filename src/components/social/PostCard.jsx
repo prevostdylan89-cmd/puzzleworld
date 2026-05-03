@@ -38,14 +38,8 @@ function PostAuthorAvatar({ authorEmail, authorInitials }) {
       .catch(() => setLoading(false));
   }, [authorEmail]);
 
-  if (loading) {
-    return (
-      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 animate-pulse" />
-    );
-  }
-
   return (
-    <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600">
+    <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 flex-shrink-0">
       {profilePhoto ? (
         <img src={profilePhoto} alt={authorEmail} className="w-full h-full object-cover" />
       ) : (

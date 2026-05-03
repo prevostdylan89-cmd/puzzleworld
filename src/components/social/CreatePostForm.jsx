@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/components/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImagePlus, X, Puzzle, Send, Loader2, Scan } from 'lucide-react';
@@ -187,6 +187,20 @@ export default function CreatePostForm({ user, onPostCreated }) {
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user?.email?.slice(0, 2).toUpperCase() || 'U';
 
+  const [userProfilePhoto, setUserProfilePhoto] = useState(null);
+
+  useEffect(() => {
+    if (user?.email) {
+      base44.entities.UserProfile.filter({ email: user.email })
+        .then(profiles => {
+          if (profiles.length > 0 && profiles[0].profile_photo) {
+            setUserProfilePhoto(profiles[0].profile_photo);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.email]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -194,8 +208,14 @@ export default function CreatePostForm({ user, onPostCreated }) {
       className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 mb-6"
     >
       <div className="flex gap-3">
-        <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden flex-shrink-0">
-          <img src="https://base44.app/api/apps/69637ed7a7bc12860b6763ca/files/mp/public/69637ed7a7bc12860b6763ca/8181d7739_photoprofil.png" alt="profile" className="w-full h-full object-cover" />
+        <div className="h-10 w-10 rounded-full ring-2 ring-orange-500/20 overflow-hidden flex-shrink-0 bg-gradient-to-br from-orange-500 to-orange-600">
+          {userProfilePhoto ? (
+            <img src={userProfilePhoto} alt="profile" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white text-sm font-medium">
+              {userInitials}
+            </div>
+          )}
         </div>
         <div className="flex-1">
           <Textarea
