@@ -1,0 +1,56 @@
+{
+  "name": "UserDNA",
+  "type": "object",
+  "properties": {
+    "score_brands": {
+      "type": "object",
+      "description": "Brand preferences scores {brand_name: score}",
+      "default": {}
+    },
+    "score_categories": {
+      "type": "object",
+      "description": "Category preferences scores {category: score}",
+      "default": {}
+    },
+    "total_swipes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total swipes ever made"
+    },
+    "current_session_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Swipes in current session (resets at 25)"
+    },
+    "total_likes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total likes given"
+    },
+    "total_superlikes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total super likes given"
+    },
+    "last_session_stats": {
+      "type": "object",
+      "description": "Stats from last completed session",
+      "default": {}
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
