@@ -27,6 +27,8 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
     }
     
     setLoading(true);
+    
+    // Initial fetch
     base44.entities.UserProfile.filter({ email: authorEmail })
       .then(profiles => {
         if (profiles.length > 0) {
@@ -43,6 +45,20 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
       })
       .catch(err => console.log('Photo load failed for:', authorEmail, err))
       .finally(() => setLoading(false));
+    
+    // Real-time subscription for photo updates
+    const unsubscribe = base44.entities.UserProfile.subscribe((event) => {
+      if (event.data?.email === authorEmail && event.data?.profile_photo) {
+        setProfilePhoto(event.data.profile_photo);
+        onProfileLoaded?.({
+          display_name: event.data.display_name,
+          full_name: event.data.full_name,
+          profile_photo: event.data.profile_photo,
+        });
+      }
+    });
+    
+    return () => unsubscribe();
   }, [authorEmail]);
 
   return (
