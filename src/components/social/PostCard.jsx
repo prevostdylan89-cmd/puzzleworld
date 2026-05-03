@@ -39,8 +39,8 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         const user = users.length > 0 ? users[0] : null;
         const profile = profiles.length > 0 ? profiles[0] : null;
         
-        // Prioritize User.display_name, fallback to UserProfile.display_name
-        const displayName = user?.display_name || profile?.display_name;
+        // Prioritize UserProfile.display_name (existing), fallback to User.display_name
+        const displayName = profile?.display_name || user?.display_name;
         const profilePhoto = profile?.profile_photo;
         
         if (profilePhoto) {
