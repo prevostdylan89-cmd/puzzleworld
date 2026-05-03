@@ -1,0 +1,52 @@
+{
+  "name": "CompletedPuzzle",
+  "type": "object",
+  "properties": {
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the completed puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Image of the completed puzzle"
+    },
+    "completion_time": {
+      "type": "string",
+      "description": "Time taken to complete (optional)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes about the puzzle"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "User's rating of the puzzle"
+    }
+  },
+  "required": [
+    "puzzle_name",
+    "puzzle_pieces"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
