@@ -16,22 +16,29 @@
     "following_email"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "$or": [
         {
-          "follower_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "following_email": "{{user.email}}"
+          "data.following_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
     "update": {
-      "follower_email": "{{user.email}}"
+      "created_by": "{{user.email}}"
     },
     "delete": {
-      "follower_email": "{{user.email}}"
+      "created_by": "{{user.email}}"
     }
   }
 }
