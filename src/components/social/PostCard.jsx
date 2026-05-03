@@ -539,25 +539,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
               )}
             </Button>
             
-            <Button 
-              onClick={handleAddFriend}
-              size="sm"
-              disabled={friendStatus !== 'none'}
-              variant="outline"
-              className={`rounded-full text-xs h-7 px-3 ${
-                friendStatus === 'friend'
-                  ? 'border-green-500/30 text-green-400'
-                  : friendStatus === 'pending'
-                  ? 'border-white/20 text-white/50'
-                  : 'border-white/20 text-white/70 hover:text-white hover:border-white/40'
-              }`}
-            >
-              {friendStatus === 'friend' 
-                ? 'Amis' 
-                : friendStatus === 'pending' 
-                ? 'En attente' 
-                : 'Ajouter'}
-            </Button>
+
           </div>
         )}
       </div>
