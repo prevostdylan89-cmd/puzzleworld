@@ -101,10 +101,21 @@ export default function CreatePostForm({ user, onPostCreated }) {
         imageUrl = uploadResult.file_url;
       }
 
+      // Get display_name from UserProfile
+      let displayName = user.full_name || user.email;
+      try {
+        const profiles = await base44.entities.UserProfile.filter({ email: user.email });
+        if (profiles.length > 0 && profiles[0].display_name) {
+          displayName = profiles[0].display_name;
+        }
+      } catch (error) {
+        console.log('Could not fetch display_name, using fallback');
+      }
+
       const postData = {
         content: content.trim() || '',
         is_completion_post: postType === 'puzzle',
-        author_name: user.full_name || user.email,
+        author_name: displayName,
         likes_count: 0,
         comments_count: 0
       };
