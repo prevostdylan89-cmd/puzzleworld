@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
-import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag, Zap } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag, Zap, Share2 } from 'lucide-react';
 import AddSpeedRecordInline from '@/components/profile/AddSpeedRecordInline';
 import StarRating from '@/components/shared/StarRating';
 import UserCategoriesManager from '@/components/profile/UserCategoriesManager';
@@ -501,6 +501,36 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
             Ajouter un record ⚡
           </button>
 
+          {/* Partager sur le feed */}
+          <button
+            onClick={async () => {
+              const photoUrl = localPhoto || puzzle.image_url;
+              const content = `🧩 J'ai terminé le puzzle "${puzzle.puzzle_name}"${puzzle.puzzle_pieces ? ` (${puzzle.puzzle_pieces} pièces)` : ''}${puzzle.puzzle_brand ? ` de ${puzzle.puzzle_brand}` : ''} ! 🏆`;
+              try {
+                const u = await base44.auth.me();
+                await base44.entities.Post.create({
+                  content,
+                  image_url: photoUrl || '',
+                  puzzle_name: puzzle.puzzle_name,
+                  puzzle_brand: puzzle.puzzle_brand || '',
+                  puzzle_pieces: puzzle.puzzle_pieces,
+                  puzzle_reference: puzzle.puzzle_reference || '',
+                  is_completion_post: true,
+                  likes_count: 0,
+                  comments_count: 0,
+                  author_name: u.full_name || u.email,
+                });
+                toast.success('🎉 Partagé sur le feed social !');
+              } catch {
+                toast.error('Erreur lors du partage');
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm font-medium hover:bg-green-500/20 transition-colors"
+          >
+            <Share2 className="w-4 h-4" />
+            Partager sur le feed social 🎉
+          </button>
+
           {/* Catégorie personnelle */}
           {categories.length > 0 && (
             <div className="bg-white/5 rounded-lg p-4 space-y-2">
@@ -599,6 +629,30 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
     { status: 'done', label: `🏆 ${t('completedTab')}`, hidden: puzzle.status === 'done' },
   ].filter(o => !o.hidden);
 
+  const handleShareToFeed = async (e) => {
+    if (e) e.stopPropagation();
+    const photoUrl = puzzle.progress_photo || puzzle.image_url;
+    const content = `🧩 J'ai terminé le puzzle "${puzzle.puzzle_name}"${puzzle.puzzle_pieces ? ` (${puzzle.puzzle_pieces} pièces)` : ''}${puzzle.puzzle_brand ? ` de ${puzzle.puzzle_brand}` : ''} ! 🏆`;
+    try {
+      const user = await base44.auth.me();
+      await base44.entities.Post.create({
+        content,
+        image_url: photoUrl || '',
+        puzzle_name: puzzle.puzzle_name,
+        puzzle_brand: puzzle.puzzle_brand || '',
+        puzzle_pieces: puzzle.puzzle_pieces,
+        puzzle_reference: puzzle.puzzle_reference || '',
+        is_completion_post: true,
+        likes_count: 0,
+        comments_count: 0,
+        author_name: user.full_name || user.email,
+      });
+      toast.success('🎉 Partagé sur le feed social !');
+    } catch {
+      toast.error('Erreur lors du partage');
+    }
+  };
+
   const handleDelete = async () => {
     if (isUpdating) return;
     
@@ -678,6 +732,13 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Ajouter un record ⚡
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => handleShareToFeed(e)}
+                className="text-green-400 cursor-pointer hover:bg-white/10"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Partager sur le feed
               </DropdownMenuItem>
               </>
             )}
