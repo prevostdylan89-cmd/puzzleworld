@@ -10,8 +10,8 @@ export default function WishlistPuzzleModal({ open, onClose, item }) {
   const brand = item.puzzle_brand || item.brand || null;
   const pieces = item.puzzle_pieces || item.piece_count || null;
   const image = item.image_url || item.image_hd || null;
-  const asin = item.asin || item._raw?.puzzle_reference || null;
-  const amazonLink = item.amazon_link || (asin ? `https://www.amazon.fr/dp/${asin}?tag=MON_PUZZLE_ID-21` : null);
+  const asin = item.asin || item.puzzle_reference || null;
+  const amazonLink = item.amazon_link || (asin ? `https://www.amazon.fr/dp/${asin}?tag=puzzleworld0f-21` : null);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
