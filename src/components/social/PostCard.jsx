@@ -30,37 +30,35 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
     
     setLoading(true);
     
-    // Initial fetch
-    base44.entities.UserProfile.filter({ email: authorEmail })
-      .then(profiles => {
-        if (profiles.length > 0) {
-          const profile = profiles[0];
-          if (profile.profile_photo) {
-            setProfilePhoto(profile.profile_photo);
-          }
-          onProfileLoaded?.({
-            display_name: profile.display_name,
-            full_name: profile.full_name,
-            profile_photo: profile.profile_photo,
-          });
-        } else {
-          // No UserProfile found, notify parent with fallback
-          onProfileLoaded?.({
-            display_name: null,
-            full_name: null,
-            profile_photo: null,
-          });
+    // Fetch from both User and UserProfile entities
+    Promise.all([
+      base44.entities.User.filter({ email: authorEmail }),
+      base44.entities.UserProfile.filter({ email: authorEmail })
+    ])
+      .then(([users, profiles]) => {
+        const user = users.length > 0 ? users[0] : null;
+        const profile = profiles.length > 0 ? profiles[0] : null;
+        
+        // Prioritize User.display_name, fallback to UserProfile.display_name
+        const displayName = user?.display_name || profile?.display_name;
+        const profilePhoto = profile?.profile_photo;
+        
+        if (profilePhoto) {
+          setProfilePhoto(profilePhoto);
         }
+        
+        onProfileLoaded?.({
+          display_name: displayName,
+          full_name: profile?.full_name,
+          profile_photo: profilePhoto,
+        });
       })
       .catch(err => console.log('Photo load failed for:', authorEmail, err))
       .finally(() => setLoading(false));
     
-    // Real-time subscription for photo updates
-    const unsubscribe = base44.entities.UserProfile.subscribe((event) => {
-      if (event.data?.email === authorEmail) {
-        if (event.data?.profile_photo) {
-          setProfilePhoto(event.data.profile_photo);
-        }
+    // Real-time subscription for updates
+    const unsubscribe = base44.entities.User.subscribe((event) => {
+      if (event.data?.email === authorEmail && event.data?.display_name) {
         onProfileLoaded?.({
           display_name: event.data.display_name,
           full_name: event.data.full_name,
