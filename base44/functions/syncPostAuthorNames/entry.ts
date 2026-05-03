@@ -12,23 +12,22 @@ Deno.serve(async (req) => {
       if (!post.created_by) continue;
 
       try {
-        // Fetch user profile
+        // Fetch from both User and UserProfile
+        const users = await base44.entities.User.filter({ email: post.created_by });
         const profiles = await base44.entities.UserProfile.filter({ email: post.created_by });
         
-        if (profiles.length > 0) {
-          const profile = profiles[0];
-          const displayName = profile.display_name || profile.full_name || post.created_by.split('@')[0];
-          
-          // Only update if author_name is missing or is just the email prefix
-          const currentAuthorName = post.author_name || '';
-          const emailPrefix = post.created_by.split('@')[0];
-          
-          if (!currentAuthorName || currentAuthorName === emailPrefix || currentAuthorName.trim() === '') {
-            await base44.entities.Post.update(post.id, {
-              author_name: displayName
-            });
-            updatedCount++;
-          }
+        const user = users.length > 0 ? users[0] : null;
+        const profile = profiles.length > 0 ? profiles[0] : null;
+        
+        // Prioritize User.display_name, then UserProfile.display_name
+        const displayName = user?.display_name || profile?.display_name || post.created_by.split('@')[0];
+        
+        // Always update with the correct display_name
+        if (post.author_name !== displayName) {
+          await base44.entities.Post.update(post.id, {
+            author_name: displayName
+          });
+          updatedCount++;
         }
       } catch (error) {
         console.log(`Failed to sync post ${post.id}:`, error.message);
