@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 export default function DashboardProfile() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userBadges, setUserBadges] = useState({});
 
   useEffect(() => {
     loadUsers();
@@ -17,6 +18,20 @@ export default function DashboardProfile() {
     try {
       const allUsers = await base44.entities.User.list('-created_date', 100);
       setUsers(allUsers);
+      
+      // Charger les badges pour chaque utilisateur
+      const badges = {};
+      for (const user of allUsers) {
+        const userBadgeList = await base44.entities.UserBadge.filter(
+          { created_by: user.email },
+          '-unlocked_at',
+          1
+        );
+        if (userBadgeList.length > 0) {
+          badges[user.email] = userBadgeList[0];
+        }
+      }
+      setUserBadges(badges);
     } catch (error) {
       console.error('Error loading users:', error);
       toast.error('Erreur de chargement');
@@ -56,57 +71,70 @@ export default function DashboardProfile() {
           Liste des Utilisateurs ({users.length})
         </h3>
 
-        <div className="space-y-2">
-          {users.map((user) => (
-            <div
-              key={user.id}
-              className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 flex items-center justify-between hover:border-white/10 transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-medium text-sm">
-                  {user.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-white font-medium">{user.display_name || user.email}</p>
-                  <p className="text-white/50 text-sm">{user.email}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-xs px-2 py-0.5 rounded ${
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/[0.06]">
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Utilisateur</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Email</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Rôle</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Badge</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} className="border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-medium text-xs">
+                        {user.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+                      </div>
+                      <p className="text-white">{user.display_name || user.email?.split('@')[0]}</p>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-white/60">{user.email}</td>
+                  <td className="py-3 px-4">
+                    <span className={`text-xs px-2 py-1 rounded ${
                       user.role === 'admin'
                         ? 'bg-orange-500/20 text-orange-400'
                         : 'bg-white/10 text-white/70'
                     }`}>
                       {user.role === 'admin' ? 'Admin' : 'Utilisateur'}
                     </span>
-                    <span className="text-white/40 text-xs">
-                      Inscrit le {new Date(user.created_date).toLocaleDateString('fr-FR')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {user.role === 'user' ? (
-                  <Button
-                    onClick={() => handleRoleChange(user.id, 'admin')}
-                    size="sm"
-                    className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
-                  >
-                    <Shield className="w-3 h-3 mr-2" />
-                    Promouvoir Admin
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleRoleChange(user.id, 'user')}
-                    size="sm"
-                    className="bg-white/10 hover:bg-white/20 text-white"
-                  >
-                    <User className="w-3 h-3 mr-2" />
-                    Rétrograder
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="py-3 px-4">
+                    {userBadges[user.email] ? (
+                      <span className="text-2xl">{userBadges[user.email].badge_name}</span>
+                    ) : (
+                      <span className="text-white/40 text-xs">Aucun badge</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    {user.role === 'user' ? (
+                      <Button
+                        onClick={() => handleRoleChange(user.id, 'admin')}
+                        size="sm"
+                        className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 text-xs"
+                      >
+                        <Shield className="w-3 h-3 mr-1" />
+                        Admin
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleRoleChange(user.id, 'user')}
+                        size="sm"
+                        className="bg-white/10 hover:bg-white/20 text-white text-xs"
+                      >
+                        <User className="w-3 h-3 mr-1" />
+                        User
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
