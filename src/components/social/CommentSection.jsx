@@ -18,16 +18,18 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
 
   useEffect(() => {
     if (!comment.created_by) return;
-    base44.functions.invoke('getUserPublicStats', { targetEmail: comment.created_by })
-      .then(res => {
-        const data = res.data;
-        if (data) {
-          setProfilePhoto(data.profilePhoto || null);
-          if (data.displayName) setDisplayName(data.displayName);
-          // Check admin via User entity separately isn't needed here as we check role
+    
+    // Fetch profile photo from UserProfile entity directly
+    base44.entities.UserProfile.filter({ email: comment.created_by })
+      .then(profiles => {
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
+          if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
         }
       })
       .catch(() => {});
+    
+    // Check admin status
     base44.entities.User.filter({ email: comment.created_by })
       .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
       .catch(() => {});
@@ -86,8 +88,12 @@ export default function CommentSection({ post, user, onCommentAdded }) {
 
   useEffect(() => {
     if (!user?.email) return;
-    base44.functions.invoke('getUserPublicStats', { targetEmail: user.email })
-      .then(res => { if (res.data?.profilePhoto) setCurrentUserPhoto(res.data.profilePhoto); })
+    base44.entities.UserProfile.filter({ email: user.email })
+      .then(profiles => { 
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setCurrentUserPhoto(profiles[0].profile_photo);
+        }
+      })
       .catch(() => {});
   }, [user?.email]);
 
