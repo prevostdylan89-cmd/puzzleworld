@@ -19,18 +19,20 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
   useEffect(() => {
     if (!comment.created_by) return;
     
-    // Fetch profile photo by display_name first, then fallback to email
+    // Fetch profile photo by email first (most reliable), then display_name
     const fetchPhoto = async () => {
       try {
-        // Search by display_name (the pseudo)
-        let profiles = await base44.entities.UserProfile.filter({ display_name: comment.author_name });
-        if (profiles.length > 0 && profiles[0].profile_photo) {
-          setProfilePhoto(profiles[0].profile_photo);
+        // Search by email first (most reliable identifier)
+        let profiles = await base44.entities.UserProfile.filter({ email: comment.created_by });
+        if (profiles.length > 0) {
+          if (profiles[0].profile_photo) {
+            setProfilePhoto(profiles[0].profile_photo);
+          }
           if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
           return;
         }
-        // Fallback: search by email
-        profiles = await base44.entities.UserProfile.filter({ email: comment.created_by });
+        // Fallback: search by display_name (the pseudo)
+        profiles = await base44.entities.UserProfile.filter({ display_name: comment.author_name });
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
           if (profiles[0].display_name) setDisplayName(profiles[0].display_name);
