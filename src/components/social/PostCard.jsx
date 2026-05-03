@@ -18,28 +18,21 @@ import UserProfileDialog from './UserProfileDialog';
 import UserBadgeDisplay from './UserBadgeDisplay';
 import AuthorLevelBadge from './AuthorLevelBadge';
 
-function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
+function PostAuthorAvatar({ authorEmail, authorInitials }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     if (!authorEmail) return;
     
-    // Fetch profile photo from UserProfile entity directly (same as CommentSection)
+    // Fetch profile photo from UserProfile entity directly
     base44.entities.UserProfile.filter({ email: authorEmail })
       .then(profiles => {
         if (profiles.length > 0 && profiles[0].profile_photo) {
           setProfilePhoto(profiles[0].profile_photo);
-          if (profiles[0].display_name) {
-            onProfileLoaded?.({
-              display_name: profiles[0].display_name,
-              full_name: profiles[0].full_name,
-              profile_photo: profiles[0].profile_photo,
-            });
-          }
         }
       })
       .catch(() => {});
-  }, [authorEmail, onProfileLoaded]);
+  }, [authorEmail]);
 
   return (
     <Avatar className="h-10 w-10 ring-2 ring-orange-500/20">
@@ -497,6 +490,11 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
+        <PostAuthorAvatar
+          authorEmail={post.created_by}
+          authorInitials={authorInitials}
+        />
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
