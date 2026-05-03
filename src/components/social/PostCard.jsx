@@ -21,20 +21,19 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick, onProfileLoade
 
   useEffect(() => {
     if (!authorEmail) return;
-    // Use service-role backed function to bypass RLS
+    
     base44.functions.invoke('getUserPublicStats', { targetEmail: authorEmail })
       .then(res => {
-        const data = res.data;
-        if (data) {
-          setProfilePhoto(data.profilePhoto || null);
+        if (res?.data?.profilePhoto) {
+          setProfilePhoto(res.data.profilePhoto);
           onProfileLoaded?.({
-            display_name: data.displayName,
-            full_name: data.displayName,
-            profile_photo: data.profilePhoto,
+            display_name: res.data.displayName,
+            full_name: res.data.displayName,
+            profile_photo: res.data.profilePhoto,
           });
         }
       })
-      .catch(() => {});
+      .catch(err => console.log('Photo load failed for:', authorEmail, err));
   }, [authorEmail]);
 
   return (
