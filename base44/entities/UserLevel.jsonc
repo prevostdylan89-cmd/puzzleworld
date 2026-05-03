@@ -1,0 +1,52 @@
+{
+  "name": "UserLevel",
+  "type": "object",
+  "properties": {
+    "level": {
+      "type": "number",
+      "default": 1,
+      "description": "User level based on activity"
+    },
+    "badge_name": {
+      "type": "string",
+      "enum": [
+        "Novice",
+        "Amateur",
+        "Passionn\u00e9",
+        "Expert",
+        "Ma\u00eetre",
+        "L\u00e9gende"
+      ],
+      "default": "Novice",
+      "description": "Badge name"
+    },
+    "total_puzzles": {
+      "type": "number",
+      "default": 0,
+      "description": "Total puzzles completed"
+    },
+    "total_posts": {
+      "type": "number",
+      "default": 0,
+      "description": "Total posts created"
+    }
+  },
+  "required": [
+    "level",
+    "badge_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
