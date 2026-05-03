@@ -310,7 +310,22 @@ export default function WishlistSection({ user }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               className={`bg-white/[0.03] backdrop-blur-xl border rounded-xl overflow-hidden hover:border-orange-500/30 transition-colors group cursor-pointer relative ${isSelected ? 'border-orange-500 ring-2 ring-orange-500/40' : 'border-white/[0.06]'}`}
-              onClick={() => isMultiSelect ? toggleSelect(item.id) : setSelectedPuzzle(item.catalogData || { title: item.puzzle_name, brand: item.puzzle_brand, piece_count: item.puzzle_pieces, image_hd: item.image_url })}
+              onClick={() => {
+                if (isMultiSelect) { toggleSelect(item.id); return; }
+                const puzzle = item.catalogData ? {
+                  ...item.catalogData,
+                  title: item.catalogData.title || item.puzzle_name,
+                  brand: item.catalogData.brand || item.puzzle_brand,
+                  piece_count: item.catalogData.piece_count || item.puzzle_pieces,
+                  image_hd: item.catalogData.image_hd || item.image_url,
+                } : {
+                  title: item.puzzle_name,
+                  brand: item.puzzle_brand,
+                  piece_count: item.puzzle_pieces,
+                  image_hd: item.image_url,
+                };
+                setSelectedPuzzle(puzzle);
+              }}
             >
               {/* Checkbox multi-select */}
               {isMultiSelect && (

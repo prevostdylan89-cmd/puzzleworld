@@ -307,7 +307,6 @@ export default function Profile() {
     { label: t('completed'), value: stats.completed, icon: Puzzle, onClick: () => setShowCompletedModal(true) },
     { label: t('achievements'), value: stats.achievements, icon: Trophy, onClick: () => setShowAchievementsModal(true) },
     { label: t('wishlist'), value: stats.wishlist, icon: Heart, onClick: () => setShowWishlistModal(true) },
-    { label: 'Fiches', value: stats.total, icon: Grid3X3, onClick: () => setShowCollectionModal(true) }
   ];
 
   const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n.toString();
@@ -409,7 +408,7 @@ export default function Profile() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3 mt-8">
+          <div className="grid grid-cols-3 gap-4 mt-8">
             {statItems.map((stat, index) => (
               <motion.button
                 key={stat.label}
