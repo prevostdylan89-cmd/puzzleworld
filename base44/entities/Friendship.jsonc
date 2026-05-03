@@ -34,34 +34,51 @@
     "addressee_email"
   ],
   "rls": {
-    "create": {},
+    "create": {
+      "created_by": "{{user.email}}"
+    },
     "read": {
       "$or": [
         {
-          "requester_email": "{{user.email}}"
+          "data.requester_email": "{{user.email}}"
         },
         {
-          "addressee_email": "{{user.email}}"
+          "data.addressee_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
     "update": {
       "$or": [
         {
-          "requester_email": "{{user.email}}"
+          "data.requester_email": "{{user.email}}"
         },
         {
-          "addressee_email": "{{user.email}}"
+          "data.addressee_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
     "delete": {
       "$or": [
         {
-          "requester_email": "{{user.email}}"
+          "data.requester_email": "{{user.email}}"
         },
         {
-          "addressee_email": "{{user.email}}"
+          "data.addressee_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     }
