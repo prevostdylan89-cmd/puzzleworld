@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Users, Trash2, Eye, MessageSquare, Loader2, Heart, X } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -22,7 +21,6 @@ export default function DashboardSocial() {
   const [likesPost, setLikesPost] = useState(null);
   const [likes, setLikes] = useState([]);
   const [loadingLikes, setLoadingLikes] = useState(false);
-  const [authorPhotos, setAuthorPhotos] = useState({});
 
   useEffect(() => {
     loadPosts();
@@ -33,22 +31,6 @@ export default function DashboardSocial() {
     try {
       const allPosts = await base44.entities.Post.list('-created_date', 50);
       setPosts(allPosts);
-      
-      // Load author photos
-      const photos = {};
-      for (const post of allPosts) {
-        if (post.created_by && !photos[post.created_by]) {
-          try {
-            const userProfiles = await base44.entities.UserProfile.filter({ email: post.created_by });
-            if (userProfiles.length > 0) {
-              photos[post.created_by] = userProfiles[0].profile_photo;
-            }
-          } catch (e) {
-            console.error('Error loading profile photo:', e);
-          }
-        }
-      }
-      setAuthorPhotos(photos);
     } catch (error) {
       console.error('Error loading posts:', error);
       toast.error('Erreur de chargement');
@@ -110,16 +92,7 @@ export default function DashboardSocial() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Avatar className="h-8 w-8">
-                      {authorPhotos[post.created_by] ? (
-                        <img src={authorPhotos[post.created_by]} alt={post.author_name} className="w-full h-full object-cover" />
-                      ) : (
-                        <AvatarFallback className="bg-orange-500/20 text-orange-400 text-xs">
-                          {post.author_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
+                  <div className="flex items-center gap-2 mb-2">
                     <span className="text-white/70 text-sm font-medium">{post.author_name}</span>
                     <span className="text-white/40 text-xs">
                       {new Date(post.created_date).toLocaleDateString('fr-FR')}
