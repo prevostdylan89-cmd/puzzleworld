@@ -19,7 +19,7 @@ export default function DashboardBadges() {
 
   const loadBadges = async () => {
     try {
-      const data = await base44.asServiceRole.entities.Badge.list();
+      const data = await base44.entities.Badge.list();
       setBadges(data);
       setLoading(false);
     } catch (error) {
@@ -46,7 +46,7 @@ export default function DashboardBadges() {
     }
 
     try {
-      await base44.asServiceRole.entities.Badge.update(editingId, editData);
+      await base44.entities.Badge.update(editingId, editData);
       toast.success('Badge mis à jour');
       setEditingId(null);
       loadBadges();
@@ -59,7 +59,7 @@ export default function DashboardBadges() {
     if (!confirm('Supprimer ce badge?')) return;
     
     try {
-      await base44.asServiceRole.entities.Badge.delete(id);
+      await base44.entities.Badge.delete(id);
       toast.success('Badge supprimé');
       loadBadges();
     } catch (error) {
@@ -74,7 +74,7 @@ export default function DashboardBadges() {
     }
 
     try {
-      await base44.asServiceRole.entities.Badge.create(editData);
+      await base44.entities.Badge.create(editData);
       toast.success('Badge créé');
       setShowForm(false);
       setEditData({});
