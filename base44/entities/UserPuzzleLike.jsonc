@@ -1,0 +1,43 @@
+{
+  "name": "UserPuzzleLike",
+  "type": "object",
+  "properties": {
+    "puzzle_asin": {
+      "type": "string",
+      "description": "ASIN du puzzle lik\u00e9"
+    },
+    "puzzle_name": {
+      "type": "string",
+      "description": "Nom du puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Marque du puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Nombre de pi\u00e8ces"
+    },
+    "puzzle_image": {
+      "type": "string",
+      "description": "Image du puzzle"
+    }
+  },
+  "required": [
+    "puzzle_asin"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
