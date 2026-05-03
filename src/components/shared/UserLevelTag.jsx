@@ -24,19 +24,33 @@ function getLevel(count) {
 
 export default function UserLevelTag({ userEmail }) {
   const [levelData, setLevelData] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!userEmail) return;
-    base44.entities.PuzzleCatalog.filter({ created_by: userEmail })
-      .then(items => setLevelData(getLevel(items.length)))
+    Promise.all([
+      base44.entities.PuzzleCatalog.filter({ created_by: userEmail }),
+      base44.entities.User.filter({ email: userEmail })
+    ])
+      .then(([items, users]) => {
+        setLevelData(getLevel(items.length));
+        if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true);
+      })
       .catch(() => {});
   }, [userEmail]);
 
   if (!levelData) return null;
 
   return (
-    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-semibold whitespace-nowrap">
-      {levelData.emoji} Niv.{levelData.level}
+    <span className="flex items-center gap-1">
+      {isAdmin && (
+        <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-bold whitespace-nowrap">
+          👑 Admin
+        </span>
+      )}
+      <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-semibold whitespace-nowrap">
+        {levelData.emoji} Niv.{levelData.level}
+      </span>
     </span>
   );
 }

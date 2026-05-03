@@ -349,7 +349,12 @@ export default function Profile() {
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <h1 className="text-2xl lg:text-3xl font-bold text-white">{user.display_name || user.full_name || user.email}</h1>
-                    {currentBadge && (
+                    {user.role === 'admin' ? (
+                      <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/20">
+                        <span className="text-2xl">👑</span>
+                        <span className="font-bold text-sm text-purple-300">Admin</span>
+                      </span>
+                    ) : currentBadge && (
                       <button
                         onClick={() => setShowBadgesModal(true)}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all hover:scale-105"

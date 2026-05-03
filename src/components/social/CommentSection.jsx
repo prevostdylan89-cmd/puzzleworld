@@ -9,6 +9,46 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '@/components/LanguageContext';
 
+function CommentItem({ comment, commentInitials, timeAgo }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!comment.created_by) return;
+    base44.entities.User.filter({ email: comment.created_by })
+      .then(users => { if (users.length > 0 && users[0].role === 'admin') setIsAdmin(true); })
+      .catch(() => {});
+  }, [comment.created_by]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex gap-3"
+    >
+      <Avatar className="h-8 w-8 ring-2 ring-purple-500/20">
+        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
+          {commentInitials}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <div className="bg-white/5 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <p className="text-white/90 font-medium text-sm">{comment.author_name}</p>
+            {isAdmin && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-bold whitespace-nowrap">
+                👑 Admin
+              </span>
+            )}
+          </div>
+          <p className="text-white/70 text-sm">{comment.content}</p>
+        </div>
+        <p className="text-white/30 text-xs mt-1 ml-3">{timeAgo}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function CommentSection({ post, user, onCommentAdded }) {
   const { t } = useLanguage();
   const [comments, setComments] = useState([]);
@@ -127,26 +167,12 @@ export default function CommentSection({ post, user, onCommentAdded }) {
                 : 'just now';
 
               return (
-                <motion.div
+                <CommentItem
                   key={comment.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="flex gap-3"
-                >
-                  <Avatar className="h-8 w-8 ring-2 ring-purple-500/20">
-                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs">
-                      {commentInitials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="bg-white/5 rounded-lg p-3">
-                      <p className="text-white/90 font-medium text-sm mb-1">{comment.author_name}</p>
-                      <p className="text-white/70 text-sm">{comment.content}</p>
-                    </div>
-                    <p className="text-white/30 text-xs mt-1 ml-3">{timeAgo}</p>
-                  </div>
-                </motion.div>
+                  comment={comment}
+                  commentInitials={commentInitials}
+                  timeAgo={timeAgo}
+                />
               );
             })}
           </AnimatePresence>
