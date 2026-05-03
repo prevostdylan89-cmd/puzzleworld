@@ -43,6 +43,13 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
             full_name: profile.full_name,
             profile_photo: profile.profile_photo,
           });
+        } else {
+          // No UserProfile found, notify parent with fallback
+          onProfileLoaded?.({
+            display_name: null,
+            full_name: null,
+            profile_photo: null,
+          });
         }
       })
       .catch(err => console.log('Photo load failed for:', authorEmail, err))
@@ -50,8 +57,10 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
     
     // Real-time subscription for photo updates
     const unsubscribe = base44.entities.UserProfile.subscribe((event) => {
-      if (event.data?.email === authorEmail && event.data?.profile_photo) {
-        setProfilePhoto(event.data.profile_photo);
+      if (event.data?.email === authorEmail) {
+        if (event.data?.profile_photo) {
+          setProfilePhoto(event.data.profile_photo);
+        }
         onProfileLoaded?.({
           display_name: event.data.display_name,
           full_name: event.data.full_name,
@@ -93,6 +102,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
   const [showAuthorProfile, setShowAuthorProfile] = useState(false);
   const [authorProfile, setAuthorProfile] = useState(null);
   const [friendStatus, setFriendStatus] = useState('none'); // 'none' | 'pending' | 'friend'
+  const [authorDisplayName, setAuthorDisplayName] = useState(null);
 
   useEffect(() => {
     if (!post.created_by) console.warn('PostCard: post.created_by is missing', post);
@@ -527,7 +537,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
-              {authorProfile?.display_name || authorProfile?.full_name || post.author_name || post.created_by?.split('@')[0] || ''}
+              {authorProfile?.display_name || authorProfile?.full_name || post.created_by?.split('@')[0] || ''}
             </span>
             {post.created_by && <AuthorLevelBadge userEmail={post.created_by} />}
             {post.is_completion_post && (
