@@ -1,0 +1,53 @@
+{
+  "name": "Wishlist",
+  "type": "object",
+  "properties": {
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Puzzle image URL"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Why user wants this puzzle"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "description": "Purchase priority"
+    }
+  },
+  "required": [
+    "puzzle_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
