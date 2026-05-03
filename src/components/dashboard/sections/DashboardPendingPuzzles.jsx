@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle2, XCircle, Loader2, Eye } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Eye, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import PuzzleEditModal from '@/components/dashboard/PuzzleEditModal';
 
 export default function DashboardPendingPuzzles() {
   const [puzzles, setPuzzles] = useState([]);
+  const [userPhotos, setUserPhotos] = useState({}); // catalogId -> user progress_photo
   const [loading, setLoading] = useState(true);
   const [editingPuzzle, setEditingPuzzle] = useState(null);
 
@@ -19,6 +20,14 @@ export default function DashboardPendingPuzzles() {
     try {
       const pending = await base44.entities.PuzzleCatalog.filter({ status: 'pending' }, '-created_date', 200);
       setPuzzles(pending);
+      // Load user photos for each pending puzzle
+      const photoMap = {};
+      await Promise.all(pending.map(async (p) => {
+        const userPuzzles = await base44.entities.UserPuzzle.filter({ puzzle_reference: p.ean || p.asin });
+        const withPhoto = userPuzzles.find(up => up.progress_photo);
+        if (withPhoto) photoMap[p.id] = withPhoto.progress_photo;
+      }));
+      setUserPhotos(photoMap);
     } catch (error) {
       toast.error('Erreur de chargement');
     } finally {
@@ -74,17 +83,32 @@ export default function DashboardPendingPuzzles() {
               key={puzzle.id}
               className="bg-white/[0.03] border border-orange-500/20 rounded-xl p-4 flex items-center gap-4"
             >
-              {puzzle.image_hd ? (
-                <img
-                  src={puzzle.image_hd}
-                  alt={puzzle.title}
-                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-white/5 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-3xl">🧩</span>
-                </div>
-              )}
+              <div className="flex gap-2 flex-shrink-0">
+                {puzzle.image_hd ? (
+                  <img
+                    src={puzzle.image_hd}
+                    alt={puzzle.title}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-white/5 rounded-lg flex items-center justify-center">
+                    <span className="text-3xl">🧩</span>
+                  </div>
+                )}
+                {userPhotos[puzzle.id] && (
+                  <div className="relative">
+                    <img
+                      src={userPhotos[puzzle.id]}
+                      alt="Photo utilisateur"
+                      className="w-20 h-20 object-cover rounded-lg border-2 border-orange-500/40"
+                    />
+                    <div className="absolute -top-1 -right-1 bg-orange-500 rounded-full p-0.5">
+                      <Camera className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    <p className="text-[9px] text-orange-400 text-center mt-0.5">Photo user</p>
+                  </div>
+                )}
+              </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { Loader2, Barcode, Edit, Star, Image as ImageIcon, Check, Edit2 } from 'lucide-react';
+import { Loader2, Barcode, Edit, Star, Image as ImageIcon, Check, Edit2, Camera, X } from 'lucide-react';
 import ManualAddPuzzleModal from './ManualAddPuzzleModal';
 import PersonalPuzzleAddModal from './PersonalPuzzleAddModal';
 import { motion } from 'framer-motion';
@@ -60,6 +60,9 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const [pendingBatch, setPendingBatch] = useState([]);
   const [showAddAnother, setShowAddAnother] = useState(false);
   const [scanRating, setScanRating] = useState(0);
+  const [userPhoto, setUserPhoto] = useState(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const userPhotoInputRef = useRef(null);
   
   const scannerRef = useRef(null);
   const html5QrcodeScannerRef = useRef(null);
@@ -461,6 +464,22 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     }
   };
 
+  const handleUserPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setUserPhoto(file_url);
+      toast.success('Photo ajoutée !');
+    } catch (err) {
+      toast.error('Erreur lors de l\'upload');
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
   const handleAddPuzzle = async (finalize = false) => {
     if (!puzzleData || !selectedStatus) {
       toast.error('Veuillez sélectionner un statut');
@@ -468,7 +487,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     }
 
     // Ajouter au lot en attente
-    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus, rating: scanRating || null }];
+    const newBatch = [...pendingBatch, { puzzleData: { ...puzzleData }, selectedStatus, rating: scanRating || null, userPhoto: userPhoto || null }];
     setPendingBatch(newBatch);
 
     if (finalize) {
@@ -483,7 +502,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
   const saveBatch = async (batch) => {
     try {
       setLoading(true);
-      for (const { puzzleData: pd, selectedStatus: status, rating } of batch) {
+      for (const { puzzleData: pd, selectedStatus: status, rating, userPhoto: photo } of batch) {
         let catalogPuzzleId = pd.catalog_id || null;
         if (!catalogPuzzleId && pd.isPending) {
           const newEntry = await base44.entities.PuzzleCatalog.create({
@@ -511,6 +530,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
           catalog_puzzle_id: catalogPuzzleId,
           status,
           rating: rating || null,
+          progress_photo: photo || null,
         });
 
         if (catalogPuzzleId) {
@@ -552,6 +572,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setScanMessage(null);
     setPendingBatch([]);
     setShowAddAnother(false);
+    setUserPhoto(null);
     setActiveTab(isMobile ? 'scanner' : 'manual');
     onClose();
   };
@@ -572,6 +593,7 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
     setEditingPieces(false);
     setEditedPieces('');
     setScanRating(0);
+    setUserPhoto(null);
     setCameraReady(false);
     setScanning(false);
     setActiveTab(isMobile ? 'scanner' : 'manual');
@@ -1070,6 +1092,46 @@ export default function ScanPuzzleModal({ open, onClose, onPuzzleAdded, skipColl
                     </p>
                   )}
                 </div>
+
+                {/* 📷 Ma photo du puzzle */}
+                <input ref={userPhotoInputRef} type="file" accept="image/*" className="hidden" onChange={handleUserPhotoUpload} />
+                <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                  <label className="text-sm text-white/70 mb-3 block">📷 Ma photo du puzzle (optionnel)</label>
+                  {userPhoto ? (
+                    <div className="relative">
+                      <img src={userPhoto} alt="Ma photo" className="w-full h-32 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => setUserPhoto(null)}
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5 text-white" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => userPhotoInputRef.current?.click()}
+                        className="absolute bottom-1.5 right-1.5 text-[10px] bg-orange-500/80 hover:bg-orange-500 text-white px-2 py-1 rounded-md transition-colors"
+                      >
+                        Changer
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => userPhotoInputRef.current?.click()}
+                      disabled={isUploadingPhoto}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-orange-500/50 hover:text-orange-400 hover:bg-orange-500/5 transition-all disabled:opacity-50"
+                    >
+                      {isUploadingPhoto ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Upload en cours...</>
+                      ) : (
+                        <><Camera className="w-4 h-4" /> Ajouter ma photo du puzzle</>
+                      )}
+                    </button>
+                  )}
+                  <p className="text-white/30 text-xs mt-2">Votre photo personnelle · L'image officielle sera choisie par l'admin</p>
+                </div>
+
                 <div>
                   <label className="text-sm text-white/70 mb-3 block">Où voulez-vous ajouter ce puzzle ?</label>
                   <div className="grid grid-cols-2 gap-3">
