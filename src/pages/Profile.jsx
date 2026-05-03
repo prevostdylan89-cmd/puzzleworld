@@ -29,7 +29,7 @@ import WishlistSection from '@/components/profile/WishlistSection';
 import CollectionSection from '@/components/profile/CollectionSection';
 import ExchangeSection from '@/components/profile/ExchangeSection';
 import LikedPuzzlesSection from '@/components/profile/LikedPuzzlesSection';
-import { CompletedPuzzlesModal, AchievementsModal, WishlistModal } from '@/components/profile/StatsModal';
+import { CompletedPuzzlesModal, AchievementsModal, WishlistModal, CollectionModal } from '@/components/profile/StatsModal';
 import BadgesModal from '@/components/profile/BadgesModal';
 import EditProfileDialog from '@/components/profile/EditProfileDialog';
 import DeleteAccountSection from '@/components/profile/DeleteAccountSection';
@@ -51,6 +51,7 @@ export default function Profile() {
     completed: 0,
     achievements: 0,
     wishlist: 0,
+    total: 0,
     followers: 0,
     following: 0,
     totalPieces: 0
@@ -62,6 +63,7 @@ export default function Profile() {
   const [showWishlistModal, setShowWishlistModal] = useState(false);
   const [showBadgesModal, setShowBadgesModal] = useState(false);
   const [showBugReport, setShowBugReport] = useState(false);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [currentBadge, setCurrentBadge] = useState(null);
 
   useEffect(() => {
@@ -124,13 +126,14 @@ export default function Profile() {
       await base44.functions.invoke('syncUserProfile', {});
       
       // Load stats
-      const [completedPuzzles, userAchievements, oldWishlist, userPuzzleWishlist, followers, following] = await Promise.all([
+      const [completedPuzzles, userAchievements, oldWishlist, userPuzzleWishlist, followers, following, allUserPuzzles] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
         base44.entities.Achievement.filter({ created_by: currentUser.email }),
         base44.entities.Wishlist.filter({ created_by: currentUser.email }),
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'wishlist' }),
         base44.entities.Follow.filter({ following_email: currentUser.email }),
-        base44.entities.Follow.filter({ follower_email: currentUser.email })
+        base44.entities.Follow.filter({ follower_email: currentUser.email }),
+        base44.entities.UserPuzzle.filter({ created_by: currentUser.email })
       ]);
       // Dedup wishlist by puzzle_name
       const wishlistSeen = new Set();
@@ -148,6 +151,7 @@ export default function Profile() {
         completed: completedPuzzles.length,
         achievements: userAchievements.length,
         wishlist: wishlistItems.length,
+        total: allUserPuzzles.length,
         followers: followers.length,
         following: following.length,
         totalPieces
@@ -302,7 +306,8 @@ export default function Profile() {
   const statItems = [
     { label: t('completed'), value: stats.completed, icon: Puzzle, onClick: () => setShowCompletedModal(true) },
     { label: t('achievements'), value: stats.achievements, icon: Trophy, onClick: () => setShowAchievementsModal(true) },
-    { label: t('wishlist'), value: stats.wishlist, icon: Heart, onClick: () => setShowWishlistModal(true) }
+    { label: t('wishlist'), value: stats.wishlist, icon: Heart, onClick: () => setShowWishlistModal(true) },
+    { label: 'Fiches', value: stats.total, icon: Grid3X3, onClick: () => setShowCollectionModal(true) }
   ];
 
   const formatPieces = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n.toString();
@@ -404,7 +409,7 @@ export default function Profile() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-4 gap-3 mt-8">
             {statItems.map((stat, index) => (
               <motion.button
                 key={stat.label}
@@ -581,6 +586,7 @@ export default function Profile() {
       <CompletedPuzzlesModal open={showCompletedModal} onClose={() => setShowCompletedModal(false)} user={user} />
       <AchievementsModal open={showAchievementsModal} onClose={() => setShowAchievementsModal(false)} user={user} />
       <WishlistModal open={showWishlistModal} onClose={() => setShowWishlistModal(false)} user={user} />
+      <CollectionModal open={showCollectionModal} onClose={() => setShowCollectionModal(false)} user={user} />
       <BadgesModal open={showBadgesModal} onClose={() => setShowBadgesModal(false)} user={user} />
       <BugReportModal open={showBugReport} onClose={() => setShowBugReport(false)} />
     </div>

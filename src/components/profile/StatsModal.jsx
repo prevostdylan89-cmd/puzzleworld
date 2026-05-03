@@ -331,6 +331,69 @@ export function AchievementsModal({ open, onClose, user }) {
   );
 }
 
+export function CollectionModal({ open, onClose, user }) {
+  const { t } = useLanguage();
+  const [puzzles, setPuzzles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (open && user) {
+      setLoading(true);
+      base44.entities.UserPuzzle.filter({ created_by: user.email }, '-created_date')
+        .then(setPuzzles)
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  }, [open, user]);
+
+  const statusLabel = { wishlist: '⭐ Wishlist', inbox: '📦 Chez moi', in_progress: '🧩 En cours', done: '✅ Terminé', cemetery: '🪦 Cimetière' };
+  const statusColor = { wishlist: 'text-yellow-400', inbox: 'text-blue-400', in_progress: 'text-orange-400', done: 'text-green-400', cemetery: 'text-white/40' };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-white text-2xl flex items-center gap-2">
+            🧩 Ma Collection ({puzzles.length})
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
+          </div>
+        ) : puzzles.length === 0 ? (
+          <div className="text-center py-8 text-white/50">Aucun puzzle dans votre collection.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {puzzles.map((puzzle) => (
+              <div key={puzzle.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-orange-500/30 transition-all">
+                <div className="flex gap-3">
+                  {puzzle.image_url ? (
+                    <img src={puzzle.image_url} alt={puzzle.puzzle_name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <Package className="w-6 h-6 text-white/20" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-white font-semibold text-sm leading-tight mb-1 line-clamp-2">{puzzle.puzzle_name}</h4>
+                    {puzzle.puzzle_brand && <p className="text-white/50 text-xs">{puzzle.puzzle_brand}</p>}
+                    <p className="text-orange-400 text-xs">{puzzle.puzzle_pieces} pcs</p>
+                    <span className={`text-xs font-medium ${statusColor[puzzle.status] || 'text-white/40'}`}>
+                      {statusLabel[puzzle.status] || puzzle.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function WishlistModal({ open, onClose, user }) {
   const { t } = useLanguage();
   const [wishlist, setWishlist] = useState([]);
