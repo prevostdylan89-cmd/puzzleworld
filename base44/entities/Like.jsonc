@@ -1,0 +1,28 @@
+{
+  "name": "Like",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post that was liked"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who liked"
+    }
+  },
+  "required": [
+    "post_id",
+    "user_id"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "user_id": "{{user.id}}"
+    },
+    "delete": {
+      "user_id": "{{user.id}}"
+    }
+  }
+}
