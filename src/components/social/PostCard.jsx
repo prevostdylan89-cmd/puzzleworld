@@ -17,7 +17,6 @@ import PuzzleDetailClickable from '@/components/collection/PuzzleDetailClickable
 import UserProfileDialog from './UserProfileDialog';
 import UserBadgeDisplay from './UserBadgeDisplay';
 import AuthorLevelBadge from './AuthorLevelBadge';
-import PostAuthorAvatar from './PostAuthorAvatar';
 
 export default function PostCard({ post, user, isFeatured = false }) {
   const { t } = useLanguage();
@@ -462,12 +461,6 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorAvatar
-          authorEmail={post.created_by}
-          authorName={null}
-          authorInitials={authorInitials}
-        />
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
