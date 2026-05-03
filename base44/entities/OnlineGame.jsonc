@@ -1,0 +1,70 @@
+{
+  "name": "OnlineGame",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Titre du jeu"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description du jeu"
+    },
+    "image": {
+      "type": "string",
+      "description": "URL de l'image"
+    },
+    "url": {
+      "type": "string",
+      "description": "URL du jeu"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Plateforme (Web, Mobile, etc.)"
+    },
+    "rating": {
+      "type": "number",
+      "default": 4.5,
+      "description": "Note du jeu"
+    },
+    "players": {
+      "type": "string",
+      "default": "1K+",
+      "description": "Nombre de joueurs"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags du jeu"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Jeu mis en avant"
+    }
+  },
+  "required": [
+    "title",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
