@@ -1,0 +1,134 @@
+{
+  "name": "PuzzleCatalog",
+  "type": "object",
+  "properties": {
+    "asin": {
+      "type": "string",
+      "description": "Amazon ASIN (identifiant Amazon)"
+    },
+    "ean": {
+      "type": "string",
+      "description": "Code EAN-13 (code-barres)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Nom du puzzle"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Marque du puzzle"
+    },
+    "piece_count": {
+      "type": "number",
+      "description": "Nombre de pi\u00e8ces"
+    },
+    "image_hd": {
+      "type": "string",
+      "description": "URL de l'image HD"
+    },
+    "category_tag": {
+      "type": "string",
+      "enum": [
+        "Nature",
+        "Urbain",
+        "Disney",
+        "Art",
+        "Animaux",
+        "Monochrome",
+        "Vintage",
+        "Autre"
+      ],
+      "description": "Cat\u00e9gorie du puzzle"
+    },
+    "socialScore": {
+      "type": "number",
+      "default": 0,
+      "description": "Score bas\u00e9 sur les likes/dislikes des posts sociaux"
+    },
+    "wishlistCount": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre d'utilisateurs ayant ajout\u00e9 ce puzzle \u00e0 leur wishlist"
+    },
+    "added_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre de fois que ce puzzle a \u00e9t\u00e9 ajout\u00e9 aux collections personnelles"
+    },
+    "total_likes": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre total de likes"
+    },
+    "total_superlikes": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre total de superlikes (d\u00e9pr\u00e9ci\u00e9)"
+    },
+    "total_dislikes": {
+      "type": "number",
+      "default": 0,
+      "description": "Nombre total de dislikes"
+    },
+    "amazon_link": {
+      "type": "string",
+      "description": "Lien Amazon avec tag affili\u00e9 (g\u00e9n\u00e9r\u00e9 automatiquement depuis ASIN)"
+    },
+    "amazon_rating": {
+      "type": "number",
+      "description": "Note moyenne Amazon"
+    },
+    "amazon_ratings_total": {
+      "type": "number",
+      "description": "Nombre total d'avis Amazon"
+    },
+    "amazon_price": {
+      "type": "number",
+      "description": "Prix sur Amazon"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description du produit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending"
+      ],
+      "default": "active",
+      "description": "Statut de validation du puzzle (pending = \u00e0 valider par l'admin)"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "data.status": "active"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
