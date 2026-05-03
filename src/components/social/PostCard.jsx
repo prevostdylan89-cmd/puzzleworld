@@ -497,12 +497,6 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorAvatar
-          authorEmail={post.created_by}
-          authorInitials={authorInitials}
-          onProfileLoaded={setAuthorProfile}
-        />
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
