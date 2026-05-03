@@ -39,9 +39,9 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         const user = users.length > 0 ? users[0] : null;
         const profile = profiles.length > 0 ? profiles[0] : null;
         
-        // Get photo from User data first, then UserProfile
-        const photo = user?.data?.profile_photo || profile?.profile_photo;
-        const displayName = profile?.display_name || user?.data?.display_name || user?.display_name;
+        // Get photo from User data first, then UserProfile data
+        const photo = user?.data?.profile_photo || profile?.data?.profile_photo;
+        const displayName = profile?.data?.display_name || user?.data?.display_name;
         
         if (photo) {
           setProfilePhoto(photo);
@@ -49,7 +49,7 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         
         onProfileLoaded?.({
           display_name: displayName,
-          full_name: profile?.full_name || user?.full_name,
+          full_name: profile?.data?.full_name || user?.full_name,
           profile_photo: photo,
         });
       })
