@@ -1,0 +1,72 @@
+{
+  "name": "Post",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "Text content of the post"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Image URL for puzzle completion posts"
+    },
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle (optional)"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Brand of the puzzle (optional)"
+    },
+    "puzzle_pieces": {
+      "type": "number",
+      "description": "Number of pieces in the puzzle (optional)"
+    },
+    "puzzle_category": {
+      "type": "string",
+      "enum": [
+        "Nature",
+        "Art & Culture",
+        "Architecture",
+        "Abstract"
+      ],
+      "description": "Category of the puzzle"
+    },
+    "puzzle_reference": {
+      "type": "string",
+      "description": "Reference or SKU of the puzzle"
+    },
+    "is_completion_post": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a puzzle completion post"
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes"
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of comments"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Cached author name for performance"
+    }
+  },
+  "required": [
+    "content"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
