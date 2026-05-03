@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Loader2, Search, Trophy, Clock, Plus, Trash2, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Loader2, Search, Trophy, Clock, Plus, Trash2, ChevronDown, ChevronUp, Filter, Camera } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -224,9 +224,31 @@ function AddRecordModal({ open, onClose, onAdded, prefillPuzzle }) {
   );
 }
 
-function PuzzleRecordCard({ puzzleName, puzzleBrand, puzzlePieces, imageUrl, records, onDelete, onAddRecord }) {
+function PuzzleRecordCard({ puzzleName, puzzleBrand, puzzlePieces, imageUrl, records, onDelete, onAddRecord, onImageUpdated }) {
   const [expanded, setExpanded] = useState(false);
+  const [localImage, setLocalImage] = useState(imageUrl);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const imgInputRef = useRef(null);
   const best = records[0]; // already sorted by total_seconds asc
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImg(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Update all records for this puzzle
+      await Promise.all(records.map(r => base44.entities.SpeedRecord.update(r.id, { image_url: file_url })));
+      setLocalImage(file_url);
+      toast.success('Photo mise à jour ! 📸');
+      if (onImageUpdated) onImageUpdated();
+    } catch {
+      toast.error('Erreur lors de l\'upload');
+    } finally {
+      setUploadingImg(false);
+      e.target.value = '';
+    }
+  };
 
   return (
     <motion.div
@@ -234,15 +256,21 @@ function PuzzleRecordCard({ puzzleName, puzzleBrand, puzzlePieces, imageUrl, rec
       animate={{ opacity: 1, y: 0 }}
       className="bg-white/[0.03] border border-white/[0.06] rounded-2xl overflow-hidden"
     >
+      <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
       {/* Header */}
       <div className="flex items-center gap-3 p-4">
-        {imageUrl ? (
-          <img src={imageUrl} alt={puzzleName} className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
-        ) : (
-          <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">🧩</span>
+        <div className="relative flex-shrink-0 group/img cursor-pointer" onClick={() => imgInputRef.current?.click()}>
+          {localImage ? (
+            <img src={localImage} alt={puzzleName} className="w-16 h-16 object-cover rounded-xl" />
+          ) : (
+            <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center">
+              <span className="text-2xl">🧩</span>
+            </div>
+          )}
+          <div className="absolute inset-0 rounded-xl bg-black/50 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+            {uploadingImg ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Camera className="w-5 h-5 text-white" />}
           </div>
-        )}
+        </div>
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold truncate">{puzzleName}</p>
           <p className="text-white/40 text-xs">{puzzlePieces} pièces{puzzleBrand ? ` · ${puzzleBrand}` : ''}</p>
@@ -256,7 +284,7 @@ function PuzzleRecordCard({ puzzleName, puzzleBrand, puzzlePieces, imageUrl, rec
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onAddRecord({ puzzle_name: puzzleName, puzzle_brand: puzzleBrand, puzzle_pieces: puzzlePieces, image_url: imageUrl, id: best.puzzle_id })}
+            onClick={() => onAddRecord({ puzzle_name: puzzleName, puzzle_brand: puzzleBrand, puzzle_pieces: puzzlePieces, image_url: localImage, id: best.puzzle_id })}
             className="w-8 h-8 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 flex items-center justify-center text-orange-400 transition-all"
           >
             <Plus className="w-4 h-4" />
@@ -490,6 +518,7 @@ export default function SpeedPuzzleSection({ user }) {
               records={g.records}
               onDelete={handleDelete}
               onAddRecord={handleAddRecord}
+              onImageUpdated={loadRecords}
             />
           ))}
         </div>
