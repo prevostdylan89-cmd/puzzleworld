@@ -1,0 +1,49 @@
+{
+  "name": "SwipeInteraction",
+  "type": "object",
+  "properties": {
+    "puzzle_id": {
+      "type": "string",
+      "description": "Reference to PuzzleCatalog"
+    },
+    "puzzle_asin": {
+      "type": "string",
+      "description": "ASIN for quick reference"
+    },
+    "interaction_type": {
+      "type": "string",
+      "enum": [
+        "dislike",
+        "like",
+        "superlike"
+      ],
+      "description": "Type of swipe interaction"
+    },
+    "puzzle_brand": {
+      "type": "string",
+      "description": "Cached brand for stats"
+    },
+    "puzzle_category": {
+      "type": "string",
+      "description": "Cached category for stats"
+    }
+  },
+  "required": [
+    "puzzle_id",
+    "interaction_type"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
