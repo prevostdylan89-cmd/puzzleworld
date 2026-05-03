@@ -39,8 +39,8 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onProfileLoaded }) {
         const user = users.length > 0 ? users[0] : null;
         const profile = profiles.length > 0 ? profiles[0] : null;
         
-        // Get photo from User data first, then UserProfile data
-        const photo = user?.data?.profile_photo || profile?.data?.profile_photo;
+        // Photo is at root level of profile, not in data
+        const photo = user?.data?.profile_photo || profile?.profile_photo;
         const displayName = profile?.data?.display_name || user?.data?.display_name;
         
         if (photo) {
