@@ -1,0 +1,50 @@
+{
+  "name": "FeaturedEvent",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ID de l'\u00e9v\u00e9nement dans Event"
+    },
+    "position": {
+      "type": "number",
+      "description": "Position dans le top 4 (1-4)",
+      "minimum": 1,
+      "maximum": 4
+    },
+    "event_title": {
+      "type": "string",
+      "description": "Titre de l'\u00e9v\u00e9nement (cache)"
+    },
+    "event_image": {
+      "type": "string",
+      "description": "Image de l'\u00e9v\u00e9nement (cache)"
+    },
+    "event_date": {
+      "type": "string",
+      "description": "Date de l'\u00e9v\u00e9nement (cache)"
+    }
+  },
+  "required": [
+    "event_id",
+    "position"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
