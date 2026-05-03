@@ -54,7 +54,7 @@ function CommentItem({ comment, commentInitials, timeAgo }) {
           {profilePhoto ? (
             <img src={profilePhoto} alt={displayName} className="w-full h-full object-cover" />
           ) : (
-            <AvatarFallback className="text-white text-xs" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #4f46e5 100%)' }}>
+            <AvatarFallback className="bg-white/20 text-white text-xs">
               {commentInitials}
             </AvatarFallback>
           )}
