@@ -2,26 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function UserBadgeDisplay({ userEmail }) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [badge, setBadge] = useState(null);
 
   useEffect(() => {
     if (!userEmail) return;
 
-    // Call a backend function to safely check admin status
-    base44.functions.invoke('checkUserRole', { email: userEmail })
+    base44.functions.invoke('getUserBadgeInfo', { email: userEmail })
       .then(res => {
-        if (res.data?.isAdmin) {
-          setIsAdmin(true);
+        if (res.data?.badge) {
+          setBadge(res.data.badge);
         }
       })
-      .catch(error => console.log('Error checking user role:', error));
+      .catch(error => console.log('Error fetching badge:', error));
   }, [userEmail]);
 
-  if (!isAdmin) return null;
+  if (!badge) return null;
 
   return (
-    <span className="flex items-center gap-0.5 px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-bold whitespace-nowrap">
-      👑 Admin
+    <span className="text-[11px] font-semibold text-orange-400">
+      {badge.icon} {badge.label}
     </span>
   );
 }
