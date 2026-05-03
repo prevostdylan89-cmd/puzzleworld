@@ -1,0 +1,59 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email de l'utilisateur"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Nom complet de l'utilisateur"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Pseudo choisi par l'utilisateur (visible publiquement)"
+    },
+    "friend_code": {
+      "type": "string",
+      "description": "Code ami unique style @453627pseudo"
+    },
+    "username_set": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si l'utilisateur a d\u00e9j\u00e0 choisi son pseudo"
+    },
+    "profile_photo": {
+      "type": "string",
+      "description": "URL de la photo de profil"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Biographie de l'utilisateur"
+    },
+    "current_badge_icon": {
+      "type": "string",
+      "description": "Ic\u00f4ne du badge actuel"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "description": "Profil visible publiquement"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
