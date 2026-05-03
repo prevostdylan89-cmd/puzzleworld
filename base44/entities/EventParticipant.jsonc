@@ -1,0 +1,34 @@
+{
+  "name": "EventParticipant",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ID of the event"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the registered user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the registered user"
+    }
+  },
+  "required": [
+    "event_id",
+    "user_email"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_email": "{{user.email}}"
+    },
+    "update": {
+      "user_email": "{{user.email}}"
+    },
+    "delete": {
+      "user_email": "{{user.email}}"
+    }
+  }
+}
