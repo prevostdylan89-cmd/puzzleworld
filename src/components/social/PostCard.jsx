@@ -464,7 +464,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
       <div className="p-4 flex items-start gap-3">
         <PostAuthorAvatar
           authorEmail={post.created_by}
-          authorName={post.author_name}
+          authorName={null}
           authorInitials={authorInitials}
         />
 
