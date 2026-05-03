@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Puzzle, Trophy, UserPlus, UserCheck, Users } from 'lucide-react';
+import { X, Puzzle, Trophy, UserPlus, UserCheck, Users, Heart } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
@@ -221,12 +221,17 @@ export default function UserProfileDialog({ userEmail, authorName, onClose }) {
                 <div className="text-[11px] text-white/50">{t('achievements')}</div>
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center">
-                <span className="text-lg block mb-1">❤️</span>
-                <div className="text-lg font-bold text-white">{profileData?.wishlist ?? 0}</div>
-                <div className="text-[11px] text-white/50">{t('wishlist')}</div>
+                 <Heart className="w-4 h-4 text-red-400 mx-auto mb-1" />
+                 <div className="text-lg font-bold text-white">{profileData?.wishlist ?? 0}</div>
+                 <div className="text-[11px] text-white/50">{t('wishlist')}</div>
+               </div>
+               <div className="bg-white/5 rounded-xl p-3 text-center">
+                 <Users className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+                 <div className="text-lg font-bold text-white">{profileData?.friends ?? 0}</div>
+                 <div className="text-[11px] text-white/50">Amis</div>
+               </div>
               </div>
-            </div>
-          )}
+              )}
         </div>
       </motion.div>
     </div>

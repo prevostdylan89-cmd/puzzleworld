@@ -31,18 +31,25 @@ Deno.serve(async (req) => {
     }
 
     // Use service role to bypass RLS and read other users' public stats
-    const [completedPuzzles, achievements, catalogItems, profiles, wishlistItems, users] = await Promise.all([
+    const [completedPuzzles, achievements, catalogItems, profiles, wishlistItems, users, friendships] = await Promise.all([
       base44.asServiceRole.entities.UserPuzzle.filter({ created_by: targetEmail, status: 'done' }),
       base44.asServiceRole.entities.Achievement.filter({ created_by: targetEmail }),
       base44.asServiceRole.entities.PuzzleCatalog.filter({ created_by: targetEmail }),
       base44.asServiceRole.entities.UserProfile.filter({ email: targetEmail }),
       base44.asServiceRole.entities.UserPuzzle.filter({ created_by: targetEmail, status: 'wishlist' }),
       base44.asServiceRole.entities.User.filter({ email: targetEmail }),
+      base44.asServiceRole.entities.Friendship.filter({
+        requester_email: targetEmail,
+        status: 'accepted'
+      }),
     ]);
 
     const totalPieces = completedPuzzles.reduce((sum, p) => sum + (p.puzzle_pieces || 0), 0);
     const scanCount = catalogItems.length;
     const levelData = getLevelData(scanCount);
+    
+    // Count accepted friendships (where user is requester)
+    const friendCount = friendships.length;
 
     const profile = profiles.find(p => p.email === targetEmail);
     const userRecord = users.find(u => u.email === targetEmail);
@@ -63,6 +70,7 @@ Deno.serve(async (req) => {
       totalPieces,
       scanCount,
       wishlist: wishlistItems.length,
+      friends: friendCount,
       level: levelData,
     });
   } catch (error) {
