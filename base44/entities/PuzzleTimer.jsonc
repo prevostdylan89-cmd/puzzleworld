@@ -1,0 +1,62 @@
+{
+  "name": "PuzzleTimer",
+  "type": "object",
+  "properties": {
+    "puzzle_id": {
+      "type": "string",
+      "description": "ID of the puzzle being timed"
+    },
+    "puzzle_name": {
+      "type": "string",
+      "description": "Name of the puzzle"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the timer started"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the timer ended"
+    },
+    "total_seconds": {
+      "type": "number",
+      "description": "Total time in seconds"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this timer is currently running"
+    },
+    "paused_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the timer was paused"
+    },
+    "accumulated_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Time accumulated before pause"
+    }
+  },
+  "required": [
+    "puzzle_id",
+    "puzzle_name",
+    "start_time"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
