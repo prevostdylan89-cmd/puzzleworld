@@ -5,6 +5,7 @@ import { useLanguage } from '@/components/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { Package, CheckCircle, Loader2, Puzzle, MoreVertical, Trash2, ArrowRight, ArrowUpDown, Camera, ImagePlus, X, Tag, Zap, Share2 } from 'lucide-react';
 import AddSpeedRecordInline from '@/components/profile/AddSpeedRecordInline';
+import ShareToFeedModal from '@/components/profile/ShareToFeedModal';
 import StarRating from '@/components/shared/StarRating';
 import UserCategoriesManager from '@/components/profile/UserCategoriesManager';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -357,6 +358,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
   const [localRating, setLocalRating] = useState(0);
   const [localCategoryId, setLocalCategoryId] = useState(null);
   const [showSpeedRecord, setShowSpeedRecord] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -418,6 +420,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
   return (
     <>
     <AddSpeedRecordInline open={showSpeedRecord} onClose={() => setShowSpeedRecord(false)} puzzle={puzzle} />
+    <ShareToFeedModal open={showShare} onClose={() => setShowShare(false)} puzzle={puzzle} photoUrl={localPhoto || puzzle?.image_url} />
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-[#0a0a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto p-0">
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleChangePhoto} />
@@ -503,28 +506,7 @@ function UserPuzzleDetailModal({ open, onClose, puzzle, onUpdate, categories = [
 
           {/* Partager sur le feed */}
           <button
-            onClick={async () => {
-              const photoUrl = localPhoto || puzzle.image_url;
-              const content = `🧩 J'ai terminé le puzzle "${puzzle.puzzle_name}"${puzzle.puzzle_pieces ? ` (${puzzle.puzzle_pieces} pièces)` : ''}${puzzle.puzzle_brand ? ` de ${puzzle.puzzle_brand}` : ''} ! 🏆`;
-              try {
-                const u = await base44.auth.me();
-                await base44.entities.Post.create({
-                  content,
-                  image_url: photoUrl || '',
-                  puzzle_name: puzzle.puzzle_name,
-                  puzzle_brand: puzzle.puzzle_brand || '',
-                  puzzle_pieces: puzzle.puzzle_pieces,
-                  puzzle_reference: puzzle.puzzle_reference || '',
-                  is_completion_post: true,
-                  likes_count: 0,
-                  comments_count: 0,
-                  author_name: u.full_name || u.email,
-                });
-                toast.success('🎉 Partagé sur le feed social !');
-              } catch {
-                toast.error('Erreur lors du partage');
-              }
-            }}
+            onClick={() => setShowShare(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm font-medium hover:bg-green-500/20 transition-colors"
           >
             <Share2 className="w-4 h-4" />
@@ -580,6 +562,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [showSpeedRecord, setShowSpeedRecord] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleCompletionPhotoUpload = async (e) => {
@@ -629,28 +612,9 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
     { status: 'done', label: `🏆 ${t('completedTab')}`, hidden: puzzle.status === 'done' },
   ].filter(o => !o.hidden);
 
-  const handleShareToFeed = async (e) => {
+  const handleShareToFeed = (e) => {
     if (e) e.stopPropagation();
-    const photoUrl = puzzle.progress_photo || puzzle.image_url;
-    const content = `🧩 J'ai terminé le puzzle "${puzzle.puzzle_name}"${puzzle.puzzle_pieces ? ` (${puzzle.puzzle_pieces} pièces)` : ''}${puzzle.puzzle_brand ? ` de ${puzzle.puzzle_brand}` : ''} ! 🏆`;
-    try {
-      const user = await base44.auth.me();
-      await base44.entities.Post.create({
-        content,
-        image_url: photoUrl || '',
-        puzzle_name: puzzle.puzzle_name,
-        puzzle_brand: puzzle.puzzle_brand || '',
-        puzzle_pieces: puzzle.puzzle_pieces,
-        puzzle_reference: puzzle.puzzle_reference || '',
-        is_completion_post: true,
-        likes_count: 0,
-        comments_count: 0,
-        author_name: user.full_name || user.email,
-      });
-      toast.success('🎉 Partagé sur le feed social !');
-    } catch {
-      toast.error('Erreur lors du partage');
-    }
+    setShowShare(true);
   };
 
   const handleDelete = async () => {
@@ -678,6 +642,7 @@ function PuzzleCard({ puzzle, index, onUpdate, onOptimisticMove, isMultiSelect, 
     <>
     <UserPuzzleDetailModal open={showDetail} onClose={() => setShowDetail(false)} puzzle={puzzle} onUpdate={onUpdate} categories={categories} />
     <AddSpeedRecordInline open={showSpeedRecord} onClose={() => setShowSpeedRecord(false)} puzzle={puzzle} />
+    <ShareToFeedModal open={showShare} onClose={() => setShowShare(false)} puzzle={puzzle} photoUrl={puzzle.progress_photo || puzzle.image_url} />
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
