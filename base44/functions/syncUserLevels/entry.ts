@@ -25,21 +25,13 @@ function getLevelForCount(count) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const payload = await req.json();
+    const { userEmail } = await req.json();
 
-    const { event, data } = payload;
-
-    // Only fire when a new puzzle is added to the community catalog (created_by = scanner's email)
-    if (event?.type !== 'create') {
-      return Response.json({ skipped: true, reason: 'Not a create event' });
-    }
-
-    const userEmail = data.created_by;
     if (!userEmail) {
-      return Response.json({ skipped: true, reason: 'No user email' });
+      return Response.json({ error: 'Email required' }, { status: 400 });
     }
 
-    // Count total puzzles added to the community catalog by this user
+    // Count total puzzles added by this user
     const addedPuzzles = await base44.asServiceRole.entities.PuzzleCatalog.filter({
       created_by: userEmail,
     });
@@ -58,14 +50,14 @@ Deno.serve(async (req) => {
       const current = existing[0];
       await base44.asServiceRole.entities.UserLevel.update(current.id, {
         level: newLevel.level,
-        badge_name: newLevel.title,
+        badge_name: newLevel.title || `Level ${newLevel.level}`,
         total_puzzles: scannedCount,
         current_badge_icon: badge?.icon || newLevel.emoji,
       });
     } else {
       await base44.asServiceRole.entities.UserLevel.create({
         level: newLevel.level,
-        badge_name: newLevel.title,
+        badge_name: `Level ${newLevel.level}`,
         total_puzzles: scannedCount,
         current_badge_icon: badge?.icon || newLevel.emoji,
       });

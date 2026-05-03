@@ -125,6 +125,9 @@ export default function Profile() {
       // Sync user profile to UserProfile entity
       await base44.functions.invoke('syncUserProfile', {});
       
+      // Sync user level based on scanned puzzles
+      await base44.functions.invoke('syncUserLevels', { userEmail: currentUser.email });
+      
       // Load stats
       const [completedPuzzles, userAchievements, oldWishlist, userPuzzleWishlist, followers, following, allUserPuzzles] = await Promise.all([
         base44.entities.UserPuzzle.filter({ created_by: currentUser.email, status: 'done' }),
