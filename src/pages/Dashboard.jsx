@@ -18,6 +18,7 @@ import DashboardBugReports from '@/components/dashboard/sections/DashboardBugRep
 import DashboardTopPuzzles from '@/components/dashboard/sections/DashboardTopPuzzles';
 import DashboardModeration from '@/components/dashboard/sections/DashboardModeration';
 import DashboardBadges from '@/components/dashboard/sections/DashboardBadges';
+import DashboardSync from '@/components/dashboard/sections/DashboardSync';
 
 const SECTIONS = [
   { id: 'home', label: 'Accueil', icon: Home, component: DashboardHome },
@@ -33,6 +34,7 @@ const SECTIONS = [
   { id: 'bugreports', label: 'Signalements', icon: Bug, component: DashboardBugReports },
   { id: 'moderation', label: 'Modération IA', icon: Shield, component: DashboardModeration },
   { id: 'badges', label: 'Badges', icon: Award, component: DashboardBadges },
+  { id: 'sync', label: 'Synchronisation', icon: Settings, component: DashboardSync },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
 ];
 
