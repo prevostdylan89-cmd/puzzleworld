@@ -22,14 +22,14 @@ function PostAuthorAvatar({ authorEmail, authorInitials, onClick, onProfileLoade
   useEffect(() => {
     if (!authorEmail) return;
     
-    base44.functions.invoke('getUserPublicStats', { targetEmail: authorEmail })
-      .then(res => {
-        if (res?.data?.profilePhoto) {
-          setProfilePhoto(res.data.profilePhoto);
+    base44.entities.UserProfile.filter({ email: authorEmail })
+      .then(profiles => {
+        if (profiles.length > 0 && profiles[0].profile_photo) {
+          setProfilePhoto(profiles[0].profile_photo);
           onProfileLoaded?.({
-            display_name: res.data.displayName,
-            full_name: res.data.displayName,
-            profile_photo: res.data.profilePhoto,
+            display_name: profiles[0].display_name,
+            full_name: profiles[0].full_name,
+            profile_photo: profiles[0].profile_photo,
           });
         }
       })
