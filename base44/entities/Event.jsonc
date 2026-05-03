@@ -1,0 +1,71 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "image": {
+      "type": "string",
+      "format": "data-url",
+      "contentMediaType": "image/*",
+      "description": "Event image"
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Brief description (2 lines max)"
+    },
+    "full_description": {
+      "type": "string",
+      "description": "Complete event description"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Event date"
+    },
+    "event_time": {
+      "type": "string",
+      "description": "Event time"
+    },
+    "location": {
+      "type": "string",
+      "description": "Event location"
+    },
+    "max_capacity": {
+      "type": "number",
+      "description": "Maximum number of participants"
+    },
+    "current_participants": {
+      "type": "number",
+      "default": 0,
+      "description": "Current number of registered participants"
+    }
+  },
+  "required": [
+    "title",
+    "image",
+    "short_description",
+    "event_date",
+    "max_capacity"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
