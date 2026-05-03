@@ -462,13 +462,12 @@ export default function PostCard({ post, user, isFeatured = false }) {
       )}
       {/* Header */}
       <div className="p-4 flex items-start gap-3">
-        <PostAuthorBadge userEmail={post.created_by} />
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
               {authorProfile?.display_name || authorProfile?.full_name || post.author_name || post.created_by?.split('@')[0] || ''}
             </span>
+            <PostAuthorBadge userEmail={post.created_by} />
             {post.created_by && <AuthorLevelBadge userEmail={post.created_by} />}
             {post.is_completion_post && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
