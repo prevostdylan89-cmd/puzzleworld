@@ -82,6 +82,14 @@ export default function CommentSection({ post, user, onCommentAdded }) {
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUserPhoto, setCurrentUserPhoto] = useState(null);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.functions.invoke('getUserPublicStats', { targetEmail: user.email })
+      .then(res => { if (res.data?.profilePhoto) setCurrentUserPhoto(res.data.profilePhoto); })
+      .catch(() => {});
+  }, [user?.email]);
 
   useEffect(() => {
     loadComments();
@@ -147,9 +155,13 @@ export default function CommentSection({ post, user, onCommentAdded }) {
         <form onSubmit={handleSubmit} className="p-4 border-b border-white/[0.06]">
           <div className="flex gap-3">
             <Avatar className="h-8 w-8 ring-2 ring-orange-500/20">
-              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
-                {userInitials}
-              </AvatarFallback>
+              {currentUserPhoto ? (
+                <img src={currentUserPhoto} alt={user.full_name} className="w-full h-full object-cover" />
+              ) : (
+                <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs">
+                  {userInitials}
+                </AvatarFallback>
+              )}
             </Avatar>
             <div className="flex-1 flex gap-2">
               <Input
