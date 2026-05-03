@@ -537,7 +537,7 @@ export default function PostCard({ post, user, isFeatured = false }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-white text-sm">
-              {authorProfile?.display_name || authorProfile?.full_name || post.created_by?.split('@')[0] || ''}
+              {authorProfile?.display_name || authorProfile?.full_name || post.author_name || post.created_by?.split('@')[0] || ''}
             </span>
             {post.created_by && <AuthorLevelBadge userEmail={post.created_by} />}
             {post.is_completion_post && (
