@@ -37,10 +37,14 @@ Deno.serve(async (req) => {
     const projectId = Deno.env.get('FIREBASE_PROJECT_ID');
     const accessToken = await getFirebaseAccessToken();
 
+    const body = await req.json().catch(() => ({}));
+    const dryRun = body.dryRun !== false;
+
+    // Fetch all user_puzzles docs
     let allDocs = [];
     let pageToken = null;
     do {
-      let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/puzzles?pageSize=300`;
+      let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/user_puzzles?pageSize=300`;
       if (pageToken) url += `&pageToken=${pageToken}`;
       const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
       if (!res.ok) return Response.json({ error: await res.text() }, { status: 500 });
@@ -49,23 +53,46 @@ Deno.serve(async (req) => {
       pageToken = data.nextPageToken || null;
     } while (pageToken);
 
-    const puzzles = allDocs.map(doc => {
+    // Extract unique puzzles by asin or title+brand+pieces
+    const seen = new Map();
+    for (const doc of allDocs) {
       const f = doc.fields || {};
-      return { asin: val(f.asin), title: val(f.title) || '', brand: val(f.brand) || '', piece_count: val(f.piece_count) || 0, image_hd: val(f.image_hd) || val(f.image_url) || '', amazon_link: val(f.amazon_link) || '', category_tag: val(f.category_tag) || '', amazon_price: val(f.price) || val(f.amazon_price) || 0, ean: val(f.ean) || '', status: 'active', socialScore: 0, wishlistCount: 0, added_count: 0 };
-    }).filter(p => p.asin);
-
-    const currentPuzzles = await base44.asServiceRole.entities.PuzzleCatalog.list('-created_date', 10000);
-    const currentAsins = new Set(currentPuzzles.map(p => p.asin).filter(Boolean));
-
-    let addedCount = 0;
-    for (const puzzle of puzzles) {
-      if (!currentAsins.has(puzzle.asin)) {
-        await base44.asServiceRole.entities.PuzzleCatalog.create(puzzle);
-        addedCount++;
+      const asin = val(f.asin);
+      const title = val(f.puzzle_name) || val(f.title) || '';
+      const brand = val(f.puzzle_brand) || val(f.brand) || '';
+      const pieces = val(f.puzzle_pieces) || val(f.piece_count) || 0;
+      const imageUrl = val(f.image_url) || val(f.image_hd) || '';
+      const ean = val(f.ean) || '';
+      if (!title) continue;
+      const key = asin || `${title}__${brand}__${pieces}`;
+      if (!seen.has(key)) {
+        seen.set(key, { asin: asin || '', ean, title, brand, piece_count: pieces, image_hd: imageUrl, status: 'active', socialScore: 0, wishlistCount: 0, added_count: 0 });
       }
     }
+    const uniquePuzzles = Array.from(seen.values());
 
-    return Response.json({ success: true, message: `${addedCount} puzzles restaurés sur ${puzzles.length} trouvés!`, restored: addedCount, total: puzzles.length });
+    if (dryRun) {
+      return Response.json({
+        dryRun: true,
+        totalDocs: allDocs.length,
+        uniquePuzzles: uniquePuzzles.length,
+        sample: uniquePuzzles.slice(0, 5),
+        message: `DRY RUN: ${uniquePuzzles.length} puzzles uniques dans ${allDocs.length} docs. Envoie dryRun:false pour importer.`
+      });
+    }
+
+    // Import missing ones
+    const existing = await base44.asServiceRole.entities.PuzzleCatalog.list('-created_date', 10000);
+    const existingAsins = new Set(existing.map(p => p.asin).filter(Boolean));
+    const existingKeys = new Set(existing.map(p => `${p.title}__${p.brand}__${p.piece_count}`));
+    let added = 0, skipped = 0;
+    for (const puzzle of uniquePuzzles) {
+      const key = `${puzzle.title}__${puzzle.brand}__${puzzle.piece_count}`;
+      if ((puzzle.asin && existingAsins.has(puzzle.asin)) || existingKeys.has(key)) { skipped++; continue; }
+      await base44.asServiceRole.entities.PuzzleCatalog.create(puzzle);
+      added++;
+    }
+    return Response.json({ success: true, totalDocs: allDocs.length, uniquePuzzles: uniquePuzzles.length, added, skipped, message: `${added} puzzles ajoutés (${skipped} déjà présents).` });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
