@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug, Trophy, Shield, Award } from 'lucide-react';
+import { Loader2, Home, Grid3X3, Users, Calendar, User, Settings, Gamepad2, Eye, BookOpen, Menu, X, Bug, Trophy, Shield, Award, RotateCcw } from 'lucide-react';
 
 // Import sections
 import DashboardHome from '@/components/dashboard/sections/DashboardHome';
@@ -17,6 +17,7 @@ import DashboardBlog from '@/components/dashboard/sections/DashboardBlog';
 import DashboardBugReports from '@/components/dashboard/sections/DashboardBugReports';
 import DashboardTopPuzzles from '@/components/dashboard/sections/DashboardTopPuzzles';
 import DashboardModeration from '@/components/dashboard/sections/DashboardModeration';
+import DashboardRestore from '@/components/dashboard/sections/DashboardRestore';
 import DashboardBadges from '@/components/dashboard/sections/DashboardBadges';
 import DashboardSync from '@/components/dashboard/sections/DashboardSync';
 
@@ -33,6 +34,7 @@ const SECTIONS = [
   { id: 'blog', label: 'Blog', icon: BookOpen, component: DashboardBlog },
   { id: 'bugreports', label: 'Signalements', icon: Bug, component: DashboardBugReports },
   { id: 'moderation', label: 'Modération IA', icon: Shield, component: DashboardModeration },
+  { id: 'restore', label: 'Restauration', icon: RotateCcw, component: DashboardRestore },
   { id: 'badges', label: 'Badges', icon: Award, component: DashboardBadges },
   { id: 'sync', label: 'Synchronisation', icon: Settings, component: DashboardSync },
   { id: 'settings', label: 'Paramètres', icon: Settings, component: DashboardSettings },
