@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { TrendingUp, Heart, Loader2, Bookmark, Edit2, Trash2, Save, X, Users } from 'lucide-react';
+import { TrendingUp, Heart, Loader2, Bookmark, Edit2, Trash2, Save, X, Users, Download, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,7 +15,9 @@ export default function DashboardData() {
   const [editingPuzzle, setEditingPuzzle] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', brand: '' });
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
-  const [modalType, setModalType] = useState(null); // 'popularity', 'wishlist', 'added'
+  const [modalType, setModalType] = useState(null);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [restoreResult, setRestoreResult] = useState(null);
 
   useEffect(() => {
     loadPuzzles();
@@ -79,6 +81,23 @@ export default function DashboardData() {
     } catch (error) {
       console.error('Error deleting puzzle:', error);
       toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleRestore = async (dryRun, batchSize = 50) => {
+    setRestoreLoading(true);
+    setRestoreResult(null);
+    try {
+      const res = await base44.functions.invoke('restoreCatalogFromAsins', { dryRun, batchSize });
+      setRestoreResult(res.data);
+      if (!dryRun && res.data?.added > 0) {
+        toast.success(`${res.data.added} puzzles ajoutés au catalogue !`);
+        loadPuzzles();
+      }
+    } catch (err) {
+      toast.error('Erreur: ' + err.message);
+    } finally {
+      setRestoreLoading(false);
     }
   };
 
@@ -218,6 +237,45 @@ export default function DashboardData() {
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Données & Analytics</h2>
         <p className="text-white/60">Classements basés sur les interactions sociales</p>
+      </div>
+
+      {/* Restauration du catalogue depuis les ASINs vus */}
+      <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-6 mb-8">
+        <h3 className="text-lg font-semibold text-white mb-1">🔄 Restauration du catalogue</h3>
+        <p className="text-white/50 text-sm mb-4">Récupère les puzzles manquants depuis les ASINs vus par les utilisateurs (via Rainforest API / Amazon.fr)</p>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            onClick={() => handleRestore(true)}
+            disabled={restoreLoading}
+            variant="outline"
+            className="border-white/20 text-white hover:bg-white/10"
+          >
+            {restoreLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            Analyser (dry run)
+          </Button>
+          <Button
+            onClick={() => handleRestore(false, 50)}
+            disabled={restoreLoading}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            {restoreLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            Importer (50 par batch)
+          </Button>
+        </div>
+        {restoreResult && (
+          <div className="mt-4 p-4 rounded-lg bg-white/5 text-sm space-y-1">
+            {restoreResult.dryRun && <p className="text-yellow-400 font-semibold">Mode analyse (aucun import)</p>}
+            {restoreResult.totalSeen !== undefined && <p className="text-white/70">ASINs vus : <span className="text-white font-medium">{restoreResult.totalSeen}</span></p>}
+            {restoreResult.alreadyInCatalog !== undefined && <p className="text-white/70">Déjà dans le catalogue : <span className="text-white font-medium">{restoreResult.alreadyInCatalog}</span></p>}
+            {restoreResult.missing !== undefined && <p className="text-white/70">Manquants : <span className="text-orange-400 font-medium">{restoreResult.missing}</span></p>}
+            {restoreResult.added !== undefined && <p className="text-white/70">Ajoutés : <span className="text-green-400 font-medium">{restoreResult.added}</span></p>}
+            {restoreResult.remaining !== undefined && restoreResult.remaining > 0 && <p className="text-white/70">Restants à importer : <span className="text-orange-400 font-medium">{restoreResult.remaining}</span> (relance l'import)</p>}
+            {restoreResult.failed > 0 && <p className="text-white/70">Échecs : <span className="text-red-400 font-medium">{restoreResult.failed}</span></p>}
+            {restoreResult.missingAsins && (
+              <p className="text-white/40 text-xs mt-2 break-all">Ex: {restoreResult.missingAsins.slice(0, 5).join(', ')}...</p>
+            )}
+          </div>
+        )}
       </div>
 
       <Tabs defaultValue="social" className="space-y-6">
