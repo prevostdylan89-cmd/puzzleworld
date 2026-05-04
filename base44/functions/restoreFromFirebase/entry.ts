@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     let allDocs = [];
     let pageToken = null;
     do {
-      let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/puzzle_catalog?pageSize=300`;
+      let url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/puzzles?pageSize=300`;
       if (pageToken) url += `&pageToken=${pageToken}`;
       const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
       if (!res.ok) return Response.json({ error: await res.text() }, { status: 500 });
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return Response.json({ success: true, message: `${addedCount} puzzles restaurés sur ${puzzles.length} trouvés dans Firebase!`, restored: addedCount, total: puzzles.length });
+    return Response.json({ success: true, message: `${addedCount} puzzles restaurés sur ${puzzles.length} trouvés!`, restored: addedCount, total: puzzles.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
