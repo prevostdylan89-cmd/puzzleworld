@@ -19,15 +19,6 @@ async function getFirebaseAccessToken() {
   return tokenData.access_token;
 }
 
-function val(v) {
-  if (!v) return null;
-  if ('stringValue' in v) return v.stringValue;
-  if ('integerValue' in v) return parseInt(v.integerValue);
-  if ('doubleValue' in v) return parseFloat(v.doubleValue);
-  if ('booleanValue' in v) return v.booleanValue;
-  return null;
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -37,20 +28,23 @@ Deno.serve(async (req) => {
     const projectId = Deno.env.get('FIREBASE_PROJECT_ID');
     const accessToken = await getFirebaseAccessToken();
 
-    // List all collections
-    const listRes = await fetch(
+    // List all root collections
+    const res = await fetch(
       `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:listCollectionIds`,
       { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: '{}' }
     );
-    const listData = await listRes.json();
-    const collections = listData.collectionIds || [];
+    const data = await res.json();
 
-    // For each, get first doc to see fields
+    // For each collection, count documents
+    const collections = data.collectionIds || [];
     const details = [];
     for (const col of collections) {
-      const r = await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${col}?pageSize=1`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-      const d = await r.json();
-      details.push({ name: col, fields: d.documents?.[0] ? Object.keys(d.documents[0].fields || {}) : [], count: d.documents?.length || 0 });
+      const countRes = await fetch(
+        `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${col}?pageSize=1`,
+        { headers: { 'Authorization': `Bearer ${accessToken}` } }
+      );
+      const countData = await countRes.json();
+      details.push({ name: col, hasDocuments: !!(countData.documents && countData.documents.length > 0), sampleDoc: countData.documents?.[0] ? Object.keys(countData.documents[0].fields || {}) : [] });
     }
 
     return Response.json({ projectId, collections: details });
